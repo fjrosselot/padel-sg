@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>St. George Padel - Perfil del Jugador</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-highest": "#d8e2ff",
+              "outline-variant": "#c4c5d8",
+              "tertiary-fixed": "#6ffbbe",
+              "surface-container": "#e9edff",
+              "on-secondary-fixed-variant": "#364669",
+              "on-tertiary-fixed-variant": "#005236",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-container": "#e8ffef",
+              "primary-fixed": "#dde1ff",
+              "secondary-container": "#c4d4fe",
+              "error": "#ba1a1a",
+              "surface-container-low": "#f1f3ff",
+              "surface-bright": "#f9f9ff",
+              "primary": "#144bdb",
+              "on-primary-fixed-variant": "#0038b6",
+              "primary-fixed-dim": "#b7c4ff",
+              "on-background": "#071b3b",
+              "on-tertiary-fixed": "#002113",
+              "on-primary-fixed": "#001452",
+              "primary-container": "#3b66f5",
+              "on-primary": "#ffffff",
+              "surface-dim": "#ccdaff",
+              "on-secondary-container": "#4b5b7f",
+              "on-secondary": "#ffffff",
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed-dim": "#4edea3",
+              "surface-variant": "#d8e2ff",
+              "on-secondary-fixed": "#071b3b",
+              "on-error": "#ffffff",
+              "tertiary-container": "#00835a",
+              "secondary-fixed-dim": "#b6c6f0",
+              "on-surface-variant": "#434655",
+              "on-primary-container": "#fbf8ff",
+              "inverse-primary": "#b7c4ff",
+              "outline": "#747686",
+              "surface": "#f9f9ff",
+              "surface-tint": "#1c4fe0",
+              "secondary-fixed": "#d8e2ff",
+              "on-error-container": "#93000a",
+              "error-container": "#ffdad6",
+              "on-surface": "#071b3b",
+              "surface-container-high": "#e1e8ff",
+              "secondary": "#4e5e82",
+              "tertiary": "#006746",
+              "inverse-on-surface": "#edf0ff",
+              "background": "#f9f9ff",
+              "inverse-surface": "#1f3051"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-effect {
+        backdrop-filter: blur(12px);
+        background: rgba(59, 102, 245, 0.1);
+      }
+      .sidebar-active {
+        box-shadow: inset 0 1px 1px rgba(255,255,255,0.2);
+      }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col py-6 px-4 h-screen w-64 border-r-0 bg-[#1f3051] dark:bg-slate-950 shadow-2xl shadow-[#071b3b]/20">
+<div class="mb-10 px-4">
+<h1 class="text-2xl font-black text-white tracking-tighter italic font-headline">ST. GEORGE</h1>
+<p class="font-bold tracking-wider uppercase text-xs text-primary-fixed-dim font-headline mt-1">ELITE PADEL</p>
+</div>
+<nav class="flex-1 flex flex-col gap-2">
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-3 transition-colors hover:bg-white/5 font-medium transition-all duration-300" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label uppercase tracking-[0.05em] text-xs">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-3 transition-colors hover:bg-white/5 font-medium transition-all duration-300" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-label uppercase tracking-[0.05em] text-xs">Reservations</span>
+</a>
+<a class="flex items-center gap-3 bg-[#3b66f5] text-white rounded-xl px-4 py-3 backdrop-blur-md sidebar-active font-medium transition-all duration-300" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label uppercase tracking-[0.05em] text-xs">Players</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-3 transition-colors hover:bg-white/5 font-medium transition-all duration-300" href="#">
+<span class="material-symbols-outlined">emoji_events</span>
+<span class="font-label uppercase tracking-[0.05em] text-xs">Tournaments</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-3 transition-colors hover:bg-white/5 font-medium transition-all duration-300" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label uppercase tracking-[0.05em] text-xs">Settings</span>
+</a>
+</nav>
+<button class="mt-4 mb-8 mx-2 bg-gradient-to-br from-primary to-primary-container text-white font-headline font-bold uppercase tracking-wider py-3 rounded-xl shadow-lg hover:scale-[0.98] transition-all">
+            New Match
+        </button>
+<div class="mt-auto border-t border-white/10 pt-4 flex flex-col gap-2">
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-2 text-xs uppercase tracking-widest font-label transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">help</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-2 text-xs uppercase tracking-widest font-label transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">logout</span>
+                Logout
+            </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-8 h-20 sticky top-0 bg-[#f9f9ff] dark:bg-slate-900 z-30">
+<div class="flex items-center gap-8">
+<div class="flex items-center bg-surface-container-low rounded-full px-4 py-2 w-80">
+<span class="material-symbols-outlined text-outline">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-outline" placeholder="Search players, matches..." type="text"/>
+</div>
+<nav class="flex gap-6">
+<a class="text-slate-500 font-medium text-sm font-label uppercase hover:text-[#3b66f5] transition-colors" href="#">Live Courts</a>
+<a class="text-[#144bdb] border-b-2 border-[#144bdb] pb-1 text-sm font-label uppercase font-bold tracking-tight" href="#">Analytics</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary text-white px-5 py-2 rounded-full text-sm font-bold font-headline uppercase tracking-wide hover:opacity-90 transition-opacity">
+                    Quick Book
+                </button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-10 w-10 rounded-full overflow-hidden border-2 border-primary-container">
+<img class="h-full w-full object-cover" data-alt="professional sports administrator with sharp modern haircut and confident expression in a high-tech office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRYfEpxxGkhoVQE-aFS3lR-OhMAFnaAWDS6dLBzDK99Pyy0aagwdngJHv_R9-3xEZWF2GhemRqwExp6cr2th93m75N5iMRf6uV_PZycLWMtIwaw5wo45d0i5wWLOySHVVMQ5TZsV7rddGZT29qoQUbZ1fQ-ycf1ImMJSHvuaVfiLl85AR8EkpO8gvoHwnusGP_BhIOQLtcpQGnVrV4pg-OB7p4D007mmczOCQwKmlbhB7wnSSaSCUOlNKNOpa1BCsqhlCvJwTM31k"/>
+</div>
+</div>
+</header>
+<div class="p-8 max-w-7xl mx-auto">
+<!-- Player Header Section -->
+<div class="flex flex-col md:flex-row items-end gap-8 mb-12">
+<div class="relative group">
+<div class="h-48 w-48 rounded-2xl overflow-hidden shadow-2xl border-4 border-white">
+<img class="h-full w-full object-cover" data-alt="professional male padel player in blue athletic jersey holding a racket over his shoulder looking intensely at camera" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPb-tLPdekgUoU16cbYMw1R9CzGIr-iASQ6C3DqJc5dHIAKiu2wk1sVk82f_jiecQn1xuYOslqi9k_ZD4CJEHIxHML8dqYX1QM4TTRGQ0geKWM5hiKO0l-Uh-GAPt2mN0hpGOqEhfIV53yiRv7HuOZi2B_6cajmUcMAIuHr15bxYp8VUnCLUEtNwoP3_ur02YkNfokXNGInwx7g6wfymjKnUV0YdgPfZTwjSTDDXGU1ylhBLDh7GCoysXS9ZllVVwje8oLHivel5Q"/>
+</div>
+<div class="absolute -bottom-3 -right-3 bg-primary-container text-white h-12 w-12 rounded-xl flex items-center justify-center shadow-lg border-2 border-white">
+<span class="material-symbols-outlined">edit</span>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-4 mb-2">
+<span class="px-3 py-1 bg-primary/10 text-primary font-bold text-[10px] tracking-[0.1em] uppercase rounded-lg">Category A+</span>
+<span class="text-on-surface-variant font-medium text-sm">Member ID: #STG-2024-089</span>
+</div>
+<h2 class="text-5xl font-black font-headline tracking-tighter uppercase text-on-surface leading-none mb-2">Alejandro Revilla</h2>
+<div class="flex gap-6 items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary">verified</span>
+<span class="text-sm font-bold uppercase tracking-wider text-tertiary">Active Member</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline">location_on</span>
+<span class="text-sm font-medium text-on-surface-variant">Madrid, Central Court Club</span>
+</div>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="px-6 py-3 border-2 border-primary text-primary font-bold uppercase text-xs tracking-widest rounded-xl hover:bg-primary/5 transition-colors">
+                        Compare Stats
+                    </button>
+<button class="px-6 py-3 bg-gradient-to-br from-primary to-primary-container text-white font-bold uppercase text-xs tracking-widest rounded-xl shadow-lg shadow-primary/20">
+                        Schedule Match
+                    </button>
+</div>
+</div>
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Left: Status Cards -->
+<div class="col-span-12 lg:col-span-8 space-y-8">
+<div class="grid grid-cols-3 gap-6">
+<!-- Financial Status -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border-l-4 border-tertiary">
+<p class="font-label text-[10px] uppercase font-bold tracking-[0.15em] text-on-surface-variant mb-4">Financial Status</p>
+<div class="flex items-center justify-between">
+<h4 class="text-2xl font-headline font-black text-tertiary">PAID</h4>
+<div class="h-10 w-10 bg-tertiary/10 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary">payments</span>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant mt-2">Next renewal: Oct 15, 2024</p>
+</div>
+<!-- Matches Played -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm">
+<p class="font-label text-[10px] uppercase font-bold tracking-[0.15em] text-on-surface-variant mb-4">Matches Played</p>
+<div class="flex items-center justify-between">
+<h4 class="text-3xl font-headline font-black text-on-surface">142</h4>
+<div class="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">sports_tennis</span>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant mt-2">+12 this month</p>
+</div>
+<!-- Win Rate -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm overflow-hidden relative">
+<div class="absolute right-0 top-0 h-full w-2 bg-primary"></div>
+<p class="font-label text-[10px] uppercase font-bold tracking-[0.15em] text-on-surface-variant mb-4">Win Rate</p>
+<div class="flex items-center justify-between">
+<h4 class="text-3xl font-headline font-black text-primary">76.4%</h4>
+<div class="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">trending_up</span>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant mt-2">Top 5% in category</p>
+</div>
+</div>
+<!-- Recent Matches Table -->
+<div class="bg-surface-container-lowest rounded-3xl p-8 shadow-sm">
+<div class="flex justify-between items-center mb-8">
+<h3 class="text-xl font-headline font-extrabold uppercase tracking-tight">Historial de Partidos</h3>
+<button class="text-primary font-bold text-xs uppercase tracking-widest hover:underline">View All</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full">
+<thead>
+<tr class="text-left border-b border-surface-container-low">
+<th class="pb-4 font-label text-[10px] uppercase font-black tracking-widest text-outline">Result</th>
+<th class="pb-4 font-label text-[10px] uppercase font-black tracking-widest text-outline">Partner / Opponents</th>
+<th class="pb-4 font-label text-[10px] uppercase font-black tracking-widest text-outline">Score</th>
+<th class="pb-4 font-label text-[10px] uppercase font-black tracking-widest text-outline">Date</th>
+<th class="pb-4"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-low/50">
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-5">
+<span class="px-3 py-1 bg-tertiary/10 text-tertiary text-[10px] font-black uppercase rounded-full">Victoria</span>
+</td>
+<td class="py-5">
+<div class="flex flex-col">
+<span class="font-bold text-sm">w/ Carlos Sainz</span>
+<span class="text-xs text-on-surface-variant">vs. R. Nadal / F. Lopez</span>
+</div>
+</td>
+<td class="py-5">
+<span class="font-headline font-bold text-sm tracking-tighter">6-4, 3-6, 6-2</span>
+</td>
+<td class="py-5 text-sm text-on-surface-variant">Aug 24, 2024</td>
+<td class="py-5 text-right">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors cursor-pointer">chevron_right</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-5">
+<span class="px-3 py-1 bg-error/10 text-error text-[10px] font-black uppercase rounded-full">Derrota</span>
+</td>
+<td class="py-5">
+<div class="flex flex-col">
+<span class="font-bold text-sm">w/ Diego Ramos</span>
+<span class="text-xs text-on-surface-variant">vs. P. Lima / J. Belasteguín</span>
+</div>
+</td>
+<td class="py-5">
+<span class="font-headline font-bold text-sm tracking-tighter">4-6, 5-7</span>
+</td>
+<td class="py-5 text-sm text-on-surface-variant">Aug 21, 2024</td>
+<td class="py-5 text-right">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors cursor-pointer">chevron_right</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-5">
+<span class="px-3 py-1 bg-tertiary/10 text-tertiary text-[10px] font-black uppercase rounded-full">Victoria</span>
+</td>
+<td class="py-5">
+<div class="flex flex-col">
+<span class="font-bold text-sm">w/ Carlos Sainz</span>
+<span class="text-xs text-on-surface-variant">vs. M. Di Nenno / F. Navarro</span>
+</div>
+</td>
+<td class="py-5">
+<span class="font-headline font-bold text-sm tracking-tighter">7-6, 6-4</span>
+</td>
+<td class="py-5 text-sm text-on-surface-variant">Aug 18, 2024</td>
+<td class="py-5 text-right">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors cursor-pointer">chevron_right</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right: Side Panel (Partner Stats) -->
+<div class="col-span-12 lg:col-span-4 space-y-8">
+<!-- Performance Chart Mockup -->
+<div class="bg-[#1f3051] text-white p-8 rounded-3xl shadow-xl overflow-hidden relative">
+<div class="absolute top-0 right-0 p-4">
+<span class="material-symbols-outlined text-primary-container opacity-50 text-6xl">insights</span>
+</div>
+<h3 class="text-lg font-headline font-bold uppercase tracking-wide mb-6">Performance Index</h3>
+<div class="flex items-baseline gap-2 mb-2">
+<span class="text-5xl font-black font-headline tracking-tighter italic">9.2</span>
+<span class="text-primary-fixed-dim font-bold">/10</span>
+</div>
+<p class="text-slate-400 text-xs mb-8 uppercase tracking-widest font-label">Elite Performance Range</p>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-[10px] uppercase tracking-widest font-black mb-1">
+<span>Attack</span>
+<span>88%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-700 rounded-full">
+<div class="h-full w-[88%] bg-primary-container rounded-full"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[10px] uppercase tracking-widest font-black mb-1">
+<span>Defense</span>
+<span>94%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-700 rounded-full">
+<div class="h-full w-[94%] bg-tertiary-fixed-dim rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Best Partners Section -->
+<div class="bg-surface-container-lowest rounded-3xl p-8 shadow-sm">
+<h3 class="text-xl font-headline font-extrabold uppercase tracking-tight mb-8">Best Partners</h3>
+<div class="space-y-6">
+<!-- Partner 1 -->
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="h-14 w-14 rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
+<img class="h-full w-full object-cover" data-alt="close up of athletic man with short stubble smiling against neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlexhm1qn551BJU7_EMfAS0zSzxUl9NgR8fHlewGwNVevSfcg0S9xzESYBMskPTbpXhryanffRSg-73SrLf4dSpvsn_hyNCm-c-hIIYpJ-IykZbHJe-_jYfsCt5dE2elfbUXgvHOndqEjdunZOyfriIodG0SOULOF8C79WJljIqELCsWtj2Py5BP1tn4eLfQbUYrmqurygp0IPo8xIwG46bBRq7ZVFyRnbq3aP8YV-f3VlEurx5NomDhzKPx-mB6fFip6bq9FuPGM"/>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-sm uppercase font-headline">Carlos Sainz</h4>
+<div class="flex items-center justify-between mt-1">
+<span class="text-[10px] text-on-surface-variant font-medium">88% Synergy</span>
+<span class="text-[10px] font-black text-tertiary uppercase tracking-tighter">12-2 Rec</span>
+</div>
+<div class="h-1 w-full bg-surface-container mt-2 rounded-full overflow-hidden">
+<div class="h-full w-[88%] bg-tertiary rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Partner 2 -->
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="h-14 w-14 rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
+<img class="h-full w-full object-cover" data-alt="handsome young man with athletic build posing for sports profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBosnhMsiFrnDDviOuK6U1BLqnZdjVWMWRm0krmVMQ2LbTkXrJzb9Ftv2Z--2DhzzM5-ptfTZAFJ6vCNkNjFIcJ_2R2vE5Y1vUrWjCgpQlISDk3waS72jsNXFAk4GodoNHfl1Zk8himsgFqP1faUZj5-zyi4Vwq1mdDHeZllnC-pgRllMkUUujH5vHif7AOX_bCEgx9PDK4T8ep5BlbsnnO6kVz8IJbAaNH3-sSAj6DjhIeSuWS6--fkq0gRW5vOQMhDnwJpo9M5OA"/>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-sm uppercase font-headline">Diego Ramos</h4>
+<div class="flex items-center justify-between mt-1">
+<span class="text-[10px] text-on-surface-variant font-medium">74% Synergy</span>
+<span class="text-[10px] font-black text-tertiary uppercase tracking-tighter">8-3 Rec</span>
+</div>
+<div class="h-1 w-full bg-surface-container mt-2 rounded-full overflow-hidden">
+<div class="h-full w-[74%] bg-primary rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Partner 3 -->
+<div class="flex items-center gap-4 group cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+<div class="h-14 w-14 rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
+<img class="h-full w-full object-cover" data-alt="middle aged professional man in sporting gear with grey hair and focused gaze" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8nbtnSNFHt42lUoevYxp5o7kfOHDMENiVFgAqGxnvrYlMIv1KPXu2WiWxan6MjRoBk0PjOTNsKE0Vl6DsaAIaZ8n2JMJKXiVSp_HLJIp9X4CSr6lMGRr3EpaAY9SkqPsJFHAeu0nWBoPKroXTuvJQDX_bGhkdf88KsngfwfvUSGBrGqjWSYyV4rTu0lFH5mPEAy_R3dQwsW6kPctURjMSxwsqS0a3UMziCF8FFRCr1FkcUOuI1sxeHTmzVUocaPxltpDPJAGJr58"/>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-sm uppercase font-headline">Jordi Alba</h4>
+<div class="flex items-center justify-between mt-1">
+<span class="text-[10px] text-on-surface-variant font-medium">62% Synergy</span>
+<span class="text-[10px] font-black text-primary uppercase tracking-tighter">5-5 Rec</span>
+</div>
+<div class="h-1 w-full bg-surface-container mt-2 rounded-full overflow-hidden">
+<div class="h-full w-[62%] bg-outline rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-10 py-4 border-2 border-dashed border-outline-variant text-outline font-bold text-[10px] uppercase tracking-[0.2em] rounded-2xl hover:bg-surface-container transition-colors">
+                            Find New Partners
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

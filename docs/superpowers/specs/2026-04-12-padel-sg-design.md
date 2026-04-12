@@ -75,6 +75,16 @@ src/
 - **Desktop:** sidebar de íconos colapsado (48px de ancho), se expande al hover
 - **Mobile:** bottom navigation bar fija con 6 ítems principales
 
+### Logo de la Rama Pádel
+El logo de la Rama Pádel Saint George's aparece en todos los puntos de contacto:
+- **App:** header del sidebar (desktop) / top bar (mobile), favicon y OG image
+- **Páginas auth:** login, registro, pantalla de aprobación pendiente
+- **Emails transaccionales:** header de confirmación de registro, aprobación, rechazo
+- **Brackets de torneo:** cover/header al imprimir o compartir
+- **Páginas estáticas:** encabezado de la sección Rama (reglas, info)
+
+El archivo fuente del logo (SVG preferido) se guarda en `public/logo/` y se referencia desde un componente `<BrandLogo>` para uso consistente.
+
 ### Reglas visuales (del design system existente)
 - Sin bordes de 1px para separar secciones — usar tonal layering
 - Sombras: `0 20px 40px rgba(7,27,59,0.06)` — tinte navy, no negro
@@ -156,23 +166,38 @@ El admin puede modificar la categoría de cualquier jugador desde el panel.
 
 ### 5.5 Torneos
 
-**Torneos Internos:**
-1. Admin crea torneo con wizard (categorías, formato, canchas, tiempos, fases, copa consolación)
-2. Simulador genera fixture — lógica portada desde `padel-court-calc` v5.0 a TypeScript puro
-3. Admin revisa y confirma fixture
-4. Torneo abre inscripciones: parejas se inscriben, tracking de pagos
-5. Torneo pasa a `en_curso`: carga de resultados habilitada (solo admin/admin_torneo)
-6. Sistema actualiza bracket + ELO automáticamente al cargar resultados
-7. Torneo `finalizado` → ranking de temporada se consolida
+**Tipo de torneo — 3 variantes (step 1 del wizard):**
 
-**Parámetros del simulador (heredados de padel-court-calc):**
+| Tipo | Descripción | Quién juega |
+|------|-------------|-------------|
+| `interno` | SG vs SG — solo miembros de la rama | Nuestros jugadores entre sí |
+| `vs_colegio` | Fecha intercolegial — SG vs otro colegio | Nuestros jugadores vs jugadores de otro colegio |
+| `externo` | Torneo en club/federación — miembros participando externamente | Solo registro/seguimiento |
+
+**Torneos Internos (`interno`):**
+1. Admin abre wizard → configura parámetros → simulador genera fixture
+2. Admin confirma fixture → torneo abre inscripciones
+3. Parejas se inscriben → admin registra pagos
+4. Admin pasa a `en_curso` → se habilita carga de resultados
+5. Admin carga resultados → bracket y ELO se actualizan automáticamente
+6. Torneo `finalizado` → ranking consolidado
+
+**Torneos vs Otro Colegio (`vs_colegio`):**
+1. Admin crea el evento con nombre del colegio rival, fecha, canchas
+2. Admin registra las parejas SG participantes (+ inscripciones/pagos si aplica)
+3. El colegio rival se registra como entidad (nombre, no usuarios del sistema)
+4. Admin carga resultados por partido (pareja SG vs pareja externa)
+5. Los resultados alimentan el ELO de nuestros jugadores
+6. Vista pública en la plataforma (miembros siguen los resultados)
+
+**Parámetros del simulador (heredados de padel-court-calc, aplica a `interno` y `vs_colegio`):**
 - Categorías con número de parejas por categoría
 - Formato: grupos round-robin + playoffs, copa de consolación (Oro/Plata), 3er lugar, byes, fixture compacto, esperar fin de ronda
 - Parejas por grupo (3–8) y cuántos avanzan (1–4)
 - Duración de partido (slider), pausa entre partidos
 - Número de canchas y hora de inicio
 
-**Torneos Externos:**
+**Torneos Externos (`externo`):**
 - Inscripciones centralizadas (el admin consolida quiénes van)
 - Seguimiento de resultados en tiempo real (carga manual)
 - Los resultados externos alimentan el ELO
@@ -194,10 +219,27 @@ El admin puede modificar la categoría de cualquier jugador desde el panel.
 Los partidos de liga alimentan el ELO igual que los de torneo.
 
 ### 5.7 Amistosos
-- Cualquier jugador registra un partido: selecciona rival, carga resultado por sets
+
+**Dos flujos:**
+
+**A — Registro retroactivo** (ya jugué, lo registro)
+- Jugador A selecciona los 4 jugadores (mi pareja + pareja rival) y carga resultado por sets
 - Sistema notifica al equipo rival
 - Rival puede: Confirmar (ELO se actualiza) | Refutar (queda en disputa, admin resuelve)
 - Si no hay respuesta en **72 horas** → aprobación automática y ELO se actualiza
+
+**B — Tablero de partidas abiertas** (busco con quién jugar)
+- Jugador publica partida con: fecha/hora, cancha (opcional), categoría, mixto sí/no, y rol que falta:
+  - `busco_compañero` — tiene rival, falta pareja propia
+  - `busco_rivales` — tiene pareja, faltan rivales
+  - `abierto` — necesita completar los 4
+- Tablero filtrado por disponibilidad horaria y categoría del jugador que navega
+- Jugadores interesados se suman con un click
+- Al completarse los 4 → estado `confirmada`, sistema notifica a todos
+- Tras jugar, cualquiera de los 4 registra el resultado (flujo A)
+- Estado de la partida: `abierta` → `confirmada` → `jugada`
+
+**Desafío directo a pareja específica → fase 2**
 
 ### 5.8 Dashboard (Home post-login)
 
@@ -399,8 +441,17 @@ CREATE TABLE padel.anuncios (
 );
 ```
 
+### Modificación adicional — tabla torneos
+```sql
+-- Diferenciar tipo de torneo
+ALTER TABLE padel.torneos
+  ADD COLUMN tipo text NOT NULL DEFAULT 'interno'
+    CHECK (tipo IN ('interno', 'vs_colegio', 'externo')),
+  ADD COLUMN colegio_rival text;  -- nombre del colegio (solo para tipo vs_colegio)
+```
+
 ### Tablas sin cambios
-`temporadas`, `torneos`, `inscripciones`, `partidos`, `ranking`, `eventos`, `disponibilidad`, `evento_participantes`, `deportes`
+`temporadas`, `inscripciones`, `partidos`, `ranking`, `eventos`, `disponibilidad`, `evento_participantes`, `deportes`
 
 ---
 
@@ -421,10 +472,16 @@ CREATE TABLE padel.anuncios (
 5. Admin carga resultados → bracket y ELO se actualizan automáticamente
 6. Torneo `finalizado` → ranking consolidado
 
-### Amistoso
-1. Jugador A registra partido con resultado
-2. Sistema notifica a equipo rival (B)
-3. B confirma → ELO actualizado | B refuta → admin resuelve | 72h sin respuesta → auto-aprobado
+### Amistoso — Registro retroactivo
+1. Jugador A selecciona los 4 jugadores y carga resultado por sets
+2. Sistema notifica al equipo rival
+3. Rival confirma → ELO actualizado | Rival refuta → admin resuelve | 72h sin respuesta → auto-aprobado
+
+### Amistoso — Tablero de partidas abiertas
+1. Jugador publica partida con fecha/hora, categoría, rol que falta (`busco_compañero` / `busco_rivales` / `abierto`)
+2. Tablero filtra partidas compatibles según disponibilidad y categoría del jugador
+3. Jugadores se suman hasta completar los 4 → estado `confirmada`, notificación a todos
+4. Tras jugar, cualquiera registra el resultado (flujo retroactivo)
 
 ### Liga escalerilla
 1. Admin crea liga, define posición inicial de cada jugador
@@ -473,3 +530,4 @@ CREATE TABLE padel.anuncios (
 - Procesamiento de pagos real (Stripe, Mercado Pago)
 - Chat interno (WhatsApp cubre esto)
 - Formato americano en ligas (revisar en fase 2 desde Americano SG v2)
+- **Desafío directo pareja vs pareja** (amistosos — fase 2)

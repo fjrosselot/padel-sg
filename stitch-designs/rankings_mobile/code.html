@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-bright": "#f9f9ff",
+              "secondary-fixed": "#d8e2ff",
+              "on-tertiary-fixed": "#002113",
+              "on-error-container": "#93000a",
+              "surface": "#f9f9ff",
+              "surface-variant": "#d8e2ff",
+              "surface-container-lowest": "#ffffff",
+              "outline": "#747686",
+              "inverse-primary": "#b7c4ff",
+              "on-primary-container": "#fbf8ff",
+              "surface-container-low": "#f1f3ff",
+              "primary": "#144bdb",
+              "tertiary-fixed-dim": "#4edea3",
+              "secondary": "#4e5e82",
+              "on-error": "#ffffff",
+              "background": "#f9f9ff",
+              "tertiary-container": "#00835a",
+              "tertiary": "#006746",
+              "error-container": "#ffdad6",
+              "surface-container-high": "#e1e8ff",
+              "secondary-fixed-dim": "#b6c6f0",
+              "surface-container": "#e9edff",
+              "outline-variant": "#c4c5d8",
+              "primary-fixed": "#dde1ff",
+              "surface-dim": "#ccdaff",
+              "inverse-on-surface": "#edf0ff",
+              "primary-container": "#3b66f5",
+              "on-primary": "#ffffff",
+              "on-background": "#071b3b",
+              "error": "#ba1a1a",
+              "on-surface": "#071b3b",
+              "on-secondary-fixed-variant": "#364669",
+              "on-secondary": "#ffffff",
+              "inverse-surface": "#1f3051",
+              "on-tertiary-container": "#e8ffef",
+              "primary-fixed-dim": "#b7c4ff",
+              "on-secondary-container": "#4b5b7f",
+              "surface-container-highest": "#d8e2ff",
+              "on-tertiary-fixed-variant": "#005236",
+              "on-surface-variant": "#434655",
+              "on-secondary-fixed": "#071b3b",
+              "secondary-container": "#c4d4fe",
+              "surface-tint": "#1c4fe0",
+              "on-primary-fixed-variant": "#0038b6",
+              "on-primary-fixed": "#001452",
+              "tertiary-fixed": "#6ffbbe",
+              "on-tertiary": "#ffffff"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-header {
+            backdrop-filter: blur(12px);
+            background: rgba(31, 48, 81, 0.95);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-[#1f3051] dark:bg-[#071b3b] shadow-2xl shadow-[#071b3b]/20">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden border border-white/20">
+<img alt="Player Profile" data-alt="Close up portrait of a professional athlete in a blue jersey, modern studio lighting, high contrast" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnZWVL_pHvf5K1I-V-X_p9j-vEws0mQ7F_5u_7Y6h-s6VVVtSkZhQeHTQpFVJmpMVwVBSHMUe8VMwklDKq6jfjZQCkzjMK66L8j3lPTa3BVp2SzNA-I5v0_uJ645EFeSkZUHBmApTDIOdfvvuT-sG0RSh9QSfcMJxrglVvGLuyBS_ijg9G3ZoJW5h-gxbje5JMt-eAHdePbRJSkfh-LBgwvj6Ag-GZMaCl33jgobBbAMvbi6tGSQhzqz8ChUofFO580T1fiXO852s"/>
+</div>
+<h1 class="font-['Manrope'] uppercase tracking-widest font-bold text-xl font-black text-white italic tracking-tighter">ST. GEORGE</h1>
+</div>
+<button class="text-white hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<main class="pt-20 px-4">
+<!-- Editorial Header Section -->
+<section class="mb-6 mt-4">
+<h2 class="font-headline text-3xl font-extrabold uppercase tracking-tight text-on-surface leading-none">
+                RANKING <br/> <span class="text-primary">GENERAL</span>
+</h2>
+<div class="mt-4 flex items-center justify-between bg-surface-container-lowest p-3 rounded-xl shadow-sm border border-outline-variant/15">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">calendar_today</span>
+<span class="font-label font-bold text-xs tracking-wider">TEMPORADA 2024</span>
+</div>
+<span class="material-symbols-outlined text-outline">expand_more</span>
+</div>
+</section>
+<!-- Horizontal Categories -->
+<section class="mb-8 -mx-4">
+<div class="flex overflow-x-auto gap-3 px-4 hide-scrollbar">
+<button class="flex-none px-6 py-2 bg-primary text-white rounded-full font-label font-bold text-xs tracking-widest shadow-lg shadow-primary/25 border border-primary">MASC. A</button>
+<button class="flex-none px-6 py-2 bg-white text-on-surface-variant rounded-full font-label font-bold text-xs tracking-widest border border-outline-variant/30">MASC. B</button>
+<button class="flex-none px-6 py-2 bg-white text-on-surface-variant rounded-full font-label font-bold text-xs tracking-widest border border-outline-variant/30">FEM. A</button>
+<button class="flex-none px-6 py-2 bg-white text-on-surface-variant rounded-full font-label font-bold text-xs tracking-widest border border-outline-variant/30">FEM. B</button>
+<button class="flex-none px-6 py-2 bg-white text-on-surface-variant rounded-full font-label font-bold text-xs tracking-widest border border-outline-variant/30">MIXTO</button>
+</div>
+</section>
+<!-- Leaderboard -->
+<section class="space-y-4">
+<!-- Rank 1 Card: Asymmetric Feature -->
+<div class="relative bg-inverse-surface rounded-2xl p-5 shadow-xl overflow-hidden">
+<div class="absolute -right-4 -top-4 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<span class="font-headline italic font-black text-4xl text-primary-container">01</span>
+<div>
+<p class="text-[10px] font-label font-bold text-primary-fixed tracking-[0.2em] uppercase">Líderes de Temporada</p>
+<h3 class="font-headline font-bold text-white text-lg">M. Ruiz / J. Navarro</h3>
+</div>
+</div>
+<div class="text-right">
+<span class="block font-headline text-2xl font-black text-white">4,850</span>
+<span class="text-[10px] font-label font-bold text-tertiary-fixed-dim uppercase">PUNTOS</span>
+</div>
+</div>
+<div class="flex gap-4 border-t border-white/5 pt-4">
+<div class="flex-1">
+<span class="block text-[9px] text-slate-400 font-bold uppercase tracking-widest">Victorias</span>
+<span class="text-white font-bold">12/14</span>
+</div>
+<div class="flex-1">
+<span class="block text-[9px] text-slate-400 font-bold uppercase tracking-widest">Racha</span>
+<span class="text-tertiary-fixed-dim font-bold">W-W-W-W</span>
+</div>
+</div>
+</div>
+<!-- List of Players (Tonal Shifts, No Borders) -->
+<div class="space-y-2">
+<!-- Rank 2 -->
+<div class="flex items-center bg-surface-container-lowest p-4 rounded-xl shadow-sm transition-transform active:scale-[0.98]">
+<span class="w-8 font-headline font-bold text-xl text-outline-variant">02</span>
+<div class="flex-1 ml-2">
+<h4 class="font-headline font-bold text-on-surface text-sm">C. Alcaraz / R. Nadal</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.5 bg-tertiary/10 text-tertiary text-[9px] font-black rounded-sm uppercase">Elite</span>
+<span class="text-[10px] text-on-surface-variant font-medium">85% Ganados</span>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-primary text-base">4,120</p>
+<p class="flex items-center justify-end gap-1 text-[10px] text-tertiary font-bold">
+<span class="material-symbols-outlined text-xs">trending_up</span> 2
+                        </p>
+</div>
+</div>
+<!-- Rank 3 -->
+<div class="flex items-center bg-surface-container-lowest p-4 rounded-xl shadow-sm transition-transform active:scale-[0.98]">
+<span class="w-8 font-headline font-bold text-xl text-outline-variant">03</span>
+<div class="flex-1 ml-2">
+<h4 class="font-headline font-bold text-on-surface text-sm">A. Galán / J. Lebrón</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.5 bg-secondary/10 text-secondary text-[9px] font-black rounded-sm uppercase">Pro</span>
+<span class="text-[10px] text-on-surface-variant font-medium">78% Ganados</span>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-on-surface text-base">3,980</p>
+<p class="flex items-center justify-end gap-1 text-[10px] text-error font-bold">
+<span class="material-symbols-outlined text-xs">trending_down</span> 1
+                        </p>
+</div>
+</div>
+<!-- Rank 4 -->
+<div class="flex items-center bg-surface-container-low p-4 rounded-xl transition-transform active:scale-[0.98]">
+<span class="w-8 font-headline font-bold text-xl text-outline-variant">04</span>
+<div class="flex-1 ml-2">
+<h4 class="font-headline font-bold text-on-surface text-sm">F. Belasteguín / L. Campa</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.5 bg-secondary/10 text-secondary text-[9px] font-black rounded-sm uppercase">Pro</span>
+<span class="text-[10px] text-on-surface-variant font-medium">72% Ganados</span>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-on-surface text-base">3,450</p>
+<p class="flex items-center justify-end gap-1 text-[10px] text-outline font-bold">
+<span class="material-symbols-outlined text-xs">horizontal_rule</span> 0
+                        </p>
+</div>
+</div>
+<!-- Rank 5 -->
+<div class="flex items-center bg-surface-container-lowest p-4 rounded-xl shadow-sm transition-transform active:scale-[0.98]">
+<span class="w-8 font-headline font-bold text-xl text-outline-variant">05</span>
+<div class="flex-1 ml-2">
+<h4 class="font-headline font-bold text-on-surface text-sm">V. González / D. Perino</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.5 bg-secondary/10 text-secondary text-[9px] font-black rounded-sm uppercase">Pro</span>
+<span class="text-[10px] text-on-surface-variant font-medium">65% Ganados</span>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-on-surface text-base">3,120</p>
+<p class="flex items-center justify-end gap-1 text-[10px] text-tertiary font-bold">
+<span class="material-symbols-outlined text-xs">trending_up</span> 4
+                        </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Stats Graphic Teaser -->
+<section class="mt-8">
+<div class="bg-primary p-6 rounded-2xl relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="font-headline text-white font-bold text-lg leading-tight uppercase italic">Rendimiento <br/> de Cancha</h3>
+<p class="text-white/70 text-xs mt-2 font-medium">Analiza tus métricas contra el top regional</p>
+<button class="mt-4 px-4 py-2 bg-white text-primary rounded-xl font-label font-bold text-[10px] uppercase tracking-widest active:scale-95 transition-transform">VER MIS STATS</button>
+</div>
+<div class="absolute top-0 right-0 h-full w-1/2 opacity-20 pointer-events-none">
+<img alt="Stats Chart" class="object-cover h-full w-full" data-alt="Abstract visualization of sports data charts, glowing neon blue lines on dark background, dynamic energy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGVhZXZyyIkgUzDssWEK7IdX5ys5zE_9mqpGmvafOpidpFqx2Ro4cHucSsVxTkaXD76iL5cBKf90j97ISTx7ecuXESI560hiw9qDjkjKX3RjaIIWKYUWPOUuyZZ6KsdsGvPSK839FyAaAzvMhKgQMvU8WV0-tT5hSA-k__aEP5xrlmYrFestf_FhrUMERxxf0zVxb0RQbx6ABYLbZwSXn_an4ladrmdsBQdTw4lFumj0xTMiYW9DBiM3OwuoMwbBUBtlSUp_rfsCs"/>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-[#ffffff] dark:bg-[#1f3051] shadow-[0_-10px_40px_rgba(7,27,59,0.08)] rounded-t-3xl">
+<button class="flex flex-col items-center justify-center text-[#1f3051]/60 dark:text-slate-400 px-4 py-2 hover:text-[#144bdb] dark:hover:text-white active:scale-90 transition-transform duration-300 ease-out">
+<span class="material-symbols-outlined">home</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-wider uppercase mt-1">HOME</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#1f3051]/60 dark:text-slate-400 px-4 py-2 hover:text-[#144bdb] dark:hover:text-white active:scale-90 transition-transform duration-300 ease-out">
+<span class="material-symbols-outlined">emoji_events</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-wider uppercase mt-1">TOURNEYS</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#1f3051]/60 dark:text-slate-400 px-4 py-2 hover:text-[#144bdb] dark:hover:text-white active:scale-90 transition-transform duration-300 ease-out">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-wider uppercase mt-1">CALENDAR</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-[#3b66f5] text-white rounded-xl px-4 py-2 scale-110 shadow-lg shadow-[#3b66f5]/30 transition-transform duration-300 ease-out">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-wider uppercase mt-1">PLAYERS</span>
+</button>
+</nav>
+</body></html>

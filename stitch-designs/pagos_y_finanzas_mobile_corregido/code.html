@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Padel Elite - Gestión de Pagos</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-high": "#e1e8ff",
+              "surface-container": "#e9edff",
+              "on-error": "#ffffff",
+              "tertiary": "#006746",
+              "on-primary-fixed": "#001452",
+              "on-primary": "#ffffff",
+              "tertiary-fixed": "#6ffbbe",
+              "on-tertiary-container": "#e8ffef",
+              "on-secondary-container": "#4b5b7f",
+              "tertiary-fixed-dim": "#4edea3",
+              "on-background": "#071b3b",
+              "inverse-on-surface": "#edf0ff",
+              "on-secondary-fixed-variant": "#364669",
+              "inverse-surface": "#1f3051",
+              "error": "#ba1a1a",
+              "inverse-primary": "#b7c4ff",
+              "on-tertiary": "#ffffff",
+              "on-error-container": "#93000a",
+              "surface": "#f9f9ff",
+              "on-surface": "#071b3b",
+              "error-container": "#ffdad6",
+              "secondary-fixed-dim": "#b6c6f0",
+              "primary": "#144bdb",
+              "surface-tint": "#1c4fe0",
+              "on-primary-fixed-variant": "#0038b6",
+              "surface-variant": "#d8e2ff",
+              "on-secondary-fixed": "#071b3b",
+              "on-primary-container": "#fbf8ff",
+              "surface-container-highest": "#d8e2ff",
+              "background": "#f9f9ff",
+              "surface-dim": "#ccdaff",
+              "on-tertiary-fixed-variant": "#005236",
+              "on-surface-variant": "#434655",
+              "surface-container-lowest": "#ffffff",
+              "primary-container": "#3b66f5",
+              "secondary": "#4e5e82",
+              "secondary-fixed": "#d8e2ff",
+              "on-tertiary-fixed": "#002113",
+              "tertiary-container": "#00835a",
+              "secondary-container": "#c4d4fe",
+              "primary-fixed-dim": "#b7c4ff",
+              "outline-variant": "#c4c5d8",
+              "surface-container-low": "#f1f3ff",
+              "primary-fixed": "#dde1ff",
+              "on-secondary": "#ffffff",
+              "surface-bright": "#f9f9ff",
+              "outline": "#747686"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center px-6 h-16 bg-[#1f3051] dark:bg-[#071b3b] shadow-[0_20px_40px_rgba(7,27,59,0.06)]">
+<div class="flex items-center justify-between w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#3b66f5] active:scale-95 duration-200 cursor-pointer">menu</span>
+<h1 class="text-xl font-black text-white tracking-tighter italic font-headline uppercase">PADEL ELITE</h1>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-primary-container border-2 border-primary">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="Close up portrait of a professional male athlete in athletic gear looking confident in an indoor stadium setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2TtGQF9lq5D5sB086C8napgvv4GcElFMMxYyLOwJr12JAfQYprVJwR_xPOp2_LOZu7YdkYWOfloH6vuxwajLiyll8UMadPNJn4WvUwKdn2ZJfiidaqb9ePMk69Grvqb6uAGy8orx79OEwGYdTomxt9upedMlrE3WiQcY-qd0aNOBLBbd1-fgraiJilE9UnDYjXGi1DQozUqGMf0C-P_4CT-tYCm-cV2akLonzq-IJwPUxFRnb8euzPlalmBjIbqOk1Hq3wQPJERk"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-32 px-5 min-h-screen">
+<!-- Header Section -->
+<header class="mb-8">
+<h2 class="font-headline font-extrabold text-3xl text-on-surface uppercase tracking-tight">Pagos y Finanzas</h2>
+<p class="text-on-surface-variant font-medium text-sm mt-1">ESTADO DE CUENTA: MARCOS RIVAS</p>
+</header>
+<!-- Summary Bento Cards -->
+<div class="grid grid-cols-2 gap-4 mb-8">
+<!-- Paid Card -->
+<div class="bg-surface-container-lowest p-5 rounded-xl shadow-[0_20px_40px_rgba(7,27,59,0.06)] flex flex-col justify-between h-32 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-tertiary/10 rounded-bl-full flex items-center justify-end pr-3 pb-3">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="font-label text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Pagado</span>
+<div class="mt-2">
+<span class="text-2xl font-headline font-bold text-on-surface">1.240€</span>
+</div>
+</div>
+<!-- Pending Card -->
+<div class="bg-surface-container-lowest p-5 rounded-xl shadow-[0_20px_40px_rgba(7,27,59,0.06)] flex flex-col justify-between h-32 border-l-4 border-error">
+<span class="font-label text-[10px] font-bold text-slate-500 uppercase tracking-widest">Pendiente</span>
+<div class="mt-2">
+<span class="text-2xl font-headline font-bold text-error">45,00€</span>
+</div>
+<div class="flex items-center gap-1 text-[10px] font-bold text-error uppercase">
+<span class="material-symbols-outlined text-[14px]">warning</span> Vence pronto
+                </div>
+</div>
+</div>
+<!-- Primary Action -->
+<div class="mb-8">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-white py-4 rounded-xl font-headline font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(20,75,219,0.2)] active:scale-[0.98] transition-transform">
+<span class="material-symbols-outlined">payments</span>
+                Realizar Pago
+            </button>
+</div>
+<!-- Transaction List -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline font-bold text-lg text-on-surface uppercase tracking-wide">Transacciones Recientes</h3>
+<button class="text-primary font-label text-xs font-bold uppercase tracking-widest">Ver todo</button>
+</div>
+<div class="space-y-3">
+<!-- Transaction Item 1 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl flex items-center justify-between hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-surface-container-high rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">sports_tennis</span>
+</div>
+<div>
+<p class="font-bold text-on-surface text-sm">Reserva Pista 4</p>
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">12 OCT 2023 • 18:30</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-bold text-on-surface text-sm">18,00€</p>
+<span class="inline-block px-2 py-0.5 rounded-full bg-tertiary/10 text-tertiary text-[9px] font-black uppercase">Pagado</span>
+</div>
+</div>
+<!-- Transaction Item 2 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl flex items-center justify-between hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-surface-container-high rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">emoji_events</span>
+</div>
+<div>
+<p class="font-bold text-on-surface text-sm">Inscripción Torneo</p>
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">08 OCT 2023 • 10:15</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-bold text-on-surface text-sm">25,00€</p>
+<span class="inline-block px-2 py-0.5 rounded-full bg-error/10 text-error text-[9px] font-black uppercase">Pendiente</span>
+</div>
+</div>
+<!-- Transaction Item 3 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl flex items-center justify-between hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-surface-container-high rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">shopping_cart</span>
+</div>
+<div>
+<p class="font-bold text-on-surface text-sm">Overgrip Head (x3)</p>
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">05 OCT 2023 • 20:00</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-bold text-on-surface text-sm">12,50€</p>
+<span class="inline-block px-2 py-0.5 rounded-full bg-tertiary/10 text-tertiary text-[9px] font-black uppercase">Pagado</span>
+</div>
+</div>
+<!-- Transaction Item 4 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl flex items-center justify-between hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-surface-container-high rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">fitness_center</span>
+</div>
+<div>
+<p class="font-bold text-on-surface text-sm">Cuota Gimnasio OCT</p>
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">01 OCT 2023 • 09:00</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-bold text-on-surface text-sm">45,00€</p>
+<span class="inline-block px-2 py-0.5 rounded-full bg-tertiary/10 text-tertiary text-[9px] font-black uppercase">Pagado</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Promotion Card -->
+<div class="mt-8 relative h-36 rounded-2xl overflow-hidden shadow-xl">
+<div class="absolute inset-0 bg-gradient-to-r from-inverse-surface via-inverse-surface/80 to-transparent z-10"></div>
+<img alt="Padel Court" class="absolute inset-0 w-full h-full object-cover" data-alt="Wide angle view of high-end indoor padel courts with bright neon lights and blue flooring" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnPYoZPynRHNwt-1ptDNowIp0_WN4p3I-yfOXlOPJ85t2KZQsaGGqAzDbYpilEdACfiHnEAofPnmTe7RPYnBmjW0EaEnS6vyaHKOAvSWJAQ9LiPvgC8364OuXD9MSXaIJrwbCTNsmbQMDmlwWHgrqfw8gKHmomIKy3Jg0uzgki6wrjLCkn_L1Jqpo7DeKVec6jwCyFDvNnpQ-5Mx8SdPcd__pluOg_lErxcvpF0VocOK_NQ2HVAQILYWdQBeAq2w8Nyl-wWqk4SGs"/>
+<div class="relative z-20 p-6 flex flex-col justify-center h-full">
+<span class="font-headline font-black text-primary-container text-xs tracking-[0.2em] mb-1">PROMO ELITE</span>
+<h4 class="font-headline font-extrabold text-white text-lg leading-tight uppercase">Bono 10 clases<br/>al 20% Dto.</h4>
+<div class="mt-2">
+<span class="text-xs text-slate-300 font-bold underline decoration-primary underline-offset-4">CONSULTAR</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-[#ffffff] dark:bg-[#1f3051] rounded-t-3xl shadow-[0_-10px_40px_rgba(7,27,59,0.08)]">
+<!-- HOME -->
+<button class="flex flex-col items-center justify-center text-[#1f3051]/60 dark:text-slate-400 px-4 py-2 transition-transform duration-300 ease-out active:scale-90 hover:text-[#144bdb] dark:hover:text-white">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-wider uppercase mt-1">HOME</span>
+</button>
+<!-- TOURNEYS -->
+<button class="flex flex-col items-center justify-center text-[#1f3051]/60 dark:text-slate-400 px-4 py-2 transition-transform duration-300 ease-out active:scale-90 hover:text-[#144bdb] dark:hover:text-white">
+<span class="material-symbols-outlined" data-icon="emoji_events">emoji_events</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-wider uppercase mt-1">TOURNEYS</span>
+</button>
+<!-- CALENDAR -->
+<button class="flex flex-col items-center justify-center text-[#1f3051]/60 dark:text-slate-400 px-4 py-2 transition-transform duration-300 ease-out active:scale-90 hover:text-[#144bdb] dark:hover:text-white">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-wider uppercase mt-1">CALENDAR</span>
+</button>
+<!-- PLAYERS (Active) -->
+<button class="flex flex-col items-center justify-center bg-[#3b66f5] text-white rounded-xl px-4 py-2 scale-110 shadow-lg shadow-[#3b66f5]/30 transition-transform duration-300 ease-out active:scale-90">
+<span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-wider uppercase mt-1">PLAYERS</span>
+</button>
+</nav>
+</body></html>
