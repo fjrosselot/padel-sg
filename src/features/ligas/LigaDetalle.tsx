@@ -77,7 +77,7 @@ export default function LigaDetalle() {
         .schema('padel')
         .from('partidos')
         .select(`
-          id, pareja1_j1, pareja2_j1, sets_pareja1, sets_pareja2, ganador, estado,
+          id, pareja1_j1, pareja1_j2, pareja2_j1, pareja2_j2, sets_pareja1, sets_pareja2, ganador, estado,
           jugador1:jugadores!pareja1_j1(nombre, elo),
           jugador2:jugadores!pareja2_j1(nombre, elo)
         `)
