@@ -142,3 +142,11 @@
 - `standings.test.ts` +7: lista vacía, estado != jugado ignorado, ganador null ignorado, tiebreaker por diff sets, jugador fuera de lista, doble pareja cuenta ambos
 
 ---
+
+## [2026-04-14 23:30] — Task 3: README.md completo
+
+**Resumen:** Se generó el README.md completo con descripción, stack, estructura de carpetas, instrucciones de local, deploy, diseño, y screenshots placeholder.
+
+**Secciones:** Descripción + estado · Stack (tabla) · Funcionalidades Plan 1-3 · Estructura de carpetas · Cómo correr en local · Deploy (Vercel + Edge Functions) · Diseño · Screenshots placeholder · Tests · Licencia
+
+---
