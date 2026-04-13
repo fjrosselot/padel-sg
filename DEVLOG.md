@@ -143,6 +143,23 @@
 
 ---
 
+## [2026-04-14 23:45] — Task 4: Auditoría accesibilidad básica (WCAG AA)
+
+**Resumen:** Revisión de accesibilidad en 23 archivos de Plan 1-2-3. Fixes en 13 archivos. 81 tests verdes, tsc limpio.
+
+**Fixes aplicados:**
+- Modales (`ResultadoModal`, `DesafioModal`, `ResultadoLigaModal`): `role="dialog" aria-modal="true" aria-labelledby`
+- Cards clickeables (`TorneosList`, `LigasList`): `role="button" tabIndex={0} onKeyDown` para navegación por teclado
+- Botones selector/toggle: `aria-pressed` en todos los estados binarios
+- Inputs de formulario: `id` + `htmlFor` en wizard steps (Step 1-4 torneos, Step 1-3 ligas)
+- Elementos decorativos: `aria-hidden="true"` en iconos/spans decorativos
+- Focus rings: `focus:ring-2 focus:ring-gold/50` en botones interactivos
+- Contraste WCAG AA verificado por cálculo de luminancia — los 5 colores de badge pasan 4.5:1 sin cambios
+
+**Pendientes:** ninguno
+
+---
+
 ## [2026-04-14 23:30] — Task 3: README.md completo
 
 **Resumen:** Se generó el README.md completo con descripción, stack, estructura de carpetas, instrucciones de local, deploy, diseño, y screenshots placeholder.
