@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import LigaWizard from './LigaWizard'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
@@ -23,6 +24,7 @@ const FORMATO_LABELS: Record<string, string> = {
 export default function LigasList() {
   const navigate = useNavigate()
   const [showWizard, setShowWizard] = useState(false)
+  const qc = useQueryClient()
   const { data: user } = useUser()
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
 
@@ -77,9 +79,15 @@ export default function LigasList() {
 
       {showWizard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowWizard(false)}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 p-6" onClick={e => e.stopPropagation()}>
-            <p className="text-muted">Wizard de liga (próximamente)</p>
-            <Button variant="outline" className="mt-4" onClick={() => setShowWizard(false)}>Cerrar</Button>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <h2 className="text-lg font-bold font-manrope text-navy mb-4">Nueva liga</h2>
+            <LigaWizard
+              onClose={() => setShowWizard(false)}
+              onCreated={() => {
+                setShowWizard(false)
+                qc.invalidateQueries({ queryKey: ['ligas'] })
+              }}
+            />
           </div>
         </div>
       )}
