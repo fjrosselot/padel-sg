@@ -42,15 +42,16 @@ export default function StepParticipantes() {
             <button
               key={j.id}
               type="button"
+              aria-pressed={selected}
               onClick={() => toggle(j.id)}
-              className={`w-full text-left flex items-center justify-between p-3 rounded-xl border transition-colors ${
+              className={`w-full text-left flex items-center justify-between p-3 rounded-xl border transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
                 selected ? 'border-gold bg-gold/10' : 'border-slate/20 bg-white hover:border-slate/40'
               }`}
             >
               <span className="font-medium text-sm">{j.nombre}</span>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted">{j.categoria ?? ''}{j.gradualidad !== 'normal' ? j.gradualidad : ''}</span>
-                {selected && <span className="text-gold text-xs">✓</span>}
+                {selected && <span aria-hidden="true" className="text-gold text-xs">✓</span>}
               </div>
             </button>
           )

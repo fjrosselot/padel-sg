@@ -58,9 +58,15 @@ export default function ResultadosModal({ partido, torneoId, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-[0_20px_40px_rgba(13,27,42,0.14)] w-full max-w-sm mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="resultados-modal-title"
+        className="bg-white rounded-2xl shadow-[0_20px_40px_rgba(13,27,42,0.14)] w-full max-w-sm mx-4 p-6 space-y-5"
+        onClick={e => e.stopPropagation()}
+      >
         <div>
-          <h2 className="text-lg font-bold font-manrope text-navy">Cargar resultado</h2>
+          <h2 id="resultados-modal-title" className="text-lg font-bold font-manrope text-navy">Cargar resultado</h2>
           <p className="text-sm text-muted">
             {partido.fase.replace('_', ' ')}
             {partido.grupo && ` · Grupo ${partido.grupo}`}
@@ -76,8 +82,9 @@ export default function ResultadosModal({ partido, torneoId, onClose }: Props) {
               <button
                 key={n}
                 type="button"
+                aria-pressed={ganador === n}
                 onClick={() => setGanador(n)}
-                className={`p-3 rounded-xl border-2 text-sm font-medium transition-colors text-left ${
+                className={`p-3 rounded-xl border-2 text-sm font-medium transition-colors text-left focus:outline-none focus:ring-2 focus:ring-gold/50 ${
                   ganador === n
                     ? 'border-gold bg-gold/10 text-navy'
                     : 'bg-surface hover:bg-surface-high border-transparent'
@@ -85,15 +92,16 @@ export default function ResultadosModal({ partido, torneoId, onClose }: Props) {
               >
                 <span className="text-xs text-muted block mb-1">Pareja {n}</span>
                 {pareja?.nombre ?? 'TBD'}
-                {ganador === n && <span className="block text-xs mt-1 text-success">✓ Ganador</span>}
+                {ganador === n && <span aria-hidden="true" className="block text-xs mt-1 text-success">✓ Ganador</span>}
               </button>
             )
           })}
         </div>
 
         <div>
-          <Label className="label-editorial">Resultado (opcional)</Label>
+          <Label htmlFor="resultado-torneo" className="label-editorial">Resultado (opcional)</Label>
           <Input
+            id="resultado-torneo"
             placeholder="6-3 6-4"
             value={resultado}
             onChange={e => setResultado(e.target.value)}

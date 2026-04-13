@@ -20,33 +20,33 @@ export default function StepFixture(_props: Props) {
     <div className="space-y-5">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label className="label-editorial">Parejas por grupo</Label>
-          <Input type="number" min={3} max={8} className="mt-1"
+          <Label htmlFor="parejas_por_grupo" className="label-editorial">Parejas por grupo</Label>
+          <Input id="parejas_por_grupo" type="number" min={3} max={8} className="mt-1"
             {...register('parejas_por_grupo', { valueAsNumber: true })} />
           {errors.parejas_por_grupo && <p className="text-[#BA1A1A] text-sm">{errors.parejas_por_grupo.message}</p>}
         </div>
         <div>
-          <Label className="label-editorial">Avanzan por grupo</Label>
-          <Input type="number" min={1} max={4} className="mt-1"
+          <Label htmlFor="cuantos_avanzan" className="label-editorial">Avanzan por grupo</Label>
+          <Input id="cuantos_avanzan" type="number" min={1} max={4} className="mt-1"
             {...register('cuantos_avanzan', { valueAsNumber: true })} />
         </div>
         <div>
-          <Label className="label-editorial">Canchas disponibles</Label>
-          <Input type="number" min={1} max={20} className="mt-1"
+          <Label htmlFor="num_canchas" className="label-editorial">Canchas disponibles</Label>
+          <Input id="num_canchas" type="number" min={1} max={20} className="mt-1"
             {...register('num_canchas', { valueAsNumber: true })} />
         </div>
         <div>
-          <Label className="label-editorial">Hora de inicio</Label>
-          <Input type="time" className="mt-1" {...register('hora_inicio')} />
+          <Label htmlFor="hora_inicio" className="label-editorial">Hora de inicio</Label>
+          <Input id="hora_inicio" type="time" className="mt-1" {...register('hora_inicio')} />
         </div>
         <div>
-          <Label className="label-editorial">Duración partido (min)</Label>
-          <Input type="number" min={30} max={120} className="mt-1"
+          <Label htmlFor="duracion_partido" className="label-editorial">Duración partido (min)</Label>
+          <Input id="duracion_partido" type="number" min={30} max={120} className="mt-1"
             {...register('duracion_partido', { valueAsNumber: true })} />
         </div>
         <div>
-          <Label className="label-editorial">Pausa entre partidos (min)</Label>
-          <Input type="number" min={0} max={60} className="mt-1"
+          <Label htmlFor="pausa_entre_partidos" className="label-editorial">Pausa entre partidos (min)</Label>
+          <Input id="pausa_entre_partidos" type="number" min={0} max={60} className="mt-1"
             {...register('pausa_entre_partidos', { valueAsNumber: true })} />
         </div>
       </div>

@@ -22,8 +22,9 @@ export default function StepTipo() {
             <button
               key={t.value}
               type="button"
+              aria-pressed={tipo === t.value}
               onClick={() => setValue('tipo', t.value)}
-              className={`text-left p-4 rounded-xl border-2 transition-colors ${
+              className={`text-left p-4 rounded-xl border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
                 tipo === t.value
                   ? 'border-gold bg-gold/10'
                   : 'border-slate/20 hover:border-slate/40 bg-surface'

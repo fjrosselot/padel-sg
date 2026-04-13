@@ -60,8 +60,12 @@ export default function LigasList() {
         {ligas?.map(l => (
           <Card
             key={l.id}
-            className="bg-white rounded-xl shadow-[0_4px_12px_rgba(13,27,42,0.06)] hover:shadow-[0_12px_32px_rgba(13,27,42,0.10)] transition-shadow cursor-pointer"
+            role="button"
+            tabIndex={0}
+            className="bg-white rounded-xl shadow-[0_4px_12px_rgba(13,27,42,0.06)] hover:shadow-[0_12px_32px_rgba(13,27,42,0.10)] transition-shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-gold/50"
             onClick={() => navigate(`/ligas/${l.id}`)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(`/ligas/${l.id}`) }}
+            aria-label={`Ver liga ${l.nombre}`}
           >
             <CardContent className="flex items-center justify-between p-4">
               <div>
@@ -82,8 +86,14 @@ export default function LigasList() {
 
       {showWizard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowWizard(false)}>
-          <div className="bg-white rounded-2xl shadow-[0_20px_40px_rgba(13,27,42,0.14)] w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <h2 className="text-lg font-bold font-manrope text-navy mb-4">Nueva liga</h2>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="liga-wizard-title"
+            className="bg-white rounded-2xl shadow-[0_20px_40px_rgba(13,27,42,0.14)] w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto"
+            onClick={e => e.stopPropagation()}
+          >
+            <h2 id="liga-wizard-title" className="text-lg font-bold font-manrope text-navy mb-4">Nueva liga</h2>
             <LigaWizard
               onClose={() => setShowWizard(false)}
               onCreated={() => setShowWizard(false)}

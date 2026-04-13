@@ -19,8 +19,9 @@ export default function StepCategorias() {
             <button
               key={cat}
               type="button"
+              aria-label={`Agregar categoría ${cat}`}
               onClick={() => append({ nombre: cat, num_parejas: 4 })}
-              className="px-3 py-1 text-sm rounded-full border border-slate/30 text-slate hover:border-gold hover:text-navy transition-colors"
+              className="px-3 py-1 text-sm rounded-full border border-slate/30 text-slate hover:border-gold hover:text-navy transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50"
             >
               + {cat}
             </button>
@@ -35,15 +36,22 @@ export default function StepCategorias() {
       <div className="space-y-3">
         {fields.map((field, idx) => (
           <div key={field.id} className="flex items-center gap-3 p-3 bg-surface rounded-lg">
-            <Input placeholder="Categoría" className="w-24" {...register(`categorias.${idx}.nombre`)} />
+            <label htmlFor={`cat-nombre-${idx}`} className="sr-only">Nombre categoría {idx + 1}</label>
+            <Input id={`cat-nombre-${idx}`} placeholder="Categoría" className="w-24" {...register(`categorias.${idx}.nombre`)} />
             <div className="flex items-center gap-2">
-              <Label className="text-sm text-muted whitespace-nowrap">Parejas:</Label>
+              <Label htmlFor={`cat-parejas-${idx}`} className="text-sm text-muted whitespace-nowrap">Parejas:</Label>
               <Input
+                id={`cat-parejas-${idx}`}
                 type="number" min={2} max={64} className="w-16"
                 {...register(`categorias.${idx}.num_parejas`, { valueAsNumber: true })}
               />
             </div>
-            <button type="button" onClick={() => remove(idx)} className="ml-auto text-[#BA1A1A]/60 hover:text-[#BA1A1A] text-sm">
+            <button
+              type="button"
+              aria-label={`Quitar categoría ${idx + 1}`}
+              onClick={() => remove(idx)}
+              className="ml-auto text-[#BA1A1A]/60 hover:text-[#BA1A1A] text-sm focus:outline-none focus:ring-2 focus:ring-gold/50 rounded"
+            >
               Quitar
             </button>
           </div>

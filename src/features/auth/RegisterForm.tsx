@@ -137,8 +137,9 @@ export function RegisterForm() {
                     <button
                       key={v}
                       type="button"
+                      aria-pressed={sexo === v}
                       onClick={() => setValue('sexo', v as 'M' | 'F')}
-                      className={`flex-1 rounded-md border py-2 font-inter text-sm font-medium transition-colors ${
+                      className={`flex-1 rounded-md border py-2 font-inter text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
                         sexo === v ? 'border-navy bg-navy text-gold' : 'border-surface-high text-slate'
                       }`}
                     >
@@ -163,6 +164,7 @@ export function RegisterForm() {
                     <button
                       key={curso}
                       type="button"
+                      aria-pressed={selected}
                       onClick={() => {
                         if (selected) {
                           setValue('hijos_sg', hijossg.filter((h) => h.curso_ingreso !== curso))
@@ -170,7 +172,7 @@ export function RegisterForm() {
                           setValue('hijos_sg', [...hijossg, { curso_ingreso: curso, anio: new Date().getFullYear() }])
                         }
                       }}
-                      className={`rounded-md px-3 py-1.5 font-inter text-xs font-semibold transition-colors ${
+                      className={`rounded-md px-3 py-1.5 font-inter text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
                         selected ? 'bg-navy text-gold' : 'bg-surface text-slate'
                       }`}
                     >
@@ -192,8 +194,9 @@ export function RegisterForm() {
                     <button
                       key={cat}
                       type="button"
+                      aria-pressed={watch('categoria') === cat}
                       onClick={() => setValue('categoria', cat)}
-                      className={`rounded-md px-3 py-1.5 font-inter text-sm font-semibold transition-colors ${
+                      className={`rounded-md px-3 py-1.5 font-inter text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
                         watch('categoria') === cat ? 'bg-navy text-gold' : 'bg-surface text-slate'
                       }`}
                     >
@@ -210,8 +213,9 @@ export function RegisterForm() {
                     <button
                       key={g}
                       type="button"
+                      aria-pressed={watch('gradualidad') === g}
                       onClick={() => setValue('gradualidad', g)}
-                      className={`flex-1 rounded-md py-2 font-inter text-sm font-medium transition-colors ${
+                      className={`flex-1 rounded-md py-2 font-inter text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
                         watch('gradualidad') === g ? 'bg-navy text-gold' : 'bg-surface text-slate'
                       }`}
                     >
@@ -227,8 +231,9 @@ export function RegisterForm() {
                     <button
                       key={v}
                       type="button"
+                      aria-pressed={watch('mixto') === v}
                       onClick={() => setValue('mixto', v as 'si' | 'no' | 'a_veces')}
-                      className={`flex-1 rounded-md py-2 font-inter text-sm transition-colors ${
+                      className={`flex-1 rounded-md py-2 font-inter text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
                         watch('mixto') === v ? 'bg-navy text-gold' : 'bg-surface text-slate'
                       }`}
                     >
@@ -255,8 +260,9 @@ export function RegisterForm() {
                     <button
                       key={v}
                       type="button"
+                      aria-pressed={watch('frecuencia_semanal') === v}
                       onClick={() => setValue('frecuencia_semanal', v as RegisterFormData['frecuencia_semanal'])}
-                      className={`rounded-md py-2.5 font-inter text-sm transition-colors ${
+                      className={`rounded-md py-2.5 font-inter text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
                         watch('frecuencia_semanal') === v ? 'bg-navy text-gold' : 'bg-surface text-slate'
                       }`}
                     >
@@ -275,15 +281,16 @@ export function RegisterForm() {
                       <button
                         key={value}
                         type="button"
+                        aria-pressed={selected}
                         onClick={() => {
                           const curr = watch('intereses_actividades') ?? []
                           setValue('intereses_actividades', selected ? curr.filter((a) => a !== value) : [...curr, value])
                         }}
-                        className={`flex w-full items-center gap-2 rounded-md px-3 py-2 font-inter text-sm transition-colors ${
+                        className={`flex w-full items-center gap-2 rounded-md px-3 py-2 font-inter text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
                           selected ? 'bg-navy/10 text-navy' : 'bg-surface text-slate'
                         }`}
                       >
-                        <span className={`h-4 w-4 rounded border-2 ${selected ? 'border-navy bg-navy' : 'border-muted'}`} />
+                        <span aria-hidden="true" className={`h-4 w-4 rounded border-2 ${selected ? 'border-navy bg-navy' : 'border-muted'}`} />
                         {label}
                       </button>
                     )

@@ -78,8 +78,12 @@ export default function TorneosList() {
         {torneos?.map(t => (
           <Card
             key={t.id}
-            className="bg-white rounded-xl shadow-[0_4px_12px_rgba(13,27,42,0.06)] hover:shadow-[0_12px_32px_rgba(13,27,42,0.10)] transition-shadow cursor-pointer"
+            role="button"
+            tabIndex={0}
+            className="bg-white rounded-xl shadow-[0_4px_12px_rgba(13,27,42,0.06)] hover:shadow-[0_12px_32px_rgba(13,27,42,0.10)] transition-shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-gold/50"
             onClick={() => navigate(`/torneos/${t.id}`)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(`/torneos/${t.id}`) }}
+            aria-label={`Ver torneo ${t.nombre}`}
           >
             <CardContent className="flex items-center justify-between p-4">
               <div>

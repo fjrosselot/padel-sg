@@ -19,8 +19,9 @@ export default function StepConfig() {
             <button
               key={f.value}
               type="button"
+              aria-pressed={formato === f.value}
               onClick={() => setValue('formato', f.value as WizardLigaData['formato'])}
-              className={`text-left p-4 rounded-xl border-2 transition-colors ${
+              className={`text-left p-4 rounded-xl border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
                 formato === f.value ? 'border-gold bg-gold/10' : 'border-slate/20 bg-surface hover:border-slate/40'
               }`}
             >

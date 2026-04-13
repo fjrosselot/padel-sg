@@ -16,10 +16,12 @@ export function TopBar() {
   return (
     <header className="flex h-14 items-center justify-between border-b border-surface bg-white px-4">
       <div />
+      <label htmlFor="temporada-select" className="sr-only">Temporada</label>
       <select
+        id="temporada-select"
         value={temporadaId ?? ''}
         onChange={(e) => setTemporadaId(e.target.value || null)}
-        className="rounded-full border border-navy/20 bg-transparent px-3 py-1 font-inter text-sm font-medium text-navy focus:outline-none"
+        className="rounded-full border border-navy/20 bg-transparent px-3 py-1 font-inter text-sm font-medium text-navy focus:outline-none focus:ring-2 focus:ring-gold/50"
       >
         <option value="">Temporada</option>
         {temporadas.map((t) => (
@@ -27,11 +29,14 @@ export function TopBar() {
         ))}
       </select>
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="relative text-slate">
+        <Button variant="ghost" size="icon" aria-label="Notificaciones" className="relative text-slate">
           <Bell className="h-5 w-5" />
         </Button>
         <div className="flex items-center gap-1.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-navy font-manrope text-xs font-bold text-gold">
+          <div
+            aria-hidden="true"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-navy font-manrope text-xs font-bold text-gold"
+          >
             {initials}
           </div>
           <span className="hidden font-inter text-sm text-slate lg:block">

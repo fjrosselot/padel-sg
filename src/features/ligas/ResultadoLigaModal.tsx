@@ -67,16 +67,23 @@ export default function ResultadoLigaModal({ partido, ligaId, onClose }: Props) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-[0_20px_40px_rgba(13,27,42,0.14)] w-full max-w-sm mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()}>
-        <h2 className="text-lg font-bold font-manrope text-navy">Cargar resultado</h2>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="resultado-liga-modal-title"
+        className="bg-white rounded-2xl shadow-[0_20px_40px_rgba(13,27,42,0.14)] w-full max-w-sm mx-4 p-6 space-y-5"
+        onClick={e => e.stopPropagation()}
+      >
+        <h2 id="resultado-liga-modal-title" className="text-lg font-bold font-manrope text-navy">Cargar resultado</h2>
 
         <div className="grid grid-cols-2 gap-3">
           {players.map(({ n, name, elo }) => (
             <button
               key={n}
               type="button"
+              aria-pressed={ganador === n}
               onClick={() => setGanador(n)}
-              className={`p-3 rounded-xl border-2 text-sm font-medium transition-colors text-left ${
+              className={`p-3 rounded-xl border-2 text-sm font-medium transition-colors text-left focus:outline-none focus:ring-2 focus:ring-gold/50 ${
                 ganador === n ? 'border-gold bg-gold/10 text-navy' : 'bg-surface border border-slate/20 hover:border-slate/40'
               }`}
             >
@@ -89,8 +96,8 @@ export default function ResultadoLigaModal({ partido, ligaId, onClose }: Props) 
         </div>
 
         <div>
-          <Label>Resultado (opcional)</Label>
-          <Input placeholder="6-3 6-4" value={resultado} onChange={e => setResultado(e.target.value)} className="mt-1" />
+          <Label htmlFor="resultado-liga">Resultado (opcional)</Label>
+          <Input id="resultado-liga" placeholder="6-3 6-4" value={resultado} onChange={e => setResultado(e.target.value)} className="mt-1" />
         </div>
 
         {mutation.error instanceof Error && (
