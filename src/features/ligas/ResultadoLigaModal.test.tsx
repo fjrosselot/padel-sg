@@ -25,7 +25,7 @@ const mockPartido = {
   pareja2_j1: 'u2',
   jugador1: { nombre: 'García', elo: 1200 },
   jugador2: { nombre: 'López', elo: 1250 },
-  estado: 'pendiente',
+  estado: 'pendiente' as const,
 }
 
 describe('ResultadoLigaModal', () => {

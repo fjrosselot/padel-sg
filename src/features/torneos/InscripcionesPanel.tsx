@@ -16,7 +16,7 @@ interface InscripcionRow {
 
 interface Props {
   torneoId: string
-  estado: string
+  estado: 'borrador' | 'inscripcion' | 'en_curso' | 'finalizado'
 }
 
 const ESTADO_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
@@ -45,7 +45,7 @@ export default function InscripcionesPanel({ torneoId, estado }: Props) {
   })
 
   const updateEstado = useMutation({
-    mutationFn: async ({ id, nuevoEstado }: { id: string; nuevoEstado: string }) => {
+    mutationFn: async ({ id, nuevoEstado }: { id: string; nuevoEstado: 'confirmada' | 'rechazada' }) => {
       const { error } = await supabase
         .schema('padel')
         .from('inscripciones')

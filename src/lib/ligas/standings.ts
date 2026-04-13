@@ -18,7 +18,7 @@ interface PartidoResult {
   sets_pareja1: number | null
   sets_pareja2: number | null
   ganador: 1 | 2 | null
-  estado: string
+  estado: 'pendiente' | 'en_curso' | 'jugado' | 'walkover'
 }
 
 export function calcStandings(

@@ -12,7 +12,7 @@ interface PartidoLiga {
   pareja2_j1: string | null
   jugador1: { nombre: string; elo: number } | null
   jugador2: { nombre: string; elo: number } | null
-  estado: string
+  estado: 'pendiente' | 'en_curso' | 'jugado' | 'walkover'
 }
 
 interface Props {

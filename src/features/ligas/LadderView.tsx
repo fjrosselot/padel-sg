@@ -14,7 +14,7 @@ interface Participante {
 
 interface Props {
   ligaId: string
-  estado: string
+  estado: 'borrador' | 'activa' | 'finalizada'
 }
 
 export default function LadderView({ ligaId, estado }: Props) {

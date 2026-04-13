@@ -26,7 +26,7 @@ interface PartidoLiga {
   sets_pareja1: number | null
   sets_pareja2: number | null
   ganador: 1 | 2 | null
-  estado: string
+  estado: 'pendiente' | 'en_curso' | 'jugado' | 'walkover'
   jugador1: { nombre: string; elo: number } | null
   jugador2: { nombre: string; elo: number } | null
 }
