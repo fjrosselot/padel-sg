@@ -187,7 +187,8 @@ export interface Database {
         Row: {
           id: string
           torneo_id: string | null
-          tipo: 'torneo' | 'amistoso'
+          liga_id: string | null
+          tipo: 'torneo' | 'amistoso' | 'liga'
           fase: 'grupo' | 'octavos' | 'cuartos' | 'semifinal' | 'tercer_lugar' | 'final' | null
           grupo: string | null
           numero_partido: number | null
@@ -214,7 +215,8 @@ export interface Database {
         Insert: {
           id?: string
           torneo_id?: string | null
-          tipo: 'torneo' | 'amistoso'
+          liga_id?: string | null
+          tipo: 'torneo' | 'amistoso' | 'liga'
           fase?: 'grupo' | 'octavos' | 'cuartos' | 'semifinal' | 'tercer_lugar' | 'final' | null
           grupo?: string | null
           numero_partido?: number | null
@@ -241,7 +243,8 @@ export interface Database {
         Update: {
           id?: string
           torneo_id?: string | null
-          tipo?: 'torneo' | 'amistoso'
+          liga_id?: string | null
+          tipo?: 'torneo' | 'amistoso' | 'liga'
           fase?: 'grupo' | 'octavos' | 'cuartos' | 'semifinal' | 'tercer_lugar' | 'final' | null
           grupo?: string | null
           numero_partido?: number | null
@@ -321,6 +324,79 @@ export interface Database {
           estado?: 'borrador' | 'activa' | 'finalizada'
           fecha_inicio?: string | null
           fecha_fin?: string | null
+          created_at?: string
+        }
+      }
+      liga_participantes: {
+        Row: {
+          id: string
+          liga_id: string
+          jugador_id: string
+          posicion: number | null
+          puntos: number
+          partidos_jugados: number
+          partidos_ganados: number
+          partidos_perdidos: number
+          sets_favor: number
+          sets_contra: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          liga_id: string
+          jugador_id: string
+          posicion?: number | null
+          puntos?: number
+          partidos_jugados?: number
+          partidos_ganados?: number
+          partidos_perdidos?: number
+          sets_favor?: number
+          sets_contra?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          liga_id?: string
+          jugador_id?: string
+          posicion?: number | null
+          puntos?: number
+          partidos_jugados?: number
+          partidos_ganados?: number
+          partidos_perdidos?: number
+          sets_favor?: number
+          sets_contra?: number
+          created_at?: string
+        }
+      }
+      liga_desafios: {
+        Row: {
+          id: string
+          liga_id: string
+          desafiante_id: string
+          desafiado_id: string
+          partido_id: string | null
+          estado: 'pendiente' | 'jugado' | 'caducado'
+          expires_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          liga_id: string
+          desafiante_id: string
+          desafiado_id: string
+          partido_id?: string | null
+          estado?: 'pendiente' | 'jugado' | 'caducado'
+          expires_at: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          liga_id?: string
+          desafiante_id?: string
+          desafiado_id?: string
+          partido_id?: string | null
+          estado?: 'pendiente' | 'jugado' | 'caducado'
+          expires_at?: string
           created_at?: string
         }
       }
