@@ -25,8 +25,8 @@ export default function StepTipo() {
               onClick={() => setValue('tipo', t.value)}
               className={`text-left p-4 rounded-xl border-2 transition-colors ${
                 tipo === t.value
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-gold bg-gold/10'
+                  : 'border-slate/20 hover:border-slate/40 bg-surface'
               }`}
             >
               <p className="font-semibold text-navy">{t.label}</p>
@@ -34,19 +34,19 @@ export default function StepTipo() {
             </button>
           ))}
         </div>
-        {errors.tipo && <p className="text-red-500 text-sm mt-1">{errors.tipo.message}</p>}
+        {errors.tipo && <p className="text-[#BA1A1A] text-sm mt-1">{errors.tipo.message}</p>}
       </div>
 
       <div className="space-y-4">
         <div>
           <Label htmlFor="nombre" className="label-editorial">Nombre del torneo</Label>
           <Input id="nombre" placeholder="Torneo Otoño 2026" className="mt-1" {...register('nombre')} />
-          {errors.nombre && <p className="text-red-500 text-sm mt-1">{errors.nombre.message}</p>}
+          {errors.nombre && <p className="text-[#BA1A1A] text-sm mt-1">{errors.nombre.message}</p>}
         </div>
         <div>
           <Label htmlFor="fecha_inicio" className="label-editorial">Fecha de inicio</Label>
           <Input id="fecha_inicio" type="date" className="mt-1" {...register('fecha_inicio')} />
-          {errors.fecha_inicio && <p className="text-red-500 text-sm mt-1">{errors.fecha_inicio.message}</p>}
+          {errors.fecha_inicio && <p className="text-[#BA1A1A] text-sm mt-1">{errors.fecha_inicio.message}</p>}
         </div>
         {tipo === 'vs_colegio' && (
           <div>

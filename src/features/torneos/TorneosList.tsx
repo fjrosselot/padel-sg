@@ -58,7 +58,7 @@ export default function TorneosList() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold font-manrope text-navy">Torneos</h1>
         {isAdmin && (
-          <Button className="bg-navy text-white hover:bg-navy-mid" onClick={() => setShowWizard(true)}>
+          <Button className="bg-gold text-navy font-bold hover:bg-gold/90 rounded-lg" onClick={() => setShowWizard(true)}>
             + Nuevo torneo
           </Button>
         )}
@@ -78,12 +78,12 @@ export default function TorneosList() {
         {torneos?.map(t => (
           <Card
             key={t.id}
-            className="hover:shadow-ambient-md transition-shadow cursor-pointer"
+            className="bg-white rounded-xl shadow-[0_4px_12px_rgba(13,27,42,0.06)] hover:shadow-[0_12px_32px_rgba(13,27,42,0.10)] transition-shadow cursor-pointer"
             onClick={() => navigate(`/torneos/${t.id}`)}
           >
             <CardContent className="flex items-center justify-between p-4">
               <div>
-                <p className="font-semibold text-navy">{t.nombre}</p>
+                <p className="font-manrope font-semibold text-navy">{t.nombre}</p>
                 <p className="text-sm text-muted">
                   {TIPO_LABELS[t.tipo]} · {t.fecha_inicio ?? 'Sin fecha'}
                   {t.tipo === 'vs_colegio' && t.colegio_rival && ` · vs ${t.colegio_rival}`}

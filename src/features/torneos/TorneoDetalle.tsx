@@ -35,7 +35,7 @@ export default function TorneoDetalle() {
   })
 
   if (isLoading) return <div className="p-6 text-muted">Cargando…</div>
-  if (!torneo) return <div className="p-6 text-red-500">Torneo no encontrado</div>
+  if (!torneo) return <div className="p-6 text-[#BA1A1A]">Torneo no encontrado</div>
 
   const categorias = (torneo.categorias as unknown as CategoriaFixture[]) ?? []
 
@@ -51,7 +51,7 @@ export default function TorneoDetalle() {
 
       <div className="space-y-4">
         <div>
-          <p className="text-xs font-semibold text-muted uppercase mb-4">Fixture</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-4">Fixture</p>
           {categorias.length === 0 ? (
             <p className="text-muted">El fixture se generará cuando el torneo pase a inscripción.</p>
           ) : (
@@ -62,7 +62,7 @@ export default function TorneoDetalle() {
         </div>
 
         <div>
-          <p className="text-xs font-semibold text-muted uppercase mb-4">Inscripciones</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-4">Inscripciones</p>
           <InscripcionesPanel torneoId={torneo.id} estado={torneo.estado} />
         </div>
       </div>

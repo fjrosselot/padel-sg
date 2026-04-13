@@ -68,7 +68,7 @@ export default function InscripcionesPanel({ torneoId, estado }: Props) {
 
       <div className="space-y-2">
         {inscripciones?.map(ins => (
-          <div key={ins.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50">
+          <div key={ins.id} className="flex items-center justify-between p-3 rounded-xl bg-surface">
             <div>
               <p className="font-medium text-sm">
                 {ins.jugador1?.nombre ?? ins.jugador1_id} / {ins.jugador2?.nombre ?? ins.jugador2_id}
@@ -84,7 +84,7 @@ export default function InscripcionesPanel({ torneoId, estado }: Props) {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="text-green-600 border-green-300 hover:bg-green-50"
+                    className="bg-[#D1FAE5] text-[#065F46] border-transparent hover:bg-[#A7F3D0]"
                     onClick={() => updateEstado.mutate({ id: ins.id, nuevoEstado: 'confirmada' })}
                     disabled={updateEstado.isPending}
                   >
@@ -93,7 +93,7 @@ export default function InscripcionesPanel({ torneoId, estado }: Props) {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="text-red-500 border-red-300 hover:bg-red-50"
+                    className="bg-[#FEE8E8] text-[#BA1A1A] border-transparent hover:bg-[#FED7D7]"
                     onClick={() => updateEstado.mutate({ id: ins.id, nuevoEstado: 'rechazada' })}
                     disabled={updateEstado.isPending}
                   >

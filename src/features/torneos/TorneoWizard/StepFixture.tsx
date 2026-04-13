@@ -23,7 +23,7 @@ export default function StepFixture(_props: Props) {
           <Label className="label-editorial">Parejas por grupo</Label>
           <Input type="number" min={3} max={8} className="mt-1"
             {...register('parejas_por_grupo', { valueAsNumber: true })} />
-          {errors.parejas_por_grupo && <p className="text-red-500 text-sm">{errors.parejas_por_grupo.message}</p>}
+          {errors.parejas_por_grupo && <p className="text-[#BA1A1A] text-sm">{errors.parejas_por_grupo.message}</p>}
         </div>
         <div>
           <Label className="label-editorial">Avanzan por grupo</Label>
@@ -58,7 +58,7 @@ export default function StepFixture(_props: Props) {
               type="checkbox"
               checked={watch(key) as boolean}
               onChange={e => setValue(key, e.target.checked as never)}
-              className="w-4 h-4 rounded border-gray-300"
+              className="w-4 h-4 rounded border-slate/30"
             />
             <span className="text-sm">{label}</span>
           </label>

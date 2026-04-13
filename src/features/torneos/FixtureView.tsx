@@ -4,7 +4,7 @@ import { Badge } from '../../components/ui/badge'
 function PartidoRow({ partido }: { partido: PartidoFixture }) {
   return (
     <div className={`flex items-center gap-2 p-2 rounded-lg text-sm ${
-      partido.ganador ? 'bg-gray-50' : 'bg-white border border-gray-100'
+      partido.ganador ? 'bg-surface-high' : 'bg-surface'
     }`}>
       <span className="text-muted w-14 shrink-0">{partido.turno ?? '--:--'} C{partido.cancha ?? '?'}</span>
       <span className={`flex-1 text-right ${partido.ganador === 1 ? 'font-semibold text-navy' : ''}`}>
@@ -31,7 +31,7 @@ export default function FixtureView({ categoria }: Props) {
       <div className="space-y-4">
         {categoria.grupos.map(g => (
           <div key={g.letra}>
-            <p className="text-xs font-semibold text-muted uppercase mb-2">Grupo {g.letra}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-2">Grupo {g.letra}</p>
             <div className="space-y-1">
               {g.partidos.map(p => <PartidoRow key={p.id} partido={p} />)}
             </div>
@@ -41,7 +41,7 @@ export default function FixtureView({ categoria }: Props) {
 
       {categoria.faseEliminatoria.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-muted uppercase mb-2">Eliminatoria</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-2">Eliminatoria</p>
           <div className="space-y-1">
             {categoria.faseEliminatoria.map(p => (
               <div key={p.id} className="flex items-center gap-2">
@@ -55,7 +55,7 @@ export default function FixtureView({ categoria }: Props) {
 
       {categoria.consola.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-muted uppercase mb-2">Copa Plata</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-2">Copa Plata</p>
           <div className="space-y-1">
             {categoria.consola.map(p => <PartidoRow key={p.id} partido={p} />)}
           </div>

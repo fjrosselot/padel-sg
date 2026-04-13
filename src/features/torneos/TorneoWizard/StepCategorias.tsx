@@ -20,7 +20,7 @@ export default function StepCategorias() {
               key={cat}
               type="button"
               onClick={() => append({ nombre: cat, num_parejas: 4 })}
-              className="px-3 py-1 text-sm rounded-full border border-gray-300 hover:border-blue-500 hover:text-blue-600 transition-colors"
+              className="px-3 py-1 text-sm rounded-full border border-slate/30 text-slate hover:border-gold hover:text-navy transition-colors"
             >
               + {cat}
             </button>
@@ -34,7 +34,7 @@ export default function StepCategorias() {
 
       <div className="space-y-3">
         {fields.map((field, idx) => (
-          <div key={field.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+          <div key={field.id} className="flex items-center gap-3 p-3 bg-surface rounded-lg">
             <Input placeholder="Categoría" className="w-24" {...register(`categorias.${idx}.nombre`)} />
             <div className="flex items-center gap-2">
               <Label className="text-sm text-muted whitespace-nowrap">Parejas:</Label>
@@ -43,7 +43,7 @@ export default function StepCategorias() {
                 {...register(`categorias.${idx}.num_parejas`, { valueAsNumber: true })}
               />
             </div>
-            <button type="button" onClick={() => remove(idx)} className="ml-auto text-red-400 hover:text-red-600 text-sm">
+            <button type="button" onClick={() => remove(idx)} className="ml-auto text-[#BA1A1A]/60 hover:text-[#BA1A1A] text-sm">
               Quitar
             </button>
           </div>
@@ -54,7 +54,7 @@ export default function StepCategorias() {
         + Agregar categoría
       </Button>
 
-      {errors.categorias && <p className="text-red-500 text-sm">{errors.categorias.message}</p>}
+      {errors.categorias && <p className="text-[#BA1A1A] text-sm">{errors.categorias.message}</p>}
     </div>
   )
 }

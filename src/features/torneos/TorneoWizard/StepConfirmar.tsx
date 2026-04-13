@@ -71,7 +71,7 @@ export default function StepConfirmar({ onCreated }: Props) {
 
   return (
     <div className="space-y-5">
-      <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+      <div className="bg-surface rounded-xl p-4 space-y-2">
         <p className="font-semibold text-navy">{values.nombre}</p>
         <p className="text-sm text-muted">{tipoLabel} · {values.fecha_inicio}</p>
         <div className="text-sm space-y-1">
@@ -87,13 +87,13 @@ export default function StepConfirmar({ onCreated }: Props) {
       <button
         type="button"
         onClick={() => setPreviewShown(v => !v)}
-        className="text-sm text-blue-600 hover:underline"
+        className="text-sm text-navy hover:underline"
       >
         {previewShown ? 'Ocultar preview del fixture' : 'Ver preview del fixture'}
       </button>
 
       {previewShown && (
-        <div className="space-y-4 max-h-64 overflow-y-auto text-xs bg-gray-50 rounded-lg p-3">
+        <div className="space-y-4 max-h-64 overflow-y-auto text-xs bg-surface rounded-lg p-3">
           {previewCats.map(cat => (
             <div key={cat.nombre}>
               <p className="font-semibold text-sm text-navy mb-2">{cat.nombre}</p>
@@ -113,11 +113,11 @@ export default function StepConfirmar({ onCreated }: Props) {
       )}
 
       {mutation.error && (
-        <p className="text-red-500 text-sm">{String(mutation.error)}</p>
+        <p className="text-[#BA1A1A] text-sm">{String(mutation.error)}</p>
       )}
 
       <Button
-        className="w-full bg-navy text-white"
+        className="w-full bg-gold text-navy font-bold rounded-lg"
         onClick={() => mutation.mutate()}
         disabled={mutation.isPending}
       >
