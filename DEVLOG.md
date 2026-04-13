@@ -1,5 +1,35 @@
 # DEVLOG — padel-sg
 
+## [2026-04-14 22:00] — Pase de diseño Plan 2 + Plan 3 (Stitch timeout → directo desde DESIGN.md)
+
+**Resumen:** Pase de diseño completo sobre los 17 componentes de Torneos y Ligas. Stitch MCP dio timeout en todos los intentos (10 pantallas), por lo que el diseño se aplicó directamente desde el DESIGN.md. Se reemplazaron todas las clases genéricas de Tailwind por tokens del design system navy/gold. 48 tests verdes, tsc limpio.
+
+**Pantallas con timeout en Stitch (todas):**
+- TorneosList, TorneoWizard (4 pasos), TorneoDetalle, FixtureView, InscripcionesPanel, ResultadosModal
+- LigasList, LigaWizard (3 pasos), LigaDetalle (RR + Escalerilla), StandingsTable, LadderView, DesafioModal, ResultadoLigaModal
+
+**Archivos actualizados (sólo styling):**
+- `src/features/torneos/TorneosList.tsx`, `TorneoDetalle.tsx`, `FixtureView.tsx`, `InscripcionesPanel.tsx`, `ResultadosModal.tsx`
+- `src/features/torneos/TorneoWizard/index.tsx`, `StepTipo.tsx`, `StepCategorias.tsx`, `StepFixture.tsx`, `StepConfirmar.tsx`
+- `src/features/ligas/LigasList.tsx`, `LigaDetalle.tsx`, `StandingsTable.tsx`, `LadderView.tsx`, `DesafioModal.tsx`, `ResultadoLigaModal.tsx`
+- `src/features/ligas/LigaWizard/index.tsx`, `StepConfig.tsx`, `StepParticipantes.tsx`, `StepConfirmar.tsx`
+
+**Decisiones:**
+- gray-* → `text-muted` / `text-slate` / `bg-surface` / `bg-surface-high`
+- blue-* selection states → `border-gold bg-gold/10`
+- Botones primarios: `bg-gold text-navy font-bold`, secundarios: `bg-navy text-white`
+- Sombras: `rgba(13,27,42,...)` en todos los cards y modales
+- Primera fila standings: `bg-gold/10` (trofeo dorado sutil)
+- LadderView usuario actual: `bg-gold/10 border-2 border-gold/30`
+
+**Pendientes:**
+- [ ] Rein tentativa de Stitch cuando el servicio esté estable (para mockups de referencia visual)
+- [ ] Aplicar migración `20260414_004_ligas_partidos.sql` en Supabase SQL Editor
+- [ ] Aplicar migración `20260414_003_torneos_config.sql` si no se hizo aún
+- [ ] Configurar env vars en Vercel y Supabase
+
+---
+
 ## [2026-04-14 18:30] — Plan 3 completo: Módulo Ligas
 
 **Resumen:** Ejecución completa del Plan 3 (Ligas) mediante subagent-driven development. Se implementó el módulo completo de ligas con dos formatos: Round-Robin (standings vivos desde partidos) y Escalerilla (desafíos por posición). 9 tasks, 48 tests verdes, tsc limpio.
