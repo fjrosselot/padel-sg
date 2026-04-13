@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { Badge } from '../../components/ui/badge'
 import FixtureView from './FixtureView'
+import InscripcionesPanel from './InscripcionesPanel'
 import type { Database } from '../../lib/types/database.types'
 import type { CategoriaFixture } from '../../lib/fixture/types'
 
@@ -13,10 +14,6 @@ const ESTADO_LABELS: Record<string, string> = {
   inscripcion: 'Inscripciones',
   en_curso: 'En curso',
   finalizado: 'Finalizado',
-}
-
-function InscripcionesPanelPlaceholder() {
-  return <div className="py-8 text-center text-muted">Inscripciones (próximamente)</div>
 }
 
 export default function TorneoDetalle() {
@@ -66,7 +63,7 @@ export default function TorneoDetalle() {
 
         <div>
           <p className="text-xs font-semibold text-muted uppercase mb-4">Inscripciones</p>
-          <InscripcionesPanelPlaceholder />
+          <InscripcionesPanel torneoId={torneo.id} estado={torneo.estado} />
         </div>
       </div>
     </div>

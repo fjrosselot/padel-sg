@@ -1,8 +1,13 @@
-import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog'
+import { useUser } from '../../hooks/useUser'
+import TorneoWizard from './TorneoWizard'
 import type { Database } from '../../lib/types/database.types'
 
 type Torneo = Database['padel']['Tables']['torneos']['Row']
@@ -28,6 +33,13 @@ const TIPO_LABELS: Record<string, string> = {
 }
 
 export default function TorneosList() {
+  const navigate = useNavigate()
+  const qc = useQueryClient()
+  const { data: user } = useUser()
+  const [showWizard, setShowWizard] = useState(false)
+
+  const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
+
   const { data: torneos, isLoading } = useQuery({
     queryKey: ['torneos'],
     queryFn: async () => {
@@ -45,9 +57,11 @@ export default function TorneosList() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold font-manrope text-navy">Torneos</h1>
-        <Button className="bg-navy text-white hover:bg-navy-mid">
-          + Nuevo torneo
-        </Button>
+        {isAdmin && (
+          <Button className="bg-navy text-white hover:bg-navy-mid" onClick={() => setShowWizard(true)}>
+            + Nuevo torneo
+          </Button>
+        )}
       </div>
 
       {isLoading && (
@@ -62,7 +76,11 @@ export default function TorneosList() {
 
       <div className="grid gap-4">
         {torneos?.map(t => (
-          <Card key={t.id} className="hover:shadow-ambient-md transition-shadow cursor-pointer">
+          <Card
+            key={t.id}
+            className="hover:shadow-ambient-md transition-shadow cursor-pointer"
+            onClick={() => navigate(`/torneos/${t.id}`)}
+          >
             <CardContent className="flex items-center justify-between p-4">
               <div>
                 <p className="font-semibold text-navy">{t.nombre}</p>
@@ -78,6 +96,21 @@ export default function TorneosList() {
           </Card>
         ))}
       </div>
+
+      <Dialog open={showWizard} onOpenChange={setShowWizard}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Nuevo torneo</DialogTitle>
+          </DialogHeader>
+          <TorneoWizard
+            onClose={() => setShowWizard(false)}
+            onCreated={() => {
+              setShowWizard(false)
+              qc.invalidateQueries({ queryKey: ['torneos'] })
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
