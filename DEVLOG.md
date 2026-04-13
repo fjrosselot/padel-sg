@@ -1,5 +1,26 @@
 # DEVLOG — padel-sg
 
+## [2026-04-14 22:30] — Migraciones SQL + Deploy Vercel
+
+**Resumen:** Se aplicaron las 2 migraciones SQL pendientes en Supabase via MCP, y se hizo deploy a producción en Vercel.
+
+**Migraciones aplicadas (exitosas):**
+- `20260414_003_torneos_config` — `jugadores.elo` (int, default 1200), `torneos.categorias` (jsonb), `torneos.config_fixture` (jsonb)
+- `20260414_004_ligas_partidos` — `partidos.liga_id` (uuid FK), constraint `tipo` actualizado (`torneo|amistoso|liga`), stats columns en `liga_participantes`
+
+**Deploy:**
+- URL producción: `https://padel-sg-omega.vercel.app`
+- Build: 529 kB JS bundle (warn: > 500kB — candidato a code splitting futuro)
+- Status: ✅ READY
+
+**Pendientes:**
+- [ ] Configurar `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` en Vercel dashboard (si no están)
+- [ ] Configurar `RESEND_API_KEY` y `APP_URL` en Supabase secrets
+- [ ] Deploy edge functions: `npx supabase functions deploy approve-user reject-user`
+- [ ] Code splitting para reducir bundle (> 500kB warning)
+
+---
+
 ## [2026-04-14 22:00] — Pase de diseño Plan 2 + Plan 3 (Stitch timeout → directo desde DESIGN.md)
 
 **Resumen:** Pase de diseño completo sobre los 17 componentes de Torneos y Ligas. Stitch MCP dio timeout en todos los intentos (10 pantallas), por lo que el diseño se aplicó directamente desde el DESIGN.md. Se reemplazaron todas las clases genéricas de Tailwind por tokens del design system navy/gold. 48 tests verdes, tsc limpio.
