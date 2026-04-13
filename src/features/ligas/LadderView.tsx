@@ -22,7 +22,7 @@ export default function LadderView({ ligaId, estado }: Props) {
   const [desafioTarget, setDesafioTarget] = useState<Participante | null>(null)
 
   const { data: participantes, isLoading } = useQuery({
-    queryKey: ['ladder', ligaId],
+    queryKey: ['liga', ligaId],
     queryFn: async () => {
       const { data, error } = await supabase
         .schema('padel')
@@ -40,7 +40,7 @@ export default function LadderView({ ligaId, estado }: Props) {
   const myPos = myEntry?.posicion ?? null
 
   function canChallenge(target: Participante) {
-    if (!myPos || !target.posicion) return false
+    if (myPos === null || target.posicion === null) return false
     if (target.jugador_id === myId) return false
     return target.posicion < myPos && myPos - target.posicion <= 3
   }
