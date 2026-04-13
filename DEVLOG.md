@@ -115,3 +115,19 @@
 - [ ] Plan 3: Ligas (round robin, escalerilla, tabla de posiciones)
 
 ---
+
+## [2026-04-14 23:00] — Task 1: TypeScript audit Plan 1-2-3
+
+**Resumen:** Auditoría de TypeScript en todos los componentes de Plan 1, 2 y 3. Se encontraron y corrigieron 7 issues de tipado. `tsc --noEmit` limpio, 48 tests verdes.
+
+**Fixes aplicados:**
+- `InscripcionesPanel.tsx` — `Props.estado` y `nuevoEstado` tipados como uniones exactas
+- `LadderView.tsx` — `Props.estado` tipado como `'borrador' | 'activa' | 'finalizada'`
+- `LigaDetalle.tsx` — `PartidoLiga.estado` tipado como unión de estados válidos
+- `ResultadoLigaModal.tsx` — mismo fix
+- `standings.ts` — `PartidoResult.estado` tipado estrictamente
+- Tests — fixtures de test actualizados con `as const` para mantener tipos literales
+
+**Pendientes:** ninguno
+
+---
