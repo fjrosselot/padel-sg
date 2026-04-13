@@ -29,6 +29,7 @@ export interface Database {
           hijos_sg: Json
           frecuencia_semanal: string | null
           comentarios_registro: string | null
+          elo: number
           created_at: string
         }
         Insert: {
@@ -50,6 +51,7 @@ export interface Database {
           hijos_sg?: Json
           frecuencia_semanal?: string | null
           comentarios_registro?: string | null
+          elo?: number
           created_at?: string
         }
         Update: {
@@ -71,6 +73,7 @@ export interface Database {
           hijos_sg?: Json
           frecuencia_semanal?: string | null
           comentarios_registro?: string | null
+          elo?: number
           created_at?: string
         }
       }
@@ -129,6 +132,8 @@ export interface Database {
           deporte_id: string
           tipo: 'interno' | 'vs_colegio' | 'externo'
           colegio_rival: string | null
+          categorias: Json
+          config_fixture: Json
           created_at: string
         }
         Insert: {
@@ -150,6 +155,8 @@ export interface Database {
           deporte_id?: string
           tipo?: 'interno' | 'vs_colegio' | 'externo'
           colegio_rival?: string | null
+          categorias?: Json
+          config_fixture?: Json
           created_at?: string
         }
         Update: {
@@ -171,6 +178,8 @@ export interface Database {
           deporte_id?: string
           tipo?: 'interno' | 'vs_colegio' | 'externo'
           colegio_rival?: string | null
+          categorias?: Json
+          config_fixture?: Json
           created_at?: string
         }
       }
