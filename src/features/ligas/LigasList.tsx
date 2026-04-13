@@ -45,7 +45,7 @@ export default function LigasList() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold font-manrope text-navy">Ligas</h1>
         {isAdmin && (
-          <Button onClick={() => setShowWizard(true)} className="bg-navy text-white hover:bg-navy-mid">
+          <Button onClick={() => setShowWizard(true)} className="bg-gold text-navy font-bold hover:bg-gold/90">
             + Nueva liga
           </Button>
         )}
@@ -60,17 +60,21 @@ export default function LigasList() {
         {ligas?.map(l => (
           <Card
             key={l.id}
-            className="hover:shadow-md transition-shadow cursor-pointer"
+            className="bg-white rounded-xl shadow-[0_4px_12px_rgba(13,27,42,0.06)] hover:shadow-[0_12px_32px_rgba(13,27,42,0.10)] transition-shadow cursor-pointer"
             onClick={() => navigate(`/ligas/${l.id}`)}
           >
             <CardContent className="flex items-center justify-between p-4">
               <div>
-                <p className="font-semibold text-navy">{l.nombre}</p>
+                <p className="font-manrope font-semibold text-navy">{l.nombre}</p>
                 <p className="text-sm text-muted">
                   {FORMATO_LABELS[l.formato]} · {l.fecha_inicio ?? 'Sin fecha'}
                 </p>
               </div>
-              <Badge variant={ESTADO_VARIANT[l.estado]}>{ESTADO_LABELS[l.estado]}</Badge>
+              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                l.estado === 'activa' ? 'bg-navy text-white' :
+                l.estado === 'borrador' ? 'border border-slate/30 text-slate' :
+                'bg-surface-high text-slate'
+              }`}>{ESTADO_LABELS[l.estado]}</span>
             </CardContent>
           </Card>
         ))}
@@ -78,7 +82,7 @@ export default function LigasList() {
 
       {showWizard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowWizard(false)}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl shadow-[0_20px_40px_rgba(13,27,42,0.14)] w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-bold font-manrope text-navy mb-4">Nueva liga</h2>
             <LigaWizard
               onClose={() => setShowWizard(false)}

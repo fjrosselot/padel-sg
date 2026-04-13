@@ -67,7 +67,7 @@ export default function ResultadoLigaModal({ partido, ligaId, onClose }: Props) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()}>
+      <div className="bg-white rounded-2xl shadow-[0_20px_40px_rgba(13,27,42,0.14)] w-full max-w-sm mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()}>
         <h2 className="text-lg font-bold font-manrope text-navy">Cargar resultado</h2>
 
         <div className="grid grid-cols-2 gap-3">
@@ -77,13 +77,13 @@ export default function ResultadoLigaModal({ partido, ligaId, onClose }: Props) 
               type="button"
               onClick={() => setGanador(n)}
               className={`p-3 rounded-xl border-2 text-sm font-medium transition-colors text-left ${
-                ganador === n ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 hover:border-gray-300'
+                ganador === n ? 'border-gold bg-gold/10 text-navy' : 'bg-surface border border-slate/20 hover:border-slate/40'
               }`}
             >
-              <span className="text-xs text-gray-400 block mb-1">Jugador {n}</span>
+              <span className="text-xs text-muted block mb-1">Jugador {n}</span>
               {name}
-              <span className="block text-xs text-gray-400 mt-1">ELO: {elo}</span>
-              {ganador === n && <span className="block text-xs mt-1 text-green-600">Ganador</span>}
+              <span className="block text-xs text-muted mt-1">ELO: {elo}</span>
+              {ganador === n && <span className="block text-xs mt-1 text-gold font-bold">Ganador</span>}
             </button>
           ))}
         </div>
@@ -94,13 +94,13 @@ export default function ResultadoLigaModal({ partido, ligaId, onClose }: Props) 
         </div>
 
         {mutation.error instanceof Error && (
-          <p className="text-red-500 text-sm">{mutation.error.message}</p>
+          <p className="text-[#BA1A1A] text-sm">{mutation.error.message}</p>
         )}
 
         <div className="flex gap-3">
-          <Button variant="outline" onClick={onClose} className="flex-1">Cancelar</Button>
+          <Button variant="outline" onClick={onClose} className="flex-1 border border-slate/30 text-slate bg-transparent hover:bg-surface">Cancelar</Button>
           <Button
-            className="flex-1 bg-navy text-white"
+            className="flex-1 bg-gold text-navy font-bold"
             disabled={!ganador || mutation.isPending}
             onClick={() => mutation.mutate()}
           >

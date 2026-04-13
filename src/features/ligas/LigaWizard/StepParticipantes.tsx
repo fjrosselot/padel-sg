@@ -31,9 +31,9 @@ export default function StepParticipantes() {
 
   return (
     <div className="space-y-4">
-      <p className="text-xs font-semibold uppercase tracking-wide">Jugadores participantes ({selectedIds.length} seleccionados)</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted">Jugadores participantes ({selectedIds.length} seleccionados)</p>
       {errors.jugadores_ids && (
-        <p className="text-red-500 text-sm">{errors.jugadores_ids.message}</p>
+        <p className="text-[#BA1A1A] text-sm">{errors.jugadores_ids.message}</p>
       )}
       <div className="space-y-2 max-h-72 overflow-y-auto">
         {jugadores?.map(j => {
@@ -44,13 +44,13 @@ export default function StepParticipantes() {
               type="button"
               onClick={() => toggle(j.id)}
               className={`w-full text-left flex items-center justify-between p-3 rounded-xl border transition-colors ${
-                selected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                selected ? 'border-gold bg-gold/10' : 'border-slate/20 bg-white hover:border-slate/40'
               }`}
             >
               <span className="font-medium text-sm">{j.nombre}</span>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">{j.categoria ?? ''}{j.gradualidad !== 'normal' ? j.gradualidad : ''}</span>
-                {selected && <span className="text-blue-500 text-xs">✓</span>}
+                <span className="text-xs text-muted">{j.categoria ?? ''}{j.gradualidad !== 'normal' ? j.gradualidad : ''}</span>
+                {selected && <span className="text-gold text-xs">✓</span>}
               </div>
             </button>
           )

@@ -36,8 +36,8 @@ export default function LigaWizard({ onClose, onCreated }: Props) {
       <div className="flex gap-2">
         {STEPS.map((label, i) => (
           <div key={label} className="flex-1">
-            <div className={`h-1 rounded-full ${i <= step ? 'bg-blue-500' : 'bg-gray-200'}`} />
-            <p className={`text-xs mt-1 text-center ${i === step ? 'text-blue-600 font-medium' : 'text-gray-400'}`}>
+            <div className={`h-1 rounded-full ${i <= step ? 'bg-gold' : 'bg-surface-high'}`} />
+            <p className={`text-xs mt-1 text-center ${i === step ? 'text-navy font-medium' : 'text-muted'}`}>
               {label}
             </p>
           </div>
@@ -48,9 +48,9 @@ export default function LigaWizard({ onClose, onCreated }: Props) {
         <CurrentStep onCreated={() => { onCreated?.(); onClose() }} />
       </FormProvider>
 
-      <div className="flex gap-3 pt-4 border-t">
-        {step > 0 && <Button variant="outline" onClick={() => setStep(s => s - 1)}>Atrás</Button>}
-        <Button variant="outline" onClick={onClose} className="ml-auto mr-0">Cancelar</Button>
+      <div className="flex gap-3 pt-4 border-t border-surface-high">
+        {step > 0 && <Button variant="outline" onClick={() => setStep(s => s - 1)} className="border border-slate/30 text-slate bg-transparent hover:bg-surface">Atrás</Button>}
+        <Button variant="outline" onClick={onClose} className="ml-auto mr-0 border border-slate/30 text-slate bg-transparent hover:bg-surface">Cancelar</Button>
         {step < STEPS.length - 1 && (
           <Button
             onClick={async () => {
@@ -61,7 +61,7 @@ export default function LigaWizard({ onClose, onCreated }: Props) {
               const valid = await methods.trigger(fieldsPerStep[step])
               if (valid) setStep(s => s + 1)
             }}
-            className="bg-navy text-white"
+            className="bg-navy text-white font-bold"
           >Siguiente</Button>
         )}
       </div>

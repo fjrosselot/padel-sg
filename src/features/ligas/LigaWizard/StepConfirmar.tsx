@@ -78,26 +78,26 @@ export default function StepConfirmar({ onCreated }: Props) {
 
   return (
     <div className="space-y-5">
-      <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-        <p className="font-semibold">{values.nombre}</p>
-        <p className="text-sm text-gray-500">
+      <div className="bg-surface rounded-xl p-4 space-y-2">
+        <p className="font-semibold text-navy">{values.nombre}</p>
+        <p className="text-sm text-slate">
           {FORMATO_LABELS[values.formato]} · {values.fecha_inicio}
           {values.fecha_fin ? ` → ${values.fecha_fin}` : ''}
         </p>
-        <p className="text-sm text-gray-500">{values.jugadores_ids.length} jugadores</p>
+        <p className="text-sm text-slate">{values.jugadores_ids.length} jugadores</p>
         {values.formato === 'round_robin' && (
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-muted">
             Se generarán {(values.jugadores_ids.length * (values.jugadores_ids.length - 1)) / 2} partidos automáticamente
           </p>
         )}
       </div>
 
       {mutation.error && (
-        <p className="text-red-500 text-sm">{mutation.error instanceof Error ? mutation.error.message : String(mutation.error)}</p>
+        <p className="text-[#BA1A1A] text-sm">{mutation.error instanceof Error ? mutation.error.message : String(mutation.error)}</p>
       )}
 
       <Button
-        className="w-full bg-navy text-white"
+        className="w-full bg-gold text-navy font-bold"
         onClick={() => mutation.mutate()}
         disabled={mutation.isPending}
       >

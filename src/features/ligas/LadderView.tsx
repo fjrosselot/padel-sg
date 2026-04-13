@@ -45,7 +45,7 @@ export default function LadderView({ ligaId, estado }: Props) {
     return target.posicion < myPos && myPos - target.posicion <= 3
   }
 
-  if (isLoading) return <div className="text-gray-400 py-8 text-center">Cargando escalerilla…</div>
+  if (isLoading) return <div className="text-muted py-8 text-center">Cargando escalerilla…</div>
 
   return (
     <div className="space-y-3">
@@ -53,19 +53,19 @@ export default function LadderView({ ligaId, estado }: Props) {
         <div
           key={p.id}
           className={`flex items-center justify-between p-3 rounded-xl ${
-            p.jugador_id === myId ? 'bg-blue-50 border-2 border-blue-200' : 'bg-gray-50'
+            p.jugador_id === myId ? 'bg-gold/10 border-2 border-gold/30' : 'bg-surface'
           }`}
         >
           <div className="flex items-center gap-3">
-            <span className="text-2xl font-bold font-manrope text-gray-400 w-8">#{p.posicion}</span>
+            <span className="text-2xl font-bold font-manrope text-muted w-8">#{p.posicion}</span>
             <span className="font-semibold text-navy">{p.jugador?.nombre ?? p.jugador_id}</span>
-            {p.jugador_id === myId && <span className="text-xs text-blue-500 font-medium">Tú</span>}
+            {p.jugador_id === myId && <span className="text-xs text-gold font-semibold">Tú</span>}
           </div>
           {estado === 'activa' && canChallenge(p) && (
             <Button
               size="sm"
               variant="outline"
-              className="text-navy border-navy hover:bg-navy hover:text-white"
+              className="border border-navy text-navy hover:bg-navy hover:text-white text-sm rounded-lg"
               onClick={() => setDesafioTarget(p)}
             >
               Desafiar

@@ -89,7 +89,7 @@ export default function LigaDetalle() {
     enabled: !!id,
   })
 
-  if (ligaLoading) return <div className="p-6 text-gray-400">Cargando…</div>
+  if (ligaLoading) return <div className="p-6 text-muted">Cargando…</div>
   if (!liga) return <div className="p-6 text-red-500">Liga no encontrada</div>
 
   const jugadoresMap = Object.fromEntries(
@@ -106,7 +106,7 @@ export default function LigaDetalle() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold font-manrope text-navy">{liga.nombre}</h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-muted text-sm">
             {liga.formato === 'round_robin' ? 'Round Robin' : 'Escalerilla'} · {liga.fecha_inicio}
           </p>
         </div>
@@ -116,22 +116,22 @@ export default function LigaDetalle() {
       {liga.formato === 'round_robin' ? (
         <div className="space-y-6">
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase mb-3">Tabla de posiciones</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-3">Tabla de posiciones</p>
             <StandingsTable ligaId={liga.id} standings={standings} jugadoresMap={jugadoresMap} />
           </div>
 
           {pendientes.length > 0 && isAdmin && (
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase mb-3">Partidos pendientes</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-3">Partidos pendientes</p>
               <div className="space-y-2">
                 {pendientes.map(p => (
-                  <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                  <div key={p.id} className="bg-surface rounded-xl p-3 flex items-center justify-between">
                     <span className="text-sm">
                       <span className="font-medium text-navy">{p.jugador1?.nombre ?? '?'}</span>
-                      <span className="text-gray-400 mx-2">vs</span>
+                      <span className="text-muted mx-2">vs</span>
                       <span className="font-medium text-navy">{p.jugador2?.nombre ?? '?'}</span>
                     </span>
-                    <Button size="sm" variant="outline" onClick={() => setSelectedPartido(p)}>
+                    <Button size="sm" variant="outline" onClick={() => setSelectedPartido(p)} className="border border-slate/30 text-navy text-sm hover:bg-surface">
                       Cargar resultado
                     </Button>
                   </div>
