@@ -9,7 +9,7 @@
     font-family: 'Inter', sans-serif;
     color: #071b3b; /* on-surface */
     background-color: #f9f9ff; /* surface */
-    @apply bg-background text-foreground;
+
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -83,10 +83,10 @@
     --sidebar-ring: oklch(0.556 0 0);
   }
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
   }
   html {
-    @apply font-sans;
+    font-family: 'Inter', sans-serif;
   }
 }
 
