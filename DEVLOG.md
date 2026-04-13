@@ -131,3 +131,14 @@
 **Pendientes:** ninguno
 
 ---
+
+## [2026-04-14 23:15] — Task 2: Edge case tests ELO + fixture engine + standings
+
+**Resumen:** Se agregaron 33 tests de edge cases distribuidos entre los 3 módulos de lógica pura. Total: 48 → 81 tests.
+
+**Tests agregados:**
+- `elo.test.ts` +14: expectedScore (gap 400, extremos), newElo (simetría, favorito vs underdog, draw, K custom), applyEloMatch (ambos jugadores ganan/pierden, ELO promedio)
+- `engine.test.ts` +13: generateRoundRobin (2 parejas, no autopartido, apariciones iguales, BYE), buildGroups (2 grupos, snake ELO), buildPlayoffs (vacío, solo final, flags con_consolacion/con_tercer_lugar)
+- `standings.test.ts` +7: lista vacía, estado != jugado ignorado, ganador null ignorado, tiebreaker por diff sets, jugador fuera de lista, doble pareja cuenta ambos
+
+---
