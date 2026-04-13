@@ -4,18 +4,12 @@ import type { WizardData } from './schema'
 import { stepTipoSchema, stepCategoriasSchema } from './schema'
 import StepTipo from './StepTipo'
 import StepCategorias from './StepCategorias'
+import StepFixture from './StepFixture'
+import StepConfirmar from './StepConfirmar'
 import { Button } from '../../../components/ui/button'
 
 const STEPS = ['Tipo', 'Categorías', 'Fixture', 'Confirmar']
 const STEP_SCHEMAS = [stepTipoSchema, stepCategoriasSchema, null, null]
-
-// Placeholder components for steps 3 and 4 — will be replaced in Task 6
-function StepFixturePlaceholder({ onCreated: _ }: { onCreated?: () => void }) {
-  return <div className="text-muted py-8 text-center">Parámetros del fixture (próximamente)</div>
-}
-function StepConfirmarPlaceholder({ onCreated: _ }: { onCreated?: () => void }) {
-  return <div className="text-muted py-8 text-center">Confirmar (próximamente)</div>
-}
 
 interface Props {
   onClose: () => void
@@ -56,7 +50,7 @@ export default function TorneoWizard({ onClose, onCreated }: Props) {
     setStep(s => Math.min(s + 1, STEPS.length - 1))
   }
 
-  const StepComponents = [StepTipo, StepCategorias, StepFixturePlaceholder, StepConfirmarPlaceholder]
+  const StepComponents = [StepTipo, StepCategorias, StepFixture, StepConfirmar]
   const CurrentStep = StepComponents[step]
 
   return (
