@@ -7,6 +7,8 @@ import { PendingApproval } from '@/features/auth/PendingApproval'
 import { PendingUsers } from '@/features/admin/PendingUsers'
 import TorneosList from './features/torneos/TorneosList'
 import TorneoDetalle from './features/torneos/TorneoDetalle'
+import LigasList from './features/ligas/LigasList'
+import LigaDetalle from './features/ligas/LigaDetalle'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginForm /> },
@@ -25,6 +27,8 @@ export const router = createBrowserRouter([
       { path: 'admin/usuarios', element: <PendingUsers /> },
       { path: 'torneos', element: <TorneosList /> },
       { path: 'torneos/:id', element: <TorneoDetalle /> },
+      { path: 'ligas', element: <LigasList /> },
+      { path: 'ligas/:id', element: <LigaDetalle /> },
     ],
   },
 ])
