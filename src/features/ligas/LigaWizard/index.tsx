@@ -52,7 +52,17 @@ export default function LigaWizard({ onClose, onCreated }: Props) {
         {step > 0 && <Button variant="outline" onClick={() => setStep(s => s - 1)}>Atrás</Button>}
         <Button variant="outline" onClick={onClose} className="ml-auto mr-0">Cancelar</Button>
         {step < STEPS.length - 1 && (
-          <Button onClick={() => setStep(s => s + 1)} className="bg-navy text-white">Siguiente</Button>
+          <Button
+            onClick={async () => {
+              const fieldsPerStep: Array<(keyof WizardLigaData)[]> = [
+                ['nombre', 'formato', 'fecha_inicio'],
+                ['jugadores_ids'],
+              ]
+              const valid = await methods.trigger(fieldsPerStep[step])
+              if (valid) setStep(s => s + 1)
+            }}
+            className="bg-navy text-white"
+          >Siguiente</Button>
         )}
       </div>
     </div>

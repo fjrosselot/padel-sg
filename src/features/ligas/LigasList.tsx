@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import LigaWizard from './LigaWizard'
 import { Badge } from '../../components/ui/badge'
@@ -24,7 +24,6 @@ const FORMATO_LABELS: Record<string, string> = {
 export default function LigasList() {
   const navigate = useNavigate()
   const [showWizard, setShowWizard] = useState(false)
-  const qc = useQueryClient()
   const { data: user } = useUser()
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
 
@@ -83,10 +82,7 @@ export default function LigasList() {
             <h2 className="text-lg font-bold font-manrope text-navy mb-4">Nueva liga</h2>
             <LigaWizard
               onClose={() => setShowWizard(false)}
-              onCreated={() => {
-                setShowWizard(false)
-                qc.invalidateQueries({ queryKey: ['ligas'] })
-              }}
+              onCreated={() => setShowWizard(false)}
             />
           </div>
         </div>

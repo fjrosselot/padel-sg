@@ -93,7 +93,7 @@ export default function StepConfirmar({ onCreated }: Props) {
       </div>
 
       {mutation.error && (
-        <p className="text-red-500 text-sm">{String(mutation.error)}</p>
+        <p className="text-red-500 text-sm">{mutation.error instanceof Error ? mutation.error.message : String(mutation.error)}</p>
       )}
 
       <Button
