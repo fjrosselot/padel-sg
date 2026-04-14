@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>St. George Elite Padel - Active Leagues</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-highest": "#d8e2ff",
+                        "outline-variant": "#c4c5d8",
+                        "tertiary-fixed": "#6ffbbe",
+                        "surface-container": "#e9edff",
+                        "on-secondary-fixed-variant": "#364669",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#e8ffef",
+                        "primary-fixed": "#dde1ff",
+                        "secondary-container": "#c4d4fe",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f1f3ff",
+                        "surface-bright": "#f9f9ff",
+                        "primary": "#144bdb",
+                        "on-primary-fixed-variant": "#0038b6",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "on-background": "#071b3b",
+                        "on-tertiary-fixed": "#002113",
+                        "on-primary-fixed": "#001452",
+                        "primary-container": "#3b66f5",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#ccdaff",
+                        "on-secondary-container": "#4b5b7f",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "surface-variant": "#d8e2ff",
+                        "on-secondary-fixed": "#071b3b",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#00835a",
+                        "secondary-fixed-dim": "#b6c6f0",
+                        "on-surface-variant": "#434655",
+                        "on-primary-container": "#fbf8ff",
+                        "inverse-primary": "#b7c4ff",
+                        "outline": "#747686",
+                        "surface": "#f9f9ff",
+                        "surface-tint": "#1c4fe0",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-error-container": "#93000a",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#071b3b",
+                        "surface-container-high": "#e1e8ff",
+                        "secondary": "#4e5e82",
+                        "tertiary": "#006746",
+                        "inverse-on-surface": "#edf0ff",
+                        "background": "#f9f9ff",
+                        "inverse-surface": "#1f3051"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-sidebar {
+            backdrop-filter: blur(12px);
+        }
+        .editorial-shadow {
+            shadow: 0 20px 40px rgba(7, 27, 59, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-background min-h-screen">
+<!-- SideNavBar (Authority: JSON style_*) -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col py-6 px-4 bg-[#1f3051] dark:bg-slate-950 h-screen w-64 border-r-0 shadow-2xl shadow-[#071b3b]/20">
+<div class="mb-10 px-4">
+<h1 class="text-2xl font-black text-white tracking-tighter italic">ST. GEORGE</h1>
+<p class="font-bold tracking-wider uppercase Manrope text-xs text-primary-fixed-dim">ELITE PADEL</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-3 transition-colors hover:bg-white/5 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="uppercase tracking-[0.05em] text-xs font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-3 transition-colors hover:bg-white/5 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span class="uppercase tracking-[0.05em] text-xs font-medium">Reservations</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-3 transition-colors hover:bg-white/5 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="uppercase tracking-[0.05em] text-xs font-medium">Players</span>
+</a>
+<!-- Active Tab -->
+<a class="flex items-center gap-3 bg-[#3b66f5] text-white rounded-xl px-4 py-3 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]" href="#">
+<span class="material-symbols-outlined" data-icon="emoji_events">emoji_events</span>
+<span class="uppercase tracking-[0.05em] text-xs font-medium">Tournaments</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-3 transition-colors hover:bg-white/5 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="uppercase tracking-[0.05em] text-xs font-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto px-4 mb-6">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-white rounded-xl py-3 px-4 font-headline font-bold uppercase tracking-wider text-sm shadow-lg shadow-primary/20 active:scale-95 transition-all">
+                New Match
+            </button>
+</div>
+<div class="border-t border-white/10 pt-4 space-y-1">
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-2 text-xs transition-colors" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="help">help</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-2 text-xs transition-colors" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="logout">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<div class="ml-64 min-h-screen flex flex-col">
+<!-- TopNavBar (Authority: JSON style_*) -->
+<header class="flex justify-between items-center w-full px-8 h-20 sticky top-0 bg-[#f9f9ff] dark:bg-slate-900 z-30 ml-0 max-w-full">
+<div class="flex items-center gap-8">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="bg-surface-container-low border-none rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary-container w-64 transition-all" placeholder="Search competitions..." type="text"/>
+</div>
+<nav class="flex gap-6">
+<a class="uppercase font-bold Manrope text-sm text-slate-500 hover:text-[#3b66f5] transition-colors" href="#">Live Courts</a>
+<a class="uppercase font-bold Manrope text-sm text-[#144bdb] border-b-2 border-[#144bdb] pb-1" href="#">Analytics</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary text-white px-5 py-2 rounded-full font-headline font-bold text-xs uppercase tracking-widest hover:bg-primary-container transition-all">
+                    Quick Book
+                </button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="flex items-center gap-3 pl-4 border-l border-outline-variant/30">
+<div class="text-right">
+<p class="text-xs font-bold uppercase tracking-tighter">Admin Console</p>
+<p class="text-[10px] text-outline font-medium">Administrator Profile</p>
+</div>
+<img alt="Administrator Profile" class="w-10 h-10 rounded-full object-cover border-2 border-primary-container" data-alt="professional portrait of a high-end sports club administrator in a modern office environment with warm lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUO1FH0-hhvZizD9iidRjkXobJnX2kVGjaKjzV-JzweoPvKUQHTtj8UzNqqxjEJLTaq37p0w2Ct6Zo8XHujfqM_PxVK481jLpKranOqxrRzfAgbGPluw1tU7FO7UgtuG6mDcKURdMEZcIdI_AbrMxDwxqUdzZFyS_KdpcHe2TvyY9-8Yr_wbxnJk2uqT3uV_O1lbA9TDOyIjxwdUeoGDKl5r8YXQ0RdRCGPrihybEzwxaz8bOuMVSFhiBpaUargEhRkTQG6KxgA7Y"/>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<main class="p-8 flex-1">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+<div>
+<h2 class="font-headline font-extrabold text-4xl text-on-background uppercase tracking-tight leading-none mb-2">
+                        Ligas y Torneos <span class="text-primary italic">Activos</span>
+</h2>
+<p class="text-outline font-medium">Gestión de competiciones en curso y próximos eventos.</p>
+</div>
+<!-- Filters -->
+<div class="flex bg-surface-container-low p-1.5 rounded-xl gap-1">
+<button class="px-6 py-2 rounded-lg bg-surface-container-lowest shadow-sm text-xs font-bold uppercase tracking-widest text-primary">Leagues</button>
+<button class="px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest text-on-surface-variant hover:bg-white/50 transition-all">Tournaments</button>
+<button class="px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest text-on-surface-variant hover:bg-white/50 transition-all">Winter</button>
+<button class="px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest text-on-surface-variant hover:bg-white/50 transition-all">Summer</button>
+</div>
+</div>
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+<!-- Competition Card 1 -->
+<div class="group bg-surface-container-lowest rounded-xl overflow-hidden border border-transparent hover:border-primary/20 transition-all duration-300 shadow-[0_20px_40px_rgba(7,27,59,0.04)]">
+<div class="h-32 relative overflow-hidden">
+<img class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" data-alt="close up of a professional padel court with blue turf and glass walls under dramatic stadium lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgYTv4r6ryB2Jt6WUr68CAG8wVoOTF9yhRoqFxruXMXDseKPauFbUpskp_5bR4EOiWMv4XSQDrAhs0gGx9nZ2fXkl5173AwO3QYQ3P4LF_fauTqnJ18NkmrlBdx2FQL5JPrsnXPlonGDYD-0qXdeKcewa9MnsgK_-IwjPt_RZZhaxPkxA4iXH8SOwA9WR6gr2u351Wznj555cvpwJJfCgIiAbqB2nwUGA9pByLxI05C_wkZIaVtdCCf11z-Vd90ovYfzrfoD2vkIs"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent"></div>
+<div class="absolute top-4 left-4">
+<span class="bg-primary/90 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md">Active</span>
+</div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">PRO CATEGORY</p>
+<h3 class="font-headline font-extrabold text-xl uppercase tracking-tight">Copa Invierno 2024</h3>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="more_vert">more_vert</span>
+</div>
+<div class="space-y-6">
+<!-- Progress -->
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-[10px] font-bold uppercase tracking-wider text-outline">Competition Progress</span>
+<span class="text-xs font-bold text-on-background">75%</span>
+</div>
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-3/4 rounded-full"></div>
+</div>
+</div>
+<!-- Leader -->
+<div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low border border-outline-variant/10">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img class="w-10 h-10 rounded-full border-2 border-white object-cover" data-alt="portrait of a focused professional male athlete in athletic gear" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1Qj79AyRLFri0WZtfMyVK0NXWy_K3DMHSc0DpkjzOeugpyAq7lWYyjbmr8Dq74dfGEpyL7zjmAzdzvZ-uJ0SyBr0EbgiIW0SA2gJJBnLCPFvL5IjOOjBh8_EbsJcmH9eDv9Z8BvYDLB1FAyPIxkOLJwrsuuLYK3o8DMcpmzd0X4RKLhvmNXS2VKo0TWWSGN0pFlcja3Zao95mA93ObiFimtMPPly8ZXTqE-QBm8UI5tfhLluhK2fVtCMI_CHfm7RQxepdvOwipf4"/>
+<div class="absolute -bottom-1 -right-1 bg-tertiary text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold">1</div>
+</div>
+<div>
+<p class="text-[10px] font-bold uppercase tracking-wider text-outline">Current Leader</p>
+<p class="text-sm font-bold">S. García / M. Ruiz</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-xs font-black text-tertiary uppercase">2,450 pts</p>
+</div>
+</div>
+<!-- Footer -->
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-1.5 text-outline">
+<span class="material-symbols-outlined text-lg" data-icon="group">group</span>
+<span class="text-xs font-bold uppercase tracking-tighter">32 Participants</span>
+</div>
+<button class="text-primary font-bold uppercase tracking-widest text-[10px] flex items-center gap-1 hover:gap-2 transition-all">
+                                    View Details <span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Competition Card 2 -->
+<div class="group bg-surface-container-lowest rounded-xl overflow-hidden border border-transparent hover:border-primary/20 transition-all duration-300 shadow-[0_20px_40px_rgba(7,27,59,0.04)]">
+<div class="h-32 relative overflow-hidden">
+<img class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" data-alt="overhead view of multiple tennis courts with vibrant green and blue surfaces" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYuvGSibJvrt3mWlLU0mqQygGSud_ztgMkN56SszXWh7Xjhx8i7btPNDPimSWn4_Jty6ZvdOl5N6KvEtLq9elUC56F6z4FiltxYGAwvth1DXWyPch9sYTWiXUti9oWV3KN1IOcTMXoi8GI4rubjCvqg8PTqrHpVD9RHPR7MR3FZ4YwxUlgb262o__rH16qL-y2KVOql_rrN8Xp1RcS8Qf_MW1hWw1vhn-u5L-YKROWgBGQxwzdwegt_2-kHhsoQiqshp8Ikyp0l9I"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent"></div>
+<div class="absolute top-4 left-4">
+<span class="bg-tertiary/90 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md">Ending Soon</span>
+</div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">AMATEUR LEAGUE</p>
+<h3 class="font-headline font-extrabold text-xl uppercase tracking-tight">Open Primavera Elite</h3>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="more_vert">more_vert</span>
+</div>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-[10px] font-bold uppercase tracking-wider text-outline">Matches Completed</span>
+<span class="text-xs font-bold text-on-background">92%</span>
+</div>
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[92%] rounded-full"></div>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low border border-outline-variant/10">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img class="w-10 h-10 rounded-full border-2 border-white object-cover" data-alt="portrait of a confident female padel player smiling in the sun" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_zU_P8AEdS38te0J7uYva-VU3emR5_On7-geC0N3Js_96dmO5Ie4HtQvhXP7tBa5EPw-mqMAN6ti6foVbWWG36e4TkZBo01SzsJ0rr4y7iDrlEYPMDsth158kDMW8cp0YcXwQjetL1Ka-F29MBtZJ1gLBBSshLa1_TxBYFA7JW3lKXoZPx414Su1RmmcPW9BEMtD4AxMWXJSf79eSh-vD6fDY8TDeDvVmezBaaSmG7Yakarq-JuOhxVxVF9KaChW1WW5nZq2vGkk"/>
+<div class="absolute -bottom-1 -right-1 bg-tertiary text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold">1</div>
+</div>
+<div>
+<p class="text-[10px] font-bold uppercase tracking-wider text-outline">Current Leader</p>
+<p class="text-sm font-bold">L. Pons / A. Torres</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-xs font-black text-tertiary uppercase">3,120 pts</p>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-1.5 text-outline">
+<span class="material-symbols-outlined text-lg" data-icon="group">group</span>
+<span class="text-xs font-bold uppercase tracking-tighter">64 Participants</span>
+</div>
+<button class="text-primary font-bold uppercase tracking-widest text-[10px] flex items-center gap-1 hover:gap-2 transition-all">
+                                    View Details <span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Competition Card 3 -->
+<div class="group bg-surface-container-lowest rounded-xl overflow-hidden border border-transparent hover:border-primary/20 transition-all duration-300 shadow-[0_20px_40px_rgba(7,27,59,0.04)]">
+<div class="h-32 relative overflow-hidden">
+<img class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" data-alt="dynamic shot of a padel ball hitting a racquet in mid-air with high action blur" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCng38gTH6ssiQGIT_Mcmh_W-UrbAduQGnjbySX5lWcJwESoH_B1R-waRWP0PwDwqm-oZ4Eg1TbLEvjO4VsdsNpdkeVb0tM4cEdiXBLibL9d7eovXoyU7YDSr4G0iPylFihscsuhu5okcF7Be2b2bDhm4R4z7nIWzf2TEVZ7drjn8H9rxg1ezpX3pVTnnrwD8M2W0fgDvjrIR0BunjrjbuHSjPWrRBZXn0K9-TzDQMSOOUmn30GU_IN5pOXqOgm8e6BuLGFe3H0JJU"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent"></div>
+<div class="absolute top-4 left-4">
+<span class="bg-outline text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md">Mid Season</span>
+</div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">PRO CATEGORY</p>
+<h3 class="font-headline font-extrabold text-xl uppercase tracking-tight">Masters Finals 2024</h3>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="more_vert">more_vert</span>
+</div>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-[10px] font-bold uppercase tracking-wider text-outline">Progreso de Liga</span>
+<span class="text-xs font-bold text-on-background">48%</span>
+</div>
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[48%] rounded-full"></div>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low border border-outline-variant/10">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img class="w-10 h-10 rounded-full border-2 border-white object-cover" data-alt="portrait of a middle-aged athletic man with a professional look" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFxOt7tDflJ0X7UpBe0Q6rK2OgZ5aYo-3wgpaG-kLq-TY5ehpOJTsft-NeN6TxuXKvWlnBeSBcGe_f_2HIEBu-U3Hhw98ZYwGWAVe6HYZsxp9dZRYhw638VJPRkZ3iRHxQ3NcgrtBALXoyx4bUqYWmXp6jquT0WhSL94xZJ5zBoZ48K3OY1SsEnN2DHEb1BqEFG36E61oi61i-A3oY4BjIsFhltxYR_YHOgJTZVr-pJIV9HTffmvhDmGfbBOmG-5qd2t6jst4uHho"/>
+<div class="absolute -bottom-1 -right-1 bg-tertiary text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold">1</div>
+</div>
+<div>
+<p class="text-[10px] font-bold uppercase tracking-wider text-outline">Current Leader</p>
+<p class="text-sm font-bold">R. Nadal / F. Lopez</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-xs font-black text-tertiary uppercase">1,890 pts</p>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-1.5 text-outline">
+<span class="material-symbols-outlined text-lg" data-icon="group">group</span>
+<span class="text-xs font-bold uppercase tracking-tighter">16 Participants</span>
+</div>
+<button class="text-primary font-bold uppercase tracking-widest text-[10px] flex items-center gap-1 hover:gap-2 transition-all">
+                                    View Details <span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Summary / Stats Bottom Section -->
+<div class="mt-12 grid grid-cols-1 lg:grid-cols-4 gap-6">
+<div class="lg:col-span-3 bg-surface-container-low rounded-xl p-8 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex items-center gap-6">
+<div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl" data-icon="analytics" data-weight="fill">analytics</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-lg uppercase">Season Snapshot</h4>
+<p class="text-sm text-outline">You have 12 active competitions this week. Total engagement is up by 14% compared to last season.</p>
+</div>
+</div>
+<button class="whitespace-nowrap px-8 py-3 bg-inverse-surface text-white rounded-xl font-headline font-bold uppercase tracking-widest text-xs hover:scale-105 transition-transform">
+                        Full Report
+                    </button>
+</div>
+<div class="bg-primary-container rounded-xl p-6 text-white flex flex-col justify-between">
+<p class="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80">Next Registration</p>
+<div>
+<h4 class="text-2xl font-black italic tracking-tighter leading-tight mb-1">ST. GEORGE OPEN</h4>
+<p class="text-xs font-medium opacity-90">Closing in 2 days</p>
+</div>
+<div class="mt-4 flex -space-x-2">
+<img class="w-6 h-6 rounded-full border border-primary-container object-cover" data-alt="avatar 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKYklvhEGV2bsmYDK-CDdWKE8IEaH1Qm2mp-P4s-RiW8Ucrl_rtreS59j6s6oYu-fSPJUVR3AqRBawToyZoE_l_E9r9u7x1Pw7CoZ8vbA1BYzrduC9B4-aUUL45uEZ2TBCPvL7q36LqsC_ZZTr2NTNhO9B0RDUhsJFXMTxKxfICHgRl5KOMvfvOsaDoeFfjH4q0TfQrWJs0v-HfH1hx0KtfskVUoe89dhG7myiWTZRqQu8GPyW9DlUiPsWZ7g47kq7NkyYeMPHRLk"/>
+<img class="w-6 h-6 rounded-full border border-primary-container object-cover" data-alt="avatar 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlI6jITV4MPbo09c5X0ow4J_fx0bEQxQGcYebrYgxourhOsYy-y07khAQN0PRUMvNYdfeZ7WIADEgx1WqRCJ46RKAa0aFN3VfByK-8SizHXjB2QshaMTrvgJAU1z0B-525MhSXjiRIe2JFkEZnSvxy_kiZGQKd87D5Ga7Bm-bdPpDgIgHqHj-wO0HXLWlOID4xGbCwORrTWiGU8wpF91GKmO90mtMp4dRvkk4zWAi7znkK37FijmAkhhq-2BkiN3a99znx3lYaqUg"/>
+<img class="w-6 h-6 rounded-full border border-primary-container object-cover" data-alt="avatar 3" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXgB_qF343huFIpvv6P8Q0JZmK9T_ZsMRYIoBAnJz9ydl9r0GGTfNssQ5pGZT94Xy2-B2sqYVxKHepeUgeZQFNhqqstzY-O7qRIOig24qECqrVNhByJSB0ec4811TWZIBIcRYehVvw-eIFT8CzgII9HETZ5dMys2UaPIpOe3VaccPMUaO2q6tILfPFp-9q0bqCMUv_5SH0GP4kTD_oXJ8JbUv9opaz5mXLFUqJIqx_KQn2e8op9j5LmY4TikEOLtDJzsbDDQc-0Y0"/>
+<div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[8px] font-bold">+12</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

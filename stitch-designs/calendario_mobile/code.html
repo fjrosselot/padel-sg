@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-bright": "#f9f9ff",
+            "secondary-fixed": "#d8e2ff",
+            "on-tertiary-fixed": "#002113",
+            "on-error-container": "#93000a",
+            "surface": "#f9f9ff",
+            "surface-variant": "#d8e2ff",
+            "surface-container-lowest": "#ffffff",
+            "outline": "#747686",
+            "inverse-primary": "#b7c4ff",
+            "on-primary-container": "#fbf8ff",
+            "surface-container-low": "#f1f3ff",
+            "primary": "#144bdb",
+            "tertiary-fixed-dim": "#4edea3",
+            "secondary": "#4e5e82",
+            "on-error": "#ffffff",
+            "background": "#f9f9ff",
+            "tertiary-container": "#00835a",
+            "tertiary": "#006746",
+            "error-container": "#ffdad6",
+            "surface-container-high": "#e1e8ff",
+            "secondary-fixed-dim": "#b6c6f0",
+            "surface-container": "#e9edff",
+            "outline-variant": "#c4c5d8",
+            "primary-fixed": "#dde1ff",
+            "surface-dim": "#ccdaff",
+            "inverse-on-surface": "#edf0ff",
+            "primary-container": "#3b66f5",
+            "on-primary": "#ffffff",
+            "on-background": "#071b3b",
+            "error": "#ba1a1a",
+            "on-surface": "#071b3b",
+            "on-secondary-fixed-variant": "#364669",
+            "on-secondary": "#ffffff",
+            "inverse-surface": "#1f3051",
+            "on-tertiary-container": "#e8ffef",
+            "primary-fixed-dim": "#b7c4ff",
+            "on-secondary-container": "#4b5b7f",
+            "surface-container-highest": "#d8e2ff",
+            "on-tertiary-fixed-variant": "#005236",
+            "on-surface-variant": "#434655",
+            "on-secondary-fixed": "#071b3b",
+            "secondary-container": "#c4d4fe",
+            "surface-tint": "#1c4fe0",
+            "on-primary-fixed-variant": "#0038b6",
+            "on-primary-fixed": "#001452",
+            "tertiary-fixed": "#6ffbbe",
+            "on-tertiary": "#ffffff"
+          },
+          fontFamily: {
+            "headline": ["Manrope"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body { font-family: 'Inter', sans-serif; }
+    .font-headline { font-family: 'Manrope', sans-serif; }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-[#1f3051] dark:bg-[#071b3b] shadow-2xl shadow-[#071b3b]/20">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-primary-container/30">
+<img alt="Player Profile" class="w-full h-full object-cover" data-alt="close-up portrait of a professional male padel player in sportswear looking confident" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPME_MMeDrq3J0sotaYGllMNjhG5UkZSfO4_1yOx3j8vynJ4UzXeZEM0Io5cgnqar04ApIYZA81cPksBwdBfmujH2lEc9tcQR2kYeFo0qht3yTZqkgDprgwy8JIfNssOc6IdzFMJ3BwrDgaEQz07KgIToYHMY51WfY5ni2htQJcg3CJBaczGQ0R-3XFV49GMH9CDLauI_q5fYFp550EkikL7hTPmv9_UQxJzuU697M-pAHiqbRkDPcL2lF3V-RQvloSd8vd8hPUhI"/>
+</div>
+<h1 class="font-['Manrope'] uppercase tracking-widest font-bold text-xl text-white italic tracking-tighter">ST. GEORGE</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-white hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<main class="pt-20 px-4 space-y-6">
+<!-- Calendar Section -->
+<section class="bg-surface-container-lowest rounded-xl p-5 shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-headline font-extrabold text-2xl uppercase tracking-tight text-on-surface">CALENDAR</h2>
+<div class="flex gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-low text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-low text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="flex justify-between mb-4 px-2">
+<div class="text-center w-full"><span class="font-label text-[10px] font-bold text-outline uppercase tracking-wider">Mo</span></div>
+<div class="text-center w-full"><span class="font-label text-[10px] font-bold text-outline uppercase tracking-wider">Tu</span></div>
+<div class="text-center w-full"><span class="font-label text-[10px] font-bold text-outline uppercase tracking-wider">We</span></div>
+<div class="text-center w-full"><span class="font-label text-[10px] font-bold text-outline uppercase tracking-wider">Th</span></div>
+<div class="text-center w-full"><span class="font-label text-[10px] font-bold text-outline uppercase tracking-wider">Fr</span></div>
+<div class="text-center w-full"><span class="font-label text-[10px] font-bold text-outline uppercase tracking-wider">Sa</span></div>
+<div class="text-center w-full"><span class="font-label text-[10px] font-bold text-outline uppercase tracking-wider">Su</span></div>
+</div>
+<div class="grid grid-cols-7 gap-y-4 text-center">
+<!-- Week 1 -->
+<div class="p-2 text-outline-variant font-medium opacity-40">28</div>
+<div class="p-2 text-outline-variant font-medium opacity-40">29</div>
+<div class="p-2 text-outline-variant font-medium opacity-40">30</div>
+<div class="p-2 font-bold text-on-surface">1</div>
+<div class="p-2 font-bold text-on-surface">2</div>
+<div class="p-2 font-bold text-on-surface relative">
+          3
+          <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-tertiary rounded-full"></div>
+</div>
+<div class="p-2 font-bold text-on-surface">4</div>
+<!-- Week 2 -->
+<div class="p-2 font-bold text-on-surface relative">
+          5
+          <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full"></div>
+</div>
+<div class="p-2 font-bold text-on-surface">6</div>
+<div class="p-2 font-bold text-on-surface">7</div>
+<div class="p-2 font-bold text-on-surface">8</div>
+<div class="p-2 font-bold text-on-surface relative">
+          9
+          <div class="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-0.5">
+<div class="w-1 h-1 bg-primary rounded-full"></div>
+<div class="w-1 h-1 bg-tertiary rounded-full"></div>
+</div>
+</div>
+<div class="p-2 font-bold text-on-surface">10</div>
+<div class="p-2 font-bold text-on-surface">11</div>
+<!-- Week 3 (Selected) -->
+<div class="p-2 font-bold text-on-surface">12</div>
+<div class="p-2 font-bold text-on-surface">13</div>
+<div class="p-2 font-bold text-on-surface">14</div>
+<div class="flex items-center justify-center p-1">
+<div class="bg-primary text-white w-9 h-9 flex items-center justify-center rounded-xl font-black shadow-lg shadow-primary/30">15</div>
+</div>
+<div class="p-2 font-bold text-on-surface">16</div>
+<div class="p-2 font-bold text-on-surface">17</div>
+<div class="p-2 font-bold text-on-surface">18</div>
+</div>
+<!-- Legend -->
+<div class="mt-8 flex justify-center gap-4 border-t border-outline-variant/10 pt-4">
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="font-label text-[10px] font-bold text-outline">MATCH</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-tertiary"></div>
+<span class="font-label text-[10px] font-bold text-outline">TRAINING</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="font-label text-[10px] font-bold text-outline">TOURNEY</span>
+</div>
+</div>
+</section>
+<!-- Daily Activities Section -->
+<section class="space-y-4">
+<div class="flex items-baseline justify-between">
+<h3 class="font-headline font-extrabold text-lg uppercase tracking-tight text-on-surface">TODAY'S LINEUP</h3>
+<span class="font-label text-xs font-semibold text-primary uppercase">OCT 15, 2023</span>
+</div>
+<!-- Activity Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border-l-4 border-primary flex items-center gap-4">
+<div class="flex flex-col items-center justify-center w-14 h-14 bg-primary-container/10 rounded-lg">
+<span class="text-xs font-bold text-primary">18:00</span>
+<span class="text-[10px] font-medium text-primary-container uppercase">60'</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label text-[10px] font-black text-primary tracking-widest uppercase">LEAGUE MATCH</span>
+<div class="h-1 w-1 rounded-full bg-outline-variant"></div>
+<span class="font-label text-[10px] font-medium text-outline uppercase">COURT 4</span>
+</div>
+<p class="font-headline font-bold text-on-surface">VS. NAVARRO / LEBRÓN</p>
+</div>
+<div class="flex -space-x-3">
+<img alt="Partner" class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" data-alt="portrait of a determined female athlete wearing a headband" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLrcj1J-hhqcZ2oz5jm2ZC2jOrgYl3a4OZn0IQ8H6M1UZEj9Glb4ur-LpskBDKR7q02EOnaSspYfY_uPnf2_aO4nDf7odajvpY2QylKjyfxzAo_od051BNVVL6qhDEndo8VQ0-0okHovBkhKtr7I230HTfypgAK4wiCA8Tco2LWgg7ihbxzZ7cg1gxSYahykHbjUgJeYKQBgJMWaZlUK0QZcJkZQpPo7uAVMwGfza9Oxsig0wzICBh1ibUDE4cm7j7fFkVO7fkavw"/>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-lowest bg-surface-container flex items-center justify-center text-[10px] font-bold text-on-surface">+1</div>
+</div>
+</div>
+<!-- Activity Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border-l-4 border-tertiary flex items-center gap-4">
+<div class="flex flex-col items-center justify-center w-14 h-14 bg-tertiary/10 rounded-lg">
+<span class="text-xs font-bold text-tertiary">20:30</span>
+<span class="text-[10px] font-medium text-tertiary uppercase">90'</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label text-[10px] font-black text-tertiary tracking-widest uppercase">INTENSIVE CLINIC</span>
+<div class="h-1 w-1 rounded-full bg-outline-variant"></div>
+<span class="font-label text-[10px] font-medium text-outline uppercase">CENTRAL COURT</span>
+</div>
+<p class="font-headline font-bold text-on-surface">OVERHEADS &amp; VOLLEYS</p>
+</div>
+<div class="w-8 h-8 rounded-full bg-tertiary/20 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-lg">sports</span>
+</div>
+</div>
+<!-- Activity Card 3 (Registration) -->
+<div class="relative overflow-hidden bg-inverse-surface rounded-xl p-5 text-white shadow-xl">
+<div class="absolute right-0 top-0 w-32 h-full opacity-20 transform translate-x-8">
+<span class="material-symbols-outlined text-[120px] text-primary-container">emoji_events</span>
+</div>
+<div class="relative z-10">
+<span class="font-label text-[10px] font-black text-primary-container tracking-tighter uppercase mb-2 block">UPCOMING TOURNAMENT</span>
+<h4 class="font-headline font-extrabold text-xl leading-tight mb-3">WINTER PADEL<br/>CHAMPIONSHIP</h4>
+<button class="bg-primary hover:bg-primary-container text-white px-5 py-2.5 rounded-xl font-label text-xs font-black uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-primary/40">
+            REGISTER NOW
+          </button>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-[#ffffff] dark:bg-[#1f3051] rounded-t-3xl shadow-[0_-10px_40px_rgba(7,27,59,0.08)]">
+<a class="flex flex-col items-center justify-center text-[#1f3051]/60 dark:text-slate-400 px-4 py-2 hover:text-[#144bdb] transition-transform active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-wider uppercase">HOME</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#1f3051]/60 dark:text-slate-400 px-4 py-2 hover:text-[#144bdb] transition-transform active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined mb-1">emoji_events</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-wider uppercase">TOURNEYS</span>
+</a>
+<!-- Active Destination: CALENDAR -->
+<a class="flex flex-col items-center justify-center bg-[#3b66f5] text-white rounded-xl px-4 py-2 scale-110 shadow-lg shadow-[#3b66f5]/30 active:scale-90 transition-transform duration-300 ease-out" href="#">
+<span class="material-symbols-outlined mb-1">calendar_month</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-wider uppercase">CALENDAR</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#1f3051]/60 dark:text-slate-400 px-4 py-2 hover:text-[#144bdb] transition-transform active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined mb-1">group</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-wider uppercase">PLAYERS</span>
+</a>
+</nav>
+</body></html>

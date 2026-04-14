@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ST. GEORGE - Elite Padel Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#d8e2ff",
+              "on-primary-container": "#fbf8ff",
+              "primary-container": "#3b66f5",
+              "secondary-fixed-dim": "#b6c6f0",
+              "error": "#ba1a1a",
+              "secondary-container": "#c4d4fe",
+              "surface-dim": "#ccdaff",
+              "surface-bright": "#f9f9ff",
+              "on-surface": "#071b3b",
+              "inverse-surface": "#1f3051",
+              "surface": "#f9f9ff",
+              "primary": "#144bdb",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-low": "#f1f3ff",
+              "surface-container-high": "#e1e8ff",
+              "outline-variant": "#c4c5d8",
+              "tertiary": "#006746",
+              "on-tertiary-container": "#e8ffef",
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-pill {
+            backdrop-filter: blur(12px);
+            background: rgba(59, 102, 245, 0.1);
+        }
+        .sidebar-active {
+            background-color: #3b66f5;
+            color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 0 15px rgba(59, 102, 245, 0.4);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface flex min-h-screen">
+<!-- SideNavBar Component -->
+<aside class="fixed left-0 top-0 h-screen w-64 bg-[#1f3051] dark:bg-[#071b3b] shadow-xl flex flex-col p-4 z-50">
+<div class="mb-10 px-4 pt-4">
+<h1 class="text-white font-black italic tracking-tighter text-2xl">ST. GEORGE</h1>
+<p class="text-slate-400 text-[0.65rem] font-bold uppercase tracking-[0.2em] mt-1">Elite Padel Management</p>
+</div>
+<nav class="flex-grow space-y-1">
+<!-- Active Tab: Dashboard -->
+<a class="sidebar-active flex items-center gap-3 px-4 py-3 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-headline text-[0.75rem] font-bold uppercase tracking-widest">Dashboard</span>
+</a>
+<a class="text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">emoji_events</span>
+<span class="font-headline text-[0.75rem] font-bold uppercase tracking-widest">Torneos</span>
+</a>
+<a class="text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">workspace_premium</span>
+<span class="font-headline text-[0.75rem] font-bold uppercase tracking-widest">Ligas</span>
+</a>
+<a class="text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-headline text-[0.75rem] font-bold uppercase tracking-widest">Jugadores</span>
+</a>
+<a class="text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-headline text-[0.75rem] font-bold uppercase tracking-widest">Calendario</span>
+</a>
+<a class="text-slate-300 hover:text-white hover:bg-white/10 flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-headline text-[0.75rem] font-bold uppercase tracking-widest">Pagos</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-white/10 pt-4 space-y-1">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-white py-3 px-4 rounded-xl font-headline text-[0.7rem] font-bold uppercase tracking-wider shadow-lg mb-4 hover:scale-105 transition-transform">
+                Nuevo Torneo
+            </button>
+<a class="text-slate-400 hover:text-white flex items-center gap-3 px-4 py-2 transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">help</span>
+<span class="font-headline text-[0.7rem] font-bold uppercase tracking-widest">Soporte</span>
+</a>
+<a class="text-slate-400 hover:text-white flex items-center gap-3 px-4 py-2 transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">logout</span>
+<span class="font-headline text-[0.7rem] font-bold uppercase tracking-widest">Cerrar Sesión</span>
+</a>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 flex-grow flex flex-col min-h-screen">
+<!-- TopAppBar Component -->
+<header class="flex justify-between items-center w-full px-8 py-4 bg-white shadow-sm sticky top-0 z-40">
+<div class="flex items-center gap-4">
+<h2 class="font-headline text-xl font-black tracking-tighter text-on-surface uppercase">Dashboard</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="material-symbols-outlined text-slate-500 group-hover:text-primary cursor-pointer transition-colors">notifications</span>
+<span class="absolute -top-1 -right-1 w-2 h-2 bg-error rounded-full"></span>
+</div>
+<span class="material-symbols-outlined text-slate-500 hover:text-primary cursor-pointer transition-colors">settings</span>
+<div class="flex items-center gap-3 pl-4 border-l border-outline-variant/30">
+<div class="text-right">
+<p class="text-xs font-bold font-headline uppercase tracking-wider text-on-surface">Admin User</p>
+<p class="text-[10px] text-slate-400 font-bold uppercase">Super Administrador</p>
+</div>
+<img class="w-10 h-10 rounded-full object-cover ring-2 ring-primary-container/20" data-alt="Close-up professional studio portrait of a smiling male administrator with short dark hair in a bright office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjfuhjyA8cW19gkvtZvbEKsvHTpYl1XabR9qt1e0cGSqeG2OIexFuVKO9372CF_skUAa-EWviTGlWs9J9hA8VVF84VHJEU40l0Vw4APX_IMEOPGuzuvtXck8gXSYVTApnBvdS_fX8X7LYYYclC8zAyMJAUbwa-qLOTzO5FrSNzCO64r7SrTG7d68TXz6FpcBQqzGxZk4blc3M0EptyJbUXzOpwt8vVo1ihLTNVYGnwHCpxG49e3jLpbOmfAfiCRbmJAYJAb8LkwIE"/>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<section class="p-8 flex-grow">
+<!-- Hero Greeting -->
+<div class="mb-10">
+<h1 class="font-headline text-4xl font-extrabold text-on-surface tracking-tight">¡Hola, Admin!</h1>
+<p class="text-slate-500 mt-2 font-medium">Bienvenido al panel central de ST. GEORGE. Aquí está el resumen de hoy.</p>
+</div>
+<div class="grid grid-cols-12 gap-8">
+<!-- Left Column: Main Stats & Access -->
+<div class="col-span-12 lg:col-span-8 space-y-8">
+<!-- Quick Stats Row (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-primary transition-all hover:shadow-md">
+<p class="font-headline text-[0.65rem] font-bold text-slate-400 uppercase tracking-[0.15em] mb-2">Socios Activos</p>
+<div class="flex items-baseline gap-2">
+<h3 class="text-3xl font-black text-on-surface">1,248</h3>
+<span class="text-tertiary text-xs font-bold">+12%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-primary-container transition-all hover:shadow-md">
+<p class="font-headline text-[0.65rem] font-bold text-slate-400 uppercase tracking-[0.15em] mb-2">Ocupación Canchas</p>
+<div class="flex items-baseline gap-2">
+<h3 class="text-3xl font-black text-on-surface">84%</h3>
+<span class="text-tertiary text-xs font-bold">Óptimo</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-inverse-surface transition-all hover:shadow-md">
+<p class="font-headline text-[0.65rem] font-bold text-slate-400 uppercase tracking-[0.15em] mb-2">Próximos Torneos</p>
+<div class="flex items-baseline gap-2">
+<h3 class="text-3xl font-black text-on-surface">03</h3>
+<span class="text-slate-400 text-xs font-bold">En 15 días</span>
+</div>
+</div>
+</div>
+<!-- Acceso a Secciones (Grid of Cards) -->
+<div>
+<div class="flex justify-between items-end mb-6">
+<h4 class="font-headline text-lg font-bold uppercase tracking-wider text-on-surface">Acceso a Secciones</h4>
+<button class="text-primary text-xs font-bold uppercase tracking-widest hover:underline">Ver todas</button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+<!-- Section Card: Torneos -->
+<div class="group bg-surface-container-lowest p-5 rounded-xl transition-all hover:bg-primary-container/5 cursor-pointer border border-outline-variant/10">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl">emoji_events</span>
+</div>
+<h5 class="font-headline text-sm font-extrabold uppercase tracking-tight text-on-surface">Torneos</h5>
+<p class="text-xs text-slate-500 mt-1">Gestión de inscripciones y cuadros.</p>
+</div>
+<!-- Section Card: Ligas -->
+<div class="group bg-surface-container-lowest p-5 rounded-xl transition-all hover:bg-primary-container/5 cursor-pointer border border-outline-variant/10">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl">workspace_premium</span>
+</div>
+<h5 class="font-headline text-sm font-extrabold uppercase tracking-tight text-on-surface">Ligas</h5>
+<p class="text-xs text-slate-500 mt-1">Sistemas de ascenso y permanencia.</p>
+</div>
+<!-- Section Card: Jugadores -->
+<div class="group bg-surface-container-lowest p-5 rounded-xl transition-all hover:bg-primary-container/5 cursor-pointer border border-outline-variant/10">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl">group</span>
+</div>
+<h5 class="font-headline text-sm font-extrabold uppercase tracking-tight text-on-surface">Jugadores</h5>
+<p class="text-xs text-slate-500 mt-1">Base de datos y rankings mundiales.</p>
+</div>
+<!-- Section Card: Calendario -->
+<div class="group bg-surface-container-lowest p-5 rounded-xl transition-all hover:bg-primary-container/5 cursor-pointer border border-outline-variant/10">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl">calendar_month</span>
+</div>
+<h5 class="font-headline text-sm font-extrabold uppercase tracking-tight text-on-surface">Calendario</h5>
+<p class="text-xs text-slate-500 mt-1">Reserva de canchas y eventos especiales.</p>
+</div>
+<!-- Section Card: Pagos -->
+<div class="group bg-surface-container-lowest p-5 rounded-xl transition-all hover:bg-primary-container/5 cursor-pointer border border-outline-variant/10">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl">payments</span>
+</div>
+<h5 class="font-headline text-sm font-extrabold uppercase tracking-tight text-on-surface">Pagos</h5>
+<p class="text-xs text-slate-500 mt-1">Control de morosidad y facturación.</p>
+</div>
+<!-- Section Card: Configuración -->
+<div class="group bg-surface-container-lowest p-5 rounded-xl transition-all hover:bg-primary-container/5 cursor-pointer border border-outline-variant/10">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl">settings</span>
+</div>
+<h5 class="font-headline text-sm font-extrabold uppercase tracking-tight text-on-surface">Configuración</h5>
+<p class="text-xs text-slate-500 mt-1">Ajustes globales del club y roles.</p>
+</div>
+</div>
+</div>
+<!-- Main Action Hero Card -->
+<div class="relative overflow-hidden rounded-2xl bg-inverse-surface p-10 text-white min-h-[220px] flex flex-col justify-center">
+<img class="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay" data-alt="Dynamic shot of a professional indoor padel court with blue turf and glass walls under dramatic overhead stadium lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDphLGT56_ou71pAEgmGSKZEckxC6wKCfJ02POIj7OnCWW8D1U02CpBuI-dONY6o84jZcwHGRk2AkgTbMqOdAfxDaL11NRqRMZalN_k6ix0AWPUkDS6ABWVIw3YHljybeYKEHWhVB9otGm-fAhz0WDJ_PWb0G6ZTHnaYH_Pr3OBxTNt_6yvwZFDAC_uhi4xYCOlr9mBdRCDKF7vs292czBHUc5QGpWJq9EE6608-vpZuKL_XWQc2Gzrs5DM42mk8PQ-xuNgdHkRAM"/>
+<div class="relative z-10">
+<h2 class="font-headline text-3xl font-black uppercase italic tracking-tighter mb-4">Potencia el Juego</h2>
+<p class="max-w-md text-slate-300 mb-8 font-medium">Lanza la nueva temporada de la Liga Premier St. George. Organiza categorías, define fechas y abre inscripciones hoy mismo.</p>
+<div class="flex flex-wrap gap-4">
+<button class="bg-primary hover:bg-primary-container text-white px-8 py-4 rounded-xl font-headline font-bold uppercase tracking-widest transition-all shadow-xl shadow-primary/20">
+                                    Crear Nueva Liga
+                                </button>
+<button class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-8 py-4 rounded-xl font-headline font-bold uppercase tracking-widest transition-all border border-white/20">
+                                    Configuración del Club
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Notifications & Notices -->
+<div class="col-span-12 lg:col-span-4 space-y-8">
+<!-- Avisos y Noticias Sidebar -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/10 h-full">
+<div class="flex items-center gap-2 mb-8">
+<span class="material-symbols-outlined text-primary">campaign</span>
+<h4 class="font-headline text-lg font-bold uppercase tracking-tight text-on-surface">Avisos y Noticias</h4>
+</div>
+<div class="space-y-6">
+<!-- Notice Item: Maintenance -->
+<div class="group cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="px-2 py-1 bg-error-container text-on-error-container text-[10px] font-bold uppercase rounded tracking-wider">Mantenimiento</span>
+<span class="text-[10px] text-slate-400 font-medium">Hace 2h</span>
+</div>
+<h6 class="font-headline text-sm font-bold text-on-surface group-hover:text-primary transition-colors">Cierre de Canchas 3 y 4</h6>
+<p class="text-xs text-slate-500 mt-1 leading-relaxed">Las canchas traseras estarán fuera de servicio este miércoles por cambio de iluminación LED.</p>
+<div class="h-px bg-outline-variant/20 mt-6"></div>
+</div>
+<!-- Notice Item: Reports -->
+<div class="group cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="px-2 py-1 bg-surface-container-high text-primary text-[10px] font-bold uppercase rounded tracking-wider">Reportes</span>
+<span class="text-[10px] text-slate-400 font-medium">Ayer</span>
+</div>
+<h6 class="font-headline text-sm font-bold text-on-surface group-hover:text-primary transition-colors">Balance Mensual Listo</h6>
+<p class="text-xs text-slate-500 mt-1 leading-relaxed">El reporte de ingresos y egresos del mes de Octubre ya está disponible para su descarga en PDF.</p>
+<div class="h-px bg-outline-variant/20 mt-6"></div>
+</div>
+<!-- Notice Item: Tournament -->
+<div class="group cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="px-2 py-1 bg-tertiary/10 text-tertiary text-[10px] font-bold uppercase rounded tracking-wider">Torneos</span>
+<span class="text-[10px] text-slate-400 font-medium">2 días</span>
+</div>
+<h6 class="font-headline text-sm font-bold text-on-surface group-hover:text-primary transition-colors">Inscripciones Abiertas: Open Cup</h6>
+<p class="text-xs text-slate-500 mt-1 leading-relaxed">Se han abierto los cupos para la Open Cup Categoría B. Ya hay 24 parejas inscritas.</p>
+</div>
+</div>
+<button class="w-full mt-10 py-3 border-2 border-primary/20 text-primary rounded-xl font-headline text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all">
+                            Ver Historial de Avisos
+                        </button>
+</div>
+<!-- Mini Map or Location Summary -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm border border-outline-variant/10">
+<div class="p-6">
+<h4 class="font-headline text-sm font-bold uppercase tracking-wider text-on-surface mb-4">Estado de Sucursales</h4>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 bg-tertiary rounded-full"></div>
+<p class="text-xs font-bold text-on-surface">Campus Central</p>
+</div>
+<span class="text-[10px] text-slate-400">12 canchas activas</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 bg-primary-container rounded-full animate-pulse"></div>
+<p class="text-xs font-bold text-on-surface">Anexo Norte</p>
+</div>
+<span class="text-[10px] text-slate-400">4 canchas (Torneo)</span>
+</div>
+</div>
+</div>
+<div class="h-32 bg-slate-200 relative">
+<img class="w-full h-full object-cover grayscale opacity-50" data-alt="Abstract aerial satellite map view of an urban residential district with geometric street patterns and green spaces" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMxhzIK-JbtdZafya1aaJiQqziZdoMMnjoLWtj4hxUFzbbAlbRiGpodUCKvjyrHUzdqX0c35zbru4xiVoqu2MKtSBCePtuxE02m3zpPkIvnqdA26Mn-AE-d1uGhOdMNg47KaoqV7qeFNCAraN7-_pcbIJlOPtAVFI-AZ4mr5qXvx2FCke4v3cEeoGKFE8rSzKLxTNIguswbwE2q4Tzqccbh9CZQ2GFV8H7kgdlJgcA-5yYRJ2KQrH0Wpthquq0e6OIK9K_rhFkeGg"/>
+<div class="absolute inset-0 bg-primary/10"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Subtle Footer -->
+<footer class="p-8 border-t border-outline-variant/10 text-center">
+<p class="text-[10px] font-headline font-bold text-slate-400 uppercase tracking-[0.2em]">© 2024 ST. GEORGE Elite Padel Management • Todos los derechos reservados</p>
+</footer>
+</main>
+<!-- FAB (Suppressed on Dashboard context as requested per "Contextual FAB Suppression" but typically allowed on Home/Dashboard screens for primary action) -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined text-2xl">add</span>
+</button>
+</body></html>

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Base de Jugadores - ST. GEORGE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#d8e2ff",
+              "on-primary-container": "#fbf8ff",
+              "primary-container": "#3b66f5",
+              "secondary-fixed-dim": "#b6c6f0",
+              "error": "#ba1a1a",
+              "secondary-container": "#c4d4fe",
+              "surface-dim": "#ccdaff",
+              "surface-bright": "#f9f9ff",
+              "on-surface": "#071b3b",
+              "inverse-surface": "#1f3051",
+              "inverse-on-surface": "#edf0ff",
+              "surface": "#f9f9ff",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-low": "#f1f3ff",
+              "surface-container": "#e9edff",
+              "surface-container-high": "#e1e8ff",
+              "surface-container-highest": "#d8e2ff",
+              "primary": "#144bdb",
+              "on-primary": "#ffffff",
+              "outline": "#747686",
+              "outline-variant": "#c4c5d8",
+              "tertiary": "#006746",
+              "on-tertiary": "#ffffff",
+              "tertiary-container": "#00835a",
+              "on-tertiary-container": "#e8ffef",
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body { font-family: 'Inter', sans-serif; }
+      h1, h2, h3, .nav-label { font-family: 'Manrope', sans-serif; }
+      .glass-active {
+        background: rgba(59, 102, 245, 0.9);
+        backdrop-blur: 12px;
+        box-shadow: 0 0 15px rgba(59, 102, 245, 0.4);
+      }
+      .athletic-gradient {
+        background: linear-gradient(135deg, #144bdb 0%, #3b66f5 100%);
+      }
+    </style>
+</head>
+<body class="bg-surface text-on-surface flex min-h-screen">
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-screen w-64 bg-[#1f3051] flex flex-col p-4 shadow-xl z-50">
+<!-- Brand Identity -->
+<div class="mb-8 px-4 py-2">
+<h1 class="text-white font-black italic tracking-tighter text-2xl">ST. GEORGE</h1>
+<p class="text-slate-400 text-[10px] uppercase font-bold tracking-widest leading-none mt-1">Elite Padel Management</p>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 space-y-1">
+<a class="text-slate-300 hover:text-white flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-all duration-300 rounded-lg group" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[0.75rem] font-bold tracking-widest uppercase">Dashboard</span>
+</a>
+<a class="text-slate-300 hover:text-white flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-all duration-300 rounded-lg group" href="#">
+<span class="material-symbols-outlined">emoji_events</span>
+<span class="text-[0.75rem] font-bold tracking-widest uppercase">Torneos</span>
+</a>
+<a class="text-slate-300 hover:text-white flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-all duration-300 rounded-lg group" href="#">
+<span class="material-symbols-outlined">workspace_premium</span>
+<span class="text-[0.75rem] font-bold tracking-widest uppercase">Ligas</span>
+</a>
+<!-- Active Tab: Jugadores -->
+<a class="bg-[#3b66f5] text-white rounded-lg backdrop-blur-md shadow-[0_0_15px_rgba(59,102,245,0.4)] flex items-center gap-3 px-4 py-3" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="text-[0.75rem] font-bold tracking-widest uppercase">Jugadores</span>
+</a>
+<a class="text-slate-300 hover:text-white flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-all duration-300 rounded-lg group" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="text-[0.75rem] font-bold tracking-widest uppercase">Calendario</span>
+</a>
+<a class="text-slate-300 hover:text-white flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-all duration-300 rounded-lg group" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-[0.75rem] font-bold tracking-widest uppercase">Pagos</span>
+</a>
+</nav>
+<!-- Sidebar CTA -->
+<div class="mt-4 px-2">
+<button class="w-full py-3 athletic-gradient text-white font-bold text-[0.75rem] tracking-widest uppercase rounded-xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all">
+                Nuevo Torneo
+            </button>
+</div>
+<!-- Footer Links -->
+<div class="mt-auto pt-4 border-t border-white/10 space-y-1">
+<a class="text-slate-300 hover:text-white flex items-center gap-3 px-4 py-2 text-[0.75rem] font-bold tracking-widest uppercase" href="#">
+<span class="material-symbols-outlined text-sm">help</span>
+                Soporte
+            </a>
+<a class="text-slate-300 hover:text-white flex items-center gap-3 px-4 py-2 text-[0.75rem] font-bold tracking-widest uppercase" href="#">
+<span class="material-symbols-outlined text-sm">logout</span>
+                Cerrar Sesión
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 flex-1 flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-white sticky top-0 z-40 flex justify-between items-center w-full px-8 py-4 shadow-sm">
+<div class="flex items-center gap-4">
+<h2 class="text-xl font-black tracking-tighter text-slate-900 uppercase">BASE DE JUGADORES</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full text-sm w-64 focus:ring-2 focus:ring-primary" placeholder="Buscar jugador..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-slate-500 hover:bg-slate-50 p-2 rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-white"></span>
+</button>
+<button class="text-slate-500 hover:bg-slate-50 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-10 w-10 rounded-full overflow-hidden border-2 border-primary-container">
+<img alt="User profile avatar" class="h-full w-full object-cover" data-alt="Close-up professional headshot of a smiling male coach in athletic gear with soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqPxaEoP2drZDdjcUqHsdyOOkPllWwzoFxHb5Ra8iggBbBJg0ByTwb37-Vt9bsVx0SYi8NBPNaCFdTgwlU_8f1wYLiVRg5B84fgx3jDV5JhCLC-gem8s1JnBQaXzdcTALq046A19wBpJcUIQCbzOkwUDGO-oUp4YUBMYLfoZSlkDofNM-NWSLbV_-AlBZaoEKhso9AD946T65NJZ5Qx1vSwqzSuPUy4LaA95hl_MbdZxyHC9DCQfHBq_4Kf9otGdqSvQuLsnk8SOY"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="p-8 max-w-7xl mx-auto w-full space-y-8">
+<!-- Page Header & Actions -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="space-y-1">
+<span class="text-primary font-bold text-xs tracking-widest uppercase">Administración Central</span>
+<h1 class="text-4xl font-extrabold tracking-tight text-on-surface uppercase">Directorio de Atletas</h1>
+</div>
+<button class="athletic-gradient text-white px-8 py-4 rounded-xl font-bold tracking-widest uppercase text-sm shadow-[0_10px_20px_rgba(20,75,219,0.2)] flex items-center gap-2 hover:translate-y-[-2px] transition-transform">
+<span class="material-symbols-outlined">person_add</span>
+                    Nuevo Jugador
+                </button>
+</div>
+<!-- Advanced Filters Bar -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/10 flex flex-wrap items-center gap-6">
+<div class="flex flex-col gap-1.5 min-w-[200px]">
+<label class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Categoría</label>
+<select class="bg-surface-container-low border-none rounded-lg text-sm font-semibold text-on-surface py-2.5 focus:ring-2 focus:ring-primary cursor-pointer">
+<option>Todas</option>
+<option>Categoría A</option>
+<option>Categoría B</option>
+<option>Categoría C</option>
+</select>
+</div>
+<div class="flex flex-col gap-1.5 min-w-[200px]">
+<label class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Estado de Pago</label>
+<select class="bg-surface-container-low border-none rounded-lg text-sm font-semibold text-on-surface py-2.5 focus:ring-2 focus:ring-primary cursor-pointer">
+<option>Todos</option>
+<option>Al día</option>
+<option>Pendiente</option>
+</select>
+</div>
+<div class="flex flex-col gap-1.5 min-w-[200px]">
+<label class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Ordenar por</label>
+<select class="bg-surface-container-low border-none rounded-lg text-sm font-semibold text-on-surface py-2.5 focus:ring-2 focus:ring-primary cursor-pointer">
+<option>Ranking (Desc)</option>
+<option>Nombre (A-Z)</option>
+<option>Win Rate</option>
+</select>
+</div>
+<button class="mt-auto h-[42px] px-6 text-primary font-bold text-xs tracking-widest uppercase hover:bg-primary/5 rounded-lg transition-colors border border-primary/20">
+                    Limpiar Filtros
+                </button>
+</div>
+<!-- Data Table Section -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low">
+<tr>
+<th class="px-6 py-4 text-[10px] font-black text-slate-500 tracking-widest uppercase">Jugador</th>
+<th class="px-6 py-4 text-[10px] font-black text-slate-500 tracking-widest uppercase text-center">Categoría</th>
+<th class="px-6 py-4 text-[10px] font-black text-slate-500 tracking-widest uppercase text-center">Ranking</th>
+<th class="px-6 py-4 text-[10px] font-black text-slate-500 tracking-widest uppercase text-center">Partidos</th>
+<th class="px-6 py-4 text-[10px] font-black text-slate-500 tracking-widest uppercase text-center">Win Rate</th>
+<th class="px-6 py-4 text-[10px] font-black text-slate-500 tracking-widest uppercase text-center">Estado de Pago</th>
+<th class="px-6 py-4 text-[10px] font-black text-slate-500 tracking-widest uppercase text-right">Acción</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
+<img alt="Santiago Mendez" class="h-full w-full object-cover" data-alt="Portrait of a young male padel player with focused expression and athletic headband" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANp9czLqMVgoiexMVMabQG4nFjFpssw0oxcvjgOhXMkGsmCMqoflskkBDPonwH5drgAr3tGev0RTf3rARZpkDrzhRgaqSPVBtdIL_Z8kpQvuJHziGOnd-kGZRCYfVi4eqYRaMJwxfbjYkp2EFl_0z1U9eYDJ7MwfBdHkRQECC8nURqTYL701nbgtTcf-pqhl48WpDfKiY620Pj0xjMv8EFq55Gn7_eQVsurq9IRc4eJlJRtN4IOCRoDqtDxagfL0nJyhI6z8hzjm8"/>
+</div>
+<div>
+<div class="font-bold text-on-surface">SANTIAGO MÉNDEZ</div>
+<div class="text-[10px] text-slate-500 font-medium">socio #2044</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full uppercase tracking-tighter">Cat. A</span>
+</td>
+<td class="px-6 py-4 text-center font-black text-slate-900">#4</td>
+<td class="px-6 py-4 text-center font-medium">82</td>
+<td class="px-6 py-4 text-center">
+<div class="flex flex-col items-center gap-1">
+<span class="text-sm font-bold text-tertiary">78%</span>
+<div class="w-16 h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-tertiary" style="width: 78%;"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="px-3 py-1 bg-tertiary/10 text-tertiary text-[10px] font-black rounded-lg uppercase tracking-widest">Al Día</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="px-4 py-2 text-primary font-bold text-[10px] tracking-widest uppercase hover:bg-primary/5 rounded-lg border border-transparent group-hover:border-primary/20 transition-all">
+                                        Perfil
+                                    </button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
+<img alt="Valeria Gomez" class="h-full w-full object-cover" data-alt="Female tennis player smiling, outdoor daylight setting, athletic uniform" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7tRv-pTYTGUg6MWu9xoAwyuru2-A2f5--TLQ8Thxt6F7csP4lvOvGDnhsTTlra-ZX87eDKgLGg0IPdGjI1uCuxZ_2y8IcXkwLLg50Q1G8bAEizHliLOf6yoW_z7lrAv_11Y3JFmbEr59pTlKGk1SUzESeTk_2e3liuG01v4Lv0c6sPZVki-CrkYnYcqn3UDuIbRvpgFUGPtbSmA-N0VsBu8HBWI7j9wPgI4GCtXEhOZ8OLhOo_GTC-wf7HNowE3V4DQylzfMGbIY"/>
+</div>
+<div>
+<div class="font-bold text-on-surface">VALERIA GÓMEZ</div>
+<div class="text-[10px] text-slate-500 font-medium">socio #3112</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full uppercase tracking-tighter">Cat. A</span>
+</td>
+<td class="px-6 py-4 text-center font-black text-slate-900">#12</td>
+<td class="px-6 py-4 text-center font-medium">64</td>
+<td class="px-6 py-4 text-center">
+<div class="flex flex-col items-center gap-1">
+<span class="text-sm font-bold text-tertiary">65%</span>
+<div class="w-16 h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-tertiary" style="width: 65%;"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="px-3 py-1 bg-error/10 text-error text-[10px] font-black rounded-lg uppercase tracking-widest">Pendiente</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="px-4 py-2 text-primary font-bold text-[10px] tracking-widest uppercase hover:bg-primary/5 rounded-lg border border-transparent group-hover:border-primary/20 transition-all">
+                                        Perfil
+                                    </button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
+<img alt="Mateo Ruiz" class="h-full w-full object-cover" data-alt="Portrait of middle-aged man with sharp gaze, cinematic lighting, corporate-athletic look" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXxSvODxLoMywUvCWgVR1tkvS0Ey2lFFAuTf-wbuODfaJRt8jLPK0XYI7q6WlkbAQ5K9PO9Hj0cCKr0p3feCIJL5mWsvQ3Pu-B1yc4zzIUbr3qLfZwqLvMO5cQByIb1nT2V_gtdNIjY8cOPl0Ane3wPuE3tNxogEqtouevcx2i6t4AMoEBhNyMfYBht-UUdBXX8m64yXh515IzxUaEcXbeUnPSW805CbEUOX0HaXgs39G_9FGwouRL9b90LwqAe5YOGqMdUVHqPr4"/>
+</div>
+<div>
+<div class="font-bold text-on-surface">MATEO RUIZ</div>
+<div class="text-[10px] text-slate-500 font-medium">socio #1088</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="px-3 py-1 bg-surface-container-highest text-on-surface-variant text-[10px] font-bold rounded-full uppercase tracking-tighter">Cat. B</span>
+</td>
+<td class="px-6 py-4 text-center font-black text-slate-900">#34</td>
+<td class="px-6 py-4 text-center font-medium">42</td>
+<td class="px-6 py-4 text-center">
+<div class="flex flex-col items-center gap-1">
+<span class="text-sm font-bold text-slate-700">52%</span>
+<div class="w-16 h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 52%;"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="px-3 py-1 bg-tertiary/10 text-tertiary text-[10px] font-black rounded-lg uppercase tracking-widest">Al Día</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="px-4 py-2 text-primary font-bold text-[10px] tracking-widest uppercase hover:bg-primary/5 rounded-lg border border-transparent group-hover:border-primary/20 transition-all">
+                                        Perfil
+                                    </button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
+<img alt="Camila Lopez" class="h-full w-full object-cover" data-alt="Close-up of competitive sportswoman, intense focus, minimalist studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7RqcMBy3KfbtBW-Fwl3nUqImsMESHBV7GJFVe4UlFHzms5Q1z30JqBaFJYQfhDexwn4Nnv502L7Un42x5XlkA8zP6aFcCwzpsEYQUvFVOSNRmOo6h8uT1Iw3tGQ6l2eFfcFlrfDSGcDqfntewhARWKCIxw59O67IKhTf8XTjqx9STPu9-7A-ptPnZVLMJGONJVpvmMYzvJtNJ4RBAeery_Wsj34NNXBNlewQlwQeZCObhfCwH-ff5rTt4QbRjF12bGU77_CRvUFg"/>
+</div>
+<div>
+<div class="font-bold text-on-surface">CAMILA LÓPEZ</div>
+<div class="text-[10px] text-slate-500 font-medium">socio #4501</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full uppercase tracking-tighter">Cat. A</span>
+</td>
+<td class="px-6 py-4 text-center font-black text-slate-900">#21</td>
+<td class="px-6 py-4 text-center font-medium">55</td>
+<td class="px-6 py-4 text-center">
+<div class="flex flex-col items-center gap-1">
+<span class="text-sm font-bold text-tertiary">71%</span>
+<div class="w-16 h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-tertiary" style="width: 71%;"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="px-3 py-1 bg-tertiary/10 text-tertiary text-[10px] font-black rounded-lg uppercase tracking-widest">Al Día</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="px-4 py-2 text-primary font-bold text-[10px] tracking-widest uppercase hover:bg-primary/5 rounded-lg border border-transparent group-hover:border-primary/20 transition-all">
+                                        Perfil
+                                    </button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
+<img alt="Julio Faría" class="h-full w-full object-cover" data-alt="Portrait of a young male athlete in sports clothing with natural lighting outdoors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnM7krkS8Q_GsvkwExxkioCSnu0HtfcH2ZTzoRpqTAoAoMRwsy2Po0Vpr-km70i-PHXAkFsHkoA0hCxO-CkuZ5hX9fnryhSbr_SOg0zCA-mxgKsmwZbfiUdj_Ai9652pcgDkctZnBpVriSv4vGtxgCRmW0XGU-3R2IBWBqnEMmHu3z0yHwNFrufYXIa1_pGkkEJhaSgpx6qwqZ6wkDEszMJuNxPjkCLEwoUs_IiMzKnM6iVFEtVzWqndTjnlEZZ7luqrYHlXKzrKk"/>
+</div>
+<div>
+<div class="font-bold text-on-surface">JULIO FARÍA</div>
+<div class="text-[10px] text-slate-500 font-medium">socio #5221</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="px-3 py-1 bg-surface-container text-slate-500 text-[10px] font-bold rounded-full uppercase tracking-tighter">Cat. C</span>
+</td>
+<td class="px-6 py-4 text-center font-black text-slate-900">#102</td>
+<td class="px-6 py-4 text-center font-medium">12</td>
+<td class="px-6 py-4 text-center">
+<div class="flex flex-col items-center gap-1">
+<span class="text-sm font-bold text-slate-500">30%</span>
+<div class="w-16 h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-slate-400" style="width: 30%;"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="px-3 py-1 bg-error/10 text-error text-[10px] font-black rounded-lg uppercase tracking-widest">Pendiente</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="px-4 py-2 text-primary font-bold text-[10px] tracking-widest uppercase hover:bg-primary/5 rounded-lg border border-transparent group-hover:border-primary/20 transition-all">
+                                        Perfil
+                                    </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="px-6 py-4 bg-surface-container-low flex items-center justify-between border-t border-outline-variant/10">
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Mostrando 1 - 5 de 128 jugadores</span>
+<div class="flex items-center gap-2">
+<button class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 cursor-not-allowed">Anterior</button>
+<div class="flex gap-1">
+<button class="w-8 h-8 flex items-center justify-center athletic-gradient text-white rounded text-xs font-bold">1</button>
+<button class="w-8 h-8 flex items-center justify-center hover:bg-white text-on-surface rounded text-xs font-bold transition-colors">2</button>
+<button class="w-8 h-8 flex items-center justify-center hover:bg-white text-on-surface rounded text-xs font-bold transition-colors">3</button>
+<span class="px-2 text-slate-400">...</span>
+<button class="w-8 h-8 flex items-center justify-center hover:bg-white text-on-surface rounded text-xs font-bold transition-colors">26</button>
+</div>
+<button class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-primary hover:bg-white rounded transition-colors">Siguiente</button>
+</div>
+</div>
+</div>
+<!-- Dashboard Stats Summary (Extra Bento Layer) -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 flex flex-col gap-2">
+<span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">Total Atletas</span>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-black text-on-surface">128</span>
+<span class="text-tertiary text-xs font-bold font-body">+12% este mes</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 flex flex-col gap-2">
+<span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">Tasa de Pago</span>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-black text-on-surface">92.4%</span>
+<span class="text-tertiary text-xs font-bold font-body">Meta: 95%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 flex flex-col gap-2">
+<span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">Actividad Semanal</span>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-black text-on-surface">456</span>
+<span class="text-slate-500 text-xs font-medium font-body">Partidos jugados</span>
+</div>
+</div>
+<div class="bg-inverse-surface p-6 rounded-xl shadow-lg flex flex-col justify-between overflow-hidden relative group">
+<div class="z-10">
+<span class="text-[10px] font-bold text-slate-300 tracking-widest uppercase">Próximo Torneo</span>
+<div class="text-xl font-bold text-white mt-1 leading-tight uppercase italic">Summer Open 2024</div>
+</div>
+<div class="z-10 mt-4">
+<span class="text-primary-container text-[10px] font-black tracking-widest uppercase">24 Jugadores Inscritos</span>
+</div>
+<!-- Aesthetic decoration -->
+<div class="absolute -right-4 -bottom-4 opacity-20 transform group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[100px] text-white">emoji_events</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sticky Footer Branding (Desktop) -->
+<footer class="mt-auto px-8 py-4 bg-white/50 backdrop-blur-sm border-t border-outline-variant/10 flex justify-between items-center text-[10px] font-bold text-slate-400 tracking-widest uppercase">
+<div>© 2024 ST. GEORGE Elite Padel Management</div>
+<div class="flex gap-4">
+<a class="hover:text-primary" href="#">Términos</a>
+<a class="hover:text-primary" href="#">Privacidad</a>
+<a class="hover:text-primary" href="#">Configuración del Club</a>
+</div>
+</footer>
+</main>
+</body></html>

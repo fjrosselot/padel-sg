@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ST. GEORGE | Panel de Finanzas</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-highest": "#d8e2ff",
+              "outline-variant": "#c4c5d8",
+              "tertiary-fixed": "#6ffbbe",
+              "surface-container": "#e9edff",
+              "on-secondary-fixed-variant": "#364669",
+              "on-tertiary-fixed-variant": "#005236",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-container": "#e8ffef",
+              "primary-fixed": "#dde1ff",
+              "secondary-container": "#c4d4fe",
+              "error": "#ba1a1a",
+              "surface-container-low": "#f1f3ff",
+              "surface-bright": "#f9f9ff",
+              "primary": "#144bdb",
+              "on-primary-fixed-variant": "#0038b6",
+              "primary-fixed-dim": "#b7c4ff",
+              "on-background": "#071b3b",
+              "on-tertiary-fixed": "#002113",
+              "on-primary-fixed": "#001452",
+              "primary-container": "#3b66f5",
+              "on-primary": "#ffffff",
+              "surface-dim": "#ccdaff",
+              "on-secondary-container": "#4b5b7f",
+              "on-secondary": "#ffffff",
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed-dim": "#4edea3",
+              "surface-variant": "#d8e2ff",
+              "on-secondary-fixed": "#071b3b",
+              "on-error": "#ffffff",
+              "tertiary-container": "#00835a",
+              "secondary-fixed-dim": "#b6c6f0",
+              "on-surface-variant": "#434655",
+              "on-primary-container": "#fbf8ff",
+              "inverse-primary": "#b7c4ff",
+              "outline": "#747686",
+              "surface": "#f9f9ff",
+              "surface-tint": "#1c4fe0",
+              "secondary-fixed": "#d8e2ff",
+              "on-error-container": "#93000a",
+              "error-container": "#ffdad6",
+              "on-surface": "#071b3b",
+              "surface-container-high": "#e1e8ff",
+              "secondary": "#4e5e82",
+              "tertiary": "#006746",
+              "inverse-on-surface": "#edf0ff",
+              "background": "#f9f9ff",
+              "inverse-surface": "#1f3051"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f9f9ff;
+        color: #071b3b;
+      }
+      h1, h2, h3, .brand-font {
+        font-family: 'Manrope', sans-serif;
+      }
+    </style>
+</head>
+<body class="flex min-h-screen">
+<!-- SideNavBar (Authority: JSON) -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col py-6 px-4 bg-[#1f3051] dark:bg-slate-950 h-screen w-64 border-r-0 shadow-2xl shadow-[#071b3b]/20">
+<div class="mb-10 px-4">
+<span class="text-2xl font-black text-white tracking-tighter italic block">ST. GEORGE</span>
+<span class="font-bold tracking-wider uppercase Manrope text-white/60 text-[10px]">ELITE PADEL</span>
+</div>
+<nav class="flex-1 space-y-2">
+<!-- Dashboard (Active based on context) -->
+<a class="flex items-center gap-3 bg-[#3b66f5] text-white rounded-xl px-4 py-3 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="uppercase tracking-[0.05em] text-xs font-bold">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-3 transition-colors hover:bg-white/5 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span class="uppercase tracking-[0.05em] text-xs font-bold">Reservations</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-3 transition-colors hover:bg-white/5 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="uppercase tracking-[0.05em] text-xs font-bold">Players</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-3 transition-colors hover:bg-white/5 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="emoji_events">emoji_events</span>
+<span class="uppercase tracking-[0.05em] text-xs font-bold">Tournaments</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-white px-4 py-3 transition-colors hover:bg-white/5 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="uppercase tracking-[0.05em] text-xs font-bold">Settings</span>
+</a>
+</nav>
+<div class="mt-auto px-4 space-y-4">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-white py-3 rounded-xl uppercase font-bold text-xs tracking-widest shadow-lg shadow-primary/20">
+                New Match
+            </button>
+<div class="pt-6 border-t border-white/10 space-y-1">
+<a class="flex items-center gap-3 text-slate-400 hover:text-white py-2 text-xs uppercase font-medium" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="help">help</span> Support
+                </a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-white py-2 text-xs uppercase font-medium" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="logout">logout</span> Logout
+                </a>
+</div>
+</div>
+</aside>
+<!-- Main Content Shell -->
+<main class="flex-1 ml-64 bg-surface flex flex-col min-h-screen">
+<!-- TopNavBar (Authority: JSON) -->
+<header class="flex justify-between items-center w-full px-8 h-20 sticky top-0 bg-[#f9f9ff] dark:bg-slate-900 z-30 ml-0 max-w-full">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<span class="uppercase font-bold Manrope text-on-surface tracking-widest text-lg">ADMIN CONSOLE</span>
+</div>
+<div class="h-6 w-[1px] bg-outline-variant/30"></div>
+<nav class="flex gap-6">
+<a class="text-slate-500 font-medium hover:text-[#3b66f5] transition-colors text-sm uppercase" href="#">Live Courts</a>
+<a class="text-[#144bdb] border-b-2 border-[#144bdb] pb-1 text-sm uppercase font-bold" href="#">Analytics</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="absolute inset-y-0 left-3 flex items-center text-slate-400">
+<span class="material-symbols-outlined text-xl">search</span>
+</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full text-sm focus:ring-2 focus:ring-primary w-64 transition-all" placeholder="Buscar jugador o transacción..." type="text"/>
+</div>
+<div class="flex items-center gap-4 text-on-surface">
+<button class="material-symbols-outlined p-2 hover:bg-surface-container rounded-full transition-colors">notifications</button>
+<div class="flex items-center gap-3">
+<img alt="Administrator Profile" class="w-10 h-10 rounded-full border-2 border-primary-container object-cover" data-alt="Close-up portrait of a professional athletic facility administrator in a modern office environment, sharp professional attire, soft natural lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYwZqMOiKoxElU5zPH391aCSjjYk4dZWgp9kjQbMLGBOzEouxBi_TLyLxEB0QyC5xhsGvu7ZhpW3-CQAp4TzdEW2JTWIBr7za3ZoMNO4nE66xI8Qhey1Zv61Ubus_5IBI-xHmWrGtW3oLLe4rK6w5R2t-wcS_JyXjK6P76RfNJpAQMpRayVX_g-4mOiTYlj5_x4DrOvQ8KcbPTe-V_8iNN3ST0THja6K_v7zajd53V30cqjYwIN0mc-N7dfUQYMwZULQHpHArYGBs"/>
+</div>
+</div>
+<button class="bg-primary text-white px-6 py-2 rounded-full uppercase font-bold text-xs tracking-wider hover:bg-primary-container transition-all">
+                    Quick Book
+                </button>
+</div>
+</header>
+<!-- Dashboard Canvas -->
+<div class="p-8 space-y-8 max-w-[1600px] mx-auto w-full">
+<!-- Headline Section -->
+<div class="flex justify-between items-end">
+<div>
+<h1 class="text-4xl font-extrabold uppercase tracking-tight text-on-surface">Panel de Finanzas</h1>
+<p class="text-slate-500 font-medium mt-1">Resumen de ingresos y estados de pago operativos.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant/20 rounded-xl text-sm font-semibold uppercase tracking-tighter">
+<span class="material-symbols-outlined text-sm">calendar_today</span> Este Mes
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant/20 rounded-xl text-sm font-semibold uppercase tracking-tighter">
+<span class="material-symbols-outlined text-sm">file_download</span> Exportar
+                    </button>
+</div>
+</div>
+<!-- Key Metrics Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Total Collected -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(7,27,59,0.04)] relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-6xl">payments</span>
+</div>
+<p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Total Recaudado</p>
+<h3 class="text-3xl font-black text-on-surface">€42,850.00</h3>
+<div class="mt-4 flex items-center gap-2 text-tertiary text-sm font-bold">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>+12.5% vs mes anterior</span>
+</div>
+</div>
+<!-- Pending Payments -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(7,27,59,0.04)] relative overflow-hidden">
+<p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Pagos Pendientes</p>
+<h3 class="text-3xl font-black text-primary">€8,120.00</h3>
+<div class="mt-4 flex items-center gap-2 text-slate-500 text-sm font-bold">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>14 transacciones activas</span>
+</div>
+</div>
+<!-- Overdue -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(7,27,59,0.04)] relative overflow-hidden border-l-4 border-error/50">
+<p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Vencidos</p>
+<h3 class="text-3xl font-black text-error">€1,450.00</h3>
+<div class="mt-4 flex items-center gap-2 text-error text-sm font-bold">
+<span class="material-symbols-outlined text-sm">warning</span>
+<span>Requiere acción inmediata</span>
+</div>
+</div>
+<!-- Operating Costs -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(7,27,59,0.04)] relative overflow-hidden">
+<p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Costes Operativos</p>
+<h3 class="text-3xl font-black text-on-surface">€18,900.00</h3>
+<div class="mt-4 flex items-center gap-2 text-slate-500 text-sm font-bold">
+<span class="material-symbols-outlined text-sm">account_balance_wallet</span>
+<span>Mantenimiento y Personal</span>
+</div>
+</div>
+</div>
+<!-- Bento Grid Content -->
+<div class="grid grid-cols-12 gap-6 items-start">
+<!-- Main Transaction List -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(7,27,59,0.04)] overflow-hidden">
+<div class="p-6 border-b border-surface-container flex justify-between items-center">
+<h2 class="text-lg font-bold uppercase tracking-widest">Transacciones Recientes</h2>
+<button class="text-primary font-bold text-xs uppercase tracking-widest hover:underline">Ver Todo</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-container-low text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+<tr>
+<th class="px-6 py-4">Fecha</th>
+<th class="px-6 py-4">Jugador</th>
+<th class="px-6 py-4">Concepto</th>
+<th class="px-6 py-4">Monto</th>
+<th class="px-6 py-4">Estado</th>
+<th class="px-6 py-4 text-right">Acción</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container/50">
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="px-6 py-4 text-sm font-medium text-slate-500">24 Oct 2023</td>
+<td class="px-6 py-4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center font-bold text-xs text-primary">AM</div>
+<span class="text-sm font-bold">Alejandro Moreno</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-bold uppercase tracking-tighter bg-surface-container px-2 py-1 rounded">Liga A</span>
+</td>
+<td class="px-6 py-4 text-sm font-bold">€45.00</td>
+<td class="px-6 py-4">
+<span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-tertiary/10 text-tertiary">Pagado</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-slate-400 hover:text-primary transition-colors">more_vert</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="px-6 py-4 text-sm font-medium text-slate-500">24 Oct 2023</td>
+<td class="px-6 py-4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center font-bold text-xs text-on-secondary-container">LP</div>
+<span class="text-sm font-bold">Lucía Parra</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-bold uppercase tracking-tighter bg-surface-container px-2 py-1 rounded">Clase Privada</span>
+</td>
+<td class="px-6 py-4 text-sm font-bold">€60.00</td>
+<td class="px-6 py-4">
+<span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-primary/10 text-primary">Pendiente</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-slate-400 hover:text-primary transition-colors">more_vert</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="px-6 py-4 text-sm font-medium text-slate-500">23 Oct 2023</td>
+<td class="px-6 py-4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-error-container flex items-center justify-center font-bold text-xs text-on-error-container">RC</div>
+<span class="text-sm font-bold">Ricardo Costa</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-bold uppercase tracking-tighter bg-surface-container px-2 py-1 rounded">Reserva Pista 4</span>
+</td>
+<td class="px-6 py-4 text-sm font-bold">€28.00</td>
+<td class="px-6 py-4">
+<span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-error/10 text-error">Vencido</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-slate-400 hover:text-primary transition-colors">more_vert</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="px-6 py-4 text-sm font-medium text-slate-500">23 Oct 2023</td>
+<td class="px-6 py-4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center font-bold text-xs text-primary">SG</div>
+<span class="text-sm font-bold">Sergio García</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-bold uppercase tracking-tighter bg-surface-container px-2 py-1 rounded">Torneo Otoño</span>
+</td>
+<td class="px-6 py-4 text-sm font-bold">€120.00</td>
+<td class="px-6 py-4">
+<span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-tertiary/10 text-tertiary">Pagado</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-slate-400 hover:text-primary transition-colors">more_vert</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Income Distribution Chart (Visual Representation) -->
+<div class="col-span-12 lg:col-span-4 space-y-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(7,27,59,0.04)]">
+<h2 class="text-lg font-bold uppercase tracking-widest mb-6">Distribución de Ingresos</h2>
+<!-- Pseudo-Chart Layout -->
+<div class="relative h-64 flex items-center justify-center mb-6">
+<!-- SVG Donut Chart for professional visual -->
+<svg class="w-full h-full transform -rotate-90">
+<circle cx="50%" cy="50%" fill="transparent" r="70" stroke="#144bdb" stroke-dasharray="280 440" stroke-width="20"></circle>
+<circle cx="50%" cy="50%" fill="transparent" r="70" stroke="#3b66f5" stroke-dasharray="120 440" stroke-dashoffset="-280" stroke-width="20"></circle>
+<circle cx="50%" cy="50%" fill="transparent" r="70" stroke="#00835a" stroke-dasharray="40 440" stroke-dashoffset="-400" stroke-width="20"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-xs uppercase font-bold text-slate-400 tracking-widest">Total</span>
+<span class="text-2xl font-black">€42.8k</span>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<span class="text-sm font-semibold">Ligas</span>
+</div>
+<span class="text-sm font-bold">52%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-primary-container"></div>
+<span class="text-sm font-semibold">Torneos</span>
+</div>
+<span class="text-sm font-bold">33%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-tertiary-container"></div>
+<span class="text-sm font-semibold">Pistas Privadas</span>
+</div>
+<span class="text-sm font-bold">15%</span>
+</div>
+</div>
+</div>
+<!-- Quick Alerts / Insights -->
+<div class="bg-inverse-surface text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-container">lightbulb</span>
+<h4 class="text-xs font-bold uppercase tracking-widest">Finanzas Insight</h4>
+</div>
+<p class="text-sm text-slate-300 leading-relaxed">
+                                Los ingresos por <span class="text-white font-bold">Torneos</span> han crecido un 24% respecto al trimestre anterior. Se recomienda abrir más franjas para clases privadas los fines de semana.
+                            </p>
+</div>
+<!-- Background Texture -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-container/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Action Row -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-low p-6 rounded-xl flex items-center gap-4 group cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined">receipt_long</span>
+</div>
+<div>
+<h4 class="text-sm font-bold uppercase">Facturación Manual</h4>
+<p class="text-xs text-slate-500">Emitir recibos personalizados</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl flex items-center gap-4 group cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined">mail</span>
+</div>
+<div>
+<h4 class="text-sm font-bold uppercase">Recordatorios de Pago</h4>
+<p class="text-xs text-slate-500">Enviar avisos a 14 deudores</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl flex items-center gap-4 group cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<div>
+<h4 class="text-sm font-bold uppercase">Reporte Fiscal</h4>
+<p class="text-xs text-slate-500">Generar cierre del periodo</p>
+</div>
+</div>
+</div>
+</div>
+<footer class="mt-auto p-8 border-t border-surface-container text-slate-400 text-[10px] font-bold uppercase tracking-widest flex justify-between">
+<span>ST. GEORGE PADEL MANAGEMENT SYSTEM © 2024</span>
+<div class="flex gap-4">
+<a class="hover:text-primary" href="#">Privacidad</a>
+<a class="hover:text-primary" href="#">Términos</a>
+<a class="hover:text-primary" href="#">Soporte Técnico</a>
+</div>
+</footer>
+</main>
+</body></html>
