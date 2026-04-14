@@ -1,5 +1,22 @@
 # DEVLOG — padel-sg
 
+## [2026-04-13 —] — Configuración variables de entorno (consulta)
+
+**Resumen:** Sesión de consulta para configurar las variables de entorno en Vercel y Supabase Edge Functions. Sin cambios de código.
+
+**Archivos:** ninguno
+
+**Decisiones:** Variables `VITE_SUPABASE_*` van solo a Vercel. `SUPABASE_SERVICE_ROLE_KEY` y `RESEND_API_KEY` solo a Supabase Edge Functions secrets.
+
+**Pendientes:**
+- [ ] Agregar `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` en Vercel dashboard
+- [ ] Obtener `SUPABASE_SERVICE_ROLE_KEY` desde Supabase Settings → API
+- [ ] Crear cuenta Resend y agregar `RESEND_API_KEY` en Supabase secrets
+- [ ] Agregar `APP_URL=https://padel-sg.vercel.app` en Supabase secrets
+- [ ] Deploy edge functions: `npx supabase functions deploy approve-user reject-user`
+
+---
+
 ## [2026-04-14 22:30] — Migraciones SQL + Deploy Vercel
 
 **Resumen:** Se aplicaron las 2 migraciones SQL pendientes en Supabase via MCP, y se hizo deploy a producción en Vercel.
