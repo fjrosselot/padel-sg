@@ -11,6 +11,8 @@ import TorneoDetalle from './features/torneos/TorneoDetalle'
 import LigasList from './features/ligas/LigasList'
 import LigaDetalle from './features/ligas/LigaDetalle'
 import { Dashboard } from './features/dashboard/Dashboard'
+import { ComingSoon } from '@/components/ComingSoon'
+import { Users, Trophy, Handshake, Calendar, Wallet, MoreHorizontal } from 'lucide-react'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginForm /> },
@@ -32,6 +34,12 @@ export const router = createBrowserRouter([
       { path: 'torneos/:id', element: <TorneoDetalle /> },
       { path: 'ligas', element: <LigasList /> },
       { path: 'ligas/:id', element: <LigaDetalle /> },
+      { path: 'jugadores', element: <ComingSoon title="Jugadores" icon={<Users className="h-8 w-8" />} /> },
+      { path: 'rankings', element: <ComingSoon title="Rankings" icon={<Trophy className="h-8 w-8" />} /> },
+      { path: 'amistosos', element: <ComingSoon title="Amistosos" icon={<Handshake className="h-8 w-8" />} /> },
+      { path: 'calendario', element: <ComingSoon title="Calendario" icon={<Calendar className="h-8 w-8" />} /> },
+      { path: 'finanzas', element: <ComingSoon title="Finanzas" icon={<Wallet className="h-8 w-8" />} /> },
+      { path: 'mas', element: <ComingSoon title="Más opciones" icon={<MoreHorizontal className="h-8 w-8" />} /> },
     ],
   },
 ])
