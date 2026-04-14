@@ -4,6 +4,7 @@ import { AuthGuard } from '@/features/auth/AuthGuard'
 import { LoginForm } from '@/features/auth/LoginForm'
 import { RegisterForm } from '@/features/auth/RegisterForm'
 import { PendingApproval } from '@/features/auth/PendingApproval'
+import { ResetPassword } from '@/features/auth/ResetPassword'
 import { PendingUsers } from '@/features/admin/PendingUsers'
 import TorneosList from './features/torneos/TorneosList'
 import TorneoDetalle from './features/torneos/TorneoDetalle'
@@ -15,6 +16,7 @@ export const router = createBrowserRouter([
   { path: '/login', element: <LoginForm /> },
   { path: '/registro', element: <RegisterForm /> },
   { path: '/pendiente', element: <PendingApproval /> },
+  { path: '/reset-password', element: <ResetPassword /> },
   {
     path: '/',
     element: (
