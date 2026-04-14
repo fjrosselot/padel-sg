@@ -1,23 +1,56 @@
-import { BrandLogo } from '@/components/brand/BrandLogo'
+import { Link } from 'react-router-dom'
 
 export function PendingApproval() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-surface p-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 text-center shadow-card">
-        <div className="mb-6 flex justify-center">
-          <BrandLogo />
+    <div className="flex min-h-screen flex-col items-center justify-center bg-navy px-4">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0"
+        style={{
+          background: 'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(245,197,24,0.07) 0%, transparent 70%)',
+        }}
+      />
+
+      <div className="relative z-10 w-full max-w-sm text-center">
+        <div className="mb-10 flex flex-col items-center gap-3">
+          <div
+            role="img"
+            aria-label="Pádel SG"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-gold font-manrope text-sm font-black text-navy"
+          >
+            P·SG
+          </div>
         </div>
-        <div className="mb-4 text-4xl">🎾</div>
-        <h1 className="mb-2 font-manrope text-xl font-bold text-navy">¡Solicitud recibida!</h1>
-        <p className="mb-6 font-inter text-sm text-slate">
-          Tu solicitud de acceso está siendo revisada. Recibirás un email cuando tu cuenta sea aprobada por el administrador.
-        </p>
-        <div className="rounded-md border-l-2 border-gold bg-warning-bg p-3 font-inter text-xs text-slate">
-          Si tienes preguntas, contacta al administrador de la rama.
+
+        <div className="rounded-2xl border border-navy-mid bg-navy-mid/50 px-8 py-8 backdrop-blur-sm">
+          <div className="mb-4 flex justify-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gold/10">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+
+          <h1 className="mb-2 font-manrope text-xl font-bold text-white">
+            Solicitud recibida
+          </h1>
+          <p className="mb-6 font-inter text-sm leading-relaxed text-muted">
+            Tu solicitud de acceso está siendo revisada. Recibirás un email cuando el administrador apruebe tu cuenta.
+          </p>
+
+          <div className="rounded-lg border border-gold/20 bg-gold/5 px-4 py-3 text-left">
+            <p className="font-inter text-xs text-muted">
+              ¿Tienes preguntas? Contacta al administrador de la rama pádel.
+            </p>
+          </div>
         </div>
-        <a href="/login" className="mt-4 block font-inter text-xs text-muted underline">
+
+        <Link
+          to="/login"
+          className="mt-6 block font-inter text-xs text-slate transition-colors hover:text-muted"
+        >
           Volver al inicio
-        </a>
+        </Link>
       </div>
     </div>
   )

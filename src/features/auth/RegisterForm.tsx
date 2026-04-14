@@ -1,16 +1,11 @@
 import { useState } from 'react'
 import { useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { registerSchema, type RegisterFormData } from './schemas'
-import { BrandLogo } from '@/components/brand/BrandLogo'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 
 const STEPS = ['Datos personales', 'Vinculación SG', 'Nivel de juego', 'Participación', 'Comentarios', 'Acceso']
-
 const CURSOS = ['PK', 'KK', '1°', '2°', '3°', '4°', '5°', '6°', '7°', '8°', '9°', '10°', '11°', '12°', 'Egresado']
 const CATEGORIAS_H = ['5a', '4a', '3a', 'Open']
 const CATEGORIAS_M = ['D', 'C', 'B', 'Open']
@@ -23,6 +18,24 @@ const ACTIVIDADES = [
   { value: 'solo_convenio', label: 'Solo usar el convenio' },
 ]
 
+const inputCls = 'w-full rounded-lg border border-navy-mid bg-navy px-4 py-3 font-inter text-sm text-white placeholder-slate transition-colors focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold'
+const labelCls = 'mb-1.5 block font-inter text-xs font-medium uppercase tracking-widest text-muted'
+
+function ToggleBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={`rounded-lg px-3 py-2 font-inter text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
+        active ? 'bg-gold text-navy' : 'border border-navy-mid bg-navy text-muted hover:border-gold/30 hover:text-white'
+      }`}
+    >
+      {children}
+    </button>
+  )
+}
+
 export function RegisterForm() {
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -31,11 +44,7 @@ export function RegisterForm() {
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      gradualidad: 'normal',
-      hijos_sg: [],
-      intereses_actividades: [],
-    },
+    defaultValues: { gradualidad: 'normal', hijos_sg: [], intereses_actividades: [] },
   })
 
   const { register, handleSubmit, formState: { errors }, watch, setValue, trigger } = form
@@ -43,12 +52,7 @@ export function RegisterForm() {
   const hijossg = watch('hijos_sg') ?? []
 
   const STEP_FIELDS: (keyof RegisterFormData)[][] = [
-    ['nombre', 'email', 'sexo'],
-    [],
-    ['categoria'],
-    ['frecuencia_semanal'],
-    [],
-    ['password', 'password_confirm'],
+    ['nombre', 'email', 'sexo'], [], ['categoria'], ['frecuencia_semanal'], [], ['password', 'password_confirm'],
   ]
 
   const nextStep = async () => {
@@ -89,277 +93,276 @@ export function RegisterForm() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-surface p-4">
-      <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-card">
-        <div className="mb-6 flex items-center justify-between">
-          <BrandLogo />
-          <span className="font-inter text-xs text-muted">Paso {step + 1} de {STEPS.length}</span>
-        </div>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-navy px-4 py-8">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0"
+        style={{
+          background: 'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(245,197,24,0.07) 0%, transparent 70%)',
+        }}
+      />
 
-        <div className="mb-2 h-1.5 rounded-full bg-surface-high">
+      <div className="relative z-10 w-full max-w-sm">
+        {/* Logo */}
+        <div className="mb-8 flex flex-col items-center gap-3">
           <div
-            className="h-1.5 rounded-full bg-gold transition-all"
-            style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
-          />
+            role="img"
+            aria-label="Pádel SG"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-gold font-manrope text-sm font-black text-navy"
+          >
+            P·SG
+          </div>
+          <p className="font-inter text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+            Solicitar acceso
+          </p>
         </div>
 
-        <h2 className="mb-6 mt-4 font-manrope text-lg font-bold text-navy">{STEPS[step]}</h2>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-
-          {/* Paso 0: Datos personales */}
-          {step === 0 && (
-            <>
-              <div>
-                <Label htmlFor="nombre">Nombre completo *</Label>
-                <Input id="nombre" {...register('nombre')} className="mt-1" />
-                {errors.nombre && <p className="mt-1 font-inter text-xs text-defeat">{errors.nombre.message}</p>}
-              </div>
-              <div>
-                <Label htmlFor="email">Email *</Label>
-                <Input id="email" type="email" {...register('email')} className="mt-1" />
-                {errors.email && <p className="mt-1 font-inter text-xs text-defeat">{errors.email.message}</p>}
-              </div>
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <Label htmlFor="telefono">Teléfono</Label>
-                  <Input id="telefono" {...register('telefono')} placeholder="+56 9 XXXX XXXX" className="mt-1" />
-                </div>
-                <div className="flex-1">
-                  <Label htmlFor="apodo">Apodo</Label>
-                  <Input id="apodo" {...register('apodo')} className="mt-1" />
-                </div>
-              </div>
-              <div>
-                <Label>Sexo *</Label>
-                <div className="mt-2 flex gap-3">
-                  {[{ v: 'M', l: 'Masculino' }, { v: 'F', l: 'Femenino' }].map(({ v, l }) => (
-                    <button
-                      key={v}
-                      type="button"
-                      aria-pressed={sexo === v}
-                      onClick={() => setValue('sexo', v as 'M' | 'F')}
-                      className={`flex-1 rounded-md border py-2 font-inter text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
-                        sexo === v ? 'border-navy bg-navy text-gold' : 'border-surface-high text-slate'
-                      }`}
-                    >
-                      {l}
-                    </button>
-                  ))}
-                </div>
-                {errors.sexo && <p className="mt-1 font-inter text-xs text-defeat">{errors.sexo.message}</p>}
-              </div>
-            </>
-          )}
-
-          {/* Paso 1: Vinculación SG */}
-          {step === 1 && (
-            <div>
-              <Label className="mb-2 block">Cursos de tus hijos en Saint George's</Label>
-              <p className="mb-3 font-inter text-xs text-slate">Selecciona todos los que apliquen</p>
-              <div className="flex flex-wrap gap-2">
-                {CURSOS.map((curso) => {
-                  const selected = hijossg.some((h) => h.curso_ingreso === curso)
-                  return (
-                    <button
-                      key={curso}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => {
-                        if (selected) {
-                          setValue('hijos_sg', hijossg.filter((h) => h.curso_ingreso !== curso))
-                        } else {
-                          setValue('hijos_sg', [...hijossg, { curso_ingreso: curso, anio: new Date().getFullYear() }])
-                        }
-                      }}
-                      className={`rounded-md px-3 py-1.5 font-inter text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
-                        selected ? 'bg-navy text-gold' : 'bg-surface text-slate'
-                      }`}
-                    >
-                      {curso}
-                    </button>
-                  )
-                })}
-              </div>
+        {/* Card */}
+        <div className="rounded-2xl border border-navy-mid bg-navy-mid/50 px-7 py-7 backdrop-blur-sm">
+          {/* Header con progreso */}
+          <div className="mb-5">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="font-manrope text-base font-bold text-white">{STEPS[step]}</h2>
+              <span className="font-inter text-xs text-muted">{step + 1} / {STEPS.length}</span>
             </div>
-          )}
+            <div className="h-1 rounded-full bg-navy">
+              <div
+                className="h-1 rounded-full bg-gold transition-all duration-300"
+                style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
+              />
+            </div>
+          </div>
 
-          {/* Paso 2: Nivel de juego */}
-          {step === 2 && (
-            <>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+            {/* Paso 0: Datos personales */}
+            {step === 0 && (
+              <>
+                <div>
+                  <label htmlFor="nombre" className={labelCls}>Nombre completo *</label>
+                  <input id="nombre" {...register('nombre')} className={inputCls} placeholder="Tu nombre" />
+                  {errors.nombre && <p className="mt-1 font-inter text-xs text-defeat">{errors.nombre.message}</p>}
+                </div>
+                <div>
+                  <label htmlFor="email" className={labelCls}>Email *</label>
+                  <input id="email" type="email" {...register('email')} className={inputCls} placeholder="tu@email.com" />
+                  {errors.email && <p className="mt-1 font-inter text-xs text-defeat">{errors.email.message}</p>}
+                </div>
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <label htmlFor="telefono" className={labelCls}>Teléfono</label>
+                    <input id="telefono" {...register('telefono')} placeholder="+56 9..." className={inputCls} />
+                  </div>
+                  <div className="flex-1">
+                    <label htmlFor="apodo" className={labelCls}>Apodo</label>
+                    <input id="apodo" {...register('apodo')} className={inputCls} />
+                  </div>
+                </div>
+                <div>
+                  <p className={labelCls}>Sexo *</p>
+                  <div className="flex gap-2">
+                    {[{ v: 'M', l: 'Masculino' }, { v: 'F', l: 'Femenino' }].map(({ v, l }) => (
+                      <ToggleBtn key={v} active={sexo === v} onClick={() => setValue('sexo', v as 'M' | 'F')}>
+                        {l}
+                      </ToggleBtn>
+                    ))}
+                  </div>
+                  {errors.sexo && <p className="mt-1 font-inter text-xs text-defeat">{errors.sexo.message}</p>}
+                </div>
+              </>
+            )}
+
+            {/* Paso 1: Vinculación SG */}
+            {step === 1 && (
               <div>
-                <Label className="mb-2 block">Categoría *</Label>
+                <p className={labelCls}>Cursos de tus hijos en SG</p>
+                <p className="mb-3 font-inter text-xs text-slate">Selecciona todos los que apliquen</p>
                 <div className="flex flex-wrap gap-2">
-                  {(sexo === 'F' ? CATEGORIAS_M : CATEGORIAS_H).map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      aria-pressed={watch('categoria') === cat}
-                      onClick={() => setValue('categoria', cat)}
-                      className={`rounded-md px-3 py-1.5 font-inter text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
-                        watch('categoria') === cat ? 'bg-navy text-gold' : 'bg-surface text-slate'
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-                {errors.categoria && <p className="mt-1 font-inter text-xs text-defeat">{errors.categoria.message}</p>}
-              </div>
-              <div>
-                <Label className="mb-2 block">Gradualidad</Label>
-                <div className="flex gap-2">
-                  {(['-', 'normal', '+'] as const).map((g) => (
-                    <button
-                      key={g}
-                      type="button"
-                      aria-pressed={watch('gradualidad') === g}
-                      onClick={() => setValue('gradualidad', g)}
-                      className={`flex-1 rounded-md py-2 font-inter text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
-                        watch('gradualidad') === g ? 'bg-navy text-gold' : 'bg-surface text-slate'
-                      }`}
-                    >
-                      {g === '-' ? 'Recién llegando (−)' : g === '+' ? 'Subiendo (+)' : 'Normal'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <Label className="mb-2 block">¿Juegas mixto?</Label>
-                <div className="flex gap-2">
-                  {[{ v: 'si', l: 'Sí' }, { v: 'no', l: 'No' }, { v: 'a_veces', l: 'A veces' }].map(({ v, l }) => (
-                    <button
-                      key={v}
-                      type="button"
-                      aria-pressed={watch('mixto') === v}
-                      onClick={() => setValue('mixto', v as 'si' | 'no' | 'a_veces')}
-                      className={`flex-1 rounded-md py-2 font-inter text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
-                        watch('mixto') === v ? 'bg-navy text-gold' : 'bg-surface text-slate'
-                      }`}
-                    >
-                      {l}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Paso 3: Participación */}
-          {step === 3 && (
-            <>
-              <div>
-                <Label className="mb-2 block">Frecuencia semanal *</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { v: 'menos_1', l: 'Menos de 1 vez' },
-                    { v: '1', l: '1 vez' },
-                    { v: '2', l: '2 veces' },
-                    { v: '3_mas', l: '3 o más veces' },
-                  ].map(({ v, l }) => (
-                    <button
-                      key={v}
-                      type="button"
-                      aria-pressed={watch('frecuencia_semanal') === v}
-                      onClick={() => setValue('frecuencia_semanal', v as RegisterFormData['frecuencia_semanal'])}
-                      className={`rounded-md py-2.5 font-inter text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
-                        watch('frecuencia_semanal') === v ? 'bg-navy text-gold' : 'bg-surface text-slate'
-                      }`}
-                    >
-                      {l}
-                    </button>
-                  ))}
-                </div>
-                {errors.frecuencia_semanal && <p className="mt-1 font-inter text-xs text-defeat">{errors.frecuencia_semanal.message}</p>}
-              </div>
-              <div>
-                <Label className="mb-2 block">Actividades de interés</Label>
-                <div className="space-y-2">
-                  {ACTIVIDADES.map(({ value, label }) => {
-                    const selected = (watch('intereses_actividades') ?? []).includes(value)
+                  {CURSOS.map((curso) => {
+                    const selected = hijossg.some((h) => h.curso_ingreso === curso)
                     return (
-                      <button
-                        key={value}
-                        type="button"
-                        aria-pressed={selected}
+                      <ToggleBtn
+                        key={curso}
+                        active={selected}
                         onClick={() => {
-                          const curr = watch('intereses_actividades') ?? []
-                          setValue('intereses_actividades', selected ? curr.filter((a) => a !== value) : [...curr, value])
+                          if (selected) setValue('hijos_sg', hijossg.filter((h) => h.curso_ingreso !== curso))
+                          else setValue('hijos_sg', [...hijossg, { curso_ingreso: curso, anio: new Date().getFullYear() }])
                         }}
-                        className={`flex w-full items-center gap-2 rounded-md px-3 py-2 font-inter text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
-                          selected ? 'bg-navy/10 text-navy' : 'bg-surface text-slate'
-                        }`}
                       >
-                        <span aria-hidden="true" className={`h-4 w-4 rounded border-2 ${selected ? 'border-navy bg-navy' : 'border-muted'}`} />
-                        {label}
-                      </button>
+                        {curso}
+                      </ToggleBtn>
                     )
                   })}
                 </div>
               </div>
-            </>
-          )}
-
-          {/* Paso 4: Comentarios */}
-          {step === 4 && (
-            <div>
-              <Label htmlFor="comentarios">Comentarios adicionales</Label>
-              <p className="mb-2 font-inter text-xs text-slate">Horarios preferidos, si buscas pareja, etc.</p>
-              <textarea
-                id="comentarios"
-                {...register('comentarios_registro')}
-                rows={4}
-                className="w-full rounded-md bg-surface px-3 py-2 font-inter text-sm text-navy focus:outline-none focus:ring-2 focus:ring-gold/40"
-                placeholder="Ej: Juego los martes y jueves tarde..."
-              />
-            </div>
-          )}
-
-          {/* Paso 5: Contraseña */}
-          {step === 5 && (
-            <>
-              <div>
-                <Label htmlFor="password">Contraseña *</Label>
-                <Input id="password" type="password" {...register('password')} className="mt-1" />
-                {errors.password && <p className="mt-1 font-inter text-xs text-defeat">{errors.password.message}</p>}
-              </div>
-              <div>
-                <Label htmlFor="password_confirm">Confirmar contraseña *</Label>
-                <Input id="password_confirm" type="password" {...register('password_confirm')} className="mt-1" />
-                {errors.password_confirm && <p className="mt-1 font-inter text-xs text-defeat">{errors.password_confirm.message}</p>}
-              </div>
-              {error && (
-                <div className="rounded-md bg-defeat/10 p-3 font-inter text-sm text-defeat">{error}</div>
-              )}
-              <div className="rounded-md border-l-2 border-gold bg-warning-bg p-3 font-inter text-xs text-slate">
-                Tu solicitud será revisada por el administrador. Recibirás un email cuando tu cuenta sea aprobada.
-              </div>
-            </>
-          )}
-
-          <div className="flex justify-between pt-2">
-            {step > 0 && (
-              <Button type="button" variant="ghost" onClick={() => setStep((s) => s - 1)}>
-                Atrás
-              </Button>
             )}
-            <div className="ml-auto">
+
+            {/* Paso 2: Nivel de juego */}
+            {step === 2 && (
+              <>
+                <div>
+                  <p className={labelCls}>Categoría *</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(sexo === 'F' ? CATEGORIAS_M : CATEGORIAS_H).map((cat) => (
+                      <ToggleBtn key={cat} active={watch('categoria') === cat} onClick={() => setValue('categoria', cat)}>
+                        {cat}
+                      </ToggleBtn>
+                    ))}
+                  </div>
+                  {errors.categoria && <p className="mt-1 font-inter text-xs text-defeat">{errors.categoria.message}</p>}
+                </div>
+                <div>
+                  <p className={labelCls}>Gradualidad</p>
+                  <div className="flex gap-2">
+                    {(['-', 'normal', '+'] as const).map((g) => (
+                      <ToggleBtn key={g} active={watch('gradualidad') === g} onClick={() => setValue('gradualidad', g)}>
+                        {g === '-' ? 'Recién (−)' : g === '+' ? 'Subiendo (+)' : 'Normal'}
+                      </ToggleBtn>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className={labelCls}>¿Juegas mixto?</p>
+                  <div className="flex gap-2">
+                    {[{ v: 'si', l: 'Sí' }, { v: 'no', l: 'No' }, { v: 'a_veces', l: 'A veces' }].map(({ v, l }) => (
+                      <ToggleBtn key={v} active={watch('mixto') === v} onClick={() => setValue('mixto', v as 'si' | 'no' | 'a_veces')}>
+                        {l}
+                      </ToggleBtn>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Paso 3: Participación */}
+            {step === 3 && (
+              <>
+                <div>
+                  <p className={labelCls}>Frecuencia semanal *</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { v: 'menos_1', l: 'Menos de 1 vez' },
+                      { v: '1', l: '1 vez' },
+                      { v: '2', l: '2 veces' },
+                      { v: '3_mas', l: '3 o más' },
+                    ].map(({ v, l }) => (
+                      <ToggleBtn key={v} active={watch('frecuencia_semanal') === v} onClick={() => setValue('frecuencia_semanal', v as RegisterFormData['frecuencia_semanal'])}>
+                        {l}
+                      </ToggleBtn>
+                    ))}
+                  </div>
+                  {errors.frecuencia_semanal && <p className="mt-1 font-inter text-xs text-defeat">{errors.frecuencia_semanal.message}</p>}
+                </div>
+                <div>
+                  <p className={labelCls}>Actividades de interés</p>
+                  <div className="space-y-2">
+                    {ACTIVIDADES.map(({ value, label }) => {
+                      const selected = (watch('intereses_actividades') ?? []).includes(value)
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => {
+                            const curr = watch('intereses_actividades') ?? []
+                            setValue('intereses_actividades', selected ? curr.filter((a) => a !== value) : [...curr, value])
+                          }}
+                          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-inter text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
+                            selected ? 'bg-gold/10 text-gold' : 'border border-navy-mid bg-navy text-muted hover:border-gold/30'
+                          }`}
+                        >
+                          <span aria-hidden="true" className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${selected ? 'border-gold bg-gold' : 'border-slate'}`}>
+                            {selected && (
+                              <svg className="h-2.5 w-2.5 text-navy" viewBox="0 0 10 10" fill="currentColor">
+                                <path d="M1.5 5L4 7.5 8.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+                              </svg>
+                            )}
+                          </span>
+                          {label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Paso 4: Comentarios */}
+            {step === 4 && (
+              <div>
+                <label htmlFor="comentarios" className={labelCls}>Comentarios adicionales</label>
+                <p className="mb-2 font-inter text-xs text-slate">Horarios preferidos, si buscas pareja, etc.</p>
+                <textarea
+                  id="comentarios"
+                  {...register('comentarios_registro')}
+                  rows={4}
+                  className="w-full rounded-lg border border-navy-mid bg-navy px-4 py-3 font-inter text-sm text-white placeholder-slate transition-colors focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+                  placeholder="Ej: Juego los martes y jueves tarde..."
+                />
+              </div>
+            )}
+
+            {/* Paso 5: Contraseña */}
+            {step === 5 && (
+              <>
+                <div>
+                  <label htmlFor="password" className={labelCls}>Contraseña *</label>
+                  <input id="password" type="password" {...register('password')} className={inputCls} placeholder="••••••••" />
+                  {errors.password && <p className="mt-1 font-inter text-xs text-defeat">{errors.password.message}</p>}
+                </div>
+                <div>
+                  <label htmlFor="password_confirm" className={labelCls}>Confirmar contraseña *</label>
+                  <input id="password_confirm" type="password" {...register('password_confirm')} className={inputCls} placeholder="••••••••" />
+                  {errors.password_confirm && <p className="mt-1 font-inter text-xs text-defeat">{errors.password_confirm.message}</p>}
+                </div>
+                {error && (
+                  <div role="alert" className="rounded-lg border border-defeat/30 bg-defeat/10 px-4 py-3 font-inter text-sm text-defeat">{error}</div>
+                )}
+                <div className="rounded-lg border border-gold/20 bg-gold/5 px-4 py-3">
+                  <p className="font-inter text-xs text-muted">
+                    Tu solicitud será revisada por el administrador. Recibirás un email al ser aprobado.
+                  </p>
+                </div>
+              </>
+            )}
+
+            {/* Navegación */}
+            <div className="flex items-center justify-between pt-2">
+              {step > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setStep((s) => s - 1)}
+                  className="font-inter text-sm text-muted transition-colors hover:text-white"
+                >
+                  Atrás
+                </button>
+              ) : <div />}
               {step < STEPS.length - 1 ? (
-                <Button type="button" onClick={nextStep} className="bg-gold text-navy hover:bg-gold-dim">
+                <button
+                  type="button"
+                  onClick={nextStep}
+                  className="rounded-lg bg-gold px-5 py-2.5 font-manrope text-sm font-bold text-navy transition-all hover:bg-gold-dim active:scale-[0.98]"
+                >
                   Siguiente
-                </Button>
+                </button>
               ) : (
-                <Button type="submit" disabled={loading} className="bg-gold text-navy hover:bg-gold-dim">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="rounded-lg bg-gold px-5 py-2.5 font-manrope text-sm font-bold text-navy transition-all hover:bg-gold-dim active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                >
                   {loading ? 'Enviando...' : 'Enviar solicitud'}
-                </Button>
+                </button>
               )}
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
 
-        <p className="mt-4 text-center font-inter text-xs text-muted">
+        <p className="mt-6 text-center font-inter text-xs text-slate">
           ¿Ya tienes cuenta?{' '}
-          <a href="/login" className="text-navy underline">Inicia sesión</a>
+          <Link to="/login" className="text-muted transition-colors hover:text-gold">
+            Inicia sesión
+          </Link>
         </p>
       </div>
     </div>

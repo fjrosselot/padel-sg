@@ -9,6 +9,7 @@ import TorneosList from './features/torneos/TorneosList'
 import TorneoDetalle from './features/torneos/TorneoDetalle'
 import LigasList from './features/ligas/LigasList'
 import LigaDetalle from './features/ligas/LigaDetalle'
+import { Dashboard } from './features/dashboard/Dashboard'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginForm /> },
@@ -23,7 +24,7 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
-      { path: 'dashboard', element: <div className="p-6 font-manrope text-navy">Dashboard — próximamente</div> },
+      { path: 'dashboard', element: <Dashboard /> },
       { path: 'admin/usuarios', element: <PendingUsers /> },
       { path: 'torneos', element: <TorneosList /> },
       { path: 'torneos/:id', element: <TorneoDetalle /> },
