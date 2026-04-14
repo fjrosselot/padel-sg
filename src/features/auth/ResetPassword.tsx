@@ -14,18 +14,24 @@ export function ResetPassword() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    // Check if we already have a recovery session (user arriving from email link)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        const params = new URLSearchParams(window.location.search)
+        const hash = window.location.hash
+        if (params.has('code') || hash.includes('type=recovery')) {
+          setMode('update')
+        }
+      }
+    })
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
         setMode('update')
       }
     })
-    const timer = setTimeout(() => {
-      // If still in request mode after 1s, that's fine — no token in URL
-    }, 1000)
-    return () => {
-      subscription.unsubscribe()
-      clearTimeout(timer)
-    }
+
+    return () => subscription.unsubscribe()
   }, [])
 
   const handleRequest = async (e: React.FormEvent) => {
@@ -55,10 +61,19 @@ export function ResetPassword() {
     }
     setLoading(true)
     setError(null)
+
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      setError('Sesión expirada. Solicita un nuevo enlace de recuperación.')
+      setLoading(false)
+      setMode('request')
+      return
+    }
+
     const { error: err } = await supabase.auth.updateUser({ password })
     setLoading(false)
     if (err) {
-      setError('No se pudo actualizar la contraseña. El enlace puede haber expirado.')
+      setError(err.message || 'No se pudo actualizar la contraseña.')
     } else {
       setSuccess(true)
       setTimeout(() => navigate('/dashboard'), 2000)
