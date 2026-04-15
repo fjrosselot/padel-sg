@@ -6,6 +6,7 @@ import { RegisterForm } from '@/features/auth/RegisterForm'
 import { PendingApproval } from '@/features/auth/PendingApproval'
 import { ResetPassword } from '@/features/auth/ResetPassword'
 import { PendingUsers } from '@/features/admin/PendingUsers'
+import AdminTemporadas from './features/admin/AdminTemporadas'
 import TorneosList from './features/torneos/TorneosList'
 import TorneoDetalle from './features/torneos/TorneoDetalle'
 import LigasList from './features/ligas/LigasList'
@@ -31,6 +32,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="/dashboard" replace /> },
       { path: 'dashboard', element: <Dashboard /> },
       { path: 'admin/usuarios', element: <PendingUsers /> },
+      { path: 'admin/temporadas', element: <AdminTemporadas /> },
       { path: 'torneos', element: <TorneosList /> },
       { path: 'torneos/:id', element: <TorneoDetalle /> },
       { path: 'ligas', element: <LigasList /> },

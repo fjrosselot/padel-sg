@@ -87,6 +87,7 @@ export interface Database {
           activa: boolean
           deporte_id: string
           descripcion: string | null
+          amistosos_afectan_ranking: boolean
           created_at: string
         }
         Insert: {
@@ -98,6 +99,7 @@ export interface Database {
           activa?: boolean
           deporte_id?: string
           descripcion?: string | null
+          amistosos_afectan_ranking?: boolean
           created_at?: string
         }
         Update: {
@@ -109,6 +111,7 @@ export interface Database {
           activa?: boolean
           deporte_id?: string
           descripcion?: string | null
+          amistosos_afectan_ranking?: boolean
           created_at?: string
         }
       }
