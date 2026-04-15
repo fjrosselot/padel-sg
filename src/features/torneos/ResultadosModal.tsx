@@ -44,11 +44,13 @@ export default function ResultadosModal({ partido, torneoId, onClose }: Props) {
         { id: partido.pareja2.jugador2_id, elo: updated.pareja2[1] },
       ].filter((u): u is { id: string; elo: number } => u.id !== null)
 
-      await Promise.all(
+      const eloResults = await Promise.all(
         eloUpdates.map(({ id, elo }) =>
           supabase.schema('padel').from('jugadores').update({ elo }).eq('id', id)
         )
       )
+      const eloError = eloResults.find(r => r.error)
+      if (eloError?.error) throw eloError.error
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['torneo', torneoId] })
@@ -112,14 +114,16 @@ export default function ResultadosModal({ partido, torneoId, onClose }: Props) {
         </div>
 
         {mutation.error && (
-          <p className="text-[#BA1A1A] text-sm">{String(mutation.error)}</p>
+          <p className="text-[#BA1A1A] text-sm">
+            {mutation.error instanceof Error ? mutation.error.message : 'Error al guardar el resultado.'}
+          </p>
         )}
 
         <div className="flex gap-3">
           <Button variant="outline" onClick={onClose} className="flex-1 border border-slate/30 text-slate bg-transparent hover:bg-surface rounded-lg">Cancelar</Button>
           <Button
             className="flex-1 bg-gold text-navy font-bold rounded-lg"
-            disabled={!ganador || mutation.isPending}
+            disabled={!ganador || mutation.isPending || !!partido.ganador || !!partido.resultado_bloqueado}
             onClick={() => mutation.mutate()}
           >
             {mutation.isPending ? 'Guardando…' : 'Guardar resultado'}
