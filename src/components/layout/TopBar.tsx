@@ -1,4 +1,5 @@
 import { Bell, ChevronDown } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useUser } from '@/hooks/useUser'
 import { useAppStore } from '@/stores/appStore'
 import { useTemporadas } from '@/hooks/useTemporada'
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/button'
 export function TopBar() {
   const { data: user } = useUser()
   const { temporadaId, setTemporadaId } = useAppStore()
+  const navigate = useNavigate()
   const { data: temporadas = [] } = useTemporadas()
 
   const initials = user?.nombre
@@ -32,7 +34,12 @@ export function TopBar() {
         <Button variant="ghost" size="icon" aria-label="Notificaciones" className="relative text-slate">
           <Bell className="h-5 w-5" />
         </Button>
-        <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={() => navigate('/perfil')}
+          className="flex items-center gap-1.5 rounded-full focus:outline-none focus:ring-2 focus:ring-gold/50"
+          aria-label="Ver perfil"
+        >
           <div
             aria-hidden="true"
             className="flex h-8 w-8 items-center justify-center rounded-full bg-navy font-manrope text-xs font-bold text-gold"
@@ -43,7 +50,7 @@ export function TopBar() {
             {user?.nombre ?? ''}
           </span>
           <ChevronDown className="h-4 w-4 text-muted" />
-        </div>
+        </button>
       </div>
     </header>
   )

@@ -15,6 +15,7 @@ import { Dashboard } from './features/dashboard/Dashboard'
 import { ComingSoon } from '@/components/ComingSoon'
 import { Users, Handshake, Calendar, Wallet, MoreHorizontal } from 'lucide-react'
 import RankingPage from './features/ranking/RankingPage'
+import PerfilPage from './features/perfil/PerfilPage'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginForm /> },
@@ -43,6 +44,7 @@ export const router = createBrowserRouter([
       { path: 'calendario', element: <ComingSoon title="Calendario" icon={<Calendar className="h-8 w-8" />} /> },
       { path: 'finanzas', element: <ComingSoon title="Finanzas" icon={<Wallet className="h-8 w-8" />} /> },
       { path: 'mas', element: <ComingSoon title="Más opciones" icon={<MoreHorizontal className="h-8 w-8" />} /> },
+      { path: 'perfil', element: <PerfilPage /> },
     ],
   },
 ])
