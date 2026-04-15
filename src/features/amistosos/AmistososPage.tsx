@@ -40,11 +40,13 @@ export default function AmistososPage() {
 
   const cancelar = useMutation({
     mutationFn: async (id: string) => {
+      if (!user) throw new Error('No autenticado')
       const { error } = await supabase
         .schema('padel')
         .from('partidas_abiertas')
         .update({ estado: 'cancelada' })
         .eq('id', id)
+        .eq('creador_id', user.id)
       if (error) throw error
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['partidas-abiertas'] }),
