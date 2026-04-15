@@ -1,5 +1,25 @@
 # DEVLOG — padel-sg
 
+## [2026-04-15 16:30] — AdminJugadores editable + fix RLS dev bypass
+
+**Resumen:** Se completó la página Admin Jugadores con tabla editable y se resolvió el problema de datos vacíos causado por RLS bloqueando queries sin sesión real de Supabase. Se migraron todas las queries a fetch directo con service key. Se agregaron columnas separadas Apellido/Nombre ordenables, dropdowns con categorías por género (M: 5a/4a/3a/Open, F: D/C/B/Open), pills de ciclo para Mixto y Estado.
+
+**Archivos:** `src/features/admin/AdminJugadores.tsx`, `src/lib/supabase.ts`, `.env.local`
+
+**Decisiones:**
+- Supabase JS client ignora service_role key cuando hay sesión cacheada en localStorage → se migró a fetch directo con headers explícitos para todas las queries de AdminJugadores
+- `GRANT USAGE ON SCHEMA padel TO service_role` aplicado en Supabase (schema padel no tenía permisos para service_role)
+- `VITE_SUPABASE_SERVICE_KEY` en `.env.local` (git-ignored) para dev bypass
+- Mixto y Estado como pill-ciclo (click para rotar valores) en vez de select dropdown
+
+**Pendientes:**
+- [ ] RUT en registro de jugadores (decidido diferir)
+- [ ] Limpiar logs de debug temporales en AdminJugadores.tsx y supabase.ts
+- [ ] Arreglar StepConfirmar.tsx en Ligas y Torneos (cambios no commiteados)
+- [ ] Probar edición inline en AdminJugadores (save con fetch PATCH)
+
+---
+
 ## [2026-04-13 —] — Configuración variables de entorno (consulta)
 
 **Resumen:** Sesión de consulta para configurar las variables de entorno en Vercel y Supabase Edge Functions. Sin cambios de código.

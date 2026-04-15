@@ -1,9 +1,13 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from './types/database.types'
 
+const IS_DEV_BYPASS = import.meta.env.DEV && import.meta.env.VITE_DEV_BYPASS === 'true'
+
 export const supabase = createClient<Database>(
   import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY,
+  IS_DEV_BYPASS && import.meta.env.VITE_SUPABASE_SERVICE_KEY
+    ? import.meta.env.VITE_SUPABASE_SERVICE_KEY
+    : import.meta.env.VITE_SUPABASE_ANON_KEY,
   { db: { schema: 'padel' } },
 )
 
