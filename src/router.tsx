@@ -13,7 +13,8 @@ import LigasList from './features/ligas/LigasList'
 import LigaDetalle from './features/ligas/LigaDetalle'
 import { Dashboard } from './features/dashboard/Dashboard'
 import { ComingSoon } from '@/components/ComingSoon'
-import { Users, Handshake, Wallet, MoreHorizontal } from 'lucide-react'
+import { Handshake, Wallet, MoreHorizontal } from 'lucide-react'
+import JugadoresPage from './features/jugadores/JugadoresPage'
 import CalendarioPage from './features/calendario/CalendarioPage'
 import RankingPage from './features/ranking/RankingPage'
 import PerfilPage from './features/perfil/PerfilPage'
@@ -39,7 +40,7 @@ export const router = createBrowserRouter([
       { path: 'torneos/:id', element: <TorneoDetalle /> },
       { path: 'ligas', element: <LigasList /> },
       { path: 'ligas/:id', element: <LigaDetalle /> },
-      { path: 'jugadores', element: <ComingSoon title="Jugadores" icon={<Users className="h-8 w-8" />} /> },
+      { path: 'jugadores', element: <JugadoresPage /> },
       { path: 'rankings', element: <RankingPage /> },
       { path: 'amistosos', element: <ComingSoon title="Amistosos" icon={<Handshake className="h-8 w-8" />} /> },
       { path: 'calendario', element: <CalendarioPage /> },
