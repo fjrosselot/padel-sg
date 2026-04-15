@@ -57,7 +57,7 @@ export default function RankingPage() {
 
               <div className="flex-1 min-w-0">
                 <p className="font-manrope text-sm font-bold text-navy truncate">
-                  {jugador.apodo ?? jugador.nombre.split(' ')[0]}
+                  {jugador.apodo ? `${jugador.nombre.split(' ')[0]} "${jugador.apodo}"` : jugador.nombre}
                 </p>
                 {jugador.categoria && (
                   <p className="font-inter text-xs text-muted">{jugador.categoria}</p>

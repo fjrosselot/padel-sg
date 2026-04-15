@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { Badge } from '../../components/ui/badge'
@@ -33,6 +34,7 @@ interface PartidoLiga {
 
 export default function LigaDetalle() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const { data: user } = useUser()
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
   const [selectedPartido, setSelectedPartido] = useState<PartidoLiga | null>(null)
@@ -101,8 +103,24 @@ export default function LigaDetalle() {
 
   const pendientes = (partidos ?? []).filter(p => p.estado === 'pendiente')
 
+  // Partidos que involucran al usuario actual (para mostrarle sus pendientes)
+  const misPendientes = (partidos ?? []).filter(p =>
+    p.estado === 'pendiente' && (
+      p.pareja1_j1 === user?.id || p.pareja1_j2 === user?.id ||
+      p.pareja2_j1 === user?.id || p.pareja2_j2 === user?.id
+    )
+  )
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-4">
+      <button
+        type="button"
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-2 text-muted font-inter text-sm hover:text-navy transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" /> Ligas
+      </button>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold font-manrope text-navy">{liga.nombre}</h1>
@@ -120,20 +138,24 @@ export default function LigaDetalle() {
             <StandingsTable ligaId={liga.id} standings={standings} jugadoresMap={jugadoresMap} />
           </div>
 
-          {pendientes.length > 0 && isAdmin && (
+          {(pendientes.length > 0 && isAdmin || misPendientes.length > 0) && (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-3">Partidos pendientes</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-3">
+                {isAdmin ? 'Partidos pendientes' : 'Mis partidos pendientes'}
+              </p>
               <div className="space-y-2">
-                {pendientes.map(p => (
+                {(isAdmin ? pendientes : misPendientes).map(p => (
                   <div key={p.id} className="bg-surface rounded-xl p-3 flex items-center justify-between">
                     <span className="text-sm">
                       <span className="font-medium text-navy">{p.jugador1?.nombre ?? '?'}</span>
                       <span className="text-muted mx-2">vs</span>
                       <span className="font-medium text-navy">{p.jugador2?.nombre ?? '?'}</span>
                     </span>
-                    <Button size="sm" variant="outline" onClick={() => setSelectedPartido(p)} className="border border-slate/30 text-navy text-sm hover:bg-surface">
-                      Cargar resultado
-                    </Button>
+                    {isAdmin && (
+                      <Button size="sm" variant="outline" onClick={() => setSelectedPartido(p)} className="border border-slate/30 text-navy text-sm hover:bg-surface">
+                        Cargar resultado
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>

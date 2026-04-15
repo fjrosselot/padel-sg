@@ -1,6 +1,13 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { supabase } from '../../lib/supabase'
 
 export function PendingApproval() {
+  const navigate = useNavigate()
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    navigate('/login')
+  }
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-navy px-4">
       <div
@@ -45,12 +52,22 @@ export function PendingApproval() {
           </div>
         </div>
 
-        <Link
-          to="/login"
-          className="mt-6 block font-inter text-xs text-slate transition-colors hover:text-muted"
-        >
-          Volver al inicio
-        </Link>
+        <div className="mt-6 flex items-center justify-center gap-4">
+          <Link
+            to="/login"
+            className="font-inter text-xs text-slate transition-colors hover:text-muted"
+          >
+            Volver al inicio
+          </Link>
+          <span className="text-navy-mid">·</span>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="font-inter text-xs text-muted transition-colors hover:text-defeat"
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </div>
     </div>
   )

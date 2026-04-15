@@ -1,36 +1,101 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useUser } from '../../hooks/useUser'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 
+const CATEGORIAS_H = ['5a', '4a', '3a', 'Open']
+const CATEGORIAS_M = ['D', 'C', 'B', 'Open']
+const LADO_OPTIONS = [
+  { value: 'drive', label: 'Drive' },
+  { value: 'reves', label: 'Revés' },
+  { value: 'ambos', label: 'Ambos' },
+]
+
+function ToggleBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-lg px-3 py-2 font-inter text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 border ${
+        active ? 'bg-gold text-navy border-gold' : 'border-navy/20 bg-white text-muted hover:border-gold/40'
+      }`}
+    >
+      {children}
+    </button>
+  )
+}
+
 export default function PerfilPage() {
   const { data: user } = useUser()
   const navigate = useNavigate()
+  const qc = useQueryClient()
 
+  // Password change state
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [pwError, setPwError] = useState<string | null>(null)
+  const [pwSuccess, setPwSuccess] = useState(false)
+  const [pwLoading, setPwLoading] = useState(false)
+
+  // Profile edit state
+  const [editMode, setEditMode] = useState(false)
+  const [apodo, setApodo] = useState(user?.apodo ?? '')
+  const [categoria, setCategoria] = useState(user?.categoria ?? '')
+  const [ladoPreferido, setLadoPreferido] = useState(user?.lado_preferido ?? '')
+  const [editError, setEditError] = useState<string | null>(null)
+  const [editLoading, setEditLoading] = useState(false)
+
+  const categorias = user?.sexo === 'F' ? CATEGORIAS_M : CATEGORIAS_H
+
+  const handleEditToggle = () => {
+    if (!editMode) {
+      setApodo(user?.apodo ?? '')
+      setCategoria(user?.categoria ?? '')
+      setLadoPreferido(user?.lado_preferido ?? '')
+      setEditError(null)
+    }
+    setEditMode(!editMode)
+  }
+
+  const handleSaveProfile = async () => {
+    if (!user) return
+    setEditLoading(true)
+    setEditError(null)
+    const { error } = await supabase
+      .schema('padel')
+      .from('jugadores')
+      .update({
+        apodo: apodo.trim() || null,
+        categoria: categoria || null,
+        lado_preferido: ladoPreferido || null,
+      })
+      .eq('id', user.id)
+    setEditLoading(false)
+    if (error) {
+      setEditError(error.message || 'No se pudo guardar los cambios.')
+    } else {
+      qc.invalidateQueries({ queryKey: ['user'] })
+      setEditMode(false)
+    }
+  }
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (password !== confirm) { setError('Las contraseñas no coinciden.'); return }
-    if (password.length < 8) { setError('Mínimo 8 caracteres.'); return }
-
-    setLoading(true)
-    setError(null)
+    if (password !== confirm) { setPwError('Las contraseñas no coinciden.'); return }
+    if (password.length < 8) { setPwError('Mínimo 8 caracteres.'); return }
+    setPwLoading(true)
+    setPwError(null)
     const { error: err } = await supabase.auth.updateUser({ password })
-    setLoading(false)
-
+    setPwLoading(false)
     if (err) {
-      setError(err.message || 'No se pudo actualizar la contraseña.')
+      setPwError(err.message || 'No se pudo actualizar la contraseña.')
     } else {
-      setSuccess(true)
+      setPwSuccess(true)
       setPassword('')
       setConfirm('')
     }
@@ -41,47 +106,103 @@ export default function PerfilPage() {
     navigate('/login')
   }
 
+  const initials = user?.nombre?.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() ?? '??'
+
   return (
     <div className="space-y-6 max-w-md">
       <h1 className="font-manrope text-2xl font-bold text-navy">Mi perfil</h1>
 
       {/* Info básica */}
-      <div className="rounded-xl bg-white shadow-card p-4 space-y-3">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-navy flex items-center justify-center overflow-hidden shrink-0">
-            {user?.foto_url
-              ? <img src={user.foto_url} alt={user.nombre} className="h-full w-full object-cover" />
-              : <span className="font-manrope text-sm font-bold text-gold">
-                  {user?.nombre?.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() ?? '??'}
-                </span>
-            }
+      <div className="rounded-xl bg-white shadow-card p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-full bg-navy flex items-center justify-center overflow-hidden shrink-0">
+              {user?.foto_url
+                ? <img src={user.foto_url} alt={user.nombre} className="h-full w-full object-cover" />
+                : <span className="font-manrope text-sm font-bold text-gold">{initials}</span>
+              }
+            </div>
+            <div>
+              <p className="font-manrope text-base font-bold text-navy">{user?.nombre}</p>
+              <p className="font-inter text-xs text-muted">{user?.email}</p>
+            </div>
           </div>
-          <div>
-            <p className="font-manrope text-base font-bold text-navy">{user?.nombre}</p>
-            <p className="font-inter text-xs text-muted">{user?.email}</p>
-          </div>
+          <button
+            type="button"
+            onClick={handleEditToggle}
+            className="font-inter text-xs text-gold hover:underline focus:outline-none"
+          >
+            {editMode ? 'Cancelar' : 'Editar'}
+          </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 pt-1">
-          {[
-            { label: 'Categoría', value: user?.categoria ?? '—' },
-            { label: 'ELO', value: user?.elo ?? '—' },
-            { label: 'Lado preferido', value: user?.lado_preferido ?? '—' },
-            { label: 'Rol', value: user?.rol ?? '—' },
-          ].map(({ label, value }) => (
-            <div key={label}>
-              <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted">{label}</p>
-              <p className="font-manrope text-sm font-bold text-navy capitalize">{String(value)}</p>
+        {!editMode ? (
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            {[
+              { label: 'Apodo', value: user?.apodo ?? '—' },
+              { label: 'ELO', value: user?.elo ?? '—' },
+              { label: 'Categoría', value: user?.categoria ?? '—' },
+              { label: 'Lado preferido', value: user?.lado_preferido ?? '—' },
+            ].map(({ label, value }) => (
+              <div key={label}>
+                <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted">{label}</p>
+                <p className="font-manrope text-sm font-bold text-navy capitalize">{String(value)}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4 pt-1">
+            <div>
+              <Label htmlFor="apodo">Apodo</Label>
+              <Input
+                id="apodo"
+                value={apodo}
+                onChange={e => setApodo(e.target.value)}
+                placeholder="Tu apodo (opcional)"
+                className="mt-1"
+              />
             </div>
-          ))}
-        </div>
+            <div>
+              <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted mb-2">Categoría</p>
+              <div className="flex flex-wrap gap-2">
+                {categorias.map(cat => (
+                  <ToggleBtn key={cat} active={categoria === cat} onClick={() => setCategoria(cat)}>
+                    {cat}
+                  </ToggleBtn>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted mb-2">Lado preferido</p>
+              <div className="flex gap-2">
+                {LADO_OPTIONS.map(opt => (
+                  <ToggleBtn key={opt.value} active={ladoPreferido === opt.value} onClick={() => setLadoPreferido(opt.value)}>
+                    {opt.label}
+                  </ToggleBtn>
+                ))}
+              </div>
+            </div>
+            {editError && (
+              <div role="alert" className="rounded-lg border border-defeat/30 bg-defeat/10 px-4 py-3 font-inter text-sm text-defeat">
+                {editError}
+              </div>
+            )}
+            <Button
+              onClick={handleSaveProfile}
+              disabled={editLoading}
+              className="w-full bg-gold text-navy font-bold rounded-lg"
+            >
+              {editLoading ? 'Guardando…' : 'Guardar cambios'}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Cambio de contraseña */}
       <div className="rounded-xl bg-white shadow-card p-4 space-y-4">
         <h2 className="font-manrope text-sm font-bold text-navy">Cambiar contraseña</h2>
 
-        {success && (
+        {pwSuccess && (
           <div role="alert" className="rounded-lg border border-success/30 bg-success/10 px-4 py-3 font-inter text-sm text-success">
             Contraseña actualizada correctamente.
           </div>
@@ -135,18 +256,18 @@ export default function PerfilPage() {
             />
           </div>
 
-          {error && (
+          {pwError && (
             <div role="alert" className="rounded-lg border border-defeat/30 bg-defeat/10 px-4 py-3 font-inter text-sm text-defeat">
-              {error}
+              {pwError}
             </div>
           )}
 
           <Button
             type="submit"
-            disabled={loading}
+            disabled={pwLoading}
             className="w-full bg-gold text-navy font-bold rounded-lg"
           >
-            {loading ? 'Guardando…' : 'Cambiar contraseña'}
+            {pwLoading ? 'Guardando…' : 'Cambiar contraseña'}
           </Button>
         </form>
       </div>

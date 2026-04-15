@@ -71,6 +71,7 @@ export default function NuevaPartidaModal({ onClose }: Props) {
               type="datetime-local"
               value={fecha}
               onChange={e => setFecha(e.target.value)}
+              min={new Date().toISOString().slice(0, 16)}
               required
               className="mt-1"
             />

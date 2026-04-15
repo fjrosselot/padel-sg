@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useUser } from '../../hooks/useUser'
@@ -21,6 +22,7 @@ const ESTADO_LABELS: Record<string, string> = {
 
 export default function TorneoDetalle() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const { data: user } = useUser()
   const [partidoModal, setPartidoModal] = useState<PartidoFixture | null>(null)
 
@@ -47,7 +49,15 @@ export default function TorneoDetalle() {
   const categorias = (torneo.categorias as unknown as CategoriaFixture[]) ?? []
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-4">
+      <button
+        type="button"
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-2 text-muted font-inter text-sm hover:text-navy transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" /> Torneos
+      </button>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold font-manrope text-navy">{torneo.nombre}</h1>
@@ -56,7 +66,7 @@ export default function TorneoDetalle() {
         <Badge>{ESTADO_LABELS[torneo.estado]}</Badge>
       </div>
 
-      <div className="space-y-4">
+      <div className="rounded-xl bg-white shadow-card space-y-4 p-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-4">Fixture</p>
           {categorias.length === 0 ? (

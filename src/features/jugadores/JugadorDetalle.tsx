@@ -10,12 +10,6 @@ const LADO_LABEL: Record<string, string> = {
   ambos: 'Ambos',
 }
 
-const ROL_LABEL: Record<string, string> = {
-  jugador: 'Jugador',
-  admin_torneo: 'Admin torneo',
-  superadmin: 'Superadmin',
-}
-
 export default function JugadorDetalle() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -83,7 +77,6 @@ export default function JugadorDetalle() {
         {[
           { label: 'Categoría', value: jugador.categoria ?? '—' },
           { label: 'Lado preferido', value: jugador.lado_preferido ? LADO_LABEL[jugador.lado_preferido] : '—' },
-          { label: 'Rol', value: jugador.rol ? ROL_LABEL[jugador.rol] ?? jugador.rol : '—' },
         ].map(({ label, value }, idx, arr) => (
           <div
             key={label}
