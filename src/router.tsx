@@ -13,7 +13,8 @@ import LigasList from './features/ligas/LigasList'
 import LigaDetalle from './features/ligas/LigaDetalle'
 import { Dashboard } from './features/dashboard/Dashboard'
 import { ComingSoon } from '@/components/ComingSoon'
-import { Users, Handshake, Calendar, Wallet, MoreHorizontal } from 'lucide-react'
+import { Users, Handshake, Wallet, MoreHorizontal } from 'lucide-react'
+import CalendarioPage from './features/calendario/CalendarioPage'
 import RankingPage from './features/ranking/RankingPage'
 import PerfilPage from './features/perfil/PerfilPage'
 
@@ -41,7 +42,7 @@ export const router = createBrowserRouter([
       { path: 'jugadores', element: <ComingSoon title="Jugadores" icon={<Users className="h-8 w-8" />} /> },
       { path: 'rankings', element: <RankingPage /> },
       { path: 'amistosos', element: <ComingSoon title="Amistosos" icon={<Handshake className="h-8 w-8" />} /> },
-      { path: 'calendario', element: <ComingSoon title="Calendario" icon={<Calendar className="h-8 w-8" />} /> },
+      { path: 'calendario', element: <CalendarioPage /> },
       { path: 'finanzas', element: <ComingSoon title="Finanzas" icon={<Wallet className="h-8 w-8" />} /> },
       { path: 'mas', element: <ComingSoon title="Más opciones" icon={<MoreHorizontal className="h-8 w-8" />} /> },
       { path: 'perfil', element: <PerfilPage /> },
