@@ -25,13 +25,13 @@ const wrap = (ui: React.ReactNode) =>
 test('shows email and password fields', () => {
   wrap(<LoginForm />)
   expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
-  expect(screen.getByLabelText(/contraseña/i)).toBeInTheDocument()
+  expect(screen.getByLabelText(/^contraseña$/i)).toBeInTheDocument()
 })
 
 test('shows error on failed login', async () => {
   wrap(<LoginForm />)
   await userEvent.type(screen.getByLabelText(/email/i), 'test@test.com')
-  await userEvent.type(screen.getByLabelText(/contraseña/i), 'wrongpass')
+  await userEvent.type(screen.getByLabelText(/^contraseña$/i), 'wrongpass')
   await userEvent.click(screen.getByRole('button', { name: /iniciar sesión/i }))
-  expect(await screen.findByText(/invalid credentials/i)).toBeInTheDocument()
+  expect(await screen.findByText(/email o contraseña incorrectos/i)).toBeInTheDocument()
 })
