@@ -52,6 +52,7 @@ export default function ResultadosModal({ partido, torneoId, onClose }: Props) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['torneo', torneoId] })
+      qc.invalidateQueries({ queryKey: ['ranking'] })
       onClose()
     },
   })
