@@ -158,6 +158,10 @@ export function LoginForm() {
             Solicitar acceso
           </Link>
         </p>
+
+        <p className="mt-4 text-center font-inter text-xs text-navy-mid">
+          v{__APP_VERSION__}
+        </p>
       </div>
     </div>
   )

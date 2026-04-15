@@ -73,7 +73,7 @@ export default function MasPage() {
         </div>
       </button>
 
-      <p className="text-center font-inter text-xs text-slate">Pádel Saint George's · v1.0</p>
+      <p className="text-center font-inter text-xs text-slate">Pádel Saint George's · v{__APP_VERSION__}</p>
     </div>
   )
 }
