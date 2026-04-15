@@ -159,7 +159,7 @@ export function LoginForm() {
           </Link>
         </p>
 
-        <p className="mt-4 text-center font-inter text-xs text-navy-mid">
+        <p className="mt-4 text-center font-inter text-xs text-slate">
           v{__APP_VERSION__}
         </p>
       </div>
