@@ -46,7 +46,10 @@ export default function TorneoDetalle() {
   if (isLoading) return <div className="p-6 text-muted">Cargando…</div>
   if (!torneo) return <div className="p-6 text-[#BA1A1A]">Torneo no encontrado</div>
 
-  const categorias = (torneo.categorias as unknown as CategoriaFixture[]) ?? []
+  // categorias puede ser CategoriaConfig[] (borrador) o CategoriaFixture[] (fixture generado)
+  // Solo renderizamos FixtureView si tiene la estructura completa (con grupos)
+  const rawCategorias = (torneo.categorias as unknown as CategoriaFixture[]) ?? []
+  const categorias = rawCategorias.filter(c => Array.isArray((c as CategoriaFixture).grupos))
 
   return (
     <div className="space-y-4">
