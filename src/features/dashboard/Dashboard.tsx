@@ -1,17 +1,42 @@
 import { useNavigate } from 'react-router-dom'
-import { Grid3x3, Layers, Handshake, Trophy, ChevronRight } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { Grid3x3, Layers, Handshake, Trophy } from 'lucide-react'
 import { useUser } from '@/hooks/useUser'
+import { supabase } from '@/lib/supabase'
 
 const QUICK_LINKS = [
   { to: '/torneos', icon: Grid3x3, label: 'Torneos', desc: 'Inscripciones y resultados' },
   { to: '/ligas', icon: Layers, label: 'Ligas', desc: 'Round robin y escalerilla' },
   { to: '/amistosos', icon: Handshake, label: 'Amistosos', desc: 'Partidos libres' },
-  { to: '/ranking', icon: Trophy, label: 'Ranking', desc: 'ELO y tabla general' },
+  { to: '/rankings', icon: Trophy, label: 'Ranking', desc: 'ELO y tabla general' },
 ]
 
 export function Dashboard() {
   const { data: user } = useUser()
   const navigate = useNavigate()
+
+  const { data: stats } = useQuery({
+    queryKey: ['user-stats', user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .schema('padel')
+        .from('partidos')
+        .select('pareja1_j1, pareja1_j2, pareja2_j1, pareja2_j2, ganador')
+        .eq('estado', 'jugado')
+        .or(`pareja1_j1.eq.${user!.id},pareja1_j2.eq.${user!.id},pareja2_j1.eq.${user!.id},pareja2_j2.eq.${user!.id}`)
+      if (error) throw error
+
+      const jugados = data.length
+      const victorias = data.filter(p => {
+        const enPareja1 = p.pareja1_j1 === user!.id || p.pareja1_j2 === user!.id
+        const enPareja2 = p.pareja2_j1 === user!.id || p.pareja2_j2 === user!.id
+        return (enPareja1 && p.ganador === 1) || (enPareja2 && p.ganador === 2)
+      }).length
+
+      return { jugados, victorias }
+    },
+  })
 
   const firstName = user?.nombre?.split(' ')[0] ?? 'Jugador'
 
@@ -30,9 +55,9 @@ export function Dashboard() {
       {/* Stats rápidas */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { label: 'ELO', value: (user as Record<string, unknown>)?.elo_actual ?? '—' },
-          { label: 'Partidos', value: (user as Record<string, unknown>)?.partidos_jugados ?? '—' },
-          { label: 'Victorias', value: (user as Record<string, unknown>)?.victorias ?? '—' },
+          { label: 'ELO', value: user?.elo ?? '—' },
+          { label: 'Partidos', value: stats?.jugados ?? '—' },
+          { label: 'Victorias', value: stats?.victorias ?? '—' },
           { label: 'Categoría', value: user?.categoria ?? '—' },
         ].map(({ label, value }) => (
           <div key={label} className="rounded-xl bg-white p-4 shadow-card">
@@ -62,21 +87,8 @@ export function Dashboard() {
                 <p className="font-manrope text-sm font-bold text-navy">{label}</p>
                 <p className="font-inter text-xs text-muted">{desc}</p>
               </div>
-              <ChevronRight className="h-4 w-4 shrink-0 text-muted" />
             </button>
           ))}
-        </div>
-      </div>
-
-      {/* Placeholder próximos eventos */}
-      <div>
-        <h2 className="mb-3 font-manrope text-sm font-bold uppercase tracking-widest text-slate">
-          Próximos eventos
-        </h2>
-        <div className="rounded-xl bg-white p-6 text-center shadow-card">
-          <p className="font-inter text-sm text-muted">
-            El calendario estará disponible próximamente
-          </p>
         </div>
       </div>
     </div>
