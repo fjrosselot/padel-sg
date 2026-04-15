@@ -45,6 +45,7 @@ const mockPartido: PartidoFixture = {
   turno: '09:00',
   ganador: null,
   resultado: null,
+  resultado_bloqueado: false,
 }
 
 describe('ResultadosModal', () => {

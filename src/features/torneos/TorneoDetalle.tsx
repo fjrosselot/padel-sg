@@ -1,11 +1,14 @@
+import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { useUser } from '../../hooks/useUser'
 import { Badge } from '../../components/ui/badge'
 import FixtureView from './FixtureView'
 import InscripcionesPanel from './InscripcionesPanel'
+import ResultadosModal from './ResultadosModal'
 import type { Database } from '../../lib/types/database.types'
-import type { CategoriaFixture } from '../../lib/fixture/types'
+import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
 type Torneo = Database['padel']['Tables']['torneos']['Row']
 
@@ -18,6 +21,10 @@ const ESTADO_LABELS: Record<string, string> = {
 
 export default function TorneoDetalle() {
   const { id } = useParams<{ id: string }>()
+  const { data: user } = useUser()
+  const [partidoModal, setPartidoModal] = useState<PartidoFixture | null>(null)
+
+  const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
 
   const { data: torneo, isLoading } = useQuery({
     queryKey: ['torneo', id],
@@ -56,7 +63,15 @@ export default function TorneoDetalle() {
             <p className="text-muted">El fixture se generará cuando el torneo pase a inscripción.</p>
           ) : (
             <div className="space-y-8">
-              {categorias.map(cat => <FixtureView key={cat.nombre} categoria={cat} />)}
+              {categorias.map(cat => (
+                <FixtureView
+                  key={cat.nombre}
+                  categoria={cat}
+                  torneoId={torneo.id}
+                  isAdmin={isAdmin}
+                  onCargarResultado={setPartidoModal}
+                />
+              ))}
             </div>
           )}
         </div>
@@ -66,6 +81,14 @@ export default function TorneoDetalle() {
           <InscripcionesPanel torneoId={torneo.id} estado={torneo.estado} />
         </div>
       </div>
+
+      {partidoModal && (
+        <ResultadosModal
+          partido={partidoModal}
+          torneoId={torneo.id}
+          onClose={() => setPartidoModal(null)}
+        />
+      )}
     </div>
   )
 }

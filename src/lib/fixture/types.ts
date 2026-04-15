@@ -18,6 +18,7 @@ export interface PartidoFixture {
   turno: string | null
   ganador: 1 | 2 | null
   resultado: string | null
+  resultado_bloqueado?: boolean
 }
 
 export interface GrupoFixture {
