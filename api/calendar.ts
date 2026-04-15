@@ -48,14 +48,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   for (const t of torneos ?? []) {
     const dtstart = formatDate(t.fecha_inicio)
-    const dtend = formatDate(t.fecha_fin ?? t.fecha_inicio)
     if (!dtstart) continue
 
     lines.push('BEGIN:VEVENT')
     lines.push(`UID:torneo-${t.id}@padel-sg`)
     lines.push(`DTSTAMP:${now}`)
     lines.push(`DTSTART;VALUE=DATE:${dtstart.slice(0, 8)}`)
-    lines.push(`DTEND;VALUE=DATE:${dtend?.slice(0, 8) ?? dtstart.slice(0, 8)}`)
+    if (t.fecha_fin) {
+      const dtend = formatDate(t.fecha_fin)
+      if (dtend) lines.push(`DTEND;VALUE=DATE:${dtend.slice(0, 8)}`)
+    }
     lines.push(`SUMMARY:🏆 ${escapeIcs(t.nombre)}`)
     if (t.descripcion) lines.push(`DESCRIPTION:${escapeIcs(t.descripcion)}`)
     lines.push('END:VEVENT')
