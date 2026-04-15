@@ -64,7 +64,7 @@ export function LoginForm() {
         {/* Card */}
         <div className="rounded-2xl border border-navy-mid bg-navy-mid/50 px-8 py-8 backdrop-blur-sm">
           <h1 className="mb-1 font-manrope text-xl font-bold text-white">
-            Bienvenido
+            Bienvenidos
           </h1>
           <p className="mb-7 font-inter text-sm text-muted">
             Ingresa tus credenciales para continuar
