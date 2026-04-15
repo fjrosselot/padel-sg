@@ -14,6 +14,7 @@ import LigaDetalle from './features/ligas/LigaDetalle'
 import { Dashboard } from './features/dashboard/Dashboard'
 import AmistososPage from './features/amistosos/AmistososPage'
 import JugadoresPage from './features/jugadores/JugadoresPage'
+import JugadorDetalle from './features/jugadores/JugadorDetalle'
 import FinanzasPage from './features/finanzas/FinanzasPage'
 import MasPage from './features/mas/MasPage'
 import CalendarioPage from './features/calendario/CalendarioPage'
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
       { path: 'ligas', element: <LigasList /> },
       { path: 'ligas/:id', element: <LigaDetalle /> },
       { path: 'jugadores', element: <JugadoresPage /> },
+      { path: 'jugadores/:id', element: <JugadorDetalle /> },
       { path: 'rankings', element: <RankingPage /> },
       { path: 'amistosos', element: <AmistososPage /> },
       { path: 'calendario', element: <CalendarioPage /> },

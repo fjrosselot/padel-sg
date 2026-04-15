@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Users } from 'lucide-react'
+import { Users, ChevronRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import type { Jugador } from '../../lib/supabase'
 
@@ -14,6 +15,7 @@ const LADO_LABEL: Record<string, string> = {
 
 export default function JugadoresPage() {
   const [search, setSearch] = useState('')
+  const navigate = useNavigate()
 
   const { data: jugadores, isLoading } = useQuery({
     queryKey: ['jugadores-directorio'],
@@ -67,9 +69,11 @@ export default function JugadoresPage() {
       {filtrados.length > 0 && (
         <div className="rounded-xl bg-white shadow-card overflow-hidden">
           {filtrados.map((jugador, idx) => (
-            <div
+            <button
               key={jugador.id}
-              className={`flex items-center gap-3 px-4 py-3 ${
+              type="button"
+              onClick={() => navigate(`/jugadores/${jugador.id}`)}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-surface transition-colors focus:outline-none focus:bg-surface ${
                 idx !== filtrados.length - 1 ? 'border-b border-surface-high' : ''
               }`}
             >
@@ -84,7 +88,7 @@ export default function JugadoresPage() {
 
               <div className="flex-1 min-w-0">
                 <p className="font-manrope text-sm font-bold text-navy truncate">
-                  {jugador.apodo ? `${jugador.nombre.split(' ')[0]} "${jugador.apodo}"` : jugador.nombre.split(' ')[0]}
+                  {jugador.apodo ? `${jugador.nombre} "${jugador.apodo}"` : jugador.nombre}
                 </p>
                 <p className="font-inter text-xs text-muted">
                   {[jugador.categoria, jugador.lado_preferido ? LADO_LABEL[jugador.lado_preferido] : null]
@@ -92,8 +96,9 @@ export default function JugadoresPage() {
                 </p>
               </div>
 
-              <span className="font-manrope text-sm font-bold text-navy shrink-0">{jugador.elo}</span>
-            </div>
+              <span className="font-manrope text-sm font-bold text-navy shrink-0 mr-1">{jugador.elo}</span>
+              <ChevronRight className="h-4 w-4 text-muted shrink-0" />
+            </button>
           ))}
         </div>
       )}
