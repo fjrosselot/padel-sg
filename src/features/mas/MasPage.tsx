@@ -15,6 +15,7 @@ const LINKS: LinkItem[] = [
   { icon: User, label: 'Mi perfil', desc: 'Datos personales y contraseña', to: '/perfil' },
   { icon: Calendar, label: 'Calendario', desc: 'Torneos y ligas programados', to: '/calendario' },
   { icon: Shield, label: 'Admin usuarios', desc: 'Aprobar y gestionar cuentas', to: '/admin/usuarios', adminOnly: true },
+  { icon: Users, label: 'Admin jugadores', desc: 'Editar datos de jugadores', to: '/admin/jugadores', adminOnly: true },
   { icon: Users, label: 'Admin temporadas', desc: 'Configuración de temporadas', to: '/admin/temporadas', adminOnly: true },
 ]
 

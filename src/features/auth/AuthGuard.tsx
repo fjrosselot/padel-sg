@@ -1,11 +1,13 @@
 import { Navigate } from 'react-router-dom'
 import { useUser } from '@/hooks/useUser'
+import { IS_DEV_BYPASS } from '@/lib/devUser'
 
 interface AuthGuardProps {
   children: React.ReactNode
 }
 
 export function AuthGuard({ children }: AuthGuardProps) {
+  if (IS_DEV_BYPASS) return <>{children}</>
   const { data: user, isLoading } = useUser()
 
   if (isLoading) {

@@ -7,6 +7,7 @@ import { PendingApproval } from '@/features/auth/PendingApproval'
 import { ResetPassword } from '@/features/auth/ResetPassword'
 import { PendingUsers } from '@/features/admin/PendingUsers'
 import AdminTemporadas from './features/admin/AdminTemporadas'
+import AdminJugadores from './features/admin/AdminJugadores'
 import TorneosList from './features/torneos/TorneosList'
 import TorneoDetalle from './features/torneos/TorneoDetalle'
 import LigasList from './features/ligas/LigasList'
@@ -38,6 +39,7 @@ export const router = createBrowserRouter([
       { path: 'dashboard', element: <Dashboard /> },
       { path: 'admin/usuarios', element: <PendingUsers /> },
       { path: 'admin/temporadas', element: <AdminTemporadas /> },
+      { path: 'admin/jugadores', element: <AdminJugadores /> },
       { path: 'torneos', element: <TorneosList /> },
       { path: 'torneos/:id', element: <TorneoDetalle /> },
       { path: 'ligas', element: <LigasList /> },

@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   useReactTable,
   getCoreRowModel,
@@ -7,359 +7,312 @@ import {
   flexRender,
   createColumnHelper,
   type SortingState,
+  type RowSelectionState,
 } from '@tanstack/react-table'
-import { Search, Check, Loader2, ChevronsUpDown, ChevronUp, ChevronDown } from 'lucide-react'
-import type { Jugador } from '../../lib/supabase'
+import { Search, ChevronsUpDown, ChevronUp, ChevronDown, Zap } from 'lucide-react'
+import { supabase, type Jugador } from '../../lib/supabase'
 
 type JugadorRow = Pick<Jugador, 'id' | 'nombre' | 'apodo' | 'email' | 'categoria' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'elo' | 'estado_cuenta'>
-
 type EditableField = 'apodo' | 'categoria' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'estado_cuenta'
 
-// Celda con select inline
-function SelectCell({
-  value,
-  options,
-  onChange,
-  saving,
-  saved,
-}: {
-  value: string | null
-  options: { value: string; label: string }[]
-  onChange: (v: string | null) => void
-  saving: boolean
-  saved: boolean
-}) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <select
-        value={value ?? ''}
-        onChange={e => onChange(e.target.value || null)}
-        disabled={saving}
-        className="rounded-md border border-navy/15 bg-transparent py-1 pl-2 pr-6 font-inter text-xs text-navy focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold disabled:opacity-50 appearance-none cursor-pointer"
-      >
-        <option value="">—</option>
-        {options.map(o => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
-      {saving && <Loader2 className="h-3 w-3 text-muted animate-spin shrink-0" />}
-      {saved && !saving && <Check className="h-3 w-3 text-success shrink-0" />}
-    </div>
-  )
+const ANON_KEY = () => import.meta.env.VITE_SUPABASE_ANON_KEY
+const SERVICE_KEY = () => import.meta.env.VITE_SUPABASE_SERVICE_KEY as string | undefined
+const API_URL = () => import.meta.env.VITE_SUPABASE_URL
+
+async function adminHeaders(method: 'read' | 'write' = 'read') {
+  const serviceKey = SERVICE_KEY()
+  if (serviceKey) {
+    // dev bypass: service key bypasa RLS completamente
+    return {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      'Accept-Profile': 'padel',
+      ...(method === 'write' ? { 'Content-Profile': 'padel', 'Content-Type': 'application/json', Prefer: 'return=minimal' } : {}),
+    }
+  }
+  // producción: usar JWT del usuario autenticado
+  const { data: { session } } = await supabase.auth.getSession()
+  const token = session?.access_token ?? ANON_KEY()
+  return {
+    apikey: ANON_KEY(),
+    Authorization: `Bearer ${token}`,
+    'Accept-Profile': 'padel',
+    ...(method === 'write' ? { 'Content-Profile': 'padel', 'Content-Type': 'application/json', Prefer: 'return=minimal' } : {}),
+  }
 }
 
-// Celda con input texto inline
-function TextCell({
-  value,
-  onSave,
-  saving,
-  saved,
-}: {
-  value: string | null
-  onSave: (v: string | null) => void
-  saving: boolean
-  saved: boolean
-}) {
-  const [local, setLocal] = useState(value ?? '')
-
-  return (
-    <div className="flex items-center gap-1.5">
-      <input
-        type="text"
-        value={local}
-        onChange={e => setLocal(e.target.value)}
-        onBlur={() => onSave(local.trim() || null)}
-        onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
-        disabled={saving}
-        placeholder="—"
-        className="w-24 rounded-md border border-navy/15 bg-transparent py-1 px-2 font-inter text-xs text-navy focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold disabled:opacity-50 placeholder-muted"
-      />
-      {saving && <Loader2 className="h-3 w-3 text-muted animate-spin shrink-0" />}
-      {saved && !saving && <Check className="h-3 w-3 text-success shrink-0" />}
-    </div>
-  )
+async function patchJugador(id: string, patch: Record<string, string | null>) {
+  const headers = await adminHeaders('write')
+  const res = await fetch(`${API_URL()}/rest/v1/jugadores?id=eq.${id}`, {
+    method: 'PATCH', headers, body: JSON.stringify(patch),
+  })
+  if (!res.ok) throw new Error(await res.text())
 }
 
-const LADO_OPTIONS = [
-  { value: 'drive', label: 'Drive' },
-  { value: 'reves', label: 'Revés' },
-  { value: 'ambos', label: 'Ambos' },
-]
-const SEXO_OPTIONS = [
-  { value: 'M', label: 'Hombre' },
-  { value: 'F', label: 'Mujer' },
-]
-const GRADUALIDAD_OPTIONS = [
-  { value: '-', label: '-' },
-  { value: 'normal', label: 'Normal' },
-  { value: '+', label: '+' },
-]
-const CATEGORIA_M = ['5a', '4a', '3a', 'Open'].map(v => ({ value: v, label: v }))
-const CATEGORIA_F = ['D', 'C', 'B', 'Open'].map(v => ({ value: v, label: v }))
-
-const MIXTO_CYCLE: Array<{ value: string; label: string; cls: string }> = [
+// ── opciones ──────────────────────────────────────────────────────────────
+const LADO_OPTIONS    = [{ value: 'drive', label: 'Drive' }, { value: 'reves', label: 'Revés' }, { value: 'ambos', label: 'Ambos' }]
+const SEXO_OPTIONS    = [{ value: 'M', label: 'Hombre' }, { value: 'F', label: 'Mujer' }]
+const GRAD_OPTIONS    = [{ value: '-', label: '−' }, { value: 'normal', label: 'Normal' }, { value: '+', label: '+' }]
+const CATEGORIA_M     = ['5a', '4a', '3a', 'Open'].map(v => ({ value: v, label: v }))
+const CATEGORIA_F     = ['D', 'C', 'B', 'Open'].map(v => ({ value: v, label: v }))
+const MIXTO_CYCLE     = [
   { value: 'si', label: 'Sí', cls: 'bg-success/15 text-success' },
   { value: 'a_veces', label: 'A veces', cls: 'bg-warning/15 text-warning' },
   { value: 'no', label: 'No', cls: 'bg-surface-high text-muted' },
 ]
-const ESTADO_CYCLE: Array<{ value: string; label: string; cls: string }> = [
+const ESTADO_CYCLE    = [
   { value: 'activo', label: 'Activo', cls: 'bg-success/15 text-success' },
   { value: 'pendiente', label: 'Pendiente', cls: 'bg-warning/15 text-warning' },
   { value: 'suspendido', label: 'Suspendido', cls: 'bg-defeat/15 text-defeat' },
   { value: 'inactivo', label: 'Inactivo', cls: 'bg-surface-high text-muted' },
 ]
 
-function CycleCell({
-  value,
-  cycle,
-  onChange,
-  saving,
-}: {
+// ── celdas ────────────────────────────────────────────────────────────────
+function SelectCell({ value, options, onChange }: {
   value: string | null
-  cycle: Array<{ value: string; label: string; cls: string }>
-  onChange: (v: string) => void
-  saving: boolean
+  options: { value: string; label: string }[]
+  onChange: (v: string | null) => void
 }) {
-  const current = cycle.find(c => c.value === value) ?? { value: '', label: '—', cls: 'bg-surface-high text-muted' }
-  const next = () => {
-    if (saving) return
+  return (
+    <select
+      value={value ?? ''}
+      onChange={e => onChange(e.target.value || null)}
+      className="rounded-md border border-navy/15 bg-transparent py-1 pl-2 pr-6 font-inter text-xs text-navy focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold appearance-none cursor-pointer"
+    >
+      <option value="">—</option>
+      {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+    </select>
+  )
+}
+
+function TextCell({ value, onSave }: { value: string | null; onSave: (v: string | null) => void }) {
+  const [local, setLocal] = useState(value ?? '')
+  return (
+    <input
+      type="text"
+      value={local}
+      onChange={e => setLocal(e.target.value)}
+      onBlur={() => onSave(local.trim() || null)}
+      onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
+      placeholder="—"
+      className="w-24 rounded-md border border-navy/15 bg-transparent py-1 px-2 font-inter text-xs text-navy focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold placeholder-muted"
+    />
+  )
+}
+
+function CycleCell({ value, cycle, onChange }: {
+  value: string | null
+  cycle: typeof MIXTO_CYCLE
+  onChange: (v: string) => void
+}) {
+  const current = cycle.find(c => c.value === value) ?? { label: '—', cls: 'bg-surface-high text-muted', value: '' }
+  const handleClick = () => {
     const idx = cycle.findIndex(c => c.value === value)
-    const nextItem = cycle[(idx + 1) % cycle.length]
-    onChange(nextItem.value)
+    onChange(cycle[(idx + 1) % cycle.length].value)
   }
   return (
-    <button
-      type="button"
-      onClick={next}
-      disabled={saving}
-      title="Click para cambiar"
-      className={`rounded-full px-2.5 py-0.5 font-inter text-[11px] font-semibold transition-opacity hover:opacity-80 disabled:opacity-50 ${current.cls}`}
-    >
-      {saving ? '…' : current.label}
+    <button type="button" onClick={handleClick} title="Click para cambiar"
+      className={`rounded-full px-2.5 py-0.5 font-inter text-[11px] font-semibold hover:opacity-80 transition-opacity ${current.cls}`}>
+      {current.label}
     </button>
   )
 }
 
+// ── barra de edición masiva ───────────────────────────────────────────────
+function BulkBar({ count, onApply, onClear }: {
+  count: number
+  onApply: (field: EditableField, value: string) => void
+  onClear: () => void
+}) {
+  const [bulkField, setBulkField] = useState<EditableField | ''>('')
+  const [bulkValue, setBulkValue] = useState('')
+  const [applying, setApplying] = useState(false)
+
+  const fieldOptions: { value: EditableField; label: string }[] = [
+    { value: 'sexo', label: 'Sexo' },
+    { value: 'categoria', label: 'Categoría' },
+    { value: 'lado_preferido', label: 'Lado' },
+    { value: 'mixto', label: 'Mixto' },
+    { value: 'gradualidad', label: 'Gradualidad' },
+    { value: 'estado_cuenta', label: 'Estado' },
+  ]
+
+  const valueOptions: Record<EditableField, { value: string; label: string }[]> = {
+    sexo: SEXO_OPTIONS,
+    categoria: [...CATEGORIA_M, { value: 'D', label: 'D' }, { value: 'C', label: 'C' }, { value: 'B', label: 'B' }],
+    lado_preferido: LADO_OPTIONS,
+    mixto: MIXTO_CYCLE.map(c => ({ value: c.value, label: c.label })),
+    gradualidad: GRAD_OPTIONS,
+    estado_cuenta: ESTADO_CYCLE.map(c => ({ value: c.value, label: c.label })),
+    apodo: [],
+  }
+
+  const handleApply = async () => {
+    if (!bulkField || !bulkValue) return
+    setApplying(true)
+    await onApply(bulkField, bulkValue)
+    setApplying(false)
+    setBulkField('')
+    setBulkValue('')
+  }
+
+  return (
+    <div className="flex items-center gap-3 rounded-xl bg-navy px-4 py-3 shadow-md">
+      <Zap className="h-4 w-4 text-gold shrink-0" />
+      <span className="font-inter text-sm font-semibold text-white shrink-0">{count} seleccionados</span>
+      <div className="flex items-center gap-2 flex-1">
+        <select
+          value={bulkField}
+          onChange={e => { setBulkField(e.target.value as EditableField); setBulkValue('') }}
+          className="rounded-md border border-white/20 bg-navy-mid py-1 pl-2 pr-6 font-inter text-xs text-white focus:border-gold focus:outline-none appearance-none cursor-pointer"
+        >
+          <option value="">Campo…</option>
+          {fieldOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+        {bulkField && (
+          <select
+            value={bulkValue}
+            onChange={e => setBulkValue(e.target.value)}
+            className="rounded-md border border-white/20 bg-navy-mid py-1 pl-2 pr-6 font-inter text-xs text-white focus:border-gold focus:outline-none appearance-none cursor-pointer"
+          >
+            <option value="">Valor…</option>
+            {valueOptions[bulkField]?.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        )}
+        <button
+          type="button"
+          onClick={handleApply}
+          disabled={!bulkField || !bulkValue || applying}
+          className="rounded-md bg-gold px-3 py-1 font-inter text-xs font-bold text-navy disabled:opacity-40 hover:bg-gold/90 transition-colors"
+        >
+          {applying ? 'Aplicando…' : 'Aplicar'}
+        </button>
+      </div>
+      <button type="button" onClick={onClear}
+        className="font-inter text-xs text-white/50 hover:text-white transition-colors shrink-0">
+        Deseleccionar
+      </button>
+    </div>
+  )
+}
+
+// ── columnas ──────────────────────────────────────────────────────────────
 const columnHelper = createColumnHelper<JugadorRow>()
 
 export default function AdminJugadores() {
   const qc = useQueryClient()
   const [search, setSearch] = useState('')
   const [sorting, setSorting] = useState<SortingState>([{ id: 'nombre', desc: false }])
-  // Estado de guardado por jugador+campo
-  const [savingMap, setSavingMap] = useState<Record<string, boolean>>({})
-  const [savedMap, setSavedMap] = useState<Record<string, boolean>>({})
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
 
   const { data: jugadores, isLoading, error: queryError } = useQuery({
     queryKey: ['admin-jugadores'],
     queryFn: async () => {
-      const key = import.meta.env.VITE_SUPABASE_SERVICE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY
-      const url = import.meta.env.VITE_SUPABASE_URL
+      const headers = await adminHeaders('read')
       const fields = 'id,nombre,apodo,email,categoria,lado_preferido,sexo,mixto,gradualidad,elo,estado_cuenta'
-      const res = await fetch(`${url}/rest/v1/jugadores?select=${fields}&order=nombre.asc`, {
-        headers: {
-          apikey: key,
-          Authorization: `Bearer ${key}`,
-          'Accept-Profile': 'padel',
-          'Content-Type': 'application/json',
-        },
-      })
+      const res = await fetch(`${API_URL()}/rest/v1/jugadores?select=${fields}&order=nombre.asc`, { headers })
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`)
       return res.json() as Promise<JugadorRow[]>
     },
+    staleTime: 60_000,
   })
 
-  const mutation = useMutation({
-    mutationFn: async ({ id, field, value }: { id: string; field: EditableField; value: string | null }) => {
-      const key = `${id}-${field}`
-      setSavingMap(m => ({ ...m, [key]: true }))
-      setSavedMap(m => ({ ...m, [key]: false }))
-      const k = import.meta.env.VITE_SUPABASE_SERVICE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY
-      const url = import.meta.env.VITE_SUPABASE_URL
-      const res = await fetch(`${url}/rest/v1/jugadores?id=eq.${id}`, {
-        method: 'PATCH',
-        headers: {
-          apikey: k,
-          Authorization: `Bearer ${k}`,
-          'Accept-Profile': 'padel',
-          'Content-Profile': 'padel',
-          'Content-Type': 'application/json',
-          Prefer: 'return=minimal',
-        },
-        body: JSON.stringify({ [field]: value }),
-      })
-      const error = res.ok ? null : await res.text()
-      if (error) throw new Error(error)
-      return key
-    },
-    onSuccess: (key) => {
-      setSavingMap(m => ({ ...m, [key]: false }))
-      setSavedMap(m => ({ ...m, [key]: true }))
+  // Actualización optimista: cambia cache local al instante, guarda en background
+  const save = useCallback(async (id: string, field: EditableField, value: string | null) => {
+    qc.setQueryData<JugadorRow[]>(['admin-jugadores'], old =>
+      old?.map(j => j.id === id ? { ...j, [field]: value } : j)
+    )
+    try {
+      await patchJugador(id, { [field]: value })
+    } catch {
       qc.invalidateQueries({ queryKey: ['admin-jugadores'] })
-      qc.invalidateQueries({ queryKey: ['jugadores-directorio'] })
-      setTimeout(() => setSavedMap(m => ({ ...m, [key]: false })), 2000)
-    },
-    onError: (_err, { id, field }) => {
-      setSavingMap(m => ({ ...m, [`${id}-${field}`]: false }))
-    },
-  })
+    }
+  }, [qc])
 
-  const save = useCallback((id: string, field: EditableField, value: string | null) => {
-    mutation.mutate({ id, field, value })
-  }, [mutation])
+  // Guardado masivo en paralelo
+  const bulkSave = useCallback(async (field: EditableField, value: string) => {
+    const selectedIds = Object.keys(rowSelection).filter(k => rowSelection[k])
+    if (!selectedIds.length) return
+    qc.setQueryData<JugadorRow[]>(['admin-jugadores'], old =>
+      old?.map(j => selectedIds.includes(j.id) ? { ...j, [field]: value } : j)
+    )
+    await Promise.allSettled(selectedIds.map(id => patchJugador(id, { [field]: value })))
+    setRowSelection({})
+  }, [qc, rowSelection])
 
   const columns = useMemo(() => [
+    columnHelper.display({
+      id: 'select',
+      size: 40,
+      header: ({ table }) => (
+        <input type="checkbox"
+          checked={table.getIsAllPageRowsSelected()}
+          onChange={table.getToggleAllPageRowsSelectedHandler()}
+          className="rounded border-navy/30 accent-gold cursor-pointer"
+        />
+      ),
+      cell: ({ row }) => (
+        <input type="checkbox"
+          checked={row.getIsSelected()}
+          onChange={row.getToggleSelectedHandler()}
+          className="rounded border-navy/30 accent-gold cursor-pointer"
+        />
+      ),
+      enableSorting: false,
+    }),
     columnHelper.accessor('nombre', {
       header: 'Apellido',
       size: 150,
       sortingFn: 'apellidoSort' as 'auto',
       cell: info => {
-        const partes = info.getValue().trim().split(/\s+/)
-        const apellido = partes.slice(1).join(' ') || partes[0]
-        return <span className="font-manrope text-sm font-bold text-navy">{apellido}</span>
+        const p = info.getValue().trim().split(/\s+/)
+        return <span className="font-manrope text-sm font-bold text-navy">{p.slice(1).join(' ') || p[0]}</span>
       },
     }),
     columnHelper.accessor('nombre', {
-      id: 'nombre_pila',
-      header: 'Nombre',
-      size: 120,
-      enableSorting: false,
-      cell: info => {
-        const nombre = info.getValue().trim().split(/\s+/)[0]
-        return <span className="font-inter text-sm text-navy">{nombre}</span>
-      },
+      id: 'nombre_pila', header: 'Nombre', size: 110, enableSorting: false,
+      cell: info => <span className="font-inter text-sm text-navy">{info.getValue().trim().split(/\s+/)[0]}</span>,
     }),
     columnHelper.accessor('email', {
-      header: 'Email',
-      size: 200,
-      enableSorting: false,
+      header: 'Email', size: 190, enableSorting: false,
       cell: info => <span className="font-inter text-xs text-muted">{info.getValue()}</span>,
     }),
     columnHelper.accessor('apodo', {
-      header: 'Apodo',
-      size: 120,
-      cell: info => {
-        const { id } = info.row.original
-        const key = `${id}-apodo`
-        return (
-          <TextCell
-            value={info.getValue()}
-            onSave={v => save(id, 'apodo', v)}
-            saving={!!savingMap[key]}
-            saved={!!savedMap[key]}
-          />
-        )
-      },
-      enableSorting: false,
+      header: 'Apodo', size: 110, enableSorting: false,
+      cell: info => <TextCell value={info.getValue()} onSave={v => save(info.row.original.id, 'apodo', v)} />,
     }),
     columnHelper.accessor('sexo', {
-      header: 'Sexo',
-      size: 110,
-      cell: info => {
-        const { id } = info.row.original
-        const key = `${id}-sexo`
-        return (
-          <SelectCell
-            value={info.getValue()}
-            options={SEXO_OPTIONS}
-            onChange={v => save(id, 'sexo', v)}
-            saving={!!savingMap[key]}
-            saved={!!savedMap[key]}
-          />
-        )
-      },
+      header: 'Sexo', size: 100,
+      cell: info => <SelectCell value={info.getValue()} options={SEXO_OPTIONS} onChange={v => save(info.row.original.id, 'sexo', v)} />,
     }),
     columnHelper.accessor('categoria', {
-      header: 'Categoría',
-      size: 110,
+      header: 'Categoría', size: 110,
       cell: info => {
-        const { id, sexo } = info.row.original
-        const key = `${id}-categoria`
-        const options = sexo === 'F' ? CATEGORIA_F : CATEGORIA_M
-        return (
-          <SelectCell
-            value={info.getValue()}
-            options={options}
-            onChange={v => save(id, 'categoria', v)}
-            saving={!!savingMap[key]}
-            saved={!!savedMap[key]}
-          />
-        )
+        const opts = info.row.original.sexo === 'F' ? CATEGORIA_F : CATEGORIA_M
+        return <SelectCell value={info.getValue()} options={opts} onChange={v => save(info.row.original.id, 'categoria', v)} />
       },
     }),
     columnHelper.accessor('lado_preferido', {
-      header: 'Lado',
-      size: 120,
-      cell: info => {
-        const { id } = info.row.original
-        const key = `${id}-lado_preferido`
-        return (
-          <SelectCell
-            value={info.getValue()}
-            options={LADO_OPTIONS}
-            onChange={v => save(id, 'lado_preferido', v)}
-            saving={!!savingMap[key]}
-            saved={!!savedMap[key]}
-          />
-        )
-      },
+      header: 'Lado', size: 110,
+      cell: info => <SelectCell value={info.getValue()} options={LADO_OPTIONS} onChange={v => save(info.row.original.id, 'lado_preferido', v)} />,
     }),
     columnHelper.accessor('mixto', {
-      header: 'Mixto',
-      size: 100,
-      cell: info => {
-        const { id } = info.row.original
-        const key = `${id}-mixto`
-        return (
-          <CycleCell
-            value={info.getValue()}
-            cycle={MIXTO_CYCLE}
-            onChange={v => save(id, 'mixto', v)}
-            saving={!!savingMap[key]}
-          />
-        )
-      },
+      header: 'Mixto', size: 90, enableSorting: false,
+      cell: info => <CycleCell value={info.getValue()} cycle={MIXTO_CYCLE} onChange={v => save(info.row.original.id, 'mixto', v)} />,
     }),
     columnHelper.accessor('gradualidad', {
-      header: 'Grad.',
-      size: 100,
-      cell: info => {
-        const { id } = info.row.original
-        const key = `${id}-gradualidad`
-        return (
-          <SelectCell
-            value={info.getValue()}
-            options={GRADUALIDAD_OPTIONS}
-            onChange={v => save(id, 'gradualidad', v)}
-            saving={!!savingMap[key]}
-            saved={!!savedMap[key]}
-          />
-        )
-      },
+      header: 'Grad.', size: 90,
+      cell: info => <SelectCell value={info.getValue()} options={GRAD_OPTIONS} onChange={v => save(info.row.original.id, 'gradualidad', v)} />,
     }),
     columnHelper.accessor('elo', {
-      header: 'ELO',
-      size: 70,
+      header: 'ELO', size: 65,
       cell: info => <span className="font-manrope text-sm font-bold text-navy">{info.getValue()}</span>,
     }),
     columnHelper.accessor('estado_cuenta', {
-      header: 'Estado',
-      size: 110,
-      cell: info => {
-        const { id } = info.row.original
-        const key = `${id}-estado_cuenta`
-        return (
-          <CycleCell
-            value={info.getValue()}
-            cycle={ESTADO_CYCLE}
-            onChange={v => save(id, 'estado_cuenta' as EditableField, v)}
-            saving={!!savingMap[key]}
-          />
-        )
-      },
-      enableSorting: false,
+      header: 'Estado', size: 100, enableSorting: false,
+      cell: info => <CycleCell value={info.getValue()} cycle={ESTADO_CYCLE} onChange={v => save(info.row.original.id, 'estado_cuenta', v)} />,
     }),
-  ], [save, savingMap, savedMap, qc])
+  ], [save])
 
   const filteredData = useMemo(() => {
     if (!search.trim()) return jugadores ?? []
@@ -374,22 +327,23 @@ export default function AdminJugadores() {
   const table = useReactTable({
     data: filteredData,
     columns,
-    state: { sorting },
+    state: { sorting, rowSelection },
     onSortingChange: setSorting,
+    onRowSelectionChange: setRowSelection,
+    getRowId: row => row.id,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    enableRowSelection: true,
     sortingFns: {
       apellidoSort: (a, b) => {
-        const getApellido = (nombre: string) => {
-          const p = nombre.trim().split(/\s+/)
-          return (p.slice(1).join(' ') || p[0]).toLowerCase()
-        }
-        return getApellido(a.original.nombre).localeCompare(getApellido(b.original.nombre), 'es')
+        const ap = (n: string) => { const p = n.trim().split(/\s+/); return (p.slice(1).join(' ') || p[0]).toLowerCase() }
+        return ap(a.original.nombre).localeCompare(ap(b.original.nombre), 'es')
       },
     },
   })
 
   const rows = table.getRowModel().rows
+  const selectedCount = Object.values(rowSelection).filter(Boolean).length
 
   if (isLoading) return <div className="p-6 text-muted font-inter text-sm">Cargando jugadores…</div>
   if (queryError) return <div className="p-6 text-defeat font-inter text-sm">Error: {String(queryError)}</div>
@@ -400,9 +354,9 @@ export default function AdminJugadores() {
         <p className="font-inter text-[10px] font-bold tracking-widest uppercase text-gold mb-0.5">Admin</p>
         <div className="flex items-end justify-between">
           <h1 className="font-manrope text-2xl font-extrabold text-navy uppercase tracking-tight">Datos jugadores</h1>
-          <span className="font-inter text-xs text-muted mb-0.5">{rows.length} de {jugadores?.length ?? 0} (filtered: {filteredData.length})</span>
+          <span className="font-inter text-xs text-muted mb-0.5">{rows.length} de {jugadores?.length ?? 0}</span>
         </div>
-        <p className="font-inter text-xs text-muted mt-1">Los cambios se guardan automáticamente al salir del campo.</p>
+        <p className="font-inter text-xs text-muted mt-1">Los cambios individuales se guardan al instante. Selecciona filas para edición masiva.</p>
       </div>
 
       <div className="relative">
@@ -416,23 +370,24 @@ export default function AdminJugadores() {
         />
       </div>
 
+      {selectedCount > 0 && (
+        <BulkBar
+          count={selectedCount}
+          onApply={bulkSave}
+          onClear={() => setRowSelection({})}
+        />
+      )}
+
       <div className="rounded-xl bg-white shadow-card overflow-x-auto">
-        <table className="w-full min-w-[900px]">
+        <table className="w-full min-w-[1000px]">
           <thead>
             {table.getHeaderGroups().map(hg => (
               <tr key={hg.id} className="border-b border-surface-high">
                 {hg.headers.map(header => (
-                  <th
-                    key={header.id}
-                    style={{ width: header.getSize() }}
-                    className="px-4 py-3 text-left"
-                  >
+                  <th key={header.id} style={{ width: header.getSize() }} className="px-3 py-3 text-left">
                     {header.column.getCanSort() ? (
-                      <button
-                        type="button"
-                        onClick={header.column.getToggleSortingHandler()}
-                        className="flex items-center gap-1 font-inter text-[10px] font-bold uppercase tracking-widest text-muted hover:text-navy transition-colors"
-                      >
+                      <button type="button" onClick={header.column.getToggleSortingHandler()}
+                        className="flex items-center gap-1 font-inter text-[10px] font-bold uppercase tracking-widest text-muted hover:text-navy transition-colors">
                         {flexRender(header.column.columnDef.header, header.getContext())}
                         {header.column.getIsSorted() === 'asc' ? <ChevronUp className="h-3 w-3" /> :
                          header.column.getIsSorted() === 'desc' ? <ChevronDown className="h-3 w-3" /> :
@@ -450,12 +405,10 @@ export default function AdminJugadores() {
           </thead>
           <tbody>
             {rows.map((row, idx) => (
-              <tr
-                key={row.id}
-                className={`${idx !== rows.length - 1 ? 'border-b border-surface-high' : ''} hover:bg-surface/50 transition-colors`}
-              >
+              <tr key={row.id}
+                className={`${idx !== rows.length - 1 ? 'border-b border-surface-high' : ''} ${row.getIsSelected() ? 'bg-gold/5' : 'hover:bg-surface/50'} transition-colors`}>
                 {row.getVisibleCells().map(cell => (
-                  <td key={cell.id} className="px-4 py-2.5">
+                  <td key={cell.id} className="px-3 py-2">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
