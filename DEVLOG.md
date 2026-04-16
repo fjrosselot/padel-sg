@@ -1,5 +1,26 @@
 # DEVLOG — padel-sg
 
+## [2026-04-16 17:00] — Bulk edit + optimistic updates + deploy a producción
+
+**Resumen:** Se agregó edición masiva de jugadores con checkboxes y barra de acción bulk (campo + valor → aplica en paralelo a todos los seleccionados). Se implementaron optimistic updates para que los cambios individuales sean instantáneos. Se corrigió el auth para producción: en dev usa service key, en prod usa JWT del usuario. Deploy a Vercel.
+
+**Archivos:** `src/features/admin/AdminJugadores.tsx`
+
+**Decisiones:**
+- Optimistic updates con `qc.setQueryData` en vez de `invalidateQueries` → UI instantánea, revierte en error
+- `adminHeaders()` detecta si hay service key (dev) o usa `supabase.auth.getSession()` JWT (prod) — mismo código funciona en ambos entornos
+- Bulk save con `Promise.allSettled` en paralelo — no bloquea si alguno falla
+- `VITE_SUPABASE_SERVICE_KEY` y `VITE_DEV_BYPASS` NO deben estar en Vercel producción
+
+**Pendientes:**
+- [ ] RUT en registro de jugadores (diferido)
+- [ ] Verificar AdminJugadores en producción con auth real
+- [ ] Toggle `resultado_bloqueado` en TorneoDetalle
+- [ ] Recálculo automático de ranking al guardar resultado
+- [ ] Code splitting para reducir bundle (>500kB warning en Vercel)
+
+---
+
 ## [2026-04-15 16:30] — AdminJugadores editable + fix RLS dev bypass
 
 **Resumen:** Se completó la página Admin Jugadores con tabla editable y se resolvió el problema de datos vacíos causado por RLS bloqueando queries sin sesión real de Supabase. Se migraron todas las queries a fetch directo con service key. Se agregaron columnas separadas Apellido/Nombre ordenables, dropdowns con categorías por género (M: 5a/4a/3a/Open, F: D/C/B/Open), pills de ciclo para Mixto y Estado.
