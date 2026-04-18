@@ -24,6 +24,7 @@ function PartidoRow({ partido, torneoId, isAdmin, onCargarResultado }: PartidoRo
       if (error) throw error
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['torneo', torneoId] }),
+    onError: () => alert('No se pudo cambiar el bloqueo'),
   })
 
   const puedeCargar = isAdmin && !partido.resultado_bloqueado && !partido.ganador
