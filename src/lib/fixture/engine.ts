@@ -39,6 +39,7 @@ export function generateRoundRobin(
           turno: null,
           ganador: null,
           resultado: null,
+          resultado_bloqueado: false,
         })
       }
     }
@@ -82,7 +83,7 @@ export function buildPlayoffs(
     partidos.push({
       id: nextId(), fase: 'final', grupo: null, numero: 1,
       pareja1: classified[0], pareja2: classified[1],
-      cancha: null, turno: null, ganador: null, resultado: null,
+      cancha: null, turno: null, ganador: null, resultado: null, resultado_bloqueado: false,
     })
     return partidos
   }
@@ -91,19 +92,19 @@ export function buildPlayoffs(
     partidos.push({
       id: nextId(), fase: 'semifinal', grupo: null, numero: 1,
       pareja1: classified[0], pareja2: classified[3],
-      cancha: null, turno: null, ganador: null, resultado: null,
+      cancha: null, turno: null, ganador: null, resultado: null, resultado_bloqueado: false,
     })
     partidos.push({
       id: nextId(), fase: 'semifinal', grupo: null, numero: 2,
       pareja1: classified[1], pareja2: classified[2],
-      cancha: null, turno: null, ganador: null, resultado: null,
+      cancha: null, turno: null, ganador: null, resultado: null, resultado_bloqueado: false,
     })
 
     if (con_consolacion) {
       partidos.push({
         id: nextId(), fase: 'consolacion_final', grupo: null, numero: 1,
         pareja1: null, pareja2: null,
-        cancha: null, turno: null, ganador: null, resultado: null,
+        cancha: null, turno: null, ganador: null, resultado: null, resultado_bloqueado: false,
       })
     }
 
@@ -111,7 +112,7 @@ export function buildPlayoffs(
       partidos.push({
         id: nextId(), fase: 'tercer_lugar', grupo: null, numero: 1,
         pareja1: null, pareja2: null,
-        cancha: null, turno: null, ganador: null, resultado: null,
+        cancha: null, turno: null, ganador: null, resultado: null, resultado_bloqueado: false,
       })
     }
   }
@@ -119,7 +120,7 @@ export function buildPlayoffs(
   partidos.push({
     id: nextId(), fase: 'final', grupo: null, numero: 1,
     pareja1: null, pareja2: null,
-    cancha: null, turno: null, ganador: null, resultado: null,
+    cancha: null, turno: null, ganador: null, resultado: null, resultado_bloqueado: false,
   })
 
   return partidos
