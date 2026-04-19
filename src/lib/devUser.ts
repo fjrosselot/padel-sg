@@ -3,6 +3,8 @@ import type { Jugador } from './supabase'
 export const DEV_USER: Jugador = {
   id: 'dev-user-pancho',
   nombre: 'Francisco Rosselot',
+  nombre_pila: 'Francisco',
+  apellido: 'Rosselot',
   apodo: 'Pancho',
   email: 'fjrosselot@gmail.com',
   telefono: null,

@@ -14,7 +14,7 @@ import { Search, ChevronsUpDown, ChevronUp, ChevronDown, Zap, Pencil, Trash2 } f
 import { supabase, type Jugador } from '../../lib/supabase'
 import { adminHeaders } from '../../lib/adminHeaders'
 
-type JugadorRow = Pick<Jugador, 'id' | 'nombre' | 'apodo' | 'email' | 'categoria' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'elo' | 'estado_cuenta'>
+type JugadorRow = Pick<Jugador, 'id' | 'nombre' | 'nombre_pila' | 'apellido' | 'apodo' | 'email' | 'categoria' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'elo' | 'estado_cuenta'>
 type EditableField = 'apodo' | 'categoria' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'estado_cuenta'
 
 const API_URL = () => import.meta.env.VITE_SUPABASE_URL
@@ -193,12 +193,11 @@ function JugadorEditModal({ jugador, onClose, onSaved, onDeleted }: {
   onSaved: () => void
   onDeleted: () => void
 }) {
-  const parts = jugador.nombre.trim().split(/\s+/)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [form, setForm] = useState({
-    nombre_pila: parts.length > 1 ? parts.slice(0, -1).join(' ') : (parts[0] ?? ''),
-    apellido: parts.length > 1 ? parts[parts.length - 1] : '',
+    nombre_pila: jugador.nombre_pila ?? jugador.nombre.split(' ')[0] ?? '',
+    apellido: jugador.apellido ?? jugador.nombre.split(' ').slice(1).join(' '),
     email: jugador.email,
     apodo: jugador.apodo ?? '',
     sexo: jugador.sexo ?? '',
@@ -217,9 +216,12 @@ function JugadorEditModal({ jugador, onClose, onSaved, onDeleted }: {
   const handleSave = async () => {
     setSaving(true)
     try {
-      const nombreCompleto = `${form.nombre_pila.trim()} ${form.apellido.trim()}`.trim()
+      const np = form.nombre_pila.trim()
+      const ap = form.apellido.trim()
       await patchJugador(jugador.id, {
-        nombre: nombreCompleto,
+        nombre: ap ? `${np} ${ap}` : np,
+        nombre_pila: np,
+        apellido: ap,
         email: form.email.trim(),
         apodo: form.apodo.trim() || null,
         sexo: form.sexo || null,
@@ -403,7 +405,7 @@ export default function AdminJugadores() {
     queryKey: ['admin-jugadores'],
     queryFn: async () => {
       const headers = await adminHeaders('read')
-      const fields = 'id,nombre,apodo,email,categoria,lado_preferido,sexo,mixto,gradualidad,elo,estado_cuenta'
+      const fields = 'id,nombre,nombre_pila,apellido,apodo,email,categoria,lado_preferido,sexo,mixto,gradualidad,elo,estado_cuenta'
       const res = await fetch(`${API_URL()}/rest/v1/jugadores?select=${fields}&order=nombre.asc`, { headers })
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`)
       return res.json() as Promise<JugadorRow[]>
@@ -454,23 +456,15 @@ export default function AdminJugadores() {
       ),
       enableSorting: false,
     }),
-    columnHelper.accessor('nombre', {
+    columnHelper.accessor('apellido', {
       header: 'Apellido',
       size: 150,
-      sortingFn: 'apellidoSort' as 'auto',
-      cell: info => {
-        const p = info.getValue().trim().split(/\s+/)
-        const apellido = p.length > 1 ? p[p.length - 1] : p[0]
-        return <span className="font-manrope text-sm font-bold text-navy">{apellido}</span>
-      },
+      sortingFn: (a, b) => (a.original.apellido ?? '').localeCompare(b.original.apellido ?? '', 'es'),
+      cell: info => <span className="font-manrope text-sm font-bold text-navy">{info.getValue() ?? ''}</span>,
     }),
-    columnHelper.accessor('nombre', {
+    columnHelper.accessor('nombre_pila', {
       id: 'nombre_pila', header: 'Nombre', size: 110, enableSorting: false,
-      cell: info => {
-        const p = info.getValue().trim().split(/\s+/)
-        const nombre = p.length > 1 ? p.slice(0, -1).join(' ') : p[0]
-        return <span className="font-inter text-sm text-navy">{nombre}</span>
-      },
+      cell: info => <span className="font-inter text-sm text-navy">{info.getValue() ?? ''}</span>,
     }),
     columnHelper.accessor('email', {
       header: 'Email', size: 190, enableSorting: false,
@@ -592,12 +586,6 @@ export default function AdminJugadores() {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     enableRowSelection: true,
-    sortingFns: {
-      apellidoSort: (a, b) => {
-        const ap = (n: string) => { const p = n.trim().split(/\s+/); return (p.length > 1 ? p[p.length - 1] : p[0]).toLowerCase() }
-        return ap(a.original.nombre).localeCompare(ap(b.original.nombre), 'es')
-      },
-    },
   })
 
   const rows = table.getRowModel().rows
