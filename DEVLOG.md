@@ -1,5 +1,23 @@
 # DEVLOG — padel-sg
 
+## [2026-04-19 18:30] — Logo Team Dragon + modal edición jugadores mejorado
+
+**Resumen:** Se reemplazó el logo de texto P·SG por la imagen JPEG del Team Dragon Padel. Se rehízo el modal de edición de jugadores con nombre/apellido separados, botones guardar/cancelar en el header, y layout comprimido en grid 2 columnas.
+
+**Archivos:** `src/components/brand/BrandLogo.tsx`, `src/assets/logo.jpeg`, `src/features/admin/AdminJugadores.tsx`
+
+**Decisiones:**
+- Logo: `<img>` con `rounded-full object-cover` — misma altura que el texto anterior, no requiere cambios de layout
+- Modal: `nombre_pila` + `apellido` como campos separados en estado; se recombina como `"nombre apellido"` al guardar (compatible con DB existente)
+- Save/Cancel en header — UX más natural en modales altos; evita scroll para confirmar cambios
+- Grid 2 columnas para 10 campos — reduce altura del modal ~40%
+
+**Pendientes:**
+- [ ] Verificar AdminJugadores en producción con auth real
+- [ ] RUT en registro de jugadores (diferido)
+
+---
+
 ## [2026-04-19 16:00] — Polish: sonner, code splitting, migración verificada
 
 **Resumen:** Se instaló sonner para reemplazar los 2 `alert()` de error en mutaciones. Se implementó code splitting con `React.lazy` + `Suspense` reduciendo el bundle de 817kB a chunks de máx 193kB. Se confirmó que la migración `amistosos_afectan_ranking` ya estaba aplicada en Supabase.
