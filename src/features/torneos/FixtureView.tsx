@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Lock, Unlock } from 'lucide-react'
+import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
 import { Badge } from '../../components/ui/badge'
 import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
@@ -24,7 +25,7 @@ function PartidoRow({ partido, torneoId, isAdmin, onCargarResultado }: PartidoRo
       if (error) throw error
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['torneo', torneoId] }),
-    onError: () => alert('No se pudo cambiar el bloqueo'),
+    onError: () => toast.error('No se pudo cambiar el bloqueo'),
   })
 
   const puedeCargar = isAdmin && !partido.resultado_bloqueado && !partido.ganador

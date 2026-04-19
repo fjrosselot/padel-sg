@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
+import { Toaster } from 'sonner'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { TemporadaProvider, useTemporada } from './contexts/TemporadaContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -305,6 +306,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <TemporadaProvider>
+          <Toaster position="bottom-center" richColors />
           <Router />
         </TemporadaProvider>
       </AuthProvider>

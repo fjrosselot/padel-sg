@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
 import type { Database } from '../../lib/types/database.types'
 
@@ -30,7 +31,7 @@ export default function AdminTemporadas() {
       if (error) throw error
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['temporadas'] }),
-    onError: () => alert('No se pudo actualizar la temporada'),
+    onError: () => toast.error('No se pudo actualizar la temporada'),
   })
 
   if (isLoading) return <div className="p-6 text-muted">Cargando temporadas…</div>
