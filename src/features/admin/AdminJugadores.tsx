@@ -9,7 +9,8 @@ import {
   type SortingState,
   type RowSelectionState,
 } from '@tanstack/react-table'
-import { Search, ChevronsUpDown, ChevronUp, ChevronDown, Zap, Pencil, X } from 'lucide-react'
+import { toast } from 'sonner'
+import { Search, ChevronsUpDown, ChevronUp, ChevronDown, Zap, Pencil, Trash2 } from 'lucide-react'
 import { supabase, type Jugador } from '../../lib/supabase'
 import { adminHeaders } from '../../lib/adminHeaders'
 
@@ -23,6 +24,12 @@ async function patchJugador(id: string, patch: Record<string, string | null>) {
   const res = await fetch(`${API_URL()}/rest/v1/jugadores?id=eq.${id}`, {
     method: 'PATCH', headers, body: JSON.stringify(patch),
   })
+  if (!res.ok) throw new Error(await res.text())
+}
+
+async function deleteJugador(id: string) {
+  const headers = await adminHeaders('write')
+  const res = await fetch(`${API_URL()}/rest/v1/jugadores?id=eq.${id}`, { method: 'DELETE', headers })
   if (!res.ok) throw new Error(await res.text())
 }
 
@@ -174,12 +181,15 @@ function BulkBar({ count, onApply, onClear }: {
 }
 
 // ── modal edición completa ────────────────────────────────────────────────
-function JugadorEditModal({ jugador, onClose, onSaved }: {
+function JugadorEditModal({ jugador, onClose, onSaved, onDeleted }: {
   jugador: JugadorRow
   onClose: () => void
   onSaved: () => void
+  onDeleted: () => void
 }) {
   const parts = jugador.nombre.trim().split(/\s+/)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [form, setForm] = useState({
     nombre_pila: parts.length > 1 ? parts.slice(0, -1).join(' ') : (parts[0] ?? ''),
     apellido: parts.length > 1 ? parts[parts.length - 1] : '',
@@ -219,6 +229,19 @@ function JugadorEditModal({ jugador, onClose, onSaved }: {
       alert('Error al guardar: ' + String(e))
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    setDeleting(true)
+    try {
+      await deleteJugador(jugador.id)
+      toast.success('Jugador eliminado')
+      onDeleted()
+    } catch {
+      toast.error('No se pudo eliminar el jugador')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -331,6 +354,29 @@ function JugadorEditModal({ jugador, onClose, onSaved }: {
             </div>
           </div>
         </div>
+
+        {/* Footer eliminar */}
+        <div className="border-t border-surface-high px-5 py-3">
+          {confirmDelete ? (
+            <div className="flex items-center gap-2">
+              <span className="font-inter text-xs text-defeat flex-1">¿Eliminar a {form.nombre_pila} {form.apellido}?</span>
+              <button type="button" onClick={handleDelete} disabled={deleting}
+                className="rounded-lg bg-defeat px-3 py-1.5 font-inter text-xs font-bold text-white disabled:opacity-50">
+                {deleting ? 'Eliminando…' : 'Confirmar'}
+              </button>
+              <button type="button" onClick={() => setConfirmDelete(false)}
+                className="rounded-lg border border-navy/20 px-3 py-1.5 font-inter text-xs text-muted hover:text-navy">
+                Cancelar
+              </button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => setConfirmDelete(true)}
+              className="flex items-center gap-1.5 font-inter text-xs text-muted hover:text-defeat transition-colors">
+              <Trash2 className="h-3.5 w-3.5" />
+              Eliminar jugador
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -345,6 +391,7 @@ export default function AdminJugadores() {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'nombre', desc: false }])
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [editingJugador, setEditingJugador] = useState<JugadorRow | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   const { data: jugadores, isLoading, error: queryError } = useQuery({
     queryKey: ['admin-jugadores'],
@@ -459,22 +506,65 @@ export default function AdminJugadores() {
       cell: info => <CycleCell value={info.getValue()} cycle={ESTADO_CYCLE} onChange={v => save(info.row.original.id, 'estado_cuenta', v)} />,
     }),
     columnHelper.display({
-      id: 'editar',
-      size: 48,
+      id: 'acciones',
+      size: 80,
       header: () => null,
-      cell: ({ row }) => (
-        <button
-          type="button"
-          onClick={() => setEditingJugador(row.original)}
-          aria-label="Editar jugador"
-          className="rounded-lg p-1.5 text-muted hover:text-navy hover:bg-surface transition-colors"
-        >
-          <Pencil className="h-3.5 w-3.5" />
-        </button>
-      ),
+      cell: ({ row }) => {
+        const id = row.original.id
+        const isConfirming = confirmDeleteId === id
+        return (
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setEditingJugador(row.original)}
+              aria-label="Editar jugador"
+              className="rounded-lg p-1.5 text-muted hover:text-navy hover:bg-surface transition-colors"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+            {isConfirming ? (
+              <>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await deleteJugador(id)
+                      qc.setQueryData<JugadorRow[]>(['admin-jugadores'], old => old?.filter(j => j.id !== id))
+                      toast.success('Jugador eliminado')
+                    } catch {
+                      toast.error('No se pudo eliminar')
+                    } finally {
+                      setConfirmDeleteId(null)
+                    }
+                  }}
+                  className="rounded px-1.5 py-0.5 font-inter text-[10px] font-bold text-white bg-defeat hover:bg-defeat/80 transition-colors"
+                >
+                  OK
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDeleteId(null)}
+                  className="rounded px-1.5 py-0.5 font-inter text-[10px] text-muted hover:text-navy transition-colors"
+                >
+                  No
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmDeleteId(id)}
+                aria-label="Eliminar jugador"
+                className="rounded-lg p-1.5 text-muted hover:text-defeat hover:bg-surface transition-colors"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        )
+      },
       enableSorting: false,
     }),
-  ], [save, setEditingJugador])
+  ], [save, setEditingJugador, confirmDeleteId, qc])
 
   const filteredData = useMemo(() => {
     if (!search.trim()) return jugadores ?? []
@@ -585,6 +675,10 @@ export default function AdminJugadores() {
           jugador={editingJugador}
           onClose={() => setEditingJugador(null)}
           onSaved={() => {
+            qc.invalidateQueries({ queryKey: ['admin-jugadores'] })
+            setEditingJugador(null)
+          }}
+          onDeleted={() => {
             qc.invalidateQueries({ queryKey: ['admin-jugadores'] })
             setEditingJugador(null)
           }}
