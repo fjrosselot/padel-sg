@@ -1,5 +1,26 @@
 # DEVLOG — padel-sg
 
+## [2026-04-18 13:30] — 5 features pendientes implementados + merge a main
+
+**Resumen:** Se implementaron los 5 features del backlog via subagent-driven development en worktree aislado (`feat/pendientes-abril`). Varios ya estaban parcialmente implementados de sesiones anteriores; se completaron y verificaron todos con spec review + code quality review por agente.
+
+**Archivos:** `src/lib/fixture/types.ts`, `src/lib/fixture/engine.ts`, `src/features/torneos/FixtureView.tsx`, `src/features/torneos/TorneoDetalle.tsx`, `src/features/torneos/ResultadosModal.tsx`, `src/features/ranking/RankingPage.tsx`, `src/features/admin/AdminTemporadas.tsx`, `src/features/perfil/PerfilPage.tsx`, `src/features/calendario/CalendarioPage.tsx`, `api/calendar.ts`, `src/router.tsx`, `src/lib/types/database.types.ts`, `supabase/migrations/20260414_amistosos_afectan_ranking.sql`
+
+**Decisiones:**
+- Toggle `resultado_bloqueado`: usa `alert()` como fallback de error (no hay toast library en el proyecto)
+- Worktree global en `~/.config/superpowers/worktrees/` para reutilizar en todos los proyectos
+- Endpoint ICS en `api/calendar.ts` (Vercel serverless) con `@vercel/node` ya instalado
+- Migración SQL `amistosos_afectan_ranking` creada; verificar si ya fue aplicada en Supabase
+
+**Pendientes:**
+- [ ] Verificar migración `amistosos_afectan_ranking` aplicada en Supabase (columna puede no existir aún)
+- [ ] Agregar librería toast (sonner) para reemplazar `alert()` en mutaciones
+- [ ] Verificar AdminJugadores en producción con auth real
+- [ ] Code splitting (>500kB warning en Vercel)
+- [ ] RUT en registro de jugadores (diferido)
+
+---
+
 ## [2026-04-16 17:00] — Bulk edit + optimistic updates + deploy a producción
 
 **Resumen:** Se agregó edición masiva de jugadores con checkboxes y barra de acción bulk (campo + valor → aplica en paralelo a todos los seleccionados). Se implementaron optimistic updates para que los cambios individuales sean instantáneos. Se corrigió el auth para producción: en dev usa service key, en prod usa JWT del usuario. Deploy a Vercel.
