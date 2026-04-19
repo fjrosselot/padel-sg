@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
 import { AuthGuard } from '@/features/auth/AuthGuard'
@@ -5,22 +6,27 @@ import { LoginForm } from '@/features/auth/LoginForm'
 import { RegisterForm } from '@/features/auth/RegisterForm'
 import { PendingApproval } from '@/features/auth/PendingApproval'
 import { ResetPassword } from '@/features/auth/ResetPassword'
-import { PendingUsers } from '@/features/admin/PendingUsers'
-import AdminTemporadas from './features/admin/AdminTemporadas'
-import AdminJugadores from './features/admin/AdminJugadores'
-import TorneosList from './features/torneos/TorneosList'
-import TorneoDetalle from './features/torneos/TorneoDetalle'
-import LigasList from './features/ligas/LigasList'
-import LigaDetalle from './features/ligas/LigaDetalle'
-import { Dashboard } from './features/dashboard/Dashboard'
-import AmistososPage from './features/amistosos/AmistososPage'
-import JugadoresPage from './features/jugadores/JugadoresPage'
-import JugadorDetalle from './features/jugadores/JugadorDetalle'
-import FinanzasPage from './features/finanzas/FinanzasPage'
-import MasPage from './features/mas/MasPage'
-import CalendarioPage from './features/calendario/CalendarioPage'
-import RankingPage from './features/ranking/RankingPage'
-import PerfilPage from './features/perfil/PerfilPage'
+
+const PendingUsers = lazy(() => import('./features/admin/PendingUsers').then(m => ({ default: m.PendingUsers })))
+const AdminTemporadas = lazy(() => import('./features/admin/AdminTemporadas'))
+const AdminJugadores = lazy(() => import('./features/admin/AdminJugadores'))
+const TorneosList = lazy(() => import('./features/torneos/TorneosList'))
+const TorneoDetalle = lazy(() => import('./features/torneos/TorneoDetalle'))
+const LigasList = lazy(() => import('./features/ligas/LigasList'))
+const LigaDetalle = lazy(() => import('./features/ligas/LigaDetalle'))
+const Dashboard = lazy(() => import('./features/dashboard/Dashboard').then(m => ({ default: m.Dashboard })))
+const AmistososPage = lazy(() => import('./features/amistosos/AmistososPage'))
+const JugadoresPage = lazy(() => import('./features/jugadores/JugadoresPage'))
+const JugadorDetalle = lazy(() => import('./features/jugadores/JugadorDetalle'))
+const FinanzasPage = lazy(() => import('./features/finanzas/FinanzasPage'))
+const MasPage = lazy(() => import('./features/mas/MasPage'))
+const CalendarioPage = lazy(() => import('./features/calendario/CalendarioPage'))
+const RankingPage = lazy(() => import('./features/ranking/RankingPage'))
+const PerfilPage = lazy(() => import('./features/perfil/PerfilPage'))
+
+const fallback = (
+  <div className="flex h-full items-center justify-center text-muted">Cargando…</div>
+)
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginForm /> },
@@ -31,7 +37,9 @@ export const router = createBrowserRouter([
     path: '/',
     element: (
       <AuthGuard>
-        <AppShell />
+        <Suspense fallback={fallback}>
+          <AppShell />
+        </Suspense>
       </AuthGuard>
     ),
     children: [
