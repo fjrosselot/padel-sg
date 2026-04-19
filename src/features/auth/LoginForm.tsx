@@ -21,8 +21,36 @@ function GoogleIcon() {
   )
 }
 
+// ── Login stats (public, no auth required) ───────────────────────────────
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string
+const ANON_KEY_VAL = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+
+async function fetchLoginStats() {
+  const headers = { apikey: ANON_KEY_VAL, Authorization: `Bearer ${ANON_KEY_VAL}`, 'Accept-Profile': 'padel' }
+  const [jugRes, torRes, parRes] = await Promise.all([
+    fetch(`${SUPABASE_URL}/rest/v1/jugadores?select=id&estado_cuenta=eq.activo`, { headers }),
+    fetch(`${SUPABASE_URL}/rest/v1/torneos?select=id&fecha_inicio=gte.2026-01-01&fecha_inicio=lt.2027-01-01`, { headers }),
+    fetch(`${SUPABASE_URL}/rest/v1/partidos?select=id&estado=eq.jugado`, { headers }),
+  ])
+  const [jugs, tors, parts] = await Promise.all([jugRes.json(), torRes.json(), parRes.json()])
+  return {
+    jugadores: Array.isArray(jugs) ? jugs.length : 0,
+    torneos: Array.isArray(tors) ? tors.length : 0,
+    partidos: Array.isArray(parts) ? parts.length : 0,
+  }
+}
+
 // ── Left panel: court photo background + editorial overlay ───────────────
 function VisualPanel() {
+  const [stats, setStats] = useState({ jugadores: 112, torneos: 6, partidos: 1284 })
+
+  useEffect(() => {
+    fetchLoginStats().then(setStats).catch(() => {})
+  }, [])
+
+  const fmt = (n: number) => n.toLocaleString('es-CL')
+  const pad = (n: number) => String(n).padStart(2, '0')
+
   return (
     <section className="relative hidden overflow-hidden md:flex md:flex-col" style={{ flex: '1.1 1 0', minWidth: 420 }}>
       {/* Court photo */}
@@ -62,9 +90,9 @@ function VisualPanel() {
 
         {/* Bottom: stats */}
         <div className="grid gap-12" style={{ gridTemplateColumns: 'repeat(3, auto)', alignItems: 'flex-end' }}>
-          <StatBlock num="112" label="Apoderados activos" />
-          <StatBlock num="06" label="Torneos 2026" highlight />
-          <StatBlock num="1.284" label="Partidos jugados" />
+          <StatBlock num={fmt(stats.jugadores)} label="Apoderados activos" />
+          <StatBlock num={pad(stats.torneos)} label="Torneos 2026" highlight />
+          <StatBlock num={fmt(stats.partidos)} label="Partidos jugados" />
         </div>
       </div>
     </section>
