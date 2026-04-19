@@ -11,35 +11,12 @@ import {
 } from '@tanstack/react-table'
 import { Search, ChevronsUpDown, ChevronUp, ChevronDown, Zap, Pencil, X } from 'lucide-react'
 import { supabase, type Jugador } from '../../lib/supabase'
+import { adminHeaders } from '../../lib/adminHeaders'
 
 type JugadorRow = Pick<Jugador, 'id' | 'nombre' | 'apodo' | 'email' | 'categoria' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'elo' | 'estado_cuenta'>
 type EditableField = 'apodo' | 'categoria' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'estado_cuenta'
 
-const ANON_KEY = () => import.meta.env.VITE_SUPABASE_ANON_KEY
-const SERVICE_KEY = () => import.meta.env.VITE_SUPABASE_SERVICE_KEY as string | undefined
 const API_URL = () => import.meta.env.VITE_SUPABASE_URL
-
-async function adminHeaders(method: 'read' | 'write' = 'read') {
-  const serviceKey = SERVICE_KEY()
-  if (serviceKey) {
-    // dev bypass: service key bypasa RLS completamente
-    return {
-      apikey: serviceKey,
-      Authorization: `Bearer ${serviceKey}`,
-      'Accept-Profile': 'padel',
-      ...(method === 'write' ? { 'Content-Profile': 'padel', 'Content-Type': 'application/json', Prefer: 'return=minimal' } : {}),
-    }
-  }
-  // producción: usar JWT del usuario autenticado
-  const { data: { session } } = await supabase.auth.getSession()
-  const token = session?.access_token ?? ANON_KEY()
-  return {
-    apikey: ANON_KEY(),
-    Authorization: `Bearer ${token}`,
-    'Accept-Profile': 'padel',
-    ...(method === 'write' ? { 'Content-Profile': 'padel', 'Content-Type': 'application/json', Prefer: 'return=minimal' } : {}),
-  }
-}
 
 async function patchJugador(id: string, patch: Record<string, string | null>) {
   const headers = await adminHeaders('write')
@@ -430,12 +407,17 @@ export default function AdminJugadores() {
       sortingFn: 'apellidoSort' as 'auto',
       cell: info => {
         const p = info.getValue().trim().split(/\s+/)
-        return <span className="font-manrope text-sm font-bold text-navy">{p.slice(1).join(' ') || p[0]}</span>
+        const apellido = p.length > 1 ? p[p.length - 1] : p[0]
+        return <span className="font-manrope text-sm font-bold text-navy">{apellido}</span>
       },
     }),
     columnHelper.accessor('nombre', {
       id: 'nombre_pila', header: 'Nombre', size: 110, enableSorting: false,
-      cell: info => <span className="font-inter text-sm text-navy">{info.getValue().trim().split(/\s+/)[0]}</span>,
+      cell: info => {
+        const p = info.getValue().trim().split(/\s+/)
+        const nombre = p.length > 1 ? p.slice(0, -1).join(' ') : p[0]
+        return <span className="font-inter text-sm text-navy">{nombre}</span>
+      },
     }),
     columnHelper.accessor('email', {
       header: 'Email', size: 190, enableSorting: false,
@@ -516,7 +498,7 @@ export default function AdminJugadores() {
     enableRowSelection: true,
     sortingFns: {
       apellidoSort: (a, b) => {
-        const ap = (n: string) => { const p = n.trim().split(/\s+/); return (p.slice(1).join(' ') || p[0]).toLowerCase() }
+        const ap = (n: string) => { const p = n.trim().split(/\s+/); return (p.length > 1 ? p[p.length - 1] : p[0]).toLowerCase() }
         return ap(a.original.nombre).localeCompare(ap(b.original.nombre), 'es')
       },
     },

@@ -1,10 +1,15 @@
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { supabase, type Jugador } from '@/lib/supabase'
+import { adminHeaders } from '@/lib/adminHeaders'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Trash2 } from 'lucide-react'
 
 export function PendingUsers() {
   const qc = useQueryClient()
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   const { data: pending = [], isLoading } = useQuery<Jugador[]>({
     queryKey: ['pending-users'],
@@ -40,6 +45,21 @@ export function PendingUsers() {
       await supabase.functions.invoke('reject-user', { body: { jugadorId } })
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['pending-users'] }),
+  })
+
+  const deleteUser = useMutation({
+    mutationFn: async (jugadorId: string) => {
+      const headers = await adminHeaders()
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/jugadores?id=eq.${jugadorId}`
+      const res = await fetch(url, { method: 'DELETE', headers: { ...headers, 'Content-Type': 'application/json' } })
+      if (!res.ok) throw new Error(await res.text())
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pending-users'] })
+      toast.success('Usuario eliminado')
+      setConfirmDelete(null)
+    },
+    onError: () => toast.error('No se pudo eliminar el usuario'),
   })
 
   if (isLoading) return <div className="p-6 font-inter text-muted">Cargando...</div>
@@ -80,7 +100,7 @@ export function PendingUsers() {
                   )}
                 </div>
               </div>
-              <div className="flex shrink-0 gap-2">
+              <div className="flex shrink-0 items-center gap-2">
                 <Button
                   size="sm"
                   onClick={() => approve.mutate(jugador.id)}
@@ -97,6 +117,35 @@ export function PendingUsers() {
                 >
                   Rechazar
                 </Button>
+                {confirmDelete === jugador.id ? (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => deleteUser.mutate(jugador.id)}
+                      disabled={deleteUser.isPending}
+                    >
+                      Confirmar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setConfirmDelete(null)}
+                    >
+                      No
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setConfirmDelete(jugador.id)}
+                    className="text-muted hover:text-defeat"
+                    aria-label="Eliminar"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
           ))}
