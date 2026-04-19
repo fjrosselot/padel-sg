@@ -1,3 +1,5 @@
+import logo from '@/assets/logo.jpeg'
+
 interface BrandLogoProps {
   variant?: 'full' | 'compact'
   className?: string
@@ -6,24 +8,16 @@ interface BrandLogoProps {
 export function BrandLogo({ variant = 'full', className = '' }: BrandLogoProps) {
   if (variant === 'compact') {
     return (
-      <div
-        role="img"
-        aria-label="Pádel SG"
-        className={`flex h-9 w-9 items-center justify-center rounded-full bg-gold font-manrope text-xs font-black text-navy ${className}`}
-      >
-        P·SG
-      </div>
+      <img
+        src={logo}
+        alt="Pádel SG"
+        className={`h-9 w-9 rounded-full object-cover ${className}`}
+      />
     )
   }
   return (
-    <div
-      role="img"
-      aria-label="Pádel SG"
-      className={`flex items-center gap-2 ${className}`}
-    >
-      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gold font-manrope text-xs font-black text-navy">
-        P·SG
-      </div>
+    <div className={`flex items-center gap-2 ${className}`}>
+      <img src={logo} alt="Pádel SG" className="h-9 w-9 rounded-full object-cover" />
       <span className="font-manrope text-sm font-bold text-gold">Pádel SG</span>
     </div>
   )
