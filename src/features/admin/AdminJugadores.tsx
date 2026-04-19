@@ -204,8 +204,8 @@ function JugadorEditModal({ jugador, onClose, onSaved }: {
 }) {
   const parts = jugador.nombre.trim().split(/\s+/)
   const [form, setForm] = useState({
-    nombre_pila: parts[0] ?? '',
-    apellido: parts.slice(1).join(' '),
+    nombre_pila: parts.length > 1 ? parts.slice(0, -1).join(' ') : (parts[0] ?? ''),
+    apellido: parts.length > 1 ? parts[parts.length - 1] : '',
     email: jugador.email,
     apodo: jugador.apodo ?? '',
     sexo: jugador.sexo ?? '',
