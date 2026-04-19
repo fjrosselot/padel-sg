@@ -3,6 +3,7 @@ import { useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { BrandLogo } from '@/components/brand/BrandLogo'
 import { registerSchema, type RegisterFormData } from './schemas'
 
 const STEPS = ['Datos personales', 'Vinculación SG', 'Nivel de juego', 'Participación', 'Comentarios', 'Acceso']
@@ -52,7 +53,7 @@ export function RegisterForm() {
   const hijossg = watch('hijos_sg') ?? []
 
   const STEP_FIELDS: (keyof RegisterFormData)[][] = [
-    ['nombre', 'email', 'sexo'], [], ['categoria'], ['frecuencia_semanal'], [], ['password', 'password_confirm'],
+    ['nombre_pila', 'apellido', 'email', 'sexo'], [], ['categoria'], ['frecuencia_semanal'], [], ['password', 'password_confirm'],
   ]
 
   const nextStep = async () => {
@@ -71,9 +72,13 @@ export function RegisterForm() {
     if (authError) { setError(authError.message); setLoading(false); return }
     const userId = signUpData?.user?.id
     if (userId) {
+      const np = data.nombre_pila.trim()
+      const ap = data.apellido.trim()
       await supabase.schema('padel').from('jugadores').insert({
         id: userId,
-        nombre: data.nombre,
+        nombre: ap ? `${np} ${ap}` : np,
+        nombre_pila: np,
+        apellido: ap,
         apodo: data.apodo ?? null,
         email: data.email,
         telefono: data.telefono ?? null,
@@ -105,13 +110,7 @@ export function RegisterForm() {
       <div className="relative z-10 w-full max-w-sm">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center gap-3">
-          <div
-            role="img"
-            aria-label="Pádel SG"
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-gold font-manrope text-sm font-black text-navy"
-          >
-            P·SG
-          </div>
+          <BrandLogo variant="compact" />
           <p className="font-inter text-xs font-semibold uppercase tracking-[0.2em] text-muted">
             Solicitar acceso
           </p>
@@ -138,10 +137,17 @@ export function RegisterForm() {
             {/* Paso 0: Datos personales */}
             {step === 0 && (
               <>
-                <div>
-                  <label htmlFor="nombre" className={labelCls}>Nombre completo *</label>
-                  <input id="nombre" {...register('nombre')} className={inputCls} placeholder="Tu nombre" />
-                  {errors.nombre && <p className="mt-1 font-inter text-xs text-defeat">{errors.nombre.message}</p>}
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <label htmlFor="nombre_pila" className={labelCls}>Nombre *</label>
+                    <input id="nombre_pila" {...register('nombre_pila')} className={inputCls} placeholder="María José" />
+                    {errors.nombre_pila && <p className="mt-1 font-inter text-xs text-defeat">{errors.nombre_pila.message}</p>}
+                  </div>
+                  <div className="flex-1">
+                    <label htmlFor="apellido" className={labelCls}>Apellido *</label>
+                    <input id="apellido" {...register('apellido')} className={inputCls} placeholder="González" />
+                    {errors.apellido && <p className="mt-1 font-inter text-xs text-defeat">{errors.apellido.message}</p>}
+                  </div>
                 </div>
                 <div>
                   <label htmlFor="email" className={labelCls}>Email *</label>

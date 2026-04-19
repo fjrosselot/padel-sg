@@ -2,7 +2,8 @@ import { z } from 'zod'
 
 export const registerSchema = z.object({
   // Paso 1: Datos personales
-  nombre: z.string().min(2, 'Ingresa tu nombre completo'),
+  nombre_pila: z.string().min(1, 'Ingresa tu nombre'),
+  apellido: z.string().min(1, 'Ingresa tu apellido'),
   email: z.string().email('Email inválido'),
   telefono: z.string().optional(),
   apodo: z.string().optional(),
