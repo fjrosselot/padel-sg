@@ -29,8 +29,14 @@ async function patchJugador(id: string, patch: Record<string, string | null>) {
 
 async function deleteJugador(id: string) {
   const headers = await adminHeaders('write')
-  const res = await fetch(`${API_URL()}/rest/v1/jugadores?id=eq.${id}`, { method: 'DELETE', headers })
+  const res = await fetch(`${API_URL()}/rest/v1/jugadores?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: { ...headers, Prefer: 'count=exact' },
+  })
   if (!res.ok) throw new Error(await res.text())
+  // content-range: */0 significa que no se eliminó ninguna fila (RLS bloqueó)
+  const count = res.headers.get('content-range')
+  if (count === '*/0') throw new Error('Sin permiso para eliminar o jugador no encontrado')
 }
 
 // ── opciones ──────────────────────────────────────────────────────────────

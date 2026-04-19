@@ -49,10 +49,11 @@ export function PendingUsers() {
 
   const deleteUser = useMutation({
     mutationFn: async (jugadorId: string) => {
-      const headers = await adminHeaders()
+      const headers = await adminHeaders('write')
       const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/jugadores?id=eq.${jugadorId}`
-      const res = await fetch(url, { method: 'DELETE', headers: { ...headers, 'Content-Type': 'application/json' } })
+      const res = await fetch(url, { method: 'DELETE', headers: { ...headers, Prefer: 'count=exact' } })
       if (!res.ok) throw new Error(await res.text())
+      if (res.headers.get('content-range') === '*/0') throw new Error('Sin permiso o jugador no encontrado')
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['pending-users'] })

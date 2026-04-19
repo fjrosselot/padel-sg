@@ -10,7 +10,7 @@ export async function adminHeaders(method: 'read' | 'write' = 'read') {
       apikey: serviceKey,
       Authorization: `Bearer ${serviceKey}`,
       'Accept-Profile': 'padel',
-      ...(method === 'write' ? { 'Content-Profile': 'padel', 'Content-Type': 'application/json', Prefer: 'return=minimal' } : {}),
+      ...(method === 'write' ? { 'Content-Profile': 'padel', 'Content-Type': 'application/json' } : {}),
     }
   }
   const { data: { session } } = await supabase.auth.getSession()
