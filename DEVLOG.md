@@ -1,5 +1,23 @@
 # DEVLOG — padel-sg
 
+## [2026-04-19 16:00] — Polish: sonner, code splitting, migración verificada
+
+**Resumen:** Se instaló sonner para reemplazar los 2 `alert()` de error en mutaciones. Se implementó code splitting con `React.lazy` + `Suspense` reduciendo el bundle de 817kB a chunks de máx 193kB. Se confirmó que la migración `amistosos_afectan_ranking` ya estaba aplicada en Supabase.
+
+**Archivos:** `src/App.jsx`, `src/router.tsx`, `src/features/torneos/FixtureView.tsx`, `src/features/admin/AdminTemporadas.tsx`, `package.json`, `vite.config.ts`
+
+**Decisiones:**
+- Sonner v2 con `position="bottom-center" richColors` — mínima config, máximo impacto visual
+- Code splitting via `React.lazy` en router — 16 chunks de rutas + 6 vendor, sin cambiar lógica
+- `manualChunks` en vite.config.ts para separar react, supabase, tanstack, radix, lucide
+- Migración `amistosos_afectan_ranking` confirmada activa en Supabase (proyecto `finanzas-padel-dev`)
+
+**Pendientes:**
+- [ ] Verificar AdminJugadores en producción con auth real (Playwright no disponible, verificar manualmente)
+- [ ] RUT en registro de jugadores (diferido)
+
+---
+
 ## [2026-04-18 13:30] — 5 features pendientes implementados + merge a main
 
 **Resumen:** Se implementaron los 5 features del backlog via subagent-driven development en worktree aislado (`feat/pendientes-abril`). Varios ya estaban parcialmente implementados de sesiones anteriores; se completaron y verificaron todos con spec review + code quality review por agente.
