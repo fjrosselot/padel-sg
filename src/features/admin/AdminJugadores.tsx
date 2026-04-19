@@ -202,8 +202,10 @@ function JugadorEditModal({ jugador, onClose, onSaved }: {
   onClose: () => void
   onSaved: () => void
 }) {
+  const parts = jugador.nombre.trim().split(/\s+/)
   const [form, setForm] = useState({
-    nombre: jugador.nombre,
+    nombre_pila: parts[0] ?? '',
+    apellido: parts.slice(1).join(' '),
     email: jugador.email,
     apodo: jugador.apodo ?? '',
     sexo: jugador.sexo ?? '',
@@ -217,14 +219,14 @@ function JugadorEditModal({ jugador, onClose, onSaved }: {
   const [saving, setSaving] = useState(false)
 
   const set = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }))
-
   const categoriaOpts = form.sexo === 'F' ? CATEGORIA_F : CATEGORIA_M
 
   const handleSave = async () => {
     setSaving(true)
     try {
+      const nombreCompleto = `${form.nombre_pila.trim()} ${form.apellido.trim()}`.trim()
       await patchJugador(jugador.id, {
-        nombre: form.nombre.trim(),
+        nombre: nombreCompleto,
         email: form.email.trim(),
         apodo: form.apodo.trim() || null,
         sexo: form.sexo || null,
@@ -243,93 +245,114 @@ function JugadorEditModal({ jugador, onClose, onSaved }: {
     }
   }
 
+  const inputCls = 'w-full rounded-lg border border-navy/20 px-2.5 py-1.5 font-inter text-sm text-navy focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold'
+  const selectCls = inputCls + ' appearance-none bg-white'
+  const labelCls = 'block font-inter text-[10px] font-bold uppercase tracking-widest text-muted mb-0.5'
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="w-full max-w-md rounded-2xl bg-white shadow-xl overflow-y-auto max-h-[90vh]">
-        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-surface-high">
-          <h2 className="font-manrope text-lg font-bold text-navy">Editar jugador</h2>
-          <button type="button" onClick={onClose} className="text-muted hover:text-navy transition-colors">
-            <X className="h-5 w-5" />
-          </button>
+
+        {/* Header con botones */}
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-surface-high">
+          <h2 className="font-manrope text-base font-bold text-navy truncate mr-3">
+            {form.nombre_pila} {form.apellido}
+          </h2>
+          <div className="flex items-center gap-2 shrink-0">
+            <button type="button" onClick={onClose} className="rounded-lg border border-navy/20 px-3 py-1.5 font-inter text-xs text-muted hover:text-navy transition-colors">
+              Cancelar
+            </button>
+            <button type="button" onClick={handleSave} disabled={saving}
+              className="rounded-lg bg-gold px-3 py-1.5 font-inter text-xs font-bold text-navy disabled:opacity-50 hover:bg-gold/90 transition-colors">
+              {saving ? 'Guardando…' : 'Guardar'}
+            </button>
+          </div>
         </div>
 
-        <div className="px-6 py-4 space-y-4">
-          {[
-            { label: 'Nombre completo', key: 'nombre', type: 'text', placeholder: 'Apellido Nombre' },
-            { label: 'Email', key: 'email', type: 'email', placeholder: 'correo@ejemplo.com' },
-            { label: 'Apodo', key: 'apodo', type: 'text', placeholder: '—' },
-          ].map(({ label, key, type, placeholder }) => (
-            <div key={key}>
-              <label className="block font-inter text-xs font-semibold uppercase tracking-widest text-muted mb-1">{label}</label>
-              <input
-                type={type}
-                value={form[key as keyof typeof form]}
-                onChange={e => set(key, e.target.value)}
-                placeholder={placeholder}
-                className="w-full rounded-lg border border-navy/20 px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
-              />
+        <div className="px-5 py-4 space-y-3">
+          {/* Nombre + Apellido */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Nombre</label>
+              <input type="text" value={form.nombre_pila} onChange={e => set('nombre_pila', e.target.value)} placeholder="Francisco" className={inputCls} />
             </div>
-          ))}
+            <div>
+              <label className={labelCls}>Apellido</label>
+              <input type="text" value={form.apellido} onChange={e => set('apellido', e.target.value)} placeholder="Rosselot" className={inputCls} />
+            </div>
+          </div>
 
-          {[
-            { label: 'Sexo', key: 'sexo', opts: SEXO_OPTIONS },
-            { label: 'Lado preferido', key: 'lado_preferido', opts: LADO_OPTIONS },
-            { label: 'Mixto', key: 'mixto', opts: MIXTO_CYCLE.map(c => ({ value: c.value, label: c.label })) },
-            { label: 'Gradualidad', key: 'gradualidad', opts: GRAD_OPTIONS },
-            { label: 'Estado', key: 'estado_cuenta', opts: ESTADO_CYCLE.map(c => ({ value: c.value, label: c.label })) },
-          ].map(({ label, key, opts }) => (
-            <div key={key}>
-              <label className="block font-inter text-xs font-semibold uppercase tracking-widest text-muted mb-1">{label}</label>
-              <select
-                value={form[key as keyof typeof form]}
-                onChange={e => set(key, e.target.value)}
-                className="w-full rounded-lg border border-navy/20 px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold appearance-none bg-white"
-              >
+          {/* Email */}
+          <div>
+            <label className={labelCls}>Email</label>
+            <input type="email" value={form.email} onChange={e => set('email', e.target.value)} className={inputCls} />
+          </div>
+
+          {/* Apodo + ELO */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Apodo</label>
+              <input type="text" value={form.apodo} onChange={e => set('apodo', e.target.value)} placeholder="—" className={inputCls} />
+            </div>
+            <div>
+              <label className={labelCls}>ELO</label>
+              <input type="number" value={form.elo} onChange={e => set('elo', e.target.value)} className={inputCls} />
+            </div>
+          </div>
+
+          {/* Sexo + Categoría */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Sexo</label>
+              <select value={form.sexo} onChange={e => set('sexo', e.target.value)} className={selectCls}>
                 <option value="">—</option>
-                {opts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                {SEXO_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
-          ))}
-
-          <div>
-            <label className="block font-inter text-xs font-semibold uppercase tracking-widest text-muted mb-1">Categoría</label>
-            <select
-              value={form.categoria}
-              onChange={e => set('categoria', e.target.value)}
-              className="w-full rounded-lg border border-navy/20 px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold appearance-none bg-white"
-            >
-              <option value="">—</option>
-              {categoriaOpts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
+            <div>
+              <label className={labelCls}>Categoría</label>
+              <select value={form.categoria} onChange={e => set('categoria', e.target.value)} className={selectCls}>
+                <option value="">—</option>
+                {categoriaOpts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </div>
           </div>
 
-          <div>
-            <label className="block font-inter text-xs font-semibold uppercase tracking-widest text-muted mb-1">ELO</label>
-            <input
-              type="number"
-              value={form.elo}
-              onChange={e => set('elo', e.target.value)}
-              className="w-full rounded-lg border border-navy/20 px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
-            />
+          {/* Lado + Mixto */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Lado</label>
+              <select value={form.lado_preferido} onChange={e => set('lado_preferido', e.target.value)} className={selectCls}>
+                <option value="">—</option>
+                {LADO_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={labelCls}>Mixto</label>
+              <select value={form.mixto} onChange={e => set('mixto', e.target.value)} className={selectCls}>
+                <option value="">—</option>
+                {MIXTO_CYCLE.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
           </div>
-        </div>
 
-        <div className="flex gap-3 px-6 py-4 border-t border-surface-high">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="flex-1 rounded-lg bg-gold py-2.5 font-inter text-sm font-bold text-navy disabled:opacity-50 hover:bg-gold/90 transition-colors"
-          >
-            {saving ? 'Guardando…' : 'Guardar cambios'}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-navy/20 px-4 py-2.5 font-inter text-sm text-muted hover:text-navy transition-colors"
-          >
-            Cancelar
-          </button>
+          {/* Gradualidad + Estado */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Gradualidad</label>
+              <select value={form.gradualidad} onChange={e => set('gradualidad', e.target.value)} className={selectCls}>
+                <option value="">—</option>
+                {GRAD_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={labelCls}>Estado</label>
+              <select value={form.estado_cuenta} onChange={e => set('estado_cuenta', e.target.value)} className={selectCls}>
+                <option value="">—</option>
+                {ESTADO_CYCLE.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
+          </div>
         </div>
       </div>
     </div>
