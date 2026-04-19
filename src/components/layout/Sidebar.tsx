@@ -1,8 +1,9 @@
+import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Users, Trophy, Grid3x3,
   Layers, Handshake, Calendar, Wallet, Settings,
-  UserCog, Timer,
+  UserCog, Timer, ChevronRight,
 } from 'lucide-react'
 import { BrandLogo } from '@/components/brand/BrandLogo'
 import { useUser } from '@/hooks/useUser'
@@ -24,7 +25,7 @@ const ADMIN_ITEMS = [
   { to: '/admin/temporadas', icon: Timer, label: 'Temporadas' },
 ]
 
-function NavItem({ to, icon: Icon, label }: { to: string; icon: React.ElementType; label: string }) {
+function NavItem({ to, icon: Icon, label, expanded }: { to: string; icon: React.ElementType; label: string; expanded: boolean }) {
   return (
     <li>
       <NavLink
@@ -37,9 +38,11 @@ function NavItem({ to, icon: Icon, label }: { to: string; icon: React.ElementTyp
         }
       >
         <Icon className="h-5 w-5 shrink-0" />
-        <span className="ml-3 hidden whitespace-nowrap font-inter text-sm font-medium group-hover:block">
-          {label}
-        </span>
+        {expanded && (
+          <span className="ml-3 whitespace-nowrap font-inter text-sm font-medium">
+            {label}
+          </span>
+        )}
       </NavLink>
     </li>
   )
@@ -48,27 +51,42 @@ function NavItem({ to, icon: Icon, label }: { to: string; icon: React.ElementTyp
 export function Sidebar() {
   const { data: user } = useUser()
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
+  const [expanded, setExpanded] = useState(false)
 
   return (
-    <nav className="group hidden w-12 flex-col bg-navy transition-all duration-200 hover:w-56 md:flex">
-      <div className="flex h-14 items-center justify-center px-1.5 group-hover:justify-start group-hover:px-4">
-        <BrandLogo variant="compact" className="shrink-0" />
-        <span className="ml-2 hidden font-manrope text-sm font-bold text-gold group-hover:block">
-          Pádel SG
-        </span>
-      </div>
+    <nav className={`hidden flex-col bg-navy transition-all duration-200 md:flex ${expanded ? 'w-56' : 'w-12'}`}>
+      <button
+        onClick={() => setExpanded(v => !v)}
+        className="flex h-14 w-full items-center px-1.5 hover:bg-navy-mid transition-colors"
+        aria-label={expanded ? 'Colapsar menú' : 'Expandir menú'}
+      >
+        {expanded ? (
+          <>
+            <BrandLogo variant="compact" className="shrink-0" />
+            <span className="ml-2 font-manrope text-sm font-bold text-gold flex-1 text-left">Pádel SG</span>
+            <ChevronRight className="h-4 w-4 text-muted rotate-180 shrink-0" />
+          </>
+        ) : (
+          <BrandLogo variant="compact" className="shrink-0" />
+        )}
+      </button>
 
       <ul className="flex flex-1 flex-col gap-1 px-1.5 py-2">
-        {NAV_ITEMS.map(item => <NavItem key={item.to} {...item} />)}
+        {NAV_ITEMS.map(item => <NavItem key={item.to} {...item} expanded={expanded} />)}
       </ul>
 
       {isAdmin && (
         <div className="border-t border-navy-mid px-1.5 py-3 space-y-0.5">
-          <p className="hidden px-2 pb-1 font-inter text-[9px] font-bold uppercase tracking-widest text-muted/50 group-hover:block">
-            Admin
-          </p>
-          {/* Icono colapsado: solo Settings */}
-          <div className="group-hover:hidden">
+          {expanded && (
+            <p className="px-2 pb-1 font-inter text-[9px] font-bold uppercase tracking-widest text-muted/50">
+              Admin
+            </p>
+          )}
+          {expanded ? (
+            <ul className="flex flex-col gap-0.5">
+              {ADMIN_ITEMS.map(item => <NavItem key={item.to} {...item} expanded={expanded} />)}
+            </ul>
+          ) : (
             <NavLink
               to="/admin/jugadores"
               aria-label="Admin"
@@ -80,11 +98,7 @@ export function Sidebar() {
             >
               <Settings className="h-5 w-5 shrink-0" />
             </NavLink>
-          </div>
-          {/* Items expandidos */}
-          <ul className="hidden group-hover:flex flex-col gap-0.5">
-            {ADMIN_ITEMS.map(item => <NavItem key={item.to} {...item} />)}
-          </ul>
+          )}
         </div>
       )}
     </nav>
