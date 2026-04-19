@@ -9,7 +9,7 @@ import {
   type SortingState,
   type RowSelectionState,
 } from '@tanstack/react-table'
-import { Search, ChevronsUpDown, ChevronUp, ChevronDown, Zap } from 'lucide-react'
+import { Search, ChevronsUpDown, ChevronUp, ChevronDown, Zap, Pencil, X } from 'lucide-react'
 import { supabase, type Jugador } from '../../lib/supabase'
 
 type JugadorRow = Pick<Jugador, 'id' | 'nombre' | 'apodo' | 'email' | 'categoria' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'elo' | 'estado_cuenta'>
@@ -196,6 +196,146 @@ function BulkBar({ count, onApply, onClear }: {
   )
 }
 
+// ── modal edición completa ────────────────────────────────────────────────
+function JugadorEditModal({ jugador, onClose, onSaved }: {
+  jugador: JugadorRow
+  onClose: () => void
+  onSaved: () => void
+}) {
+  const [form, setForm] = useState({
+    nombre: jugador.nombre,
+    email: jugador.email,
+    apodo: jugador.apodo ?? '',
+    sexo: jugador.sexo ?? '',
+    categoria: jugador.categoria ?? '',
+    lado_preferido: jugador.lado_preferido ?? '',
+    mixto: jugador.mixto ?? '',
+    gradualidad: jugador.gradualidad ?? '',
+    elo: String(jugador.elo ?? 1200),
+    estado_cuenta: jugador.estado_cuenta ?? 'activo',
+  })
+  const [saving, setSaving] = useState(false)
+
+  const set = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }))
+
+  const categoriaOpts = form.sexo === 'F' ? CATEGORIA_F : CATEGORIA_M
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await patchJugador(jugador.id, {
+        nombre: form.nombre.trim(),
+        email: form.email.trim(),
+        apodo: form.apodo.trim() || null,
+        sexo: form.sexo || null,
+        categoria: form.categoria || null,
+        lado_preferido: form.lado_preferido || null,
+        mixto: form.mixto || null,
+        gradualidad: form.gradualidad || null,
+        elo: form.elo,
+        estado_cuenta: form.estado_cuenta || null,
+      })
+      onSaved()
+    } catch (e) {
+      alert('Error al guardar: ' + String(e))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl overflow-y-auto max-h-[90vh]">
+        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-surface-high">
+          <h2 className="font-manrope text-lg font-bold text-navy">Editar jugador</h2>
+          <button type="button" onClick={onClose} className="text-muted hover:text-navy transition-colors">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="px-6 py-4 space-y-4">
+          {[
+            { label: 'Nombre completo', key: 'nombre', type: 'text', placeholder: 'Apellido Nombre' },
+            { label: 'Email', key: 'email', type: 'email', placeholder: 'correo@ejemplo.com' },
+            { label: 'Apodo', key: 'apodo', type: 'text', placeholder: '—' },
+          ].map(({ label, key, type, placeholder }) => (
+            <div key={key}>
+              <label className="block font-inter text-xs font-semibold uppercase tracking-widest text-muted mb-1">{label}</label>
+              <input
+                type={type}
+                value={form[key as keyof typeof form]}
+                onChange={e => set(key, e.target.value)}
+                placeholder={placeholder}
+                className="w-full rounded-lg border border-navy/20 px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+              />
+            </div>
+          ))}
+
+          {[
+            { label: 'Sexo', key: 'sexo', opts: SEXO_OPTIONS },
+            { label: 'Lado preferido', key: 'lado_preferido', opts: LADO_OPTIONS },
+            { label: 'Mixto', key: 'mixto', opts: MIXTO_CYCLE.map(c => ({ value: c.value, label: c.label })) },
+            { label: 'Gradualidad', key: 'gradualidad', opts: GRAD_OPTIONS },
+            { label: 'Estado', key: 'estado_cuenta', opts: ESTADO_CYCLE.map(c => ({ value: c.value, label: c.label })) },
+          ].map(({ label, key, opts }) => (
+            <div key={key}>
+              <label className="block font-inter text-xs font-semibold uppercase tracking-widest text-muted mb-1">{label}</label>
+              <select
+                value={form[key as keyof typeof form]}
+                onChange={e => set(key, e.target.value)}
+                className="w-full rounded-lg border border-navy/20 px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold appearance-none bg-white"
+              >
+                <option value="">—</option>
+                {opts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </div>
+          ))}
+
+          <div>
+            <label className="block font-inter text-xs font-semibold uppercase tracking-widest text-muted mb-1">Categoría</label>
+            <select
+              value={form.categoria}
+              onChange={e => set('categoria', e.target.value)}
+              className="w-full rounded-lg border border-navy/20 px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold appearance-none bg-white"
+            >
+              <option value="">—</option>
+              {categoriaOpts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label className="block font-inter text-xs font-semibold uppercase tracking-widest text-muted mb-1">ELO</label>
+            <input
+              type="number"
+              value={form.elo}
+              onChange={e => set('elo', e.target.value)}
+              className="w-full rounded-lg border border-navy/20 px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3 px-6 py-4 border-t border-surface-high">
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="flex-1 rounded-lg bg-gold py-2.5 font-inter text-sm font-bold text-navy disabled:opacity-50 hover:bg-gold/90 transition-colors"
+          >
+            {saving ? 'Guardando…' : 'Guardar cambios'}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-navy/20 px-4 py-2.5 font-inter text-sm text-muted hover:text-navy transition-colors"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── columnas ──────────────────────────────────────────────────────────────
 const columnHelper = createColumnHelper<JugadorRow>()
 
@@ -204,6 +344,7 @@ export default function AdminJugadores() {
   const [search, setSearch] = useState('')
   const [sorting, setSorting] = useState<SortingState>([{ id: 'nombre', desc: false }])
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+  const [editingJugador, setEditingJugador] = useState<JugadorRow | null>(null)
 
   const { data: jugadores, isLoading, error: queryError } = useQuery({
     queryKey: ['admin-jugadores'],
@@ -312,7 +453,23 @@ export default function AdminJugadores() {
       header: 'Estado', size: 100, enableSorting: false,
       cell: info => <CycleCell value={info.getValue()} cycle={ESTADO_CYCLE} onChange={v => save(info.row.original.id, 'estado_cuenta', v)} />,
     }),
-  ], [save])
+    columnHelper.display({
+      id: 'editar',
+      size: 48,
+      header: () => null,
+      cell: ({ row }) => (
+        <button
+          type="button"
+          onClick={() => setEditingJugador(row.original)}
+          aria-label="Editar jugador"
+          className="rounded-lg p-1.5 text-muted hover:text-navy hover:bg-surface transition-colors"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      ),
+      enableSorting: false,
+    }),
+  ], [save, setEditingJugador])
 
   const filteredData = useMemo(() => {
     if (!search.trim()) return jugadores ?? []
@@ -417,6 +574,17 @@ export default function AdminJugadores() {
           </tbody>
         </table>
       </div>
+
+      {editingJugador && (
+        <JugadorEditModal
+          jugador={editingJugador}
+          onClose={() => setEditingJugador(null)}
+          onSaved={() => {
+            qc.invalidateQueries({ queryKey: ['admin-jugadores'] })
+            setEditingJugador(null)
+          }}
+        />
+      )}
     </div>
   )
 }
