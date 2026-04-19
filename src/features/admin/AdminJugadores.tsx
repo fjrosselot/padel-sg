@@ -39,6 +39,17 @@ async function deleteJugador(id: string) {
   if (count === '*/0') throw new Error('Sin permiso para eliminar o jugador no encontrado')
 }
 
+function Pill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick}
+      className={`whitespace-nowrap px-3 py-1 rounded-full font-inter text-xs font-semibold transition-colors ${
+        active ? 'bg-navy text-gold' : 'bg-white border border-navy/20 text-slate hover:border-navy/40 hover:text-navy'
+      }`}>
+      {label}
+    </button>
+  )
+}
+
 // ── opciones ──────────────────────────────────────────────────────────────
 const LADO_OPTIONS    = [{ value: 'drive', label: 'Drive' }, { value: 'reves', label: 'Revés' }, { value: 'ambos', label: 'Ambos' }]
 const SEXO_OPTIONS    = [{ value: 'M', label: 'Hombre' }, { value: 'F', label: 'Mujer' }]
@@ -400,6 +411,11 @@ export default function AdminJugadores() {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [editingJugador, setEditingJugador] = useState<JugadorRow | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [filtroSexo, setFiltroSexo] = useState<'todos' | 'M' | 'F'>('todos')
+  const [filtroLado, setFiltroLado] = useState<'todos' | 'drive' | 'reves' | 'ambos'>('todos')
+  const [filtroMixto, setFiltroMixto] = useState<'todos' | 'si' | 'no'>('todos')
+  const [filtroCategoria, setFiltroCategoria] = useState('todas')
+  const [filtroEstado, setFiltroEstado] = useState('todos')
 
   const { data: jugadores, isLoading, error: queryError } = useQuery({
     queryKey: ['admin-jugadores'],
@@ -566,15 +582,30 @@ export default function AdminJugadores() {
     }),
   ], [save, setEditingJugador, confirmDeleteId, qc])
 
+  const categorias = useMemo(() => {
+    if (!jugadores) return []
+    return [...new Set(jugadores.map(j => j.categoria).filter(Boolean))].sort() as string[]
+  }, [jugadores])
+
   const filteredData = useMemo(() => {
-    if (!search.trim()) return jugadores ?? []
-    const q = search.trim().toLowerCase()
-    return (jugadores ?? []).filter(j =>
-      j.nombre.toLowerCase().includes(q) ||
-      j.email.toLowerCase().includes(q) ||
-      (j.apodo?.toLowerCase().includes(q) ?? false)
+    let data = jugadores ?? []
+    if (search.trim()) {
+      const q = search.trim().toLowerCase()
+      data = data.filter(j =>
+        j.nombre.toLowerCase().includes(q) ||
+        j.email.toLowerCase().includes(q) ||
+        (j.apodo?.toLowerCase().includes(q) ?? false)
+      )
+    }
+    if (filtroSexo !== 'todos') data = data.filter(j => j.sexo === filtroSexo)
+    if (filtroLado !== 'todos') data = data.filter(j => j.lado_preferido === filtroLado)
+    if (filtroMixto !== 'todos') data = data.filter(j =>
+      filtroMixto === 'si' ? (j.mixto === 'si' || j.mixto === 'a_veces') : j.mixto === 'no'
     )
-  }, [jugadores, search])
+    if (filtroCategoria !== 'todas') data = data.filter(j => j.categoria === filtroCategoria)
+    if (filtroEstado !== 'todos') data = data.filter(j => j.estado_cuenta === filtroEstado)
+    return data
+  }, [jugadores, search, filtroSexo, filtroLado, filtroMixto, filtroCategoria, filtroEstado])
 
   const table = useReactTable({
     data: filteredData,
@@ -614,6 +645,42 @@ export default function AdminJugadores() {
           onChange={e => setSearch(e.target.value)}
           className="w-full rounded-xl border border-navy/20 bg-white pl-10 pr-4 py-2.5 font-inter text-sm text-navy placeholder-muted focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
         />
+      </div>
+
+      {/* Pills */}
+      <div className="space-y-2">
+        {categorias.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+            <Pill label="Todas" active={filtroCategoria === 'todas'} onClick={() => setFiltroCategoria('todas')} />
+            {categorias.map(cat => (
+              <Pill key={cat} label={`Cat. ${cat}`} active={filtroCategoria === cat}
+                onClick={() => setFiltroCategoria(filtroCategoria === cat ? 'todas' : cat)} />
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <Pill label="Hombre" active={filtroSexo === 'M'} onClick={() => setFiltroSexo(filtroSexo === 'M' ? 'todos' : 'M')} />
+          <Pill label="Mujer" active={filtroSexo === 'F'} onClick={() => setFiltroSexo(filtroSexo === 'F' ? 'todos' : 'F')} />
+          <div className="w-px bg-navy/10 shrink-0" />
+          <Pill label="Drive" active={filtroLado === 'drive'} onClick={() => setFiltroLado(filtroLado === 'drive' ? 'todos' : 'drive')} />
+          <Pill label="Revés" active={filtroLado === 'reves'} onClick={() => setFiltroLado(filtroLado === 'reves' ? 'todos' : 'reves')} />
+          <Pill label="Ambos" active={filtroLado === 'ambos'} onClick={() => setFiltroLado(filtroLado === 'ambos' ? 'todos' : 'ambos')} />
+          <div className="w-px bg-navy/10 shrink-0" />
+          <Pill label="Mixto" active={filtroMixto === 'si'} onClick={() => setFiltroMixto(filtroMixto === 'si' ? 'todos' : 'si')} />
+          <Pill label="No mixto" active={filtroMixto === 'no'} onClick={() => setFiltroMixto(filtroMixto === 'no' ? 'todos' : 'no')} />
+          <div className="w-px bg-navy/10 shrink-0" />
+          <Pill label="Activo" active={filtroEstado === 'activo'} onClick={() => setFiltroEstado(filtroEstado === 'activo' ? 'todos' : 'activo')} />
+          <Pill label="Pendiente" active={filtroEstado === 'pendiente'} onClick={() => setFiltroEstado(filtroEstado === 'pendiente' ? 'todos' : 'pendiente')} />
+          <Pill label="Suspendido" active={filtroEstado === 'suspendido'} onClick={() => setFiltroEstado(filtroEstado === 'suspendido' ? 'todos' : 'suspendido')} />
+          <Pill label="Inactivo" active={filtroEstado === 'inactivo'} onClick={() => setFiltroEstado(filtroEstado === 'inactivo' ? 'todos' : 'inactivo')} />
+        </div>
+        {(filtroSexo !== 'todos' || filtroLado !== 'todos' || filtroMixto !== 'todos' || filtroCategoria !== 'todas' || filtroEstado !== 'todos') && (
+          <button type="button"
+            onClick={() => { setFiltroSexo('todos'); setFiltroLado('todos'); setFiltroMixto('todos'); setFiltroCategoria('todas'); setFiltroEstado('todos') }}
+            className="font-inter text-xs text-muted hover:text-navy underline underline-offset-2">
+            Limpiar filtros
+          </button>
+        )}
       </div>
 
       {selectedCount > 0 && (
