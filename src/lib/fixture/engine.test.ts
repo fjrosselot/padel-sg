@@ -70,14 +70,14 @@ describe('buildPlayoffs', () => {
 
 describe('buildFixture', () => {
   it('returns a CategoriaFixture with groups and playoffs', () => {
-    const cat: CategoriaConfig = { nombre: '3a', num_parejas: 8 }
+    const cat: CategoriaConfig = { nombre: '3a', num_parejas: 8, sexo: 'M' }
     const result = buildFixture(cat, makeParejas(8), defaultConfig)
     expect(result.nombre).toBe('3a')
     expect(result.grupos.length).toBeGreaterThan(0)
     expect(result.faseEliminatoria.length).toBeGreaterThan(0)
   })
   it('assigns turnos and canchas to group matches', () => {
-    const cat: CategoriaConfig = { nombre: '3a', num_parejas: 8 }
+    const cat: CategoriaConfig = { nombre: '3a', num_parejas: 8, sexo: 'M' }
     const result = buildFixture(cat, makeParejas(8), defaultConfig)
     const first = result.grupos[0].partidos[0]
     expect(first.turno).toBeTruthy()

@@ -10,6 +10,7 @@ export const stepTipoSchema = z.object({
 export const categoriaSchema = z.object({
   nombre: z.string().min(1, 'Nombre requerido'),
   num_parejas: z.number().min(2).max(64),
+  sexo: z.enum(['M', 'F', 'Mixto']),
 })
 
 export const stepCategoriasSchema = z.object({

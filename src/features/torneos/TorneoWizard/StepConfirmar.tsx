@@ -76,7 +76,9 @@ export default function StepConfirmar({ onCreated }: Props) {
         <p className="text-sm text-muted">{tipoLabel} · {values.fecha_inicio}</p>
         <div className="text-sm space-y-1">
           {values.categorias.map(c => (
-            <p key={c.nombre}>{c.nombre}: {c.num_parejas} parejas</p>
+            <p key={c.nombre}>
+              {c.nombre} ({c.sexo === 'M' ? 'Varones' : c.sexo === 'F' ? 'Damas' : 'Mixto'}): {c.num_parejas} parejas
+            </p>
           ))}
         </div>
         <p className="text-sm text-muted">

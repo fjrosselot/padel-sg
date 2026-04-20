@@ -49,6 +49,7 @@ export interface ConfigFixture {
 export interface CategoriaConfig {
   nombre: string
   num_parejas: number
+  sexo: 'M' | 'F' | 'Mixto'
 }
 
 export interface FixtureResult {
