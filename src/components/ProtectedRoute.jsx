@@ -30,7 +30,7 @@ export function ProtectedRoute({ children, requireAdmin = false, publicOnly = fa
 
   if (jugador.estado_cuenta === 'suspendido') return <Navigate to="/suspendido" replace />
   if (jugador.estado_cuenta === 'pendiente') return <Navigate to="/pendiente" replace />
-  if (requireAdmin && !jugador.es_admin) return <Navigate to="/" replace />
+  if (requireAdmin && jugador.rol !== 'superadmin' && jugador.rol !== 'admin_torneo') return <Navigate to="/" replace />
 
   return children
 }

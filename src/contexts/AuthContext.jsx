@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
 
   async function signIn(email, password) {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return { error }
+    if (error) throw error
   }
 
   async function signOut() {
@@ -83,7 +83,7 @@ export function AuthProvider({ children }) {
     user,
     jugador,
     cargando,
-    isAdmin: jugador?.es_admin ?? false,
+    isAdmin: jugador?.rol === 'superadmin' || jugador?.rol === 'admin_torneo',
     isActive: jugador?.estado_cuenta === 'activo',
     isPending: jugador?.estado_cuenta === 'pendiente',
     signIn,
