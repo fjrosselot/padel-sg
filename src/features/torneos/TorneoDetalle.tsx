@@ -76,6 +76,7 @@ export default function TorneoDetalle() {
       if (inscErr) throw inscErr
 
       const configFixture = torneo!.config_fixture as unknown as ConfigFixture
+      if (!configFixture) throw new Error('El torneo no tiene configuración de fixture guardada.')
 
       const categoriasFixture = categoriasConfig.map(cat => {
         const parejas: ParejaFixture[] = ((inscritas ?? []) as any[])
