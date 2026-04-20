@@ -10,7 +10,7 @@ import FixtureView from './FixtureView'
 import InscripcionesPanel from './InscripcionesPanel'
 import ResultadosModal from './ResultadosModal'
 import RosterAdmin from './RosterAdmin'
-import { buildFixture } from '../../lib/fixture/engine'
+import { buildFixture, buildDesafioFixture } from '../../lib/fixture/engine'
 import type { Database } from '../../lib/types/database.types'
 import type { CategoriaConfig, CategoriaFixture, PartidoFixture, ParejaFixture, ConfigFixture } from '../../lib/fixture/types'
 
@@ -89,7 +89,9 @@ export default function TorneoDetalle() {
             elo1: i.j1?.elo ?? 1200,
             elo2: i.j2?.elo ?? 1200,
           }))
-        return buildFixture(cat, parejas, configFixture)
+        return cat.formato === 'desafio_puntos'
+          ? buildDesafioFixture(cat, parejas, configFixture)
+          : buildFixture(cat, parejas, configFixture)
       })
 
       const { error: updErr } = await supabase
@@ -113,11 +115,15 @@ export default function TorneoDetalle() {
 
   // categorias puede ser CategoriaConfig[] (borrador) o CategoriaFixture[] (fixture generado)
   // Solo renderizamos FixtureView si tiene la estructura completa (con grupos)
-  const rawCategorias = (torneo.categorias as unknown as CategoriaFixture[]) ?? []
-  const categorias = rawCategorias.filter(c => Array.isArray((c as CategoriaFixture).grupos))
-  const categoriasConfig = (rawCategorias.filter(
-    (c: unknown) => !Array.isArray((c as CategoriaFixture).grupos)
-  ) as unknown) as CategoriaConfig[]
+  const rawCategorias = (torneo.categorias as unknown as (CategoriaFixture | CategoriaConfig)[]) ?? []
+  const categorias = rawCategorias.filter(
+    (c): c is CategoriaFixture =>
+      Array.isArray((c as CategoriaFixture).grupos) || Array.isArray((c as CategoriaFixture).partidos)
+  )
+  const categoriasConfig = rawCategorias.filter(
+    (c): c is CategoriaConfig =>
+      !Array.isArray((c as CategoriaFixture).grupos) && !Array.isArray((c as CategoriaFixture).partidos)
+  ) as CategoriaConfig[]
 
   return (
     <div className="space-y-4">
