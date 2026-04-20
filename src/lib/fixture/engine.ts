@@ -172,8 +172,51 @@ export function buildFixture(
 
   return {
     nombre: categoriaConfig.nombre,
+    formato: categoriaConfig.formato ?? 'americano_grupos',
     grupos: gruposConTurnos,
     faseEliminatoria: bracket,
     consola,
+  }
+}
+
+export function buildDesafioFixture(
+  cat: CategoriaConfig,
+  parejas: ParejaFixture[],
+  config: ConfigFixture
+): CategoriaFixture {
+  const [h, m] = config.hora_inicio.split(':').map(Number)
+  const slot = config.duracion_partido + config.pausa_entre_partidos
+
+  const partidos: PartidoFixture[] = parejas.map((pareja, idx) => {
+    const cancha = (idx % config.num_canchas) + 1
+    const ronda = Math.floor(idx / config.num_canchas)
+    const minuteOffset = ronda * slot
+
+    const totalMinutes = h * 60 + m + minuteOffset
+    const hh = String(Math.floor(totalMinutes / 60)).padStart(2, '0')
+    const mm = String(totalMinutes % 60).padStart(2, '0')
+
+    return {
+      id: nextId(),
+      fase: 'desafio',
+      grupo: null,
+      numero: idx + 1,
+      pareja1: pareja,
+      pareja2: null,
+      cancha,
+      turno: `${hh}:${mm}`,
+      ganador: null,
+      resultado: null,
+      resultado_bloqueado: false,
+    }
+  })
+
+  return {
+    nombre: cat.nombre,
+    formato: 'desafio_puntos',
+    grupos: [],
+    faseEliminatoria: [],
+    consola: [],
+    partidos,
   }
 }

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { generateRoundRobin, buildGroups, buildPlayoffs, buildFixture } from './engine'
-import type { ParejaFixture, ConfigFixture, CategoriaConfig } from './types'
+import { generateRoundRobin, buildGroups, buildPlayoffs, buildFixture, buildDesafioFixture } from './engine'
+import type { ParejaFixture, CategoriaConfig, ConfigFixture } from './types'
 
 const defaultConfig: ConfigFixture = {
   parejas_por_grupo: 4,
@@ -12,6 +12,12 @@ const defaultConfig: ConfigFixture = {
   num_canchas: 2,
   hora_inicio: '09:00',
   fixture_compacto: false,
+}
+
+const baseConfig: ConfigFixture = {
+  parejas_por_grupo: 4, cuantos_avanzan: 2, con_consolacion: false,
+  con_tercer_lugar: false, duracion_partido: 60, pausa_entre_partidos: 10,
+  num_canchas: 4, hora_inicio: '09:00', fixture_compacto: false,
 }
 
 function makeParejas(n: number): ParejaFixture[] {
@@ -182,5 +188,33 @@ describe('buildPlayoffs — edge cases', () => {
     const cfg = { ...defaultConfig, con_consolacion: false }
     const playoffs = buildPlayoffs(makeParejas(4), cfg)
     expect(playoffs.some(p => p.fase === 'consolacion_final')).toBe(false)
+  })
+})
+
+describe('buildDesafioFixture', () => {
+  it('produces one match per pair', () => {
+    const cat: CategoriaConfig = { nombre: '4a', num_parejas: 4, sexo: 'M', formato: 'desafio_puntos' }
+    const parejas = makeParejas(4)
+    const result = buildDesafioFixture(cat, parejas, baseConfig)
+    expect(result.formato).toBe('desafio_puntos')
+    expect(result.partidos).toHaveLength(4)
+    expect(result.grupos).toHaveLength(0)
+    expect(result.faseEliminatoria).toHaveLength(0)
+  })
+
+  it('every match has fase "desafio" and pareja1 assigned', () => {
+    const cat: CategoriaConfig = { nombre: '4a', num_parejas: 3, sexo: 'M', formato: 'desafio_puntos' }
+    const parejas = makeParejas(3)
+    const result = buildDesafioFixture(cat, parejas, baseConfig)
+    expect(result.partidos?.every(p => p.fase === 'desafio')).toBe(true)
+    expect(result.partidos?.every(p => p.pareja1 !== null)).toBe(true)
+  })
+
+  it('assigns canchas and turnos from config', () => {
+    const cat: CategoriaConfig = { nombre: '4a', num_parejas: 4, sexo: 'M', formato: 'desafio_puntos' }
+    const parejas = makeParejas(4)
+    const result = buildDesafioFixture(cat, parejas, baseConfig)
+    expect(result.partidos?.every(p => p.cancha !== null)).toBe(true)
+    expect(result.partidos?.every(p => p.turno !== null)).toBe(true)
   })
 })
