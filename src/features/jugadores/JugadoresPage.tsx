@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import type { Jugador } from '../../lib/supabase'
 
-type JugadorItem = Pick<Jugador, 'id' | 'nombre' | 'apodo' | 'categoria' | 'elo' | 'foto_url' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'telefono'> & { nombre_pila: string | null; apellido: string | null }
+type JugadorItem = Pick<Jugador, 'id' | 'nombre' | 'apodo' | 'categoria' | 'elo' | 'foto_url' | 'lado_preferido' | 'sexo' | 'mixto' | 'telefono'> & { nombre_pila: string | null; apellido: string | null }
 
 const LADO_LABEL: Record<string, string> = { drive: 'Drive', reves: 'Revés', ambos: 'Ambos' }
 const MIXTO_LABEL: Record<string, string> = { si: 'Sí', no: 'No', a_veces: 'A veces' }
@@ -56,7 +56,6 @@ function Avatar({ jugador, rank }: { jugador: JugadorItem; rank: number }) {
 }
 
 const SEXO_LABEL: Record<string, string> = { M: 'H', F: 'M' }
-const GRAD_LABEL: Record<string, string> = { exalumno: 'Exal.', apoderado: 'Apod.', funcionario: 'Func.' }
 
 const columnHelper = createColumnHelper<JugadorItem & { rank: number }>()
 
@@ -75,7 +74,7 @@ export default function JugadoresPage() {
       const { data, error } = await supabase
         .schema('padel')
         .from('jugadores')
-        .select('id, nombre, nombre_pila, apellido, apodo, categoria, elo, foto_url, lado_preferido, sexo, mixto, gradualidad, telefono')
+        .select('id, nombre, nombre_pila, apellido, apodo, categoria, elo, foto_url, lado_preferido, sexo, mixto, telefono')
         .eq('estado_cuenta', 'activo')
         .order('elo', { ascending: false })
       if (error) throw error
@@ -106,21 +105,16 @@ export default function JugadoresPage() {
   const columns = useMemo(() => [
     columnHelper.accessor('rank', {
       header: '#',
-      size: 40,
-      cell: info => <span className="font-inter text-xs text-muted font-semibold">{info.getValue()}</span>,
+      size: 56,
+      cell: info => <Avatar jugador={info.row.original} rank={info.getValue()} />,
       enableColumnFilter: false,
     }),
     columnHelper.accessor('apellido', {
       header: 'Apellido',
-      size: 130,
+      size: 120,
       cell: info => {
         const row = info.row.original
-        return (
-          <div className="flex items-center gap-2.5">
-            <Avatar jugador={row} rank={row.rank} />
-            <span className="font-manrope text-sm font-bold text-navy">{info.getValue() ?? row.nombre.split(' ').pop()}</span>
-          </div>
-        )
+        return <span className="font-manrope text-sm font-bold text-navy">{info.getValue() ?? row.nombre.split(' ').pop()}</span>
       },
       filterFn: (row, _colId, value) => {
         const terms = (value as string).toLowerCase().split(/\s+/).filter(Boolean)
@@ -191,14 +185,6 @@ export default function JugadoresPage() {
       enableColumnFilter: false,
       cell: info => info.getValue()
         ? <span className="font-inter text-xs text-navy">{MIXTO_LABEL[info.getValue()!]}</span>
-        : <span className="font-inter text-xs text-muted/50">—</span>,
-    }),
-    columnHelper.accessor('gradualidad', {
-      header: 'Grad.',
-      size: 70,
-      enableColumnFilter: false,
-      cell: info => info.getValue()
-        ? <span className="font-inter text-xs text-muted">{GRAD_LABEL[info.getValue()!] ?? info.getValue()}</span>
         : <span className="font-inter text-xs text-muted/50">—</span>,
     }),
     columnHelper.accessor('elo', {
