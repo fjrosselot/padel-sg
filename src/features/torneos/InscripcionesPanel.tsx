@@ -6,19 +6,7 @@ import { Button } from '../../components/ui/button'
 import { useUser } from '../../hooks/useUser'
 import type { CategoriaConfig } from '../../lib/fixture/types'
 import { SEXO_LABEL } from './TorneoWizard/constants'
-
-interface InscripcionRow {
-  id: string
-  jugador1_id: string
-  jugador2_id: string
-  estado: 'pendiente' | 'confirmada' | 'rechazada'
-  categoria_nombre: string | null
-  lista_espera: boolean
-  posicion_espera: number | null
-  created_at: string
-  jugador1: { nombre: string; sexo: 'M' | 'F' | null } | null
-  jugador2: { nombre: string; sexo: 'M' | 'F' | null } | null
-}
+import type { InscripcionRow } from './RosterRow'
 
 interface JugadorOption {
   id: string
