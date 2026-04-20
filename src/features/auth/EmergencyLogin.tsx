@@ -1,21 +1,22 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Shield } from 'lucide-react'
-import { IS_EMERGENCY_TOKEN, setEmergencySession } from '@/lib/emergencySession'
+import { Shield, Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import { checkEmergencyCredentials, setEmergencySession } from '@/lib/emergencySession'
 
 export function EmergencyLogin() {
-  const [token, setToken] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState(false)
   const navigate = useNavigate()
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (IS_EMERGENCY_TOKEN(token)) {
+    if (checkEmergencyCredentials(email.trim(), password)) {
       setEmergencySession()
       navigate('/dashboard')
     } else {
       setError(true)
-      setToken('')
     }
   }
 
@@ -31,22 +32,49 @@ export function EmergencyLogin() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {error && (
+            <div className="rounded-lg border border-defeat/20 bg-defeat/8 px-3.5 py-3">
+              <p className="font-inter text-[13px] font-semibold text-defeat">Credenciales incorrectas.</p>
+            </div>
+          )}
+
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="token" className="font-inter text-[11px] font-semibold uppercase tracking-wider text-slate">
-              Token de emergencia
+            <label htmlFor="email" className="font-inter text-[11px] font-semibold uppercase tracking-wider text-slate">
+              Email
             </label>
-            <input
-              id="token"
-              type="password"
-              value={token}
-              onChange={e => { setToken(e.target.value); setError(false) }}
-              placeholder="••••••••••••"
-              autoFocus
-              className={`h-12 w-full rounded-lg border px-4 font-inter text-sm text-navy outline-none transition-all focus:ring-2 focus:ring-gold/50 ${error ? 'border-defeat bg-defeat/5' : 'border-navy/15 bg-white'}`}
-            />
-            {error && (
-              <p className="font-inter text-xs text-defeat">Token incorrecto.</p>
-            )}
+            <div className="flex h-12 items-center gap-2.5 rounded-lg border border-navy/15 bg-white px-3.5 focus-within:ring-2 focus-within:ring-gold/50">
+              <Mail className="h-[18px] w-[18px] shrink-0 text-muted" />
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={e => { setEmail(e.target.value); setError(false) }}
+                placeholder="admin@email.com"
+                autoComplete="email"
+                className="flex-1 border-none bg-transparent font-inter text-sm text-navy outline-none placeholder:text-muted"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="password" className="font-inter text-[11px] font-semibold uppercase tracking-wider text-slate">
+              Contraseña
+            </label>
+            <div className="flex h-12 items-center gap-2.5 rounded-lg border border-navy/15 bg-white px-3.5 focus-within:ring-2 focus-within:ring-gold/50">
+              <Lock className="h-[18px] w-[18px] shrink-0 text-muted" />
+              <input
+                id="password"
+                type={showPw ? 'text' : 'password'}
+                value={password}
+                onChange={e => { setPassword(e.target.value); setError(false) }}
+                placeholder="••••••••"
+                autoComplete="current-password"
+                className="flex-1 border-none bg-transparent font-inter text-sm text-navy outline-none placeholder:text-muted"
+              />
+              <button type="button" onClick={() => setShowPw(s => !s)} className="text-muted hover:text-slate transition-colors">
+                {showPw ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+              </button>
+            </div>
           </div>
 
           <button
