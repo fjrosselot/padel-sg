@@ -29,8 +29,6 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
   const [j2Id, setJ2Id] = useState('')
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  if (!isAdmin) return null
-
   const { data: inscripciones } = useQuery({
     queryKey: ['inscripciones', torneoId],
     queryFn: async () => {
@@ -130,6 +128,8 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
     onSettled: () => setDeletingId(null),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['inscripciones', torneoId] }),
   })
+
+  if (!isAdmin) return null
 
   return (
     <div className="space-y-6">
