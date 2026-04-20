@@ -81,3 +81,10 @@ ALTER TABLE padel.puntos_ranking  ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "read_tabla_puntos"    ON padel.tabla_puntos    FOR SELECT TO authenticated USING (true);
 CREATE POLICY "read_eventos_ranking" ON padel.eventos_ranking FOR SELECT TO authenticated USING (true);
 CREATE POLICY "read_puntos_ranking"  ON padel.puntos_ranking  FOR SELECT TO authenticated USING (true);
+
+-- Unique constraint: one points row per player per event
+ALTER TABLE padel.puntos_ranking ADD CONSTRAINT puntos_ranking_jugador_evento_unique UNIQUE (jugador_id, evento_id);
+
+-- Performance indexes on FK columns
+CREATE INDEX IF NOT EXISTS puntos_ranking_jugador_idx ON padel.puntos_ranking (jugador_id);
+CREATE INDEX IF NOT EXISTS puntos_ranking_evento_idx  ON padel.puntos_ranking (evento_id);
