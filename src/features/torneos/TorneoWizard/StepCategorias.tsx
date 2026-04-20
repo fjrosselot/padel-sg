@@ -77,6 +77,15 @@ export default function StepCategorias() {
 
             <SexoBadge idx={idx} />
 
+            <select
+              aria-label={`Formato categoría ${idx + 1}`}
+              className="rounded-lg border border-navy/20 bg-white px-2 py-1.5 text-sm text-navy focus:border-gold focus:outline-none"
+              {...register(`categorias.${idx}.formato`)}
+            >
+              <option value="americano_grupos">Americano</option>
+              <option value="desafio_puntos">Desafío</option>
+            </select>
+
             <div className="flex items-center gap-2">
               <Label htmlFor={`cat-parejas-${idx}`} className="text-sm text-muted whitespace-nowrap">Parejas:</Label>
               <Input
