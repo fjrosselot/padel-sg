@@ -285,6 +285,9 @@ export interface Database {
           jugador1_id: string
           jugador2_id: string
           estado: 'pendiente' | 'confirmada' | 'rechazada'
+          categoria_nombre: string | null
+          lista_espera: boolean
+          posicion_espera: number | null
           created_at: string
         }
         Insert: {
@@ -293,6 +296,9 @@ export interface Database {
           jugador1_id: string
           jugador2_id: string
           estado?: 'pendiente' | 'confirmada' | 'rechazada'
+          categoria_nombre?: string | null
+          lista_espera?: boolean
+          posicion_espera?: number | null
           created_at?: string
         }
         Update: {
@@ -301,6 +307,9 @@ export interface Database {
           jugador1_id?: string
           jugador2_id?: string
           estado?: 'pendiente' | 'confirmada' | 'rechazada'
+          categoria_nombre?: string | null
+          lista_espera?: boolean
+          posicion_espera?: number | null
           created_at?: string
         }
       }
