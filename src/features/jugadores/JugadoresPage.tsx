@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import type { Jugador } from '../../lib/supabase'
 
-type JugadorItem = Pick<Jugador, 'id' | 'nombre' | 'apodo' | 'categoria' | 'elo' | 'foto_url' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad'>
+type JugadorItem = Pick<Jugador, 'id' | 'nombre' | 'apodo' | 'categoria' | 'elo' | 'foto_url' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'telefono'> & { nombre_pila: string | null; apellido: string | null }
 
 const LADO_LABEL: Record<string, string> = { drive: 'Drive', reves: 'Revés', ambos: 'Ambos' }
 const MIXTO_LABEL: Record<string, string> = { si: 'Sí', no: 'No', a_veces: 'A veces' }
@@ -55,6 +55,9 @@ function Avatar({ jugador, rank }: { jugador: JugadorItem; rank: number }) {
   )
 }
 
+const SEXO_LABEL: Record<string, string> = { M: 'H', F: 'M' }
+const GRAD_LABEL: Record<string, string> = { exalumno: 'Exal.', apoderado: 'Apod.', funcionario: 'Func.' }
+
 const columnHelper = createColumnHelper<JugadorItem & { rank: number }>()
 
 export default function JugadoresPage() {
@@ -72,7 +75,7 @@ export default function JugadoresPage() {
       const { data, error } = await supabase
         .schema('padel')
         .from('jugadores')
-        .select('id, nombre, apodo, categoria, elo, foto_url, lado_preferido, sexo, mixto, gradualidad')
+        .select('id, nombre, nombre_pila, apellido, apodo, categoria, elo, foto_url, lado_preferido, sexo, mixto, gradualidad, telefono')
         .eq('estado_cuenta', 'activo')
         .order('elo', { ascending: false })
       if (error) throw error
@@ -103,23 +106,19 @@ export default function JugadoresPage() {
   const columns = useMemo(() => [
     columnHelper.accessor('rank', {
       header: '#',
-      size: 48,
+      size: 40,
       cell: info => <span className="font-inter text-xs text-muted font-semibold">{info.getValue()}</span>,
       enableColumnFilter: false,
     }),
-    columnHelper.accessor('nombre', {
-      header: 'Jugador',
+    columnHelper.accessor('apellido', {
+      header: 'Apellido',
+      size: 130,
       cell: info => {
         const row = info.row.original
         return (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <Avatar jugador={row} rank={row.rank} />
-            <div>
-              <p className="font-manrope text-sm font-bold text-navy">
-                {row.nombre}
-                {row.apodo && <span className="font-normal text-muted"> "{row.apodo}"</span>}
-              </p>
-            </div>
+            <span className="font-manrope text-sm font-bold text-navy">{info.getValue() ?? row.nombre.split(' ').pop()}</span>
           </div>
         )
       },
@@ -127,9 +126,8 @@ export default function JugadoresPage() {
         const terms = (value as string).toLowerCase().split(/\s+/).filter(Boolean)
         const j = row.original
         const haystack = [
-          j.nombre,
-          j.apodo ?? '',
-          j.categoria ?? '',
+          j.nombre, j.nombre_pila ?? '', j.apellido ?? '',
+          j.apodo ?? '', j.categoria ?? '',
           j.lado_preferido ? LADO_LABEL[j.lado_preferido] : '',
           j.mixto ? MIXTO_LABEL[j.mixto] : '',
           j.sexo === 'M' ? 'hombre' : j.sexo === 'F' ? 'mujer' : '',
@@ -137,42 +135,88 @@ export default function JugadoresPage() {
         return terms.every(t => haystack.includes(t))
       },
     }),
-    columnHelper.accessor('categoria', {
-      header: 'Categoría',
-      cell: info => info.getValue()
-        ? <span className="px-2 py-0.5 rounded-md bg-navy/8 font-inter text-xs font-semibold text-navy">Cat. {info.getValue()}</span>
-        : <span className="text-muted font-inter text-xs">—</span>,
+    columnHelper.accessor('nombre_pila', {
+      header: 'Nombre',
+      size: 110,
+      enableSorting: false,
       enableColumnFilter: false,
+      cell: info => <span className="font-inter text-sm text-navy">{info.getValue() ?? info.row.original.nombre.split(' ')[0]}</span>,
+    }),
+    columnHelper.accessor('telefono', {
+      header: 'Teléfono',
+      size: 120,
+      enableSorting: false,
+      enableColumnFilter: false,
+      cell: info => info.getValue()
+        ? <span className="font-inter text-xs text-muted">{info.getValue()}</span>
+        : <span className="font-inter text-xs text-muted/50">—</span>,
+    }),
+    columnHelper.accessor('apodo', {
+      header: 'Apodo',
+      size: 100,
+      enableSorting: false,
+      enableColumnFilter: false,
+      cell: info => info.getValue()
+        ? <span className="font-inter text-xs text-muted italic">"{info.getValue()}"</span>
+        : <span className="font-inter text-xs text-muted/50">—</span>,
+    }),
+    columnHelper.accessor('sexo', {
+      header: 'Sexo',
+      size: 60,
+      enableColumnFilter: false,
+      cell: info => info.getValue()
+        ? <span className="font-inter text-xs text-navy">{SEXO_LABEL[info.getValue()!] ?? info.getValue()}</span>
+        : <span className="font-inter text-xs text-muted/50">—</span>,
+    }),
+    columnHelper.accessor('categoria', {
+      header: 'Cat.',
+      size: 70,
+      enableColumnFilter: false,
+      cell: info => info.getValue()
+        ? <span className="px-1.5 py-0.5 rounded-md bg-navy/8 font-inter text-xs font-semibold text-navy">{info.getValue()}</span>
+        : <span className="font-inter text-xs text-muted/50">—</span>,
     }),
     columnHelper.accessor('lado_preferido', {
       header: 'Lado',
-      cell: info => info.getValue()
-        ? <span className="font-inter text-sm text-navy">{LADO_LABEL[info.getValue()!]}</span>
-        : <span className="text-muted font-inter text-sm">—</span>,
+      size: 75,
       enableColumnFilter: false,
+      cell: info => info.getValue()
+        ? <span className="font-inter text-xs text-navy">{LADO_LABEL[info.getValue()!]}</span>
+        : <span className="font-inter text-xs text-muted/50">—</span>,
     }),
     columnHelper.accessor('mixto', {
       header: 'Mixto',
-      cell: info => info.getValue()
-        ? <span className="font-inter text-sm text-navy">{MIXTO_LABEL[info.getValue()!]}</span>
-        : <span className="text-muted font-inter text-sm">—</span>,
+      size: 80,
+      enableSorting: false,
       enableColumnFilter: false,
+      cell: info => info.getValue()
+        ? <span className="font-inter text-xs text-navy">{MIXTO_LABEL[info.getValue()!]}</span>
+        : <span className="font-inter text-xs text-muted/50">—</span>,
+    }),
+    columnHelper.accessor('gradualidad', {
+      header: 'Grad.',
+      size: 70,
+      enableColumnFilter: false,
+      cell: info => info.getValue()
+        ? <span className="font-inter text-xs text-muted">{GRAD_LABEL[info.getValue()!] ?? info.getValue()}</span>
+        : <span className="font-inter text-xs text-muted/50">—</span>,
     }),
     columnHelper.accessor('elo', {
       header: 'ELO',
-      cell: info => <span className="font-manrope text-sm font-bold text-navy">{info.getValue()}</span>,
+      size: 60,
       enableColumnFilter: false,
+      cell: info => <span className="font-manrope text-sm font-bold text-navy">{info.getValue()}</span>,
     }),
     columnHelper.display({
       id: 'accion',
       header: '',
-      size: 40,
+      size: 36,
       cell: () => <ChevronRight className="h-4 w-4 text-muted" />,
     }),
   ], [])
 
   const columnFilters: ColumnFiltersState = useMemo(() =>
-    search ? [{ id: 'nombre', value: search }] : []
+    search ? [{ id: 'apellido', value: search }] : []
   , [search])
 
   const table = useReactTable({
