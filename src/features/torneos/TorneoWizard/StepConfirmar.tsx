@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { SEXO_LABEL } from './constants'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { buildFixture } from '../../../lib/fixture/engine'
+import { buildFixture, buildDesafioFixture } from '../../../lib/fixture/engine'
 import type { WizardData } from './schema'
-import type { ParejaFixture } from '../../../lib/fixture/types'
+import type { ParejaFixture, CategoriaFixture } from '../../../lib/fixture/types'
 import { supabase } from '../../../lib/supabase'
 import { Button } from '../../../components/ui/button'
 
@@ -30,7 +30,7 @@ export default function StepConfirmar({ onCreated }: Props) {
     fixture_compacto: values.fixture_compacto,
   }
 
-  const previewCats = values.categorias.map(cat => {
+  const previewCats: CategoriaFixture[] = values.categorias.map(cat => {
     const placeholders: ParejaFixture[] = Array.from({ length: cat.num_parejas }, (_, i) => ({
       id: `placeholder_${i}`,
       nombre: `Pareja ${i + 1}`,
@@ -39,7 +39,9 @@ export default function StepConfirmar({ onCreated }: Props) {
       elo1: 1200,
       elo2: 1200,
     }))
-    return buildFixture(cat, placeholders, configFixture)
+    return cat.formato === 'desafio_puntos'
+      ? buildDesafioFixture(cat, placeholders, configFixture)
+      : buildFixture(cat, placeholders, configFixture)
   })
 
   const mutation = useMutation({
@@ -78,7 +80,8 @@ export default function StepConfirmar({ onCreated }: Props) {
         <div className="text-sm space-y-1">
           {values.categorias.map(c => (
             <p key={c.nombre}>
-              {c.nombre} ({SEXO_LABEL[c.sexo]}): {c.num_parejas} parejas
+              {c.nombre} ({SEXO_LABEL[c.sexo]}) — {c.num_parejas} parejas
+              {c.formato === 'desafio_puntos' && <span className="ml-1 text-xs text-gold font-medium">Desafío</span>}
             </p>
           ))}
         </div>
@@ -99,24 +102,33 @@ export default function StepConfirmar({ onCreated }: Props) {
         <div className="space-y-4 max-h-64 overflow-y-auto text-xs bg-surface rounded-lg p-3">
           {previewCats.map(cat => (
             <div key={cat.nombre}>
-              <p className="font-semibold text-sm text-navy mb-2">{cat.nombre}</p>
-              {cat.grupos.map(g => (
-                <div key={g.letra} className="mb-2">
-                  <p className="text-muted uppercase text-xs mb-1">Grupo {g.letra}</p>
-                  {g.partidos.map(p => (
-                    <p key={p.id}>
-                      {p.turno} · C{p.cancha} · {p.pareja1?.nombre} vs {p.pareja2?.nombre}
-                    </p>
-                  ))}
-                </div>
-              ))}
+              <p className="font-semibold text-sm text-navy mb-2">
+                {cat.nombre}
+                {cat.formato === 'desafio_puntos' && <span className="ml-1 text-xs text-gold">Desafío</span>}
+              </p>
+              {cat.formato === 'desafio_puntos' ? (
+                (cat.partidos ?? []).map(p => (
+                  <p key={p.id}>{p.turno} · C{p.cancha} · {p.pareja1?.nombre} vs Rival</p>
+                ))
+              ) : (
+                cat.grupos.map(g => (
+                  <div key={g.letra} className="mb-2">
+                    <p className="text-muted uppercase text-xs mb-1">Grupo {g.letra}</p>
+                    {g.partidos.map(p => (
+                      <p key={p.id}>{p.turno} · C{p.cancha} · {p.pareja1?.nombre} vs {p.pareja2?.nombre}</p>
+                    ))}
+                  </div>
+                ))
+              )}
             </div>
           ))}
         </div>
       )}
 
       {mutation.error && (
-        <p className="text-[#BA1A1A] text-sm">{mutation.error instanceof Error ? mutation.error.message : (mutation.error as any)?.message ?? String(mutation.error)}</p>
+        <p className="text-[#BA1A1A] text-sm">
+          {mutation.error instanceof Error ? mutation.error.message : (mutation.error as any)?.message ?? String(mutation.error)}
+        </p>
       )}
 
       <Button
