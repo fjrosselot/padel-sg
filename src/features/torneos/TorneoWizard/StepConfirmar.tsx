@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
+import { SEXO_LABEL } from './constants'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { buildFixture } from '../../../lib/fixture/engine'
 import type { WizardData } from './schema'
@@ -77,7 +78,7 @@ export default function StepConfirmar({ onCreated }: Props) {
         <div className="text-sm space-y-1">
           {values.categorias.map(c => (
             <p key={c.nombre}>
-              {c.nombre} ({c.sexo === 'M' ? 'Varones' : c.sexo === 'F' ? 'Damas' : 'Mixto'}): {c.num_parejas} parejas
+              {c.nombre} ({SEXO_LABEL[c.sexo]}): {c.num_parejas} parejas
             </p>
           ))}
         </div>

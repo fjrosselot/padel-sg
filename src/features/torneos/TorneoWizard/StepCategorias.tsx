@@ -1,8 +1,9 @@
-import { useFormContext, useFieldArray } from 'react-hook-form'
+import { useFormContext, useFieldArray, useWatch } from 'react-hook-form'
 import type { WizardData } from './schema'
 import { Label } from '../../../components/ui/label'
 import { Input } from '../../../components/ui/input'
 import { Button } from '../../../components/ui/button'
+import { SEXO_LABEL, SEXO_COLOR } from './constants'
 
 const CATEGORIAS_PRESET: Array<{ nombre: string; sexo: 'M' | 'F' | 'Mixto' }> = [
   { nombre: '5a Damas', sexo: 'F' },
@@ -15,17 +16,19 @@ const CATEGORIAS_PRESET: Array<{ nombre: string; sexo: 'M' | 'F' | 'Mixto' }> = 
   { nombre: 'Mixto', sexo: 'Mixto' },
 ]
 
-const SEXO_LABEL: Record<string, string> = { M: 'Varones', F: 'Damas', Mixto: 'Mixto' }
-const SEXO_COLOR: Record<string, string> = {
-  M: 'bg-blue-50 text-blue-700 border-blue-200',
-  F: 'bg-pink-50 text-pink-700 border-pink-200',
-  Mixto: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+function SexoBadge({ idx }: { idx: number }) {
+  const raw = useWatch({ name: `categorias.${idx}.sexo` })
+  const sexo: 'M' | 'F' | 'Mixto' = raw === 'F' ? 'F' : raw === 'Mixto' ? 'Mixto' : 'M'
+  return (
+    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${SEXO_COLOR[sexo]}`}>
+      {SEXO_LABEL[sexo]}
+    </span>
+  )
 }
 
 export default function StepCategorias() {
-  const { register, control, watch, formState: { errors } } = useFormContext<WizardData>()
+  const { register, control, formState: { errors } } = useFormContext<WizardData>()
   const { fields, append, remove } = useFieldArray({ control, name: 'categorias' })
-  const categorias = watch('categorias')
 
   return (
     <div className="space-y-4">
@@ -51,52 +54,47 @@ export default function StepCategorias() {
       )}
 
       <div className="space-y-3">
-        {fields.map((field, idx) => {
-          const currentSexo = categorias?.[idx]?.sexo ?? 'M'
-          return (
-            <div key={field.id} className="flex items-center gap-3 p-3 bg-surface rounded-lg flex-wrap">
-              <label htmlFor={`cat-nombre-${idx}`} className="sr-only">Nombre categoría {idx + 1}</label>
+        {fields.map((field, idx) => (
+          <div key={field.id} className="flex items-center gap-3 p-3 bg-surface rounded-lg flex-wrap">
+            <label htmlFor={`cat-nombre-${idx}`} className="sr-only">Nombre categoría {idx + 1}</label>
+            <Input
+              id={`cat-nombre-${idx}`}
+              placeholder="Categoría"
+              className="w-32"
+              {...register(`categorias.${idx}.nombre`)}
+            />
+
+            <select
+              aria-label={`Sexo categoría ${idx + 1}`}
+              className="rounded-lg border border-navy/20 bg-white px-2 py-1.5 text-sm text-navy focus:border-gold focus:outline-none"
+              {...register(`categorias.${idx}.sexo`)}
+            >
+              <option value="M">Varones</option>
+              <option value="F">Damas</option>
+              <option value="Mixto">Mixto</option>
+            </select>
+
+            <SexoBadge idx={idx} />
+
+            <div className="flex items-center gap-2">
+              <Label htmlFor={`cat-parejas-${idx}`} className="text-sm text-muted whitespace-nowrap">Parejas:</Label>
               <Input
-                id={`cat-nombre-${idx}`}
-                placeholder="Categoría"
-                className="w-32"
-                {...register(`categorias.${idx}.nombre`)}
+                id={`cat-parejas-${idx}`}
+                type="number" min={2} max={64} className="w-16"
+                {...register(`categorias.${idx}.num_parejas`, { valueAsNumber: true })}
               />
-
-              <select
-                aria-label={`Sexo categoría ${idx + 1}`}
-                className="rounded-lg border border-navy/20 bg-white px-2 py-1.5 text-sm text-navy focus:border-gold focus:outline-none"
-                {...register(`categorias.${idx}.sexo`)}
-              >
-                <option value="M">Varones</option>
-                <option value="F">Damas</option>
-                <option value="Mixto">Mixto</option>
-              </select>
-
-              <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${SEXO_COLOR[currentSexo]}`}>
-                {SEXO_LABEL[currentSexo]}
-              </span>
-
-              <div className="flex items-center gap-2">
-                <Label htmlFor={`cat-parejas-${idx}`} className="text-sm text-muted whitespace-nowrap">Parejas:</Label>
-                <Input
-                  id={`cat-parejas-${idx}`}
-                  type="number" min={2} max={64} className="w-16"
-                  {...register(`categorias.${idx}.num_parejas`, { valueAsNumber: true })}
-                />
-              </div>
-
-              <button
-                type="button"
-                aria-label={`Quitar categoría ${idx + 1}`}
-                onClick={() => remove(idx)}
-                className="ml-auto text-[#BA1A1A]/60 hover:text-[#BA1A1A] text-sm focus:outline-none focus:ring-2 focus:ring-gold/50 rounded"
-              >
-                Quitar
-              </button>
             </div>
-          )
-        })}
+
+            <button
+              type="button"
+              aria-label={`Quitar categoría ${idx + 1}`}
+              onClick={() => remove(idx)}
+              className="ml-auto text-[#BA1A1A]/60 hover:text-[#BA1A1A] text-sm focus:outline-none focus:ring-2 focus:ring-gold/50 rounded"
+            >
+              Quitar
+            </button>
+          </div>
+        ))}
       </div>
 
       <Button
