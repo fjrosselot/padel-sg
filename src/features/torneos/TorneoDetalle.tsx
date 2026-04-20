@@ -1,16 +1,18 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useUser } from '../../hooks/useUser'
 import { Badge } from '../../components/ui/badge'
+import { Button } from '../../components/ui/button'
 import FixtureView from './FixtureView'
 import InscripcionesPanel from './InscripcionesPanel'
 import ResultadosModal from './ResultadosModal'
 import RosterAdmin from './RosterAdmin'
+import { buildFixture } from '../../lib/fixture/engine'
 import type { Database } from '../../lib/types/database.types'
-import type { CategoriaConfig, CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
+import type { CategoriaConfig, CategoriaFixture, PartidoFixture, ParejaFixture, ConfigFixture } from '../../lib/fixture/types'
 
 type Torneo = Database['padel']['Tables']['torneos']['Row']
 
@@ -29,6 +31,8 @@ export default function TorneoDetalle() {
 
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
 
+  const qc = useQueryClient()
+
   const { data: torneo, isLoading } = useQuery({
     queryKey: ['torneo', id],
     queryFn: async () => {
@@ -42,6 +46,65 @@ export default function TorneoDetalle() {
       return data as Torneo
     },
     enabled: !!id,
+  })
+
+  const abrirInscripciones = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .schema('padel')
+        .from('torneos')
+        .update({ estado: 'inscripcion' })
+        .eq('id', id!)
+      if (error) throw error
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['torneo', id] }),
+  })
+
+  const generarFixture = useMutation({
+    mutationFn: async () => {
+      const { data: inscritas, error: inscErr } = await supabase
+        .schema('padel')
+        .from('inscripciones')
+        .select(`
+          id, jugador1_id, jugador2_id, categoria_nombre,
+          j1:jugadores!jugador1_id(id, nombre, elo),
+          j2:jugadores!jugador2_id(id, nombre, elo)
+        `)
+        .eq('torneo_id', id!)
+        .eq('estado', 'confirmada')
+        .eq('lista_espera', false)
+      if (inscErr) throw inscErr
+
+      const configFixture = torneo!.config_fixture as unknown as ConfigFixture
+
+      const categoriasFixture = categoriasConfig.map(cat => {
+        const parejas: ParejaFixture[] = ((inscritas ?? []) as any[])
+          .filter((i: any) => i.categoria_nombre === cat.nombre)
+          .map((i: any) => ({
+            id: i.id,
+            nombre: `${i.j1?.nombre ?? '?'} / ${i.j2?.nombre ?? '?'}`,
+            jugador1_id: i.jugador1_id,
+            jugador2_id: i.jugador2_id,
+            elo1: i.j1?.elo ?? 1200,
+            elo2: i.j2?.elo ?? 1200,
+          }))
+        return buildFixture(cat, parejas, configFixture)
+      })
+
+      const { error: updErr } = await supabase
+        .schema('padel')
+        .from('torneos')
+        .update({
+          categorias: categoriasFixture as unknown as any,
+          estado: 'en_curso',
+        })
+        .eq('id', id!)
+      if (updErr) throw updErr
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['torneo', id] })
+      qc.invalidateQueries({ queryKey: ['inscripciones', id] })
+    },
   })
 
   if (isLoading) return <div className="p-6 text-muted">Cargando…</div>
@@ -72,6 +135,41 @@ export default function TorneoDetalle() {
         </div>
         <Badge>{ESTADO_LABELS[torneo.estado]}</Badge>
       </div>
+
+      {isAdmin && (torneo.estado === 'borrador' || torneo.estado === 'inscripcion') && (
+        <div className="flex gap-2 mt-2 flex-wrap">
+          {torneo.estado === 'borrador' && (
+            <Button
+              size="sm"
+              className="bg-navy text-white text-xs font-semibold rounded-lg"
+              onClick={() => abrirInscripciones.mutate()}
+              disabled={abrirInscripciones.isPending}
+            >
+              {abrirInscripciones.isPending ? 'Abriendo…' : 'Abrir inscripciones'}
+            </Button>
+          )}
+          {torneo.estado === 'inscripcion' && (
+            <Button
+              size="sm"
+              className="bg-gold text-navy font-bold text-xs rounded-lg"
+              onClick={() => generarFixture.mutate()}
+              disabled={generarFixture.isPending}
+            >
+              {generarFixture.isPending ? 'Generando fixture…' : 'Generar fixture y comenzar'}
+            </Button>
+          )}
+          {abrirInscripciones.error && (
+            <p className="text-xs text-defeat w-full">
+              {abrirInscripciones.error instanceof Error ? abrirInscripciones.error.message : 'Error al abrir inscripciones'}
+            </p>
+          )}
+          {generarFixture.error && (
+            <p className="text-xs text-defeat w-full">
+              {generarFixture.error instanceof Error ? generarFixture.error.message : 'Error al generar fixture'}
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="rounded-xl bg-white shadow-card space-y-4 p-4">
         <div>
