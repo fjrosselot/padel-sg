@@ -43,7 +43,7 @@ async function upsertRankingPoints(
     .from('eventos_ranking')
     .select('id')
     .eq('nombre', torneo.nombre)
-    .single()
+    .maybeSingle()
 
   if (existing) {
     eventoId = existing.id
@@ -206,7 +206,7 @@ export default function ResultadosModal({ partido, torneoId, torneo, onClose }: 
 
         {isDesafio && (
           <p className="text-xs text-muted bg-gold/5 rounded-lg p-2">
-            El ganador sumará 20 pts de ranking, el perdedor 5 pts (externo).
+            Los jugadores SG ganadores suman 20 pts de ranking, los perdedores 5 pts.
           </p>
         )}
 
