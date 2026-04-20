@@ -482,6 +482,40 @@ export interface Database {
           created_at?: string
         }
       }
+      tabla_puntos: {
+        Row: { tipo_evento: string; fase: string; puntos: number }
+        Insert: { tipo_evento: string; fase: string; puntos: number }
+        Update: { tipo_evento?: string; fase?: string; puntos?: number }
+      }
+      eventos_ranking: {
+        Row: {
+          id: string; nombre: string; tipo: string
+          fecha: string | null; temporada_id: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; nombre: string; tipo: string
+          fecha?: string | null; temporada_id?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; nombre?: string; tipo?: string
+          fecha?: string | null; temporada_id?: string | null
+        }
+      }
+      puntos_ranking: {
+        Row: {
+          id: string; jugador_id: string; evento_id: string
+          categoria: string; sexo: string | null; puntos: number
+          fase: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; jugador_id: string; evento_id: string
+          categoria: string; sexo?: string | null; puntos: number
+          fase?: string | null; created_at?: string
+        }
+        Update: {
+          categoria?: string; sexo?: string | null; puntos?: number; fase?: string | null
+        }
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
