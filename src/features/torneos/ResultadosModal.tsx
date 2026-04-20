@@ -35,7 +35,7 @@ async function upsertRankingPoints(
     .eq('anio', new Date(torneo.fecha_inicio).getFullYear())
     .limit(1)
     .single()
-  if (!temporada) return
+  if (!temporada) throw new Error('Temporada no encontrada para el año del torneo')
 
   let eventoId: string
   const { data: existing } = await supabase
@@ -59,7 +59,7 @@ async function upsertRankingPoints(
       })
       .select('id')
       .single()
-    if (error || !created) return
+    if (error || !created) throw new Error('No se pudo crear el evento de ranking')
     eventoId = created.id
   }
 
@@ -72,7 +72,7 @@ async function upsertRankingPoints(
     .select('id, categoria, sexo')
     .in('id', jugadorIds)
 
-  await Promise.all(
+  const upsertResults = await Promise.all(
     (jugadores ?? []).map(j =>
       supabase
         .schema('padel')
@@ -90,6 +90,8 @@ async function upsertRankingPoints(
         )
     )
   )
+  const upsertError = upsertResults.find(r => r.error)
+  if (upsertError?.error) throw upsertError.error
 }
 
 export default function ResultadosModal({ partido, torneoId, torneo, onClose }: Props) {
@@ -110,6 +112,8 @@ export default function ResultadosModal({ partido, torneoId, torneo, onClose }: 
         .update({ ganador, resultado: resultado || null, estado: 'jugado' })
         .eq('id', partido.id)
       if (partErr) throw partErr
+
+      if (isDesafio && !torneo) throw new Error('Datos del torneo requeridos para registrar puntos')
 
       if (isDesafio && torneo) {
         const winnerPareja = ganador === 1 ? partido.pareja1 : partido.pareja2
