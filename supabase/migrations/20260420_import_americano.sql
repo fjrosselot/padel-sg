@@ -6,6 +6,16 @@ DECLARE
   v_temporada_id uuid;
 BEGIN
   SELECT id INTO v_temporada_id FROM padel.temporadas WHERE anio = 2026 LIMIT 1;
+  IF v_temporada_id IS NULL THEN
+    RAISE EXCEPTION 'Temporada 2026 not found — run 20260420_ranking_sistema.sql first';
+  END IF;
+
+  -- Idempotent: skip if already imported
+  SELECT id INTO v_evento_id FROM padel.eventos_ranking WHERE nombre = 'Americano SG Abril 2026' LIMIT 1;
+  IF v_evento_id IS NOT NULL THEN
+    RAISE NOTICE 'Americano SG Abril 2026 already imported, skipping.';
+    RETURN;
+  END IF;
 
   INSERT INTO padel.eventos_ranking (nombre, tipo, fecha, temporada_id)
   VALUES ('Americano SG Abril 2026', 'americano_grupos', '2026-04-08', v_temporada_id)
