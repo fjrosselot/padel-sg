@@ -98,7 +98,9 @@ export default function InscripcionesPanel({ torneoId, estado, categorias }: Pro
     inscripciones?.filter(i => i.categoria_nombre === nombre && i.lista_espera) ?? []
 
   const yaInscrito = inscripciones?.some(
-    ins => ins.jugador1_id === user?.id || ins.jugador2_id === user?.id
+    ins =>
+      ins.estado !== 'rechazada' &&
+      (ins.jugador1_id === user?.id || ins.jugador2_id === user?.id)
   )
 
   const updateEstado = useMutation({

@@ -7,13 +7,20 @@ vi.mock('../../lib/supabase', () => ({
     schema: () => ({
       from: () => ({
         select: () => ({
-          eq: () => ({
-            order: () => Promise.resolve({ data: [], error: null })
-          })
-        })
-      })
-    })
-  }
+          eq: () => {
+            const chain: Record<string, unknown> = {}
+            const terminal = Promise.resolve({ data: [], error: null })
+            chain['order'] = () => chain
+            chain['then'] = terminal.then.bind(terminal)
+            chain['catch'] = terminal.catch.bind(terminal)
+            return chain
+          },
+          insert: () => Promise.resolve({ error: null }),
+          update: () => ({ eq: () => Promise.resolve({ error: null }) }),
+        }),
+      }),
+    }),
+  },
 }))
 
 vi.mock('../../hooks/useUser', () => ({
