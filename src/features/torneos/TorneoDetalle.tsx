@@ -192,6 +192,7 @@ export default function TorneoDetalle() {
                   torneoId={torneo.id}
                   isAdmin={isAdmin}
                   onCargarResultado={setPartidoModal}
+                  colegioRival={torneo.colegio_rival ?? undefined}
                 />
               ))}
             </div>
