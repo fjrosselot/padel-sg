@@ -7,20 +7,85 @@ import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 
+interface TorneoBasic {
+  id: string
+  nombre: string
+  fecha_inicio: string
+  colegio_rival?: string | null
+}
+
 interface Props {
   partido: PartidoFixture
   torneoId: string
+  torneo?: TorneoBasic
   onClose: () => void
 }
 
-export default function ResultadosModal({ partido, torneoId, onClose }: Props) {
+async function upsertRankingPoints(
+  torneo: TorneoBasic,
+  pareja: NonNullable<PartidoFixture['pareja1']>,
+  fase: 'ganador' | 'perdedor'
+) {
+  const puntos = fase === 'ganador' ? 20 : 5
+
+  const { data: temporada } = await supabase
+    .schema('padel')
+    .from('temporadas')
+    .select('id')
+    .eq('anio', new Date(torneo.fecha_inicio).getFullYear())
+    .limit(1)
+    .single()
+  if (!temporada) return
+
+  let eventoId: string
+  const { data: existing } = await supabase
+    .schema('padel')
+    .from('eventos_ranking')
+    .select('id')
+    .eq('nombre', torneo.nombre)
+    .single()
+
+  if (existing) {
+    eventoId = existing.id
+  } else {
+    const { data: created, error } = await supabase
+      .schema('padel')
+      .from('eventos_ranking')
+      .insert({
+        nombre: torneo.nombre,
+        tipo: 'vs_colegio',
+        fecha: torneo.fecha_inicio,
+        temporada_id: temporada.id,
+      })
+      .select('id')
+      .single()
+    if (error || !created) return
+    eventoId = created.id
+  }
+
+  const jugadorIds = [pareja.jugador1_id, pareja.jugador2_id].filter((id): id is string => id !== null)
+  await Promise.all(
+    jugadorIds.map(jugadorId =>
+      supabase
+        .schema('padel')
+        .from('puntos_ranking')
+        .upsert(
+          { jugador_id: jugadorId, evento_id: eventoId, puntos, fase, categoria: null, sexo: null },
+          { onConflict: 'jugador_id,evento_id' }
+        )
+    )
+  )
+}
+
+export default function ResultadosModal({ partido, torneoId, torneo, onClose }: Props) {
   const [ganador, setGanador] = useState<1 | 2 | null>(null)
   const [resultado, setResultado] = useState('')
   const qc = useQueryClient()
+  const isDesafio = partido.fase === 'desafio'
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!ganador || !partido.pareja1 || !partido.pareja2) {
+      if (!ganador || !partido.pareja1) {
         throw new Error('Datos incompletos')
       }
 
@@ -31,26 +96,32 @@ export default function ResultadosModal({ partido, torneoId, onClose }: Props) {
         .eq('id', partido.id)
       if (partErr) throw partErr
 
-      const updated = applyEloMatch(
-        [partido.pareja1.elo1, partido.pareja1.elo2],
-        [partido.pareja2.elo1, partido.pareja2.elo2],
-        ganador === 1 ? 'pareja1' : 'pareja2'
-      )
-
-      const eloUpdates = [
-        { id: partido.pareja1.jugador1_id, elo: updated.pareja1[0] },
-        { id: partido.pareja1.jugador2_id, elo: updated.pareja1[1] },
-        { id: partido.pareja2.jugador1_id, elo: updated.pareja2[0] },
-        { id: partido.pareja2.jugador2_id, elo: updated.pareja2[1] },
-      ].filter((u): u is { id: string; elo: number } => u.id !== null)
-
-      const eloResults = await Promise.all(
-        eloUpdates.map(({ id, elo }) =>
-          supabase.schema('padel').from('jugadores').update({ elo }).eq('id', id)
+      if (isDesafio && torneo) {
+        const winnerPareja = ganador === 1 ? partido.pareja1 : partido.pareja2
+        const loserPareja = ganador === 1 ? partido.pareja2 : partido.pareja1
+        if (winnerPareja) await upsertRankingPoints(torneo, winnerPareja, 'ganador')
+        if (loserPareja) await upsertRankingPoints(torneo, loserPareja, 'perdedor')
+      } else if (!isDesafio && partido.pareja2) {
+        const updated = applyEloMatch(
+          [partido.pareja1.elo1, partido.pareja1.elo2],
+          [partido.pareja2.elo1, partido.pareja2.elo2],
+          ganador === 1 ? 'pareja1' : 'pareja2'
         )
-      )
-      const eloError = eloResults.find(r => r.error)
-      if (eloError?.error) throw eloError.error
+        const eloUpdates = [
+          { id: partido.pareja1.jugador1_id, elo: updated.pareja1[0] },
+          { id: partido.pareja1.jugador2_id, elo: updated.pareja1[1] },
+          { id: partido.pareja2.jugador1_id, elo: updated.pareja2[0] },
+          { id: partido.pareja2.jugador2_id, elo: updated.pareja2[1] },
+        ].filter((u): u is { id: string; elo: number } => u.id !== null)
+
+        const eloResults = await Promise.all(
+          eloUpdates.map(({ id, elo }) =>
+            supabase.schema('padel').from('jugadores').update({ elo }).eq('id', id)
+          )
+        )
+        const eloError = eloResults.find(r => r.error)
+        if (eloError?.error) throw eloError.error
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['torneo', torneoId] })
@@ -71,7 +142,7 @@ export default function ResultadosModal({ partido, torneoId, onClose }: Props) {
         <div>
           <h2 id="resultados-modal-title" className="text-lg font-bold font-manrope text-navy">Cargar resultado</h2>
           <p className="text-sm text-muted">
-            {partido.fase.replace('_', ' ')}
+            {isDesafio ? 'Desafío' : partido.fase.replace('_', ' ')}
             {partido.grupo && ` · Grupo ${partido.grupo}`}
             {partido.cancha && ` · C${partido.cancha}`}
             {partido.turno && ` · ${partido.turno}`}
@@ -81,6 +152,7 @@ export default function ResultadosModal({ partido, torneoId, onClose }: Props) {
         <div className="grid grid-cols-2 gap-3">
           {([1, 2] as const).map(n => {
             const pareja = n === 1 ? partido.pareja1 : partido.pareja2
+            const label = isDesafio ? (n === 1 ? 'SG' : 'Rival') : `Pareja ${n}`
             return (
               <button
                 key={n}
@@ -93,7 +165,7 @@ export default function ResultadosModal({ partido, torneoId, onClose }: Props) {
                     : 'bg-surface hover:bg-surface-high border-transparent'
                 }`}
               >
-                <span className="text-xs text-muted block mb-1">Pareja {n}</span>
+                <span className="text-xs text-muted block mb-1">{label}</span>
                 {pareja?.nombre ?? 'TBD'}
                 {ganador === n && <span aria-hidden="true" className="block text-xs mt-1 text-success">✓ Ganador</span>}
               </button>
@@ -102,7 +174,7 @@ export default function ResultadosModal({ partido, torneoId, onClose }: Props) {
         </div>
 
         <div>
-          <Label htmlFor="resultado-torneo" className="label-editorial">Resultado (opcional)</Label>
+          <Label htmlFor="resultado-torneo" className="label-editorial">Resultado (sets)</Label>
           <Input
             id="resultado-torneo"
             placeholder="6-3 6-4"
@@ -112,6 +184,12 @@ export default function ResultadosModal({ partido, torneoId, onClose }: Props) {
           />
           <p className="text-xs text-muted mt-1">Sets separados por espacio</p>
         </div>
+
+        {isDesafio && (
+          <p className="text-xs text-muted bg-gold/5 rounded-lg p-2">
+            El ganador sumará 20 pts de ranking, el perdedor 5 pts (externo).
+          </p>
+        )}
 
         {mutation.error && (
           <p className="text-[#BA1A1A] text-sm">
