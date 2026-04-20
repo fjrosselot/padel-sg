@@ -9,7 +9,7 @@ export interface ParejaFixture {
 
 export interface PartidoFixture {
   id: string
-  fase: 'grupo' | 'cuartos' | 'semifinal' | 'tercer_lugar' | 'final' | 'consolacion_sf' | 'consolacion_final'
+  fase: 'grupo' | 'cuartos' | 'semifinal' | 'tercer_lugar' | 'final' | 'consolacion_sf' | 'consolacion_final' | 'desafio'
   grupo: string | null
   numero: number
   pareja1: ParejaFixture | null
@@ -29,9 +29,11 @@ export interface GrupoFixture {
 
 export interface CategoriaFixture {
   nombre: string
+  formato?: 'americano_grupos' | 'desafio_puntos'
   grupos: GrupoFixture[]
   faseEliminatoria: PartidoFixture[]
   consola: PartidoFixture[]
+  partidos?: PartidoFixture[]
 }
 
 export interface ConfigFixture {
@@ -50,6 +52,7 @@ export interface CategoriaConfig {
   nombre: string
   num_parejas: number
   sexo: 'M' | 'F' | 'Mixto'
+  formato?: 'americano_grupos' | 'desafio_puntos'
 }
 
 export interface FixtureResult {

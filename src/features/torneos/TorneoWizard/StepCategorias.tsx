@@ -41,7 +41,7 @@ export default function StepCategorias() {
               key={cat.nombre}
               type="button"
               aria-label={`Agregar categoría ${cat.nombre}`}
-              onClick={() => append({ nombre: cat.nombre, num_parejas: 4, sexo: cat.sexo })}
+              onClick={() => append({ nombre: cat.nombre, num_parejas: 4, sexo: cat.sexo, formato: 'americano_grupos' })}
               className="px-3 py-1 text-sm rounded-full border border-slate/30 text-slate hover:border-gold hover:text-navy transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50"
             >
               + {cat.nombre}
@@ -102,7 +102,7 @@ export default function StepCategorias() {
         type="button"
         variant="outline"
         className="w-full"
-        onClick={() => append({ nombre: '', num_parejas: 4, sexo: 'M' })}
+        onClick={() => append({ nombre: '', num_parejas: 4, sexo: 'M', formato: 'americano_grupos' })}
       >
         + Agregar categoría
       </Button>
