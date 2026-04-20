@@ -1,5 +1,26 @@
 # DEVLOG — padel-sg
 
+## [2026-04-20 00:30] — Feature: Desafío por Puntos para torneos vs colegio
+
+**Resumen:** Se implementó el formato `desafio_puntos` para torneos vs_colegio en 8 tareas con subagent-driven development. Cada pareja SG juega un partido (mejor de 3 sets) contra una pareja rival; los ganadores suman 1 punto al marcador escolar y 20 pts de ranking externo. Compatible con torneos mixtos (algunas categorías americano, otras desafío).
+
+**Archivos:** `src/lib/fixture/types.ts`, `src/features/torneos/TorneoWizard/schema.ts`, `src/lib/fixture/engine.ts`, `src/lib/fixture/engine.test.ts`, `src/features/torneos/TorneoWizard/StepCategorias.tsx`, `src/features/torneos/TorneoWizard/StepFixture.tsx`, `src/features/torneos/TorneoWizard/StepConfirmar.tsx`, `src/features/torneos/TorneoDetalle.tsx`, `src/features/torneos/FixtureView.tsx`, `src/features/torneos/ResultadosModal.tsx`
+
+**Decisiones:**
+- `formato` opcional en `CategoriaConfig`/`CategoriaFixture` — backward-compatible, default `'americano_grupos'`
+- `buildDesafioFixture()` retorna `partidos[]` flat (sin grupos ni eliminatoria); `pareja2: null` porque el rival se asigna después
+- Scoreboard SG/Rival cuenta `ganador === 1` vs `ganador === 2` en `DesafioView`
+- `upsertRankingPoints` crea/encuentra `eventos_ranking` por nombre del torneo, usa `.maybeSingle()` para evitar PGRST116
+- Ranking points: ganador 20pts, perdedor 5pts — mismo modelo que torneos externos
+
+**Pendientes:**
+- [ ] Asignar `pareja2` (rival) en partidos desafío desde el roster admin
+- [ ] Tests de los componentes auth rotos (BrandLogo, LoginForm, RegisterForm, AuthGuard, Sidebar) — pre-existentes, no relacionados con esta feature
+- [ ] Estado `finalizado` y flujo de cierre de torneo
+- [ ] Recalcular `posicion_espera` server-side (trigger Postgres)
+
+---
+
 ## [2026-04-19 21:00] — Ciclo completo de torneo: sexo en categorías, inscripción por categoría, roster admin, fixture real
 
 **Resumen:** Se implementó el ciclo de vida completo de un torneo en 5 tareas con subagent-driven development. Desde la creación con categorías M/F/Mixto hasta la generación del fixture real desde inscritos confirmados, pasando por lista de espera, roster admin y transiciones de estado.
