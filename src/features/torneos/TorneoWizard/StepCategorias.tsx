@@ -6,13 +6,14 @@ import { Button } from '../../../components/ui/button'
 import { SEXO_LABEL, SEXO_COLOR } from './constants'
 
 const CATEGORIAS_PRESET: Array<{ nombre: string; sexo: 'M' | 'F' | 'Mixto' }> = [
-  { nombre: '5a Damas', sexo: 'F' },
-  { nombre: '5a Varones', sexo: 'M' },
-  { nombre: '4a Damas', sexo: 'F' },
-  { nombre: '4a Varones', sexo: 'M' },
-  { nombre: '3a Damas', sexo: 'F' },
-  { nombre: '3a Varones', sexo: 'M' },
-  { nombre: 'Open', sexo: 'M' },
+  { nombre: 'D', sexo: 'F' },
+  { nombre: 'C', sexo: 'F' },
+  { nombre: 'B', sexo: 'F' },
+  { nombre: 'Open Damas', sexo: 'F' },
+  { nombre: '5a', sexo: 'M' },
+  { nombre: '4a', sexo: 'M' },
+  { nombre: '3a', sexo: 'M' },
+  { nombre: 'Open Varones', sexo: 'M' },
   { nombre: 'Mixto', sexo: 'Mixto' },
 ]
 
