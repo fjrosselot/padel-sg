@@ -517,7 +517,23 @@ export interface Database {
         }
       }
     }
-    Views: Record<string, never>
+    Views: {
+      ranking_categoria: {
+        Row: {
+          jugador_id: string
+          nombre: string
+          nombre_pila: string | null
+          apellido: string | null
+          apodo: string | null
+          foto_url: string | null
+          sexo: string | null
+          categoria: string
+          temporada_id: string | null
+          puntos_total: number
+          eventos_jugados: number
+        }
+      }
+    }
     Functions: Record<string, never>
     Enums: Record<string, never>
   }

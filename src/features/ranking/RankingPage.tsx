@@ -42,7 +42,7 @@ export default function RankingPage() {
 
       const { data, error } = await supabase
         .schema('padel')
-        .from('ranking_categoria' as never)
+        .from('ranking_categoria')
         .select('jugador_id, nombre, nombre_pila, apellido, apodo, foto_url, sexo, categoria, temporada_id, puntos_total, eventos_jugados')
         .eq('temporada_id', temporadaId)
       if (error) throw error
@@ -54,7 +54,7 @@ export default function RankingPage() {
     const map = new Map<string, { sexo: 'M' | 'F'; entries: RankingEntry[] }>()
     for (const e of entries) {
       if (!map.has(e.categoria)) {
-        map.set(e.categoria, { sexo: (e.sexo as 'M' | 'F') ?? 'M', entries: [] })
+        map.set(e.categoria, { sexo: CATS_MUJERES.includes(e.categoria) ? 'F' : 'M', entries: [] })
       }
       map.get(e.categoria)!.entries.push(e)
     }
