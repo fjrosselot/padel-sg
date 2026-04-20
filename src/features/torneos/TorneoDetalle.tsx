@@ -9,7 +9,7 @@ import FixtureView from './FixtureView'
 import InscripcionesPanel from './InscripcionesPanel'
 import ResultadosModal from './ResultadosModal'
 import type { Database } from '../../lib/types/database.types'
-import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
+import type { CategoriaConfig, CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
 type Torneo = Database['padel']['Tables']['torneos']['Row']
 
@@ -50,6 +50,9 @@ export default function TorneoDetalle() {
   // Solo renderizamos FixtureView si tiene la estructura completa (con grupos)
   const rawCategorias = (torneo.categorias as unknown as CategoriaFixture[]) ?? []
   const categorias = rawCategorias.filter(c => Array.isArray((c as CategoriaFixture).grupos))
+  const categoriasConfig = (rawCategorias.filter(
+    (c: unknown) => !Array.isArray((c as CategoriaFixture).grupos)
+  ) as unknown) as CategoriaConfig[]
 
   return (
     <div className="space-y-4">
@@ -91,7 +94,7 @@ export default function TorneoDetalle() {
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-4">Inscripciones</p>
-          <InscripcionesPanel torneoId={torneo.id} estado={torneo.estado} />
+          <InscripcionesPanel torneoId={torneo.id} estado={torneo.estado} categorias={categoriasConfig} />
         </div>
       </div>
 

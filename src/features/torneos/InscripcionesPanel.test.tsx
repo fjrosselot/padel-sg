@@ -29,7 +29,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 describe('InscripcionesPanel', () => {
   it('renders heading', () => {
-    render(<InscripcionesPanel torneoId="t1" estado="borrador" />, { wrapper })
+    render(<InscripcionesPanel torneoId="t1" estado="borrador" categorias={[]} />, { wrapper })
     expect(screen.getByText('Inscripciones')).toBeDefined()
   })
 })
