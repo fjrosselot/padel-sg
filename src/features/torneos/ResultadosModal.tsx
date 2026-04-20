@@ -64,13 +64,28 @@ async function upsertRankingPoints(
   }
 
   const jugadorIds = [pareja.jugador1_id, pareja.jugador2_id].filter((id): id is string => id !== null)
+  if (jugadorIds.length === 0) return
+
+  const { data: jugadores } = await supabase
+    .schema('padel')
+    .from('jugadores')
+    .select('id, categoria, sexo')
+    .in('id', jugadorIds)
+
   await Promise.all(
-    jugadorIds.map(jugadorId =>
+    (jugadores ?? []).map(j =>
       supabase
         .schema('padel')
         .from('puntos_ranking')
         .upsert(
-          { jugador_id: jugadorId, evento_id: eventoId, puntos, fase, categoria: null, sexo: null },
+          {
+            jugador_id: j.id,
+            evento_id: eventoId,
+            puntos,
+            fase,
+            categoria: j.categoria ?? 'Sin categoría',
+            sexo: j.sexo ?? 'M',
+          },
           { onConflict: 'jugador_id,evento_id' }
         )
     )
