@@ -184,6 +184,7 @@ export function buildDesafioFixture(
   parejas: ParejaFixture[],
   config: ConfigFixture
 ): CategoriaFixture {
+  _matchCounter = 0
   const [h, m] = config.hora_inicio.split(':').map(Number)
   const slot = config.duracion_partido + config.pausa_entre_partidos
 
