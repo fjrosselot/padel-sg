@@ -1,5 +1,27 @@
 # DEVLOG — padel-sg
 
+## [2026-04-19 21:00] — Ciclo completo de torneo: sexo en categorías, inscripción por categoría, roster admin, fixture real
+
+**Resumen:** Se implementó el ciclo de vida completo de un torneo en 5 tareas con subagent-driven development. Desde la creación con categorías M/F/Mixto hasta la generación del fixture real desde inscritos confirmados, pasando por lista de espera, roster admin y transiciones de estado.
+
+**Archivos:** `supabase/migrations/20260419_inscripciones_categoria.sql`, `src/lib/types/database.types.ts`, `src/lib/fixture/types.ts`, `src/features/torneos/TorneoWizard/schema.ts`, `src/features/torneos/TorneoWizard/StepCategorias.tsx`, `src/features/torneos/TorneoWizard/StepConfirmar.tsx`, `src/features/torneos/TorneoWizard/constants.ts`, `src/features/torneos/InscripcionesPanel.tsx`, `src/features/torneos/RosterAdmin.tsx`, `src/features/torneos/RosterRow.tsx`, `src/features/torneos/TorneoDetalle.tsx`, `src/features/auth/LoginForm.tsx`, `src/assets/court-photo.png`
+
+**Decisiones:**
+- `sexo` en `CategoriaConfig` como `'M' | 'F' | 'Mixto'` — filtra compañeros en inscripción y admins en roster
+- `lista_espera boolean + posicion_espera integer` en DB — posición calculada client-side desde cache (race condition documentada como known limitation para baja concurrencia)
+- `InscripcionRow` compartida desde `RosterRow.tsx` — evita divergencia de tipos entre InscripcionesPanel y RosterAdmin
+- Early return `if (!isAdmin)` movido después de todos los hooks — corrige Rules of Hooks violation
+- Stats del login ahora dinámicos desde Supabase (anon key, sin auth)
+- Fixture real: `buildFixture` recibe `ParejaFixture[]` con ELO real de jugadores; se guarda en `torneos.categorias` reemplazando el JSON de config
+
+**Pendientes:**
+- [ ] Recalcular `posicion_espera` server-side (trigger Postgres) para eliminar race condition
+- [ ] Tests de LoginForm.test.tsx y RegisterForm.test.tsx rotos por cambios de sesiones anteriores — actualizar
+- [ ] Probar ciclo completo en producción: crear torneo → abrir inscripciones → roster → generar fixture
+- [ ] Estado `finalizado` y cierre de torneos
+
+---
+
 ## [2026-04-19 18:30] — Logo Team Dragon + modal edición jugadores mejorado
 
 **Resumen:** Se reemplazó el logo de texto P·SG por la imagen JPEG del Team Dragon Padel. Se rehízo el modal de edición de jugadores con nombre/apellido separados, botones guardar/cancelar en el header, y layout comprimido en grid 2 columnas.
