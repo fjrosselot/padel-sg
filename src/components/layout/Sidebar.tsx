@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, Trophy, Medal,
   BarChart3, Handshake, CalendarDays, Banknote, Settings,
-  UserCog, CalendarRange, ChevronRight,
+  UserCog, CalendarRange, ChevronRight, LogOut,
 } from 'lucide-react'
 import { BrandLogo } from '@/components/brand/BrandLogo'
 import { useUser } from '@/hooks/useUser'
+import { supabase } from '@/lib/supabase'
 
 const NAV_ITEMS = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -55,9 +56,15 @@ export function Sidebar() {
   const { data: user } = useUser()
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
   const [expanded, setExpanded] = useState(false)
+  const navigate = useNavigate()
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    navigate('/login')
+  }
 
   return (
-    <nav className={`hidden flex-col bg-navy transition-all duration-200 md:flex ${expanded ? 'w-56' : 'w-12'}`}>
+    <nav className={`hidden h-full flex-col bg-navy transition-all duration-200 md:flex ${expanded ? 'w-56' : 'w-12'}`}>
       <button
         onClick={() => setExpanded(v => !v)}
         className="flex h-14 w-full items-center px-1.5 hover:bg-navy-mid transition-colors"
@@ -109,6 +116,25 @@ export function Sidebar() {
           )}
         </div>
       )}
+
+      <div className="border-t border-white/10 px-2 py-2 space-y-1">
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex h-9 w-full items-center rounded-md px-2 text-muted hover:bg-red-900/40 hover:text-red-300 transition-colors"
+          aria-label="Cerrar sesión"
+        >
+          <LogOut className="h-5 w-5 shrink-0" />
+          {expanded && (
+            <span className="ml-3 font-inter text-sm font-medium">Cerrar sesión</span>
+          )}
+        </button>
+
+        <div className={`flex items-center px-2 py-1 ${expanded ? 'justify-between' : 'justify-center'}`}>
+          {expanded && <span className="font-inter text-[10px] text-white/30">versión</span>}
+          <span className="font-inter text-xs font-bold text-gold">v0.2.0</span>
+        </div>
+      </div>
     </nav>
   )
 }

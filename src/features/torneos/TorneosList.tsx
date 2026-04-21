@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '../../lib/supabase'
+import { adminHeaders } from '../../lib/adminHeaders'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
@@ -11,6 +11,8 @@ import TorneoWizard from './TorneoWizard'
 import type { Database } from '../../lib/types/database.types'
 
 type Torneo = Database['padel']['Tables']['torneos']['Row']
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string
 
 const ESTADO_LABELS: Record<string, string> = {
   borrador: 'Borrador',
@@ -43,13 +45,13 @@ export default function TorneosList() {
   const { data: torneos, isLoading } = useQuery({
     queryKey: ['torneos'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .schema('padel')
-        .from('torneos')
-        .select('*')
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data as Torneo[]
+      const headers = await adminHeaders('read')
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/torneos?select=*&order=created_at.desc`,
+        { headers }
+      )
+      if (!res.ok) throw new Error(`Error ${res.status}`)
+      return res.json() as Promise<Torneo[]>
     },
   })
 

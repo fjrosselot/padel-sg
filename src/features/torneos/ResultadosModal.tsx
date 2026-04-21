@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '../../lib/supabase'
+import { padelApi } from '../../lib/padelApi'
 import { applyEloMatch } from '../../lib/fixture/elo'
 import type { PartidoFixture } from '../../lib/fixture/types'
 import { Button } from '../../components/ui/button'
@@ -27,71 +27,49 @@ async function upsertRankingPoints(
   fase: 'ganador' | 'perdedor'
 ) {
   const puntos = fase === 'ganador' ? 20 : 5
+  const anio = new Date(torneo.fecha_inicio).getFullYear()
 
-  const { data: temporada } = await supabase
-    .schema('padel')
-    .from('temporadas')
-    .select('id')
-    .eq('anio', new Date(torneo.fecha_inicio).getFullYear())
-    .limit(1)
-    .single()
+  const temporadas = await padelApi.get<{ id: string }[]>(`temporadas?select=id&anio=eq.${anio}&limit=1`)
+  const temporada = temporadas?.[0]
   if (!temporada) throw new Error('Temporada no encontrada para el año del torneo')
 
+  const existingRows = await padelApi.get<{ id: string }[]>(
+    `eventos_ranking?select=id&nombre=eq.${encodeURIComponent(torneo.nombre)}`
+  )
   let eventoId: string
-  const { data: existing } = await supabase
-    .schema('padel')
-    .from('eventos_ranking')
-    .select('id')
-    .eq('nombre', torneo.nombre)
-    .maybeSingle()
 
-  if (existing) {
-    eventoId = existing.id
+  if (existingRows?.[0]) {
+    eventoId = existingRows[0].id
   } else {
-    const { data: created, error } = await supabase
-      .schema('padel')
-      .from('eventos_ranking')
-      .insert({
-        nombre: torneo.nombre,
-        tipo: 'vs_colegio',
-        fecha: torneo.fecha_inicio,
-        temporada_id: temporada.id,
-      })
-      .select('id')
-      .single()
-    if (error || !created) throw new Error('No se pudo crear el evento de ranking')
-    eventoId = created.id
+    const created = await padelApi.post<{ id: string }[]>('eventos_ranking', {
+      nombre: torneo.nombre,
+      tipo: 'vs_colegio',
+      fecha: torneo.fecha_inicio,
+      temporada_id: temporada.id,
+    })
+    if (!created?.[0]) throw new Error('No se pudo crear el evento de ranking')
+    eventoId = created[0].id
   }
 
   const jugadorIds = [pareja.jugador1_id, pareja.jugador2_id].filter((id): id is string => id !== null)
   if (jugadorIds.length === 0) return
 
-  const { data: jugadores } = await supabase
-    .schema('padel')
-    .from('jugadores')
-    .select('id, categoria, sexo')
-    .in('id', jugadorIds)
+  const jugadores = await padelApi.get<{ id: string; categoria: string | null; sexo: string | null }[]>(
+    `jugadores?select=id,categoria,sexo&id=in.(${jugadorIds.join(',')})`
+  )
 
-  const upsertResults = await Promise.all(
+  await Promise.all(
     (jugadores ?? []).map(j =>
-      supabase
-        .schema('padel')
-        .from('puntos_ranking')
-        .upsert(
-          {
-            jugador_id: j.id,
-            evento_id: eventoId,
-            puntos,
-            fase,
-            categoria: j.categoria ?? 'Sin categoría',
-            sexo: j.sexo ?? 'M',
-          },
-          { onConflict: 'jugador_id,evento_id' }
-        )
+      padelApi.upsert('puntos_ranking', {
+        jugador_id: j.id,
+        evento_id: eventoId,
+        puntos,
+        fase,
+        categoria: j.categoria ?? 'Sin categoría',
+        sexo: j.sexo ?? 'M',
+      })
     )
   )
-  const upsertError = upsertResults.find(r => r.error)
-  if (upsertError?.error) throw upsertError.error
 }
 
 export default function ResultadosModal({ partido, torneoId, torneo, onClose }: Props) {
@@ -106,12 +84,11 @@ export default function ResultadosModal({ partido, torneoId, torneo, onClose }: 
         throw new Error('Datos incompletos')
       }
 
-      const { error: partErr } = await supabase
-        .schema('padel')
-        .from('partidos')
-        .update({ ganador, resultado: resultado || null, estado: 'jugado' })
-        .eq('id', partido.id)
-      if (partErr) throw partErr
+      await padelApi.patch('partidos', `id=eq.${partido.id}`, {
+        ganador,
+        resultado: resultado || null,
+        estado: 'jugado',
+      })
 
       if (isDesafio && !torneo) throw new Error('Datos del torneo requeridos para registrar puntos')
 
@@ -133,13 +110,9 @@ export default function ResultadosModal({ partido, torneoId, torneo, onClose }: 
           { id: partido.pareja2.jugador2_id, elo: updated.pareja2[1] },
         ].filter((u): u is { id: string; elo: number } => u.id !== null)
 
-        const eloResults = await Promise.all(
-          eloUpdates.map(({ id, elo }) =>
-            supabase.schema('padel').from('jugadores').update({ elo }).eq('id', id)
-          )
+        await Promise.all(
+          eloUpdates.map(({ id, elo }) => padelApi.patch('jugadores', `id=eq.${id}`, { elo }))
         )
-        const eloError = eloResults.find(r => r.error)
-        if (eloError?.error) throw eloError.error
       }
     },
     onSuccess: () => {

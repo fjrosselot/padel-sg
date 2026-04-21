@@ -20,9 +20,10 @@ interface Props {
   sexo: 'M' | 'F'
   entries: RankingEntry[]
   compact?: boolean
+  onSelect?: () => void
 }
 
-export default function RankingCategoriaCard({ categoria, sexo, entries, compact = false }: Props) {
+export default function RankingCategoriaCard({ categoria, sexo, entries, compact = false, onSelect }: Props) {
   const navigate = useNavigate()
   const [busqueda, setBusqueda] = useState('')
 
@@ -35,7 +36,10 @@ export default function RankingCategoriaCard({ categoria, sexo, entries, compact
   return (
     <div className="rounded-xl bg-white shadow-card overflow-hidden">
       <div className={`px-4 py-3 flex flex-col gap-2 ${sexo === 'M' ? 'bg-blue-50' : 'bg-pink-50'}`}>
-        <div className="flex items-center gap-2">
+        <div
+          className={`flex items-center gap-2 ${onSelect ? 'cursor-pointer' : ''}`}
+          onClick={onSelect}
+        >
           <span className="font-manrope text-sm font-extrabold text-navy uppercase tracking-tight">
             Cat. {categoria}
           </span>
@@ -121,9 +125,13 @@ export default function RankingCategoriaCard({ categoria, sexo, entries, compact
       )}
 
       {compact && entries.length > 8 && (
-        <p className="px-4 py-2 text-center font-inter text-[10px] text-muted border-t border-surface-high">
+        <button
+          type="button"
+          onClick={onSelect}
+          className="w-full px-4 py-2 text-center font-inter text-[10px] text-muted border-t border-surface-high hover:text-navy hover:bg-surface transition-colors"
+        >
           +{entries.length - 8} más
-        </p>
+        </button>
       )}
     </div>
   )

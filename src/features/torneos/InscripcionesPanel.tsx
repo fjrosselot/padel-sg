@@ -1,19 +1,13 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '../../lib/supabase'
+import { padelApi } from '../../lib/padelApi'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { useUser } from '../../hooks/useUser'
 import type { CategoriaConfig } from '../../lib/fixture/types'
 import { SEXO_LABEL } from './TorneoWizard/constants'
 import type { InscripcionRow } from './RosterRow'
-
-interface JugadorOption {
-  id: string
-  nombre: string
-  apodo: string | null
-  sexo: 'M' | 'F' | null
-}
+import { PlayerCombobox, usePastCompaneros } from './PlayerCombobox'
 
 interface Props {
   torneoId: string
@@ -37,44 +31,23 @@ export default function InscripcionesPanel({ torneoId, estado, categorias }: Pro
 
   const { data: inscripciones, isLoading } = useQuery({
     queryKey: ['inscripciones', torneoId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .schema('padel')
-        .from('inscripciones')
-        .select(`
-          id, jugador1_id, jugador2_id, estado, categoria_nombre,
-          lista_espera, posicion_espera, created_at,
-          jugador1:jugadores!jugador1_id(nombre, sexo),
-          jugador2:jugadores!jugador2_id(nombre, sexo)
-        `)
-        .eq('torneo_id', torneoId)
-        .order('lista_espera', { ascending: true })
-        .order('posicion_espera', { ascending: true })
-        .order('created_at', { ascending: true })
-      if (error) throw error
-      return data as unknown as InscripcionRow[]
-    },
+    queryFn: () => padelApi.get<InscripcionRow[]>(
+      `inscripciones?select=id,jugador1_id,jugador2_id,estado,categoria_nombre,lista_espera,posicion_espera,created_at,jugador1:jugadores!jugador1_id(nombre,sexo),jugador2:jugadores!jugador2_id(nombre,sexo)&torneo_id=eq.${torneoId}&order=lista_espera.asc,posicion_espera.asc,created_at.asc`
+    ),
   })
 
   const categoriaSeleccionada = categorias.find(c => c.nombre === categoriaNombre)
 
   const { data: jugadoresActivos } = useQuery({
     queryKey: ['jugadores-activos-select', categoriaSeleccionada?.sexo],
-    queryFn: async () => {
-      let q = supabase
-        .schema('padel')
-        .from('jugadores')
-        .select('id, nombre, apodo, sexo')
-        .eq('estado_cuenta', 'activo')
-        .order('nombre')
-      if (categoriaSeleccionada?.sexo === 'M') q = q.eq('sexo', 'M')
-      if (categoriaSeleccionada?.sexo === 'F') q = q.eq('sexo', 'F')
-      const { data, error } = await q
-      if (error) throw error
-      return data as JugadorOption[]
+    queryFn: () => {
+      const sexoFilter = categoriaSeleccionada?.sexo === 'M' ? '&sexo=eq.M' : categoriaSeleccionada?.sexo === 'F' ? '&sexo=eq.F' : ''
+      return padelApi.get<{ id: string; nombre: string; apodo: string | null; sexo: 'M' | 'F' | null }[]>(`jugadores?select=id,nombre,apodo,sexo&estado_cuenta=eq.activo${sexoFilter}&order=nombre.asc`)
     },
     enabled: showForm && !!categoriaSeleccionada,
   })
+
+  const { data: pastCompaneros } = usePastCompaneros(showForm ? user?.id : undefined)
 
   const cuposOcupados = (nombre: string) =>
     inscripciones?.filter(i => i.categoria_nombre === nombre && !i.lista_espera && i.estado !== 'rechazada').length ?? 0
@@ -92,14 +65,8 @@ export default function InscripcionesPanel({ torneoId, estado, categorias }: Pro
   )
 
   const updateEstado = useMutation({
-    mutationFn: async ({ id, nuevoEstado }: { id: string; nuevoEstado: 'confirmada' | 'rechazada' }) => {
-      const { error } = await supabase
-        .schema('padel')
-        .from('inscripciones')
-        .update({ estado: nuevoEstado })
-        .eq('id', id)
-      if (error) throw error
-    },
+    mutationFn: ({ id, nuevoEstado }: { id: string; nuevoEstado: 'confirmada' | 'rechazada' }) =>
+      padelApi.patch('inscripciones', `id=eq.${id}`, { estado: nuevoEstado }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['inscripciones', torneoId] }),
   })
 
@@ -110,19 +77,15 @@ export default function InscripcionesPanel({ torneoId, estado, categorias }: Pro
       const total = cuposTotal(categoriaNombre)
       const estaLlena = ocupados >= total
       const posicion_espera = estaLlena ? enListaEspera(categoriaNombre).length + 1 : null
-      const { error } = await supabase
-        .schema('padel')
-        .from('inscripciones')
-        .insert({
-          torneo_id: torneoId,
-          jugador1_id: user.id,
-          jugador2_id: companeroId,
-          estado: 'pendiente',
-          categoria_nombre: categoriaNombre,
-          lista_espera: estaLlena,
-          posicion_espera,
-        })
-      if (error) throw error
+      await padelApi.post('inscripciones', {
+        torneo_id: torneoId,
+        jugador1_id: user.id,
+        jugador2_id: companeroId,
+        estado: 'pendiente',
+        categoria_nombre: categoriaNombre,
+        lista_espera: estaLlena,
+        posicion_espera,
+      })
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['inscripciones', torneoId] })
@@ -181,18 +144,14 @@ export default function InscripcionesPanel({ torneoId, estado, categorias }: Pro
                   <span className="ml-1 text-gold">({SEXO_LABEL[categoriaSeleccionada.sexo]} solamente)</span>
                 )}
               </label>
-              <select
+              <PlayerCombobox
+                players={jugadoresActivos}
                 value={companeroId}
-                onChange={e => setCompaneroId(e.target.value)}
-                className="w-full rounded-lg border border-navy/20 bg-white px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none"
-              >
-                <option value="">— elige compañero —</option>
-                {jugadoresActivos?.filter(j => j.id !== user?.id).map(j => (
-                  <option key={j.id} value={j.id}>
-                    {j.nombre}{j.apodo ? ` (${j.apodo})` : ''}
-                  </option>
-                ))}
-              </select>
+                onChange={setCompaneroId}
+                placeholder="— elige compañero —"
+                excludeId={user?.id}
+                suggestedIds={pastCompaneros ?? []}
+              />
             </div>
           )}
 

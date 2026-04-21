@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useUser } from '../../hooks/useUser'
+import { padelApi } from '../../lib/padelApi'
 import { PuntosHistorial } from '../ranking/PuntosHistorial'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
@@ -34,6 +35,18 @@ export default function PerfilPage() {
   const { data: user } = useUser()
   const navigate = useNavigate()
   const qc = useQueryClient()
+
+  const { data: rankingInfo } = useQuery({
+    queryKey: ['ranking-jugador', user?.id, user?.categoria],
+    queryFn: async () => {
+      const rows = await padelApi.get<{ jugador_id: string; puntos_total: number }[]>(
+        `ranking_categoria?categoria=eq.${encodeURIComponent(user!.categoria!)}&select=jugador_id,puntos_total&order=puntos_total.desc`
+      )
+      const pos = rows.findIndex(r => r.jugador_id === user!.id) + 1
+      return { pos: pos > 0 ? pos : null, puntos: rows.find(r => r.jugador_id === user!.id)?.puntos_total ?? 0 }
+    },
+    enabled: !!user?.id && !!user?.categoria,
+  })
 
   // Password change state
   const [password, setPassword] = useState('')
@@ -141,7 +154,7 @@ export default function PerfilPage() {
           <div className="grid grid-cols-2 gap-2 pt-1">
             {[
               { label: 'Apodo', value: user?.apodo ?? '—' },
-              { label: 'ELO', value: user?.elo ?? '—' },
+              { label: 'Ranking', value: rankingInfo?.pos ? `${user?.categoria} / #${rankingInfo.pos} · ${rankingInfo.puntos} pts` : '—' },
               { label: 'Categoría', value: user?.categoria ?? '—' },
               { label: 'Lado preferido', value: user?.lado_preferido ?? '—' },
             ].map(({ label, value }) => (

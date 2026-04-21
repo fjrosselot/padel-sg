@@ -1,12 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Users, Grid3x3, Handshake, Calendar, MoreHorizontal } from 'lucide-react'
+import { LayoutDashboard, Users, Trophy, Handshake, CalendarDays, MoreHorizontal } from 'lucide-react'
 
 const BOTTOM_ITEMS = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Inicio' },
   { to: '/jugadores', icon: Users, label: 'Jugadores' },
-  { to: '/torneos', icon: Grid3x3, label: 'Torneos' },
+  { to: '/torneos', icon: Trophy, label: 'Torneos' },
   { to: '/amistosos', icon: Handshake, label: 'Amistosos' },
-  { to: '/calendario', icon: Calendar, label: 'Calendario' },
+  { to: '/calendario', icon: CalendarDays, label: 'Calendario' },
   { to: '/mas', icon: MoreHorizontal, label: 'Más' },
 ]
 

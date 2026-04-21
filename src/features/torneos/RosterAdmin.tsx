@@ -1,19 +1,13 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '../../lib/supabase'
+import { padelApi } from '../../lib/padelApi'
 import { Button } from '../../components/ui/button'
 import { useUser } from '../../hooks/useUser'
 import type { CategoriaConfig } from '../../lib/fixture/types'
 import { SEXO_LABEL } from './TorneoWizard/constants'
 import RosterRow from './RosterRow'
 import type { InscripcionRow } from './RosterRow'
-
-interface JugadorOption {
-  id: string
-  nombre: string
-  apodo: string | null
-  sexo: 'M' | 'F' | null
-}
+import { PlayerCombobox, usePastCompaneros } from './PlayerCombobox'
 
 interface Props {
   torneoId: string
@@ -31,44 +25,23 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
 
   const { data: inscripciones } = useQuery({
     queryKey: ['inscripciones', torneoId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .schema('padel')
-        .from('inscripciones')
-        .select(`
-          id, jugador1_id, jugador2_id, estado, categoria_nombre,
-          lista_espera, posicion_espera, created_at,
-          jugador1:jugadores!jugador1_id(nombre),
-          jugador2:jugadores!jugador2_id(nombre)
-        `)
-        .eq('torneo_id', torneoId)
-        .order('lista_espera', { ascending: true })
-        .order('posicion_espera', { ascending: true })
-        .order('created_at', { ascending: true })
-      if (error) throw error
-      return data as unknown as InscripcionRow[]
-    },
+    queryFn: () => padelApi.get<InscripcionRow[]>(
+      `inscripciones?select=id,jugador1_id,jugador2_id,estado,categoria_nombre,lista_espera,posicion_espera,created_at,jugador1:jugadores!jugador1_id(nombre),jugador2:jugadores!jugador2_id(nombre)&torneo_id=eq.${torneoId}&order=lista_espera.asc,posicion_espera.asc,created_at.asc`
+    ),
   })
 
   const catActiva = categorias.find(c => c.nombre === addingCat)
 
   const { data: jugadoresOptions } = useQuery({
     queryKey: ['jugadores-activos-select', catActiva?.sexo],
-    queryFn: async () => {
-      let q = supabase
-        .schema('padel')
-        .from('jugadores')
-        .select('id, nombre, apodo, sexo')
-        .eq('estado_cuenta', 'activo')
-        .order('nombre')
-      if (catActiva?.sexo === 'M') q = q.eq('sexo', 'M')
-      if (catActiva?.sexo === 'F') q = q.eq('sexo', 'F')
-      const { data, error } = await q
-      if (error) throw error
-      return data as JugadorOption[]
+    queryFn: () => {
+      const sexoFilter = catActiva?.sexo === 'M' ? '&sexo=eq.M' : catActiva?.sexo === 'F' ? '&sexo=eq.F' : ''
+      return padelApi.get<{ id: string; nombre: string; apodo: string | null; sexo: 'M' | 'F' | null }[]>(`jugadores?select=id,nombre,apodo,sexo&estado_cuenta=eq.activo${sexoFilter}&order=nombre.asc`)
     },
     enabled: !!addingCat,
   })
+
+  const { data: pastCompaneros } = usePastCompaneros(j1Id || undefined)
 
   const addPareja = useMutation({
     mutationFn: async ({ cat }: { cat: string }) => {
@@ -81,19 +54,15 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
       const posicion_espera = estaLlena
         ? (inscripciones?.filter(i => i.categoria_nombre === cat && i.lista_espera).length ?? 0) + 1
         : null
-      const { error } = await supabase
-        .schema('padel')
-        .from('inscripciones')
-        .insert({
-          torneo_id: torneoId,
-          jugador1_id: j1Id,
-          jugador2_id: j2Id,
-          estado: 'confirmada',
-          categoria_nombre: cat,
-          lista_espera: estaLlena,
-          posicion_espera,
-        })
-      if (error) throw error
+      await padelApi.post('inscripciones', {
+        torneo_id: torneoId,
+        jugador1_id: j1Id,
+        jugador2_id: j2Id,
+        estado: 'confirmada',
+        categoria_nombre: cat,
+        lista_espera: estaLlena,
+        posicion_espera,
+      })
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['inscripciones', torneoId] })
@@ -104,26 +73,15 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
   })
 
   const promoverEspera = useMutation({
-    mutationFn: async (inscripcionId: string) => {
-      const { error } = await supabase
-        .schema('padel')
-        .from('inscripciones')
-        .update({ lista_espera: false, posicion_espera: null, estado: 'confirmada' })
-        .eq('id', inscripcionId)
-      if (error) throw error
-    },
+    mutationFn: (inscripcionId: string) =>
+      padelApi.patch('inscripciones', `id=eq.${inscripcionId}`, { lista_espera: false, posicion_espera: null, estado: 'confirmada' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['inscripciones', torneoId] }),
   })
 
   const eliminarInscripcion = useMutation({
     mutationFn: async (inscripcionId: string) => {
       setDeletingId(inscripcionId)
-      const { error } = await supabase
-        .schema('padel')
-        .from('inscripciones')
-        .delete()
-        .eq('id', inscripcionId)
-      if (error) throw error
+      await padelApi.delete('inscripciones', `id=eq.${inscripcionId}`)
     },
     onSettled: () => setDeletingId(null),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['inscripciones', torneoId] }),
@@ -168,29 +126,24 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-xs text-muted block mb-1">Jugador 1</label>
-                    <select
+                    <PlayerCombobox
+                      players={jugadoresOptions}
                       value={j1Id}
-                      onChange={e => setJ1Id(e.target.value)}
-                      className="w-full rounded-lg border border-navy/20 bg-white px-2 py-1.5 text-sm text-navy focus:border-gold focus:outline-none"
-                    >
-                      <option value="">— elige —</option>
-                      {jugadoresOptions?.filter(j => j.id !== j2Id).map(j => (
-                        <option key={j.id} value={j.id}>{j.nombre}</option>
-                      ))}
-                    </select>
+                      onChange={id => { setJ1Id(id); setJ2Id('') }}
+                      placeholder="— elige —"
+                      excludeId={j2Id}
+                    />
                   </div>
                   <div>
                     <label className="text-xs text-muted block mb-1">Jugador 2</label>
-                    <select
+                    <PlayerCombobox
+                      players={jugadoresOptions}
                       value={j2Id}
-                      onChange={e => setJ2Id(e.target.value)}
-                      className="w-full rounded-lg border border-navy/20 bg-white px-2 py-1.5 text-sm text-navy focus:border-gold focus:outline-none"
-                    >
-                      <option value="">— elige —</option>
-                      {jugadoresOptions?.filter(j => j.id !== j1Id).map(j => (
-                        <option key={j.id} value={j.id}>{j.nombre}</option>
-                      ))}
-                    </select>
+                      onChange={setJ2Id}
+                      placeholder="— elige —"
+                      excludeId={j1Id}
+                      suggestedIds={pastCompaneros ?? []}
+                    />
                   </div>
                 </div>
                 <div className="flex gap-2">

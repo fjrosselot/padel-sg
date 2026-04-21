@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Trophy } from 'lucide-react'
-import { supabase } from '../../lib/supabase'
+import { padelApi } from '../../lib/padelApi'
 import RankingCategoriaCard, { type RankingEntry } from './RankingCategoriaCard'
 
 const CATS_HOMBRES = ['3a', '4a', '5a', 'Open']
@@ -31,27 +31,19 @@ export default function RankingPage() {
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ['ranking-categoria'],
     queryFn: async () => {
-      const { data: temps } = await supabase
-        .schema('padel')
-        .from('temporadas')
-        .select('id')
-        .order('anio', { ascending: false })
-        .limit(1)
-      const temporadaId = temps?.[0]?.id
+      const temporadas = await padelApi.get<{ id: string }[]>(
+        'temporadas?select=id&order=anio.desc&limit=1'
+      )
+      const temporadaId = temporadas?.[0]?.id
       if (!temporadaId) return []
 
-      const [{ data: rankingData }, { data: jugadoresData }] = await Promise.all([
-        supabase
-          .schema('padel')
-          .from('ranking_categoria')
-          .select('jugador_id, nombre, nombre_pila, apellido, apodo, foto_url, sexo, categoria, puntos_total, eventos_jugados')
-          .eq('temporada_id', temporadaId),
-        supabase
-          .schema('padel')
-          .from('jugadores')
-          .select('id, nombre, nombre_pila, apellido, apodo, foto_url, sexo, categoria')
-          .eq('estado_cuenta', 'activo')
-          .not('categoria', 'is', null),
+      const [rankingData, jugadoresData] = await Promise.all([
+        padelApi.get<RankingEntry[]>(
+          `ranking_categoria?select=jugador_id,nombre,nombre_pila,apellido,apodo,foto_url,sexo,categoria,puntos_total,eventos_jugados&temporada_id=eq.${temporadaId}`
+        ),
+        padelApi.get<{ id: string; nombre: string; nombre_pila: string | null; apellido: string | null; apodo: string | null; foto_url: string | null; sexo: string | null; categoria: string | null }[]>(
+          'jugadores?select=id,nombre,nombre_pila,apellido,apodo,foto_url,sexo,categoria&estado_cuenta=eq.activo&categoria=not.is.null'
+        ),
       ])
 
       const ranked = new Set((rankingData ?? []).map(r => r.jugador_id))
@@ -65,7 +57,7 @@ export default function RankingPage() {
           apodo: j.apodo,
           foto_url: j.foto_url,
           sexo: j.sexo,
-          categoria: j.categoria,
+          categoria: j.categoria!,
           puntos_total: 0,
           eventos_jugados: 0,
         }))
@@ -74,13 +66,14 @@ export default function RankingPage() {
     },
   })
 
-  const byCategoria = useMemo(() => {
-    const map = new Map<string, { sexo: 'M' | 'F'; entries: RankingEntry[] }>()
+  // Key: `${categoria}_${sexo}` to handle shared names like "Open"
+  const byKey = useMemo(() => {
+    const map = new Map<string, { cat: string; sexo: 'M' | 'F'; entries: RankingEntry[] }>()
     for (const e of entries) {
-      if (!map.has(e.categoria)) {
-        map.set(e.categoria, { sexo: CATS_MUJERES.includes(e.categoria) ? 'F' : 'M', entries: [] })
-      }
-      map.get(e.categoria)!.entries.push(e)
+      const sexo = (e.sexo as 'M' | 'F') ?? 'M'
+      const key = `${e.categoria}_${sexo}`
+      if (!map.has(key)) map.set(key, { cat: e.categoria, sexo, entries: [] })
+      map.get(key)!.entries.push(e)
     }
     for (const v of map.values()) {
       v.entries.sort((a, b) => b.puntos_total - a.puntos_total)
@@ -88,17 +81,19 @@ export default function RankingPage() {
     return map
   }, [entries])
 
-  const hombresConDatos = CATS_HOMBRES.filter(c => byCategoria.has(c))
-  const mujeresConDatos = CATS_MUJERES.filter(c => byCategoria.has(c))
+  const hombres = CATS_HOMBRES
+    .map(c => ({ key: `${c}_M`, cat: c, sexo: 'M' as const }))
+    .filter(x => byKey.has(x.key))
 
-  const todasCats = [
-    ...CATS_HOMBRES.filter(c => byCategoria.has(c)).map(c => ({ cat: c, sexo: 'M' as const })),
-    ...CATS_MUJERES.filter(c => byCategoria.has(c)).map(c => ({ cat: c, sexo: 'F' as const })),
-  ]
+  const mujeres = CATS_MUJERES
+    .map(c => ({ key: `${c}_F`, cat: c, sexo: 'F' as const }))
+    .filter(x => byKey.has(x.key))
+
+  const todasCats = [...hombres, ...mujeres]
 
   if (isLoading) return <div className="p-6 text-muted font-inter text-sm">Cargando ranking…</div>
 
-  const catData = filtro !== 'todas' ? byCategoria.get(filtro) : null
+  const catData = filtro !== 'todas' ? byKey.get(filtro) : null
 
   return (
     <div className="space-y-4">
@@ -110,19 +105,29 @@ export default function RankingPage() {
       <div className="space-y-2">
         <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
           <FilterPill label="Todas" active={filtro === 'todas'} onClick={() => setFiltro('todas')} />
-          {hombresConDatos.length > 0 && (
+          {hombres.length > 0 && (
             <>
               <div className="w-px bg-navy/10 shrink-0" />
-              {hombresConDatos.map(c => (
-                <FilterPill key={c} label={`H: ${c}`} active={filtro === c} onClick={() => setFiltro(filtro === c ? 'todas' : c)} />
+              {hombres.map(x => (
+                <FilterPill
+                  key={x.key}
+                  label={`H: ${x.cat}`}
+                  active={filtro === x.key}
+                  onClick={() => setFiltro(filtro === x.key ? 'todas' : x.key)}
+                />
               ))}
             </>
           )}
-          {mujeresConDatos.length > 0 && (
+          {mujeres.length > 0 && (
             <>
               <div className="w-px bg-navy/10 shrink-0" />
-              {mujeresConDatos.map(c => (
-                <FilterPill key={c} label={`M: ${c}`} active={filtro === c} onClick={() => setFiltro(filtro === c ? 'todas' : c)} />
+              {mujeres.map(x => (
+                <FilterPill
+                  key={x.key}
+                  label={`M: ${x.cat}`}
+                  active={filtro === x.key}
+                  onClick={() => setFiltro(filtro === x.key ? 'todas' : x.key)}
+                />
               ))}
             </>
           )}
@@ -135,19 +140,20 @@ export default function RankingPage() {
         </div>
       ) : filtro === 'todas' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {todasCats.map(({ cat, sexo }) => (
+          {todasCats.map(({ key, cat, sexo }) => (
             <RankingCategoriaCard
-              key={cat}
+              key={key}
               categoria={cat}
               sexo={sexo}
-              entries={byCategoria.get(cat)?.entries ?? []}
+              entries={byKey.get(key)?.entries ?? []}
               compact
+              onSelect={() => setFiltro(key)}
             />
           ))}
         </div>
       ) : catData ? (
         <RankingCategoriaCard
-          categoria={filtro}
+          categoria={catData.cat}
           sexo={catData.sexo}
           entries={catData.entries}
           compact={false}

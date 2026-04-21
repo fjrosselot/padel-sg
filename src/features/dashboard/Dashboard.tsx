@@ -1,14 +1,14 @@
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Grid3x3, Layers, Handshake, Trophy } from 'lucide-react'
+import { Trophy, BarChart3, Handshake, Medal } from 'lucide-react'
 import { useUser } from '@/hooks/useUser'
-import { supabase } from '@/lib/supabase'
+import { padelApi } from '@/lib/padelApi'
 
 const QUICK_LINKS = [
-  { to: '/torneos', icon: Grid3x3, label: 'Torneos', desc: 'Inscripciones y resultados' },
-  { to: '/ligas', icon: Layers, label: 'Ligas', desc: 'Round robin y escalerilla' },
+  { to: '/torneos', icon: Trophy, label: 'Torneos', desc: 'Inscripciones y resultados' },
+  { to: '/ligas', icon: BarChart3, label: 'Ligas', desc: 'Round robin y escalerilla' },
   { to: '/amistosos', icon: Handshake, label: 'Amistosos', desc: 'Partidos libres' },
-  { to: '/rankings', icon: Trophy, label: 'Ranking', desc: 'ELO y tabla general' },
+  { to: '/rankings', icon: Medal, label: 'Ranking', desc: 'Rankings por categoría' },
 ]
 
 export function Dashboard() {
@@ -19,30 +19,46 @@ export function Dashboard() {
     queryKey: ['user-stats', user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .schema('padel')
-        .from('partidos')
-        .select('pareja1_j1, pareja1_j2, pareja2_j1, pareja2_j2, ganador')
-        .eq('estado', 'jugado')
-        .or(`pareja1_j1.eq.${user!.id},pareja1_j2.eq.${user!.id},pareja2_j1.eq.${user!.id},pareja2_j2.eq.${user!.id}`)
-      if (error) throw error
-
+      const data = await padelApi.get<{
+        pareja1_j1: string | null
+        pareja1_j2: string | null
+        pareja2_j1: string | null
+        pareja2_j2: string | null
+        ganador: 1 | 2 | null
+      }[]>(
+        `partidos?select=pareja1_j1,pareja1_j2,pareja2_j1,pareja2_j2,ganador&estado=eq.jugado&or=(pareja1_j1.eq.${user!.id},pareja1_j2.eq.${user!.id},pareja2_j1.eq.${user!.id},pareja2_j2.eq.${user!.id})`
+      )
       const jugados = data.length
       const victorias = data.filter(p => {
         const enPareja1 = p.pareja1_j1 === user!.id || p.pareja1_j2 === user!.id
         const enPareja2 = p.pareja2_j1 === user!.id || p.pareja2_j2 === user!.id
         return (enPareja1 && p.ganador === 1) || (enPareja2 && p.ganador === 2)
       }).length
-
       return { jugados, victorias }
     },
   })
 
-  const firstName = user?.nombre?.split(' ')[0] ?? 'Jugador'
+  const { data: rankingCat } = useQuery({
+    queryKey: ['ranking-cat-pos', user?.id, user?.categoria],
+    enabled: !!user?.id && !!user?.categoria,
+    queryFn: async () => {
+      const rows = await padelApi.get<{ jugador_id: string; puntos_total: number }[]>(
+        `ranking_categoria?categoria=eq.${encodeURIComponent(user!.categoria!)}&select=jugador_id,puntos_total&order=puntos_total.desc`
+      )
+      const pos = rows.findIndex(r => r.jugador_id === user!.id) + 1
+      const puntos = rows.find(r => r.jugador_id === user!.id)?.puntos_total ?? 0
+      return { pos: pos > 0 ? pos : null, puntos, total: rows.length }
+    },
+  })
+
+  const firstName = user?.nombre_pila ?? user?.nombre?.split(' ')[0] ?? 'Jugador'
+
+  const jugados = stats?.jugados ?? 0
+  const victorias = stats?.victorias ?? 0
+  const winRate = jugados > 0 ? Math.round((victorias / jugados) * 100) : null
 
   return (
     <div className="space-y-6">
-      {/* Saludo */}
       <div>
         <h1 className="font-manrope text-2xl font-bold text-navy">
           Hola, {firstName}
@@ -52,22 +68,21 @@ export function Dashboard() {
         </p>
       </div>
 
-      {/* Stats rápidas */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {[
-          { label: 'ELO', value: user?.elo ?? '—' },
-          { label: 'Partidos', value: stats?.jugados ?? '—' },
-          { label: 'Victorias', value: stats?.victorias ?? '—' },
-          { label: 'Categoría', value: user?.categoria ?? '—' },
-        ].map(({ label, value }) => (
-          <div key={label} className="rounded-xl bg-white p-4 shadow-card">
-            <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted">{label}</p>
-            <p className="mt-1 font-manrope text-2xl font-bold text-navy">{String(value)}</p>
-          </div>
-        ))}
+        <StatCard label="Categoría" value={user?.categoria ?? '—'} />
+        <StatCard
+          label="Ranking"
+          value={rankingCat?.pos ? `#${rankingCat.pos}` : '—'}
+          sub={rankingCat?.pos ? `${rankingCat.puntos} pts` : undefined}
+        />
+        <StatCard label="Partidos" value={stats ? jugados : '—'} />
+        <StatCard
+          label="Ganados"
+          value={stats ? victorias : '—'}
+          sub={winRate !== null ? `${winRate}% victorias` : undefined}
+        />
       </div>
 
-      {/* Accesos rápidos */}
       <div>
         <h2 className="mb-3 font-manrope text-sm font-bold uppercase tracking-widest text-slate">
           Accesos rápidos
@@ -91,6 +106,16 @@ export function Dashboard() {
           ))}
         </div>
       </div>
+    </div>
+  )
+}
+
+function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+  return (
+    <div className="rounded-xl bg-white p-4 shadow-card">
+      <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted">{label}</p>
+      <p className="mt-1 font-manrope text-2xl font-bold text-navy leading-tight">{String(value)}</p>
+      {sub && <p className="font-inter text-xs text-muted mt-0.5">{sub}</p>}
     </div>
   )
 }

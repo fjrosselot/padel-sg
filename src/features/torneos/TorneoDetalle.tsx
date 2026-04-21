@@ -2,8 +2,23 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '../../lib/supabase'
+import { adminHeaders } from '../../lib/adminHeaders'
 import { useUser } from '../../hooks/useUser'
+
+const SB = import.meta.env.VITE_SUPABASE_URL as string
+
+async function padelGet(path: string) {
+  const headers = await adminHeaders('read')
+  const res = await fetch(`${SB}/rest/v1/${path}`, { headers })
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message ?? `Error ${res.status}`) }
+  return res.json()
+}
+
+async function padelPatch(table: string, id: string, body: Record<string, unknown>) {
+  const headers = await adminHeaders('write')
+  const res = await fetch(`${SB}/rest/v1/${table}?id=eq.${id}`, { method: 'PATCH', headers, body: JSON.stringify(body) })
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message ?? `Error ${res.status}`) }
+}
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import FixtureView from './FixtureView'
@@ -35,51 +50,26 @@ export default function TorneoDetalle() {
 
   const { data: torneo, isLoading } = useQuery({
     queryKey: ['torneo', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .schema('padel')
-        .from('torneos')
-        .select('*')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as Torneo
-    },
+    queryFn: () => padelGet(`torneos?id=eq.${id}&select=*`).then((rows: Torneo[]) => rows[0] ?? null),
     enabled: !!id,
   })
 
   const abrirInscripciones = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .schema('padel')
-        .from('torneos')
-        .update({ estado: 'inscripcion' })
-        .eq('id', id!)
-      if (error) throw error
-    },
+    mutationFn: () => padelPatch('torneos', id!, { estado: 'inscripcion' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['torneo', id] }),
   })
 
   const generarFixture = useMutation({
     mutationFn: async () => {
-      const { data: inscritas, error: inscErr } = await supabase
-        .schema('padel')
-        .from('inscripciones')
-        .select(`
-          id, jugador1_id, jugador2_id, categoria_nombre,
-          j1:jugadores!jugador1_id(id, nombre, elo),
-          j2:jugadores!jugador2_id(id, nombre, elo)
-        `)
-        .eq('torneo_id', id!)
-        .eq('estado', 'confirmada')
-        .eq('lista_espera', false)
-      if (inscErr) throw inscErr
+      const inscritas: any[] = await padelGet(
+        `inscripciones?select=id,jugador1_id,jugador2_id,categoria_nombre,j1:jugadores!jugador1_id(id,nombre,elo),j2:jugadores!jugador2_id(id,nombre,elo)&torneo_id=eq.${id}&estado=eq.confirmada&lista_espera=eq.false`
+      )
 
       const configFixture = torneo!.config_fixture as unknown as ConfigFixture
       if (!configFixture) throw new Error('El torneo no tiene configuración de fixture guardada.')
 
       const categoriasFixture = categoriasConfig.map(cat => {
-        const parejas: ParejaFixture[] = ((inscritas ?? []) as any[])
+        const parejas: ParejaFixture[] = inscritas
           .filter((i: any) => i.categoria_nombre === cat.nombre)
           .map((i: any) => ({
             id: i.id,
@@ -94,15 +84,7 @@ export default function TorneoDetalle() {
           : buildFixture(cat, parejas, configFixture)
       })
 
-      const { error: updErr } = await supabase
-        .schema('padel')
-        .from('torneos')
-        .update({
-          categorias: categoriasFixture as unknown as any,
-          estado: 'en_curso',
-        })
-        .eq('id', id!)
-      if (updErr) throw updErr
+      await padelPatch('torneos', id!, { categorias: categoriasFixture, estado: 'en_curso' })
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['torneo', id] })

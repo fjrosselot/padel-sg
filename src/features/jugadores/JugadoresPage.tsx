@@ -12,7 +12,7 @@ import {
 } from '@tanstack/react-table'
 import { Search, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../../lib/supabase'
+import { padelApi } from '../../lib/padelApi'
 import type { Jugador } from '../../lib/supabase'
 
 type JugadorItem = Pick<Jugador, 'id' | 'nombre' | 'apodo' | 'categoria' | 'elo' | 'foto_url' | 'lado_preferido' | 'sexo' | 'mixto' | 'telefono'> & { nombre_pila: string | null; apellido: string | null }
@@ -38,7 +38,7 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
   )
 }
 
-function Avatar({ jugador, rank }: { jugador: JugadorItem; rank: number }) {
+function Avatar({ jugador, rankPos }: { jugador: JugadorItem; rankPos?: number }) {
   const initials = jugador.nombre.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || '??'
   return (
     <div className="relative shrink-0">
@@ -48,16 +48,18 @@ function Avatar({ jugador, rank }: { jugador: JugadorItem; rank: number }) {
           : <span className="font-manrope text-xs font-bold text-gold">{initials}</span>
         }
       </div>
-      <div className="absolute -top-1.5 -left-1.5 bg-navy text-gold text-[9px] font-black w-4 h-4 flex items-center justify-center rounded shadow">
-        {rank}
-      </div>
+      {rankPos != null && (
+        <div className="absolute -top-1.5 -left-1.5 bg-gold text-navy text-[9px] font-black w-4 h-4 flex items-center justify-center rounded shadow">
+          {rankPos}
+        </div>
+      )}
     </div>
   )
 }
 
 const SEXO_LABEL: Record<string, string> = { M: 'H', F: 'M' }
 
-const columnHelper = createColumnHelper<JugadorItem & { rank: number }>()
+const columnHelper = createColumnHelper<JugadorItem & { rank: number; rankPos?: number; rankPts?: number }>()
 
 export default function JugadoresPage() {
   const [search, setSearch] = useState('')
@@ -70,27 +72,50 @@ export default function JugadoresPage() {
 
   const { data: jugadores, isLoading } = useQuery({
     queryKey: ['jugadores-directorio'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .schema('padel')
-        .from('jugadores')
-        .select('id, nombre, nombre_pila, apellido, apodo, categoria, elo, foto_url, lado_preferido, sexo, mixto, telefono')
-        .eq('estado_cuenta', 'activo')
-        .order('apellido', { ascending: true })
-      if (error) throw error
-      return (data as JugadorItem[]).map((j, i) => ({ ...j, rank: i + 1 }))
-    },
+    queryFn: () =>
+      padelApi.get<JugadorItem[]>(
+        'jugadores?select=id,nombre,nombre_pila,apellido,apodo,categoria,elo,foto_url,lado_preferido,sexo,mixto,telefono&estado_cuenta=eq.activo&order=apellido.asc'
+      ),
   })
+
+  const { data: rankingRows } = useQuery({
+    queryKey: ['ranking-categoria-all'],
+    queryFn: () =>
+      padelApi.get<{ jugador_id: string; categoria: string; puntos_total: number }[]>(
+        'ranking_categoria?select=jugador_id,categoria,puntos_total&order=categoria.asc,puntos_total.desc'
+      ),
+  })
+
+  const rankingMap = useMemo(() => {
+    const map = new Map<string, { pos: number; puntos: number }>()
+    if (!rankingRows) return map
+    const byCategoria = new Map<string, { jugador_id: string; puntos_total: number }[]>()
+    for (const r of rankingRows) {
+      if (!byCategoria.has(r.categoria)) byCategoria.set(r.categoria, [])
+      byCategoria.get(r.categoria)!.push(r)
+    }
+    byCategoria.forEach(rows => {
+      rows.forEach((r, i) => map.set(r.jugador_id, { pos: i + 1, puntos: r.puntos_total }))
+    })
+    return map
+  }, [rankingRows])
+
+  const jugadoresConRanking = useMemo(() =>
+    (jugadores ?? []).map((j, i) => ({
+      ...j,
+      rank: i + 1,
+      rankPos: rankingMap.get(j.id)?.pos,
+      rankPts: rankingMap.get(j.id)?.puntos,
+    }))
+  , [jugadores, rankingMap])
 
   const categorias = useMemo(() => {
     if (!jugadores) return []
     return [...new Set(jugadores.map(j => j.categoria).filter(Boolean))].sort() as string[]
   }, [jugadores])
 
-  // Filtrado fuera de TanStack (pills) + búsqueda dentro de TanStack
   const filtradoPills = useMemo(() => {
-    if (!jugadores) return []
-    return jugadores.filter(j => {
+    return jugadoresConRanking.filter(j => {
       const matchCat = filtroCategoria === 'todas' || j.categoria === filtroCategoria
       const matchLado = filtroLado === 'todos' || j.lado_preferido === filtroLado
       const matchMixto =
@@ -100,13 +125,14 @@ export default function JugadoresPage() {
       const matchSexo = filtroSexo === 'todos' || j.sexo === filtroSexo
       return matchCat && matchLado && matchMixto && matchSexo
     })
-  }, [jugadores, filtroCategoria, filtroLado, filtroMixto])
+  }, [jugadoresConRanking, filtroCategoria, filtroLado, filtroMixto, filtroSexo])
 
   const columns = useMemo(() => [
     columnHelper.accessor('rank', {
       header: '#',
       size: 56,
-      cell: info => <Avatar jugador={info.row.original} rank={info.getValue()} />,
+      cell: info => <Avatar jugador={info.row.original} rankPos={info.row.original.rankPos} />,
+      enableSorting: false,
       enableColumnFilter: false,
     }),
     columnHelper.accessor('apellido', {
@@ -187,11 +213,21 @@ export default function JugadoresPage() {
         ? <span className="font-inter text-xs text-navy">{MIXTO_LABEL[info.getValue()!]}</span>
         : <span className="font-inter text-xs text-muted/50">—</span>,
     }),
-    columnHelper.accessor('elo', {
-      header: 'ELO',
-      size: 60,
+    columnHelper.accessor('rankPos', {
+      header: 'Ranking',
+      size: 80,
       enableColumnFilter: false,
-      cell: info => <span className="font-manrope text-sm font-bold text-navy">{info.getValue()}</span>,
+      cell: info => {
+        const pos = info.getValue()
+        const pts = info.row.original.rankPts
+        if (!pos) return <span className="font-inter text-xs text-muted/50">—</span>
+        return (
+          <div className="leading-tight">
+            <span className="font-manrope text-sm font-bold text-navy">#{pos}</span>
+            <span className="block font-inter text-[10px] text-muted">{pts} pts</span>
+          </div>
+        )
+      },
     }),
     columnHelper.display({
       id: 'accion',
@@ -223,7 +259,6 @@ export default function JugadoresPage() {
   return (
     <div className="space-y-4">
 
-      {/* Header */}
       <div>
         <p className="font-inter text-[10px] font-bold tracking-widest uppercase text-gold mb-0.5">Saint George's</p>
         <div className="flex items-end justify-between">
@@ -232,7 +267,6 @@ export default function JugadoresPage() {
         </div>
       </div>
 
-      {/* Buscador */}
       <div className="relative">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted pointer-events-none" />
         <input
@@ -244,18 +278,17 @@ export default function JugadoresPage() {
         />
       </div>
 
-      {/* Pills */}
       <div className="space-y-2">
         {categorias.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <div className="flex flex-wrap gap-2">
             <FilterPill label="Todas" active={filtroCategoria === 'todas'} onClick={() => setFiltroCategoria('todas')} />
             {categorias.map(cat => (
-              <FilterPill key={cat} label={`Cat. ${cat}`} active={filtroCategoria === cat}
+              <FilterPill key={cat} label={cat} active={filtroCategoria === cat}
                 onClick={() => setFiltroCategoria(filtroCategoria === cat ? 'todas' : cat)} />
             ))}
           </div>
         )}
-        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+        <div className="flex flex-wrap gap-2">
           <FilterPill label="Hombre" active={filtroSexo === 'M'} onClick={() => setFiltroSexo(filtroSexo === 'M' ? 'todos' : 'M')} />
           <FilterPill label="Mujer" active={filtroSexo === 'F'} onClick={() => setFiltroSexo(filtroSexo === 'F' ? 'todos' : 'F')} />
           <div className="w-px bg-navy/10 shrink-0" />
@@ -276,14 +309,12 @@ export default function JugadoresPage() {
         </button>
       )}
 
-      {/* Tabla desktop */}
       {rows.length === 0 ? (
         <div className="rounded-xl bg-white shadow-card p-8 text-center">
           <p className="font-inter text-sm text-muted">Sin jugadores para esos filtros.</p>
         </div>
       ) : (
         <>
-          {/* DESKTOP */}
           <div className="hidden md:block rounded-xl bg-white shadow-card overflow-hidden">
             <table className="w-full">
               <thead>
@@ -336,7 +367,6 @@ export default function JugadoresPage() {
             </table>
           </div>
 
-          {/* MOBILE */}
           <div className="md:hidden rounded-xl bg-white shadow-card overflow-hidden">
             {rows.map((row, idx) => {
               const j = row.original
@@ -354,7 +384,7 @@ export default function JugadoresPage() {
                     idx !== rows.length - 1 ? 'border-b border-surface-high' : ''
                   }`}
                 >
-                  <Avatar jugador={j} rank={j.rank} />
+                  <Avatar jugador={j} rankPos={j.rankPos} />
                   <div className="flex-1 min-w-0">
                     <p className="font-manrope text-sm font-bold text-navy truncate">
                       {j.nombre}{j.apodo && <span className="font-normal text-muted"> "{j.apodo}"</span>}
@@ -365,9 +395,15 @@ export default function JugadoresPage() {
                       ))}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="font-manrope text-sm font-bold text-navy">{j.elo}</span>
-                    <ChevronRight className="h-4 w-4 text-muted" />
+                  <div className="flex flex-col items-end shrink-0">
+                    {j.rankPos
+                      ? <>
+                          <span className="font-manrope text-sm font-bold text-navy">{j.categoria} / #{j.rankPos}</span>
+                          <span className="font-inter text-[10px] text-muted">{j.rankPts} pts</span>
+                        </>
+                      : <span className="font-inter text-xs text-muted/50">—</span>
+                    }
+                    <ChevronRight className="h-4 w-4 text-muted mt-0.5" />
                   </div>
                 </button>
               )

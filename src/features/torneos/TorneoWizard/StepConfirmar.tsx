@@ -5,8 +5,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { buildFixture, buildDesafioFixture } from '../../../lib/fixture/engine'
 import type { WizardData } from './schema'
 import type { ParejaFixture, CategoriaFixture } from '../../../lib/fixture/types'
-import { supabase } from '../../../lib/supabase'
+import { adminHeaders } from '../../../lib/adminHeaders'
 import { Button } from '../../../components/ui/button'
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string
 
 interface Props {
   onCreated?: () => void
@@ -46,10 +48,11 @@ export default function StepConfirmar({ onCreated }: Props) {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .schema('padel')
-        .from('torneos')
-        .insert({
+      const headers = await adminHeaders('write')
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/torneos`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
           nombre: values.nombre,
           tipo: values.tipo,
           colegio_rival: values.colegio_rival ?? null,
@@ -57,8 +60,12 @@ export default function StepConfirmar({ onCreated }: Props) {
           estado: 'borrador',
           categorias: values.categorias,
           config_fixture: configFixture,
-        })
-      if (error) throw error
+        }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.message ?? `Error ${res.status}`)
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['torneos'] })

@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Trophy, Target, Percent } from 'lucide-react'
-import { supabase } from '../../lib/supabase'
+import { padelApi } from '../../lib/padelApi'
 import type { Jugador } from '../../lib/supabase'
 import { PuntosHistorial } from '../ranking/PuntosHistorial'
 
@@ -42,34 +42,32 @@ export default function JugadorDetalle() {
 
   const { data: jugador, isLoading, error } = useQuery({
     queryKey: ['jugador', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .schema('padel')
-        .from('jugadores')
-        .select('id, nombre, apodo, categoria, elo, foto_url, lado_preferido, sexo, mixto, gradualidad, frecuencia_semanal')
-        .eq('id', id!)
-        .single()
-      if (error) throw error
-      return data as Jugador & { frecuencia_semanal?: string | null; gradualidad?: string | null; mixto?: string | null }
-    },
+    queryFn: () =>
+      padelApi.get<(Jugador & { frecuencia_semanal?: string | null; gradualidad?: string | null; mixto?: string | null })[]>(
+        `jugadores?select=id,nombre,apodo,categoria,elo,foto_url,lado_preferido,sexo,mixto,gradualidad,frecuencia_semanal&id=eq.${id}`
+      ).then(rows => rows[0] ?? null),
     enabled: !!id,
   })
 
   const { data: historial } = useQuery({
     queryKey: ['jugador-historial', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .schema('padel')
-        .from('partidos')
-        .select('id, fecha, tipo, ganador, resultado, pareja1_j1, pareja1_j2, pareja2_j1, pareja2_j2, sets_pareja1, sets_pareja2')
-        .or(`pareja1_j1.eq.${id},pareja1_j2.eq.${id},pareja2_j1.eq.${id},pareja2_j2.eq.${id}`)
-        .eq('estado', 'jugado')
-        .order('fecha', { ascending: false })
-        .limit(10)
-      if (error) throw error
-      return data as PartidoHistorial[]
-    },
+    queryFn: () =>
+      padelApi.get<PartidoHistorial[]>(
+        `partidos?select=id,fecha,tipo,ganador,resultado,pareja1_j1,pareja1_j2,pareja2_j1,pareja2_j2,sets_pareja1,sets_pareja2&or=(pareja1_j1.eq.${id},pareja1_j2.eq.${id},pareja2_j1.eq.${id},pareja2_j2.eq.${id})&estado=eq.jugado&order=fecha.desc&limit=10`
+      ),
     enabled: !!id,
+  })
+
+  const { data: rankingInfo } = useQuery({
+    queryKey: ['ranking-jugador', id, jugador?.categoria],
+    queryFn: async () => {
+      const rows = await padelApi.get<{ jugador_id: string; puntos_total: number }[]>(
+        `ranking_categoria?categoria=eq.${encodeURIComponent(jugador!.categoria!)}&select=jugador_id,puntos_total&order=puntos_total.desc`
+      )
+      const pos = rows.findIndex(r => r.jugador_id === id) + 1
+      return { pos: pos > 0 ? pos : null, puntos: rows.find(r => r.jugador_id === id)?.puntos_total ?? 0 }
+    },
+    enabled: !!jugador?.categoria,
   })
 
   if (isLoading) return <div className="p-6 text-muted font-inter text-sm">Cargando…</div>
@@ -140,8 +138,16 @@ export default function JugadorDetalle() {
           <div className="flex items-center justify-center mb-1">
             <Trophy className="h-4 w-4 text-gold" />
           </div>
-          <p className="font-manrope text-xl font-bold text-navy">{jugador.elo}</p>
-          <p className="font-inter text-[10px] text-muted uppercase tracking-wide">ELO</p>
+          {rankingInfo?.pos
+            ? <>
+                <p className="font-manrope text-xl font-bold text-navy">#{rankingInfo.pos}</p>
+                <p className="font-inter text-[10px] text-muted uppercase tracking-wide">{jugador.categoria} · {rankingInfo.puntos} pts</p>
+              </>
+            : <>
+                <p className="font-manrope text-xl font-bold text-navy">—</p>
+                <p className="font-inter text-[10px] text-muted uppercase tracking-wide">Ranking</p>
+              </>
+          }
         </div>
         <div className="rounded-xl bg-white shadow-card p-3 text-center">
           <div className="flex items-center justify-center mb-1">
