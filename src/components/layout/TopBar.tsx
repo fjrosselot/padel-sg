@@ -1,15 +1,14 @@
 import { Bell, ChevronDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useUser } from '@/hooks/useUser'
-import { useAppStore } from '@/stores/appStore'
 import { useTemporadas } from '@/hooks/useTemporada'
 import { Button } from '@/components/ui/button'
 
 export function TopBar() {
   const { data: user } = useUser()
-  const { temporadaId, setTemporadaId } = useAppStore()
   const navigate = useNavigate()
   const { data: temporadas = [] } = useTemporadas()
+  const temporadaActual = temporadas[0]
 
   const initials = user?.nombre
     ? user.nombre.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
@@ -18,18 +17,11 @@ export function TopBar() {
   return (
     <header className="flex h-14 items-center justify-between border-b border-surface bg-white px-4">
       <div />
-      <label htmlFor="temporada-select" className="sr-only">Temporada</label>
-      <select
-        id="temporada-select"
-        value={temporadaId ?? ''}
-        onChange={(e) => setTemporadaId(e.target.value || null)}
-        className="rounded-full border border-navy/20 bg-transparent px-3 py-1 font-inter text-sm font-medium text-navy focus:outline-none focus:ring-2 focus:ring-gold/50"
-      >
-        <option value="">Temporada</option>
-        {temporadas.map((t) => (
-          <option key={t.id} value={t.id}>{t.nombre}</option>
-        ))}
-      </select>
+      {temporadaActual && (
+        <span className="rounded-full border border-navy/20 px-3 py-1 font-inter text-sm font-medium text-navy">
+          {temporadaActual.nombre}
+        </span>
+      )}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" aria-label="Notificaciones" className="relative text-slate">
           <Bell className="h-5 w-5" />
