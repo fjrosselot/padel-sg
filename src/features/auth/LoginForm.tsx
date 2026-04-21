@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { queryClient } from '@/lib/queryClient'
 import logo from '@/assets/logo.jpeg'
 import courtPhoto from '@/assets/court-photo.png'
 import {
@@ -205,6 +206,7 @@ export function LoginForm() {
     if (!user) { setLoading(false); return }
     const { data: jugador } = await supabase
       .schema('padel').from('jugadores').select('estado_cuenta').eq('id', user.id).single()
+    queryClient.clear()
     if ((jugador as Record<string, unknown>)?.estado_cuenta === 'pendiente') {
       navigate('/pendiente')
     } else {

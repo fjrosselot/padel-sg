@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Shield, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { checkEmergencyCredentials, setEmergencySession } from '@/lib/emergencySession'
 import { supabase } from '@/lib/supabase'
+import { queryClient } from '@/lib/queryClient'
 
 export function EmergencyLogin() {
   const [email, setEmail] = useState('')
@@ -26,9 +27,9 @@ export function EmergencyLogin() {
     })
     setLoading(false)
     if (authError) {
-      // Igual damos acceso de emergencia aunque falle Supabase
       setEmergencySession()
     }
+    queryClient.clear()
     navigate('/dashboard')
   }
 
