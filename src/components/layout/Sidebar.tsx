@@ -27,7 +27,7 @@ const ADMIN_ITEMS = [
 
 function NavItem({ to, icon: Icon, label, expanded }: { to: string; icon: React.ElementType; label: string; expanded: boolean }) {
   return (
-    <li>
+    <li className="relative group/navitem">
       <NavLink
         to={to}
         aria-label={label}
@@ -44,6 +44,9 @@ function NavItem({ to, icon: Icon, label, expanded }: { to: string; icon: React.
           </span>
         )}
       </NavLink>
+      <span className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-navy-mid px-2.5 py-1 font-inter text-xs font-semibold text-white opacity-0 transition-opacity group-hover/navitem:opacity-100">
+        {label}
+      </span>
     </li>
   )
 }
@@ -87,17 +90,22 @@ export function Sidebar() {
               {ADMIN_ITEMS.map(item => <NavItem key={item.to} {...item} expanded={expanded} />)}
             </ul>
           ) : (
-            <NavLink
-              to="/admin/jugadores"
-              aria-label="Admin"
-              className={({ isActive }) =>
-                `flex h-9 items-center rounded-md px-2 transition-colors ${
-                  isActive ? 'bg-gold text-navy' : 'text-muted hover:bg-navy-mid hover:text-white'
-                }`
-              }
-            >
-              <Settings className="h-5 w-5 shrink-0" />
-            </NavLink>
+            <div className="relative group/navitem">
+              <NavLink
+                to="/admin/jugadores"
+                aria-label="Admin"
+                className={({ isActive }) =>
+                  `flex h-9 items-center rounded-md px-2 transition-colors ${
+                    isActive ? 'bg-gold text-navy' : 'text-muted hover:bg-navy-mid hover:text-white'
+                  }`
+                }
+              >
+                <Settings className="h-5 w-5 shrink-0" />
+              </NavLink>
+              <span className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-navy-mid px-2.5 py-1 font-inter text-xs font-semibold text-white opacity-0 transition-opacity group-hover/navitem:opacity-100">
+                Admin
+              </span>
+            </div>
           )}
         </div>
       )}
