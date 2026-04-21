@@ -22,8 +22,9 @@ const wrap = (ui: React.ReactNode) =>
 
 test('shows step 1 fields initially', () => {
   wrap(<RegisterForm />)
-  expect(screen.getByLabelText(/nombre completo/i)).toBeInTheDocument()
-  expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
+  expect(screen.getByLabelText(/^nombre/i)).toBeInTheDocument()
+  expect(screen.getByLabelText(/^apellido/i)).toBeInTheDocument()
+  expect(screen.getByLabelText(/^email/i)).toBeInTheDocument()
   expect(screen.getByRole('button', { name: /siguiente/i })).toBeInTheDocument()
 })
 

@@ -3,6 +3,11 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import { AuthGuard } from './AuthGuard'
 
+vi.mock('@/lib/devUser', () => ({
+  IS_DEV_BYPASS: false,
+  DEV_USER: null,
+}))
+
 vi.mock('@/hooks/useUser', () => ({
   useUser: vi.fn(),
 }))

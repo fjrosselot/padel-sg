@@ -6,7 +6,8 @@ test('renders logo with accessible label', () => {
   expect(screen.getByRole('img', { name: /pádel sg/i })).toBeInTheDocument()
 })
 
-test('renders compact variant', () => {
+test('renders compact variant without text label', () => {
   render(<BrandLogo variant="compact" />)
-  expect(screen.getByText('P·SG')).toBeInTheDocument()
+  expect(screen.getByRole('img', { name: /pádel sg/i })).toBeInTheDocument()
+  expect(screen.queryByText('Pádel SG')).not.toBeInTheDocument()
 })
