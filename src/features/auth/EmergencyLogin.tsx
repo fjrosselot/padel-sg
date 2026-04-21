@@ -2,22 +2,34 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Shield, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { checkEmergencyCredentials, setEmergencySession } from '@/lib/emergencySession'
+import { supabase } from '@/lib/supabase'
 
 export function EmergencyLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (checkEmergencyCredentials(email.trim(), password)) {
-      setEmergencySession()
-      navigate('/dashboard')
-    } else {
+    if (!checkEmergencyCredentials(email.trim(), password)) {
       setError(true)
+      return
     }
+    setLoading(true)
+    // Autenticar con Supabase real para que RLS funcione
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    })
+    setLoading(false)
+    if (authError) {
+      // Igual damos acceso de emergencia aunque falle Supabase
+      setEmergencySession()
+    }
+    navigate('/dashboard')
   }
 
   return (
@@ -79,9 +91,10 @@ export function EmergencyLogin() {
 
           <button
             type="submit"
-            className="h-12 w-full rounded-lg bg-navy font-inter text-sm font-bold tracking-wide text-white transition-all hover:bg-navy/90 active:scale-[0.99]"
+            disabled={loading}
+            className="h-12 w-full rounded-lg bg-navy font-inter text-sm font-bold tracking-wide text-white transition-all hover:bg-navy/90 active:scale-[0.99] disabled:opacity-60"
           >
-            Ingresar
+            {loading ? 'Ingresando…' : 'Ingresar'}
           </button>
         </form>
 
