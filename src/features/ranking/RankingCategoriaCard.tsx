@@ -46,8 +46,7 @@ export default function RankingCategoriaCard({ categoria, sexo, entries, compact
           </span>
           <span className="ml-auto font-inter text-[10px] text-muted">{entries.length} jugadores</span>
         </div>
-        {entries.length > 5 && (
-          <div className="relative">
+        <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted pointer-events-none" />
             <input
               type="text"
@@ -61,8 +60,7 @@ export default function RankingCategoriaCard({ categoria, sexo, entries, compact
                 <X className="h-3 w-3" />
               </button>
             )}
-          </div>
-        )}
+        </div>
       </div>
 
       {display.length === 0 ? (

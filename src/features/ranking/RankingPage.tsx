@@ -40,13 +40,37 @@ export default function RankingPage() {
       const temporadaId = temps?.[0]?.id
       if (!temporadaId) return []
 
-      const { data, error } = await supabase
-        .schema('padel')
-        .from('ranking_categoria')
-        .select('jugador_id, nombre, nombre_pila, apellido, apodo, foto_url, sexo, categoria, temporada_id, puntos_total, eventos_jugados')
-        .eq('temporada_id', temporadaId)
-      if (error) throw error
-      return (data ?? []) as RankingEntry[]
+      const [{ data: rankingData }, { data: jugadoresData }] = await Promise.all([
+        supabase
+          .schema('padel')
+          .from('ranking_categoria')
+          .select('jugador_id, nombre, nombre_pila, apellido, apodo, foto_url, sexo, categoria, puntos_total, eventos_jugados')
+          .eq('temporada_id', temporadaId),
+        supabase
+          .schema('padel')
+          .from('jugadores')
+          .select('id, nombre, nombre_pila, apellido, apodo, foto_url, sexo, categoria')
+          .eq('estado_cuenta', 'activo')
+          .not('categoria', 'is', null),
+      ])
+
+      const ranked = new Set((rankingData ?? []).map(r => r.jugador_id))
+      const ceroEntries = (jugadoresData ?? [])
+        .filter(j => !ranked.has(j.id))
+        .map(j => ({
+          jugador_id: j.id,
+          nombre: j.nombre,
+          nombre_pila: j.nombre_pila,
+          apellido: j.apellido,
+          apodo: j.apodo,
+          foto_url: j.foto_url,
+          sexo: j.sexo,
+          categoria: j.categoria,
+          puntos_total: 0,
+          eventos_jugados: 0,
+        }))
+
+      return [...(rankingData ?? []), ...ceroEntries] as RankingEntry[]
     },
   })
 
