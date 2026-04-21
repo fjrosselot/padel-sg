@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
-  LayoutDashboard, Users, Trophy, Grid3x3,
-  Layers, Handshake, Calendar, Wallet, Settings,
-  UserCog, Timer, ChevronRight,
+  LayoutDashboard, Users, Trophy, Medal,
+  BarChart3, Handshake, CalendarDays, Banknote, Settings,
+  UserCog, CalendarRange, ChevronRight,
 } from 'lucide-react'
 import { BrandLogo } from '@/components/brand/BrandLogo'
 import { useUser } from '@/hooks/useUser'
@@ -11,18 +11,18 @@ import { useUser } from '@/hooks/useUser'
 const NAV_ITEMS = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/jugadores', icon: Users, label: 'Jugadores' },
-  { to: '/rankings', icon: Trophy, label: 'Rankings' },
-  { to: '/torneos', icon: Grid3x3, label: 'Torneos' },
-  { to: '/ligas', icon: Layers, label: 'Ligas' },
+  { to: '/rankings', icon: Medal, label: 'Rankings' },
+  { to: '/torneos', icon: Trophy, label: 'Torneos' },
+  { to: '/ligas', icon: BarChart3, label: 'Ligas' },
   { to: '/amistosos', icon: Handshake, label: 'Amistosos' },
-  { to: '/calendario', icon: Calendar, label: 'Calendario' },
-  { to: '/finanzas', icon: Wallet, label: 'Finanzas' },
+  { to: '/calendario', icon: CalendarDays, label: 'Calendario' },
+  { to: '/finanzas', icon: Banknote, label: 'Finanzas' },
 ]
 
 const ADMIN_ITEMS = [
   { to: '/admin/usuarios', icon: Users, label: 'Usuarios' },
   { to: '/admin/jugadores', icon: UserCog, label: 'Jugadores' },
-  { to: '/admin/temporadas', icon: Timer, label: 'Temporadas' },
+  { to: '/admin/temporadas', icon: CalendarRange, label: 'Temporadas' },
 ]
 
 function NavItem({ to, icon: Icon, label, expanded }: { to: string; icon: React.ElementType; label: string; expanded: boolean }) {
