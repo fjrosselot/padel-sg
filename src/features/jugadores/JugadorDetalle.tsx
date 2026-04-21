@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Trophy, Target, Percent } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import type { Jugador } from '../../lib/supabase'
+import { PuntosHistorial } from '../ranking/PuntosHistorial'
 
 const LADO_LABEL: Record<string, string> = {
   drive: 'Drive',
@@ -223,6 +224,9 @@ export default function JugadorDetalle() {
           <p className="font-inter text-sm text-muted">Sin partidos jugados aún.</p>
         </div>
       )}
+
+      {/* Historial de puntos de ranking */}
+      <PuntosHistorial jugadorId={id!} />
     </div>
   )
 }

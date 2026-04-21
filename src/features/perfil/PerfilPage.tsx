@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useUser } from '../../hooks/useUser'
+import { PuntosHistorial } from '../ranking/PuntosHistorial'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
@@ -271,6 +272,9 @@ export default function PerfilPage() {
           </Button>
         </form>
       </div>
+
+      {/* Historial de puntos */}
+      {user?.id && <PuntosHistorial jugadorId={user.id} />}
 
       {/* Cerrar sesión */}
       <Button
