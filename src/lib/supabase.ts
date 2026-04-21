@@ -8,7 +8,6 @@ export const supabase = createClient<Database>(
   IS_DEV_BYPASS && import.meta.env.VITE_SUPABASE_SERVICE_KEY
     ? import.meta.env.VITE_SUPABASE_SERVICE_KEY
     : import.meta.env.VITE_SUPABASE_ANON_KEY,
-  { db: { schema: 'padel' } },
 )
 
 export type Jugador = Database['padel']['Tables']['jugadores']['Row']
