@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Handshake, Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
 import { useUser } from '../../hooks/useUser'
 import { Button } from '../../components/ui/button'
@@ -31,10 +32,27 @@ export default function AmistososPage() {
         .schema('padel')
         .from('partidas_abiertas')
         .select('*, creador:jugadores!creador_id(nombre, apodo)')
-        .eq('estado', 'abierta')
+        .in('estado', ['abierta', 'confirmada'])
         .order('fecha', { ascending: true })
       if (error) throw error
       return data as PartidaAbierta[]
+    },
+  })
+
+  const unirme = useMutation({
+    mutationFn: async (id: string) => {
+      if (!user) throw new Error('No autenticado')
+      const { error } = await supabase
+        .schema('padel')
+        .from('partidas_abiertas')
+        .update({ companero_id: user.id, estado: 'confirmada' })
+        .eq('id', id)
+        .eq('estado', 'abierta')
+      if (error) throw error
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['partidas-abiertas'] })
+      toast.success('Te uniste a la partida')
     },
   })
 
@@ -85,6 +103,8 @@ export default function AmistososPage() {
       <div className="space-y-3">
         {partidas?.map(p => {
           const esMio = p.creador_id === user?.id
+          const yaUnido = p.companero_id === user?.id
+          const puedeUnirse = !esMio && p.estado === 'abierta' && (p.rol_buscado === 'busco_companero' || p.rol_buscado === 'abierto')
           const nombreCreador = p.creador?.apodo ?? p.creador?.nombre?.split(' ')[0] ?? '—'
 
           return (
@@ -103,6 +123,22 @@ export default function AmistososPage() {
 
               {p.admite_mixto && (
                 <p className="font-inter text-xs text-muted">✓ Admite mixto</p>
+              )}
+
+              {yaUnido && (
+                <Badge className="w-full justify-center text-xs h-8 rounded-lg bg-green-100 text-green-800 border-green-200">
+                  Ya te uniste
+                </Badge>
+              )}
+
+              {puedeUnirse && (
+                <Button
+                  onClick={() => unirme.mutate(p.id)}
+                  disabled={unirme.isPending}
+                  className="w-full bg-gold text-navy font-bold text-xs h-8 rounded-lg"
+                >
+                  Unirme
+                </Button>
               )}
 
               {esMio && (
