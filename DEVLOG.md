@@ -1,5 +1,25 @@
 # DEVLOG — padel-sg
 
+## [2026-04-21 17:00] — Fix auth + mejoras UX: sort jugadores, rename evento ranking
+
+**Resumen:** Se encontró y eliminó el root cause del bug recurrente "sin jugadores": el flag `psg_emergency_session` en sessionStorage hacía que `useUser()` devolviera un DEV_USER falso, ejecutando todas las queries sin JWT real (RLS retornaba `[]`). Se eliminó el bypass de emergencia de `useUser` y `AuthGuard`. También se ordenó el listado de jugadores por apellido y se renombró el evento de ranking "Torneo Externo Abril 2026" → "OSP Primera Fecha 2026".
+
+**Archivos:** `src/hooks/useUser.ts`, `src/features/auth/AuthGuard.tsx`, `src/features/jugadores/JugadoresPage.tsx`
+
+**Decisiones:**
+- `hasEmergencySession()` eliminado de useUser — nunca debió devolver DEV_USER en producción
+- `clearEmergencySession()` llamado en AuthGuard cuando no hay user real — limpia flags stale
+- Password de fjrosselot@gmail.com reseteado vía SQL directo en `auth.users`
+- Listado jugadores: `.order('apellido', { ascending: true })` en lugar de elo
+
+**Pendientes:**
+- [ ] Probar wizard de torneos end-to-end: 1 torneo interno (americano) + 1 desafío
+- [ ] Actualizar teléfonos faltantes en jugadores (18 sin teléfono) — pendiente MCP Google Contacts o CSV manual
+- [ ] Ligas detalle: jornadas, tabla posiciones, resultados
+- [ ] Cleanup: eliminar archivos .jsx legacy en components/
+
+---
+
 ## [2026-04-20 00:30] — Feature: Desafío por Puntos para torneos vs colegio
 
 **Resumen:** Se implementó el formato `desafio_puntos` para torneos vs_colegio en 8 tareas con subagent-driven development. Cada pareja SG juega un partido (mejor de 3 sets) contra una pareja rival; los ganadores suman 1 punto al marcador escolar y 20 pts de ranking externo. Compatible con torneos mixtos (algunas categorías americano, otras desafío).
