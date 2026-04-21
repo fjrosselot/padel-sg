@@ -76,7 +76,7 @@ export default function JugadoresPage() {
         .from('jugadores')
         .select('id, nombre, nombre_pila, apellido, apodo, categoria, elo, foto_url, lado_preferido, sexo, mixto, telefono')
         .eq('estado_cuenta', 'activo')
-        .order('elo', { ascending: false })
+        .order('apellido', { ascending: true })
       if (error) throw error
       return (data as JugadorItem[]).map((j, i) => ({ ...j, rank: i + 1 }))
     },
