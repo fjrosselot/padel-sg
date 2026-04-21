@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Trophy } from 'lucide-react'
+import { Trophy, Search, X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import RankingCategoriaCard, { type RankingEntry } from './RankingCategoriaCard'
 
@@ -27,6 +27,7 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
 
 export default function RankingPage() {
   const [filtro, setFiltro] = useState<Filtro>('todas')
+  const [busqueda, setBusqueda] = useState('')
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ['ranking-categoria'],
@@ -50,9 +51,18 @@ export default function RankingPage() {
     },
   })
 
+  const entriesFiltradas = useMemo(() => {
+    if (!busqueda.trim()) return entries
+    const q = busqueda.toLowerCase().trim()
+    return entries.filter(e =>
+      [e.nombre, e.nombre_pila, e.apellido, e.apodo]
+        .some(v => v?.toLowerCase().includes(q))
+    )
+  }, [entries, busqueda])
+
   const byCategoria = useMemo(() => {
     const map = new Map<string, { sexo: 'M' | 'F'; entries: RankingEntry[] }>()
-    for (const e of entries) {
+    for (const e of entriesFiltradas) {
       if (!map.has(e.categoria)) {
         map.set(e.categoria, { sexo: CATS_MUJERES.includes(e.categoria) ? 'F' : 'M', entries: [] })
       }
@@ -83,7 +93,22 @@ export default function RankingPage() {
         <h1 className="font-manrope text-2xl font-bold text-navy uppercase tracking-tight">Ranking</h1>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
+        <div className="relative max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted pointer-events-none" />
+          <input
+            type="text"
+            value={busqueda}
+            onChange={e => setBusqueda(e.target.value)}
+            placeholder="Buscar jugador…"
+            className="w-full h-9 pl-9 pr-8 rounded-lg border border-navy/15 bg-white font-inter text-sm text-navy placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-gold/50"
+          />
+          {busqueda && (
+            <button type="button" onClick={() => setBusqueda('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-navy">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
         <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
           <FilterPill label="Todas" active={filtro === 'todas'} onClick={() => setFiltro('todas')} />
           {hombresConDatos.length > 0 && (
