@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Search, X } from 'lucide-react'
 
 export interface RankingEntry {
   jugador_id: string
@@ -22,20 +24,45 @@ interface Props {
 
 export default function RankingCategoriaCard({ categoria, sexo, entries, compact = false }: Props) {
   const navigate = useNavigate()
-  const display = compact ? entries.slice(0, 8) : entries
+  const [busqueda, setBusqueda] = useState('')
+
+  const filtered = busqueda.trim()
+    ? entries.filter(e => [e.nombre, e.nombre_pila, e.apellido, e.apodo].some(v => v?.toLowerCase().includes(busqueda.toLowerCase())))
+    : entries
+
+  const display = compact ? filtered.slice(0, 8) : filtered
 
   return (
     <div className="rounded-xl bg-white shadow-card overflow-hidden">
-      <div className={`px-4 py-3 flex items-center gap-2 ${sexo === 'M' ? 'bg-blue-50' : 'bg-pink-50'}`}>
-        <span className="font-manrope text-sm font-extrabold text-navy uppercase tracking-tight">
-          Cat. {categoria}
-        </span>
-        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-          sexo === 'M' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'
-        }`}>
-          {sexo === 'M' ? 'Hombres' : 'Damas'}
-        </span>
-        <span className="ml-auto font-inter text-[10px] text-muted">{entries.length} jugadores</span>
+      <div className={`px-4 py-3 flex flex-col gap-2 ${sexo === 'M' ? 'bg-blue-50' : 'bg-pink-50'}`}>
+        <div className="flex items-center gap-2">
+          <span className="font-manrope text-sm font-extrabold text-navy uppercase tracking-tight">
+            Cat. {categoria}
+          </span>
+          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+            sexo === 'M' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'
+          }`}>
+            {sexo === 'M' ? 'Hombres' : 'Damas'}
+          </span>
+          <span className="ml-auto font-inter text-[10px] text-muted">{entries.length} jugadores</span>
+        </div>
+        {entries.length > 5 && (
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted pointer-events-none" />
+            <input
+              type="text"
+              value={busqueda}
+              onChange={e => setBusqueda(e.target.value)}
+              placeholder="Buscar…"
+              className="w-full h-7 pl-7 pr-6 rounded-md border border-navy/15 bg-white/80 font-inter text-xs text-navy placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-gold/60"
+            />
+            {busqueda && (
+              <button type="button" onClick={() => setBusqueda('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-navy">
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {display.length === 0 ? (
