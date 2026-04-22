@@ -56,7 +56,7 @@ function NavItem({ to, icon: Icon, label, expanded }: { to: string; icon: React.
 export function Sidebar() {
   const { data: user } = useUser()
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(true)
   const navigate = useNavigate()
 
   async function handleLogout() {
