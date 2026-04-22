@@ -9,7 +9,7 @@ export interface ParejaFixture {
 
 export interface PartidoFixture {
   id: string
-  fase: 'grupo' | 'cuartos' | 'semifinal' | 'tercer_lugar' | 'final' | 'consolacion_sf' | 'consolacion_final' | 'desafio'
+  fase: 'grupo' | 'cuartos' | 'semifinal' | 'tercer_lugar' | 'final' | 'consolacion_cuartos' | 'consolacion_sf' | 'consolacion_final' | 'desafio'
   grupo: string | null
   numero: number
   pareja1: ParejaFixture | null

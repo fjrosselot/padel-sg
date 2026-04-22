@@ -218,18 +218,20 @@ export function LoginForm() {
     })
   }
 
-  const formContent = (
+  const formContent = (showHeading = true) => (
     <form onSubmit={handleSubmit} className={`flex flex-col gap-6 w-full${shake ? ' shake' : ''}`}>
       {/* Heading */}
-      <div>
-        <p className="font-inter text-[10px] font-bold uppercase tracking-[0.28em] text-gold">
-          Saint George's · Rama Pádel
-        </p>
-        <h2 className="mt-2 font-manrope text-[30px] font-extrabold text-navy" style={{ letterSpacing: '-0.02em' }}>
-          Bienvenidos
-        </h2>
-        <p className="mt-1 font-inter text-sm text-slate">Ingresa tus credenciales para continuar.</p>
-      </div>
+      {showHeading && (
+        <div>
+          <p className="font-inter text-[10px] font-bold uppercase tracking-[0.28em] text-gold">
+            Saint George's · Rama Pádel
+          </p>
+          <h2 className="mt-2 font-manrope text-[30px] font-extrabold text-navy" style={{ letterSpacing: '-0.02em' }}>
+            Bienvenidos
+          </h2>
+          <p className="mt-1 font-inter text-sm text-slate">Ingresa tus credenciales para continuar.</p>
+        </div>
+      )}
 
       {/* Error */}
       {error && (
@@ -318,7 +320,7 @@ export function LoginForm() {
               <div className="mb-9">
                 <LogoWordmark />
               </div>
-              {formContent}
+              {formContent(true)}
               <Footer />
             </div>
           </section>
@@ -365,8 +367,8 @@ export function LoginForm() {
                 Entra a<br/>
                 <span style={{ color: '#F5C518', fontStyle: 'italic' }}>la cancha.</span>
               </h1>
-              <p className="m-0 font-inter text-sm" style={{ color: 'rgba(255,255,255,0.80)', lineHeight: 1.55, maxWidth: 360 }}>
-                Bienvenido a la plataforma de la Rama de Pádel de Saint George's College. Acá encontrarás información de jugadores, torneos, rankings, partidos amistosos — todo en un solo lugar.
+              <p className="m-0 font-inter text-sm" style={{ color: 'rgba(255,255,255,0.80)', lineHeight: 1.5 }}>
+                Plataforma de la Rama de Pádel · Saint George's College
               </p>
             </div>
           </div>
@@ -376,7 +378,7 @@ export function LoginForm() {
         <section className="relative bg-white" style={{ marginTop: -28, borderRadius: '24px 24px 0 0', padding: '32px 24px 48px', boxShadow: '0 -8px 24px rgba(13,27,42,0.08)', minHeight: '58vh' }}>
           <div className="mx-auto" style={{ maxWidth: 420 }}>
             <div className="mx-auto mb-6 h-1 w-10 rounded-full bg-navy/10" />
-            {formContent}
+            {formContent(false)}
             <Footer />
           </div>
         </section>

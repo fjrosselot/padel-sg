@@ -133,12 +133,24 @@ function simular(categorias: WizardData['categorias'], cfg: Partial<WizardData>)
       grupoPartidos = (n * (n - 1)) / 2
     }
 
-    const advancing = numGrupos * (cuantos_avanzan ?? 2)
+    const apg = cuantos_avanzan ?? 2
+    const advancing = numGrupos * apg
     let bracketSize = 1
     while (bracketSize < advancing) bracketSize *= 2
     let playoffPartidos = advancing >= 2 ? bracketSize - 1 : 0
-    if (con_consolacion && advancing >= 2) playoffPartidos++
     if (con_tercer_lugar && advancing >= 4) playoffPartidos++
+    if (con_consolacion) {
+      const silverTeams = numGrupos * Math.max(0, (parejas_por_grupo ?? 4) - apg)
+      if (silverTeams >= 2) {
+        let silverSize = 1
+        while (silverSize < silverTeams) silverSize *= 2
+        playoffPartidos += silverSize - 1
+      } else if (silverTeams === 0) {
+        // No non-classified teams (e.g. all advance); skip
+      } else {
+        playoffPartidos += 1 // 1 team can't play, but keep minimal
+      }
+    }
 
     const total = grupoPartidos + playoffPartidos
     return { nombre: cat.nombre, partidos: total, duracionMin: Math.ceil(total / num_canchas) * slot, grupos: numGrupos }

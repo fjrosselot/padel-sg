@@ -75,35 +75,26 @@ export function buildGroups(
   })
 }
 
-export function buildPlayoffs(
-  classified: ParejaFixture[],
-  config: ConfigFixture
+function buildBracket(
+  teams: ParejaFixture[],
+  phaseNames: { early: PartidoFixture['fase']; semi: PartidoFixture['fase']; final: PartidoFixture['fase'] }
 ): PartidoFixture[] {
-  const { con_consolacion, con_tercer_lugar } = config
   const partidos: PartidoFixture[] = []
-  const n = classified.length
-
+  const n = teams.length
   if (n <= 1) return []
-
-  // Power-of-2 bracket: rounds from [size/2] (first round) down to [1] (final)
   const size = nextPow2(n)
   const rounds: number[] = []
   let m = size / 2
   while (m >= 1) { rounds.push(m); m = Math.floor(m / 2) }
-
   let num = 1
-
   for (let roundIdx = 0; roundIdx < rounds.length; roundIdx++) {
     const matchesInRound = rounds[roundIdx]
     const isFinal = roundIdx === rounds.length - 1
     const isSemi = !isFinal && roundIdx === rounds.length - 2
-    const fase: PartidoFixture['fase'] = isFinal ? 'final' : isSemi ? 'semifinal' : 'cuartos'
-
+    const fase = isFinal ? phaseNames.final : isSemi ? phaseNames.semi : phaseNames.early
     for (let i = 0; i < matchesInRound; i++) {
-      // First round: seed i vs seed (size-1-i) — standard bracket seeding
-      // Byes when classified[size-1-i] is beyond the actual n teams
-      const p1 = roundIdx === 0 ? (classified[i] ?? null) : null
-      const p2 = roundIdx === 0 ? (classified[size - 1 - i] ?? null) : null
+      const p1 = roundIdx === 0 ? (teams[i] ?? null) : null
+      const p2 = roundIdx === 0 ? (teams[size - 1 - i] ?? null) : null
       partidos.push({
         id: nextId(), fase, grupo: null, numero: num++,
         pareja1: p1, pareja2: p2,
@@ -111,6 +102,20 @@ export function buildPlayoffs(
       })
     }
   }
+  return partidos
+}
+
+export function buildPlayoffs(
+  classified: ParejaFixture[],
+  config: ConfigFixture,
+  nonClassified?: ParejaFixture[]
+): PartidoFixture[] {
+  const { con_consolacion, con_tercer_lugar } = config
+  const n = classified.length
+  if (n <= 1) return []
+
+  const goldBracket = buildBracket(classified, { early: 'cuartos', semi: 'semifinal', final: 'final' })
+  const partidos: PartidoFixture[] = [...goldBracket]
 
   if (con_tercer_lugar && n >= 4) {
     partidos.push({
@@ -120,7 +125,15 @@ export function buildPlayoffs(
     })
   }
 
-  if (con_consolacion) {
+  if (con_consolacion && nonClassified && nonClassified.length >= 2) {
+    const silverBracket = buildBracket(nonClassified, {
+      early: 'consolacion_cuartos',
+      semi: 'consolacion_sf',
+      final: 'consolacion_final',
+    })
+    partidos.push(...silverBracket)
+  } else if (con_consolacion && (!nonClassified || nonClassified.length < 2)) {
+    // Fallback: single consolacion final when no nonClassified info
     partidos.push({
       id: nextId(), fase: 'consolacion_final', grupo: null, numero: 1,
       pareja1: null, pareja2: null,
@@ -205,14 +218,12 @@ export function buildFixture(
   }))
 
   const classified = grupos.flatMap(g => g.parejas.slice(0, config.cuantos_avanzan))
-  const playoffs = buildPlayoffs(classified, config)
+  const nonClassified = grupos.flatMap(g => g.parejas.slice(config.cuantos_avanzan))
+  const playoffs = buildPlayoffs(classified, config, nonClassified)
 
-  const consola = playoffs.filter(p =>
-    p.fase === 'consolacion_sf' || p.fase === 'consolacion_final'
-  )
-  const bracket = playoffs.filter(p =>
-    p.fase !== 'consolacion_sf' && p.fase !== 'consolacion_final'
-  )
+  const CONSOLA_FASES = new Set(['consolacion_cuartos', 'consolacion_sf', 'consolacion_final'])
+  const consola = playoffs.filter(p => CONSOLA_FASES.has(p.fase))
+  const bracket = playoffs.filter(p => !CONSOLA_FASES.has(p.fase))
 
   return {
     nombre: categoriaConfig.nombre,

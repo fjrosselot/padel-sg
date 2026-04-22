@@ -13,7 +13,9 @@ const PHASE_COLOR: Record<string, string> = {
   semifinal: '#F97316',
   final: '#0D1B2A',
   tercer_lugar: '#8FA8C8',
-  consolacion_final: '#A78BFA',
+  consolacion_cuartos: '#C084FC',
+  consolacion_sf: '#A855F7',
+  consolacion_final: '#7C3AED',
   desafio: '#34D399',
 }
 
@@ -109,6 +111,7 @@ export function FixtureGantt({ categorias, cfg }: Props) {
           <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-gold" />Grupos</span>
           <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-[#F97316]" />Playoffs</span>
           <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-navy" />Final</span>
+          <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-[#A855F7]" />Plata</span>
         </div>
       </div>
       <div className="overflow-x-auto p-3">
