@@ -14,7 +14,7 @@ import { Search, ChevronsUpDown, ChevronUp, ChevronDown, Zap, Pencil, Trash2 } f
 import { supabase, type Jugador } from '../../lib/supabase'
 import { adminHeaders } from '../../lib/adminHeaders'
 
-type JugadorRow = Pick<Jugador, 'id' | 'nombre' | 'nombre_pila' | 'apellido' | 'apodo' | 'email' | 'categoria' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'elo' | 'estado_cuenta'>
+type JugadorRow = Pick<Jugador, 'id' | 'nombre' | 'nombre_pila' | 'apellido' | 'apodo' | 'email' | 'categoria' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'elo' | 'estado_cuenta'> & { rut?: string | null }
 type EditableField = 'apodo' | 'categoria' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'estado_cuenta'
 
 const API_URL = () => import.meta.env.VITE_SUPABASE_URL
@@ -211,6 +211,7 @@ function JugadorEditModal({ jugador, onClose, onSaved, onDeleted }: {
     apellido: jugador.apellido ?? jugador.nombre.split(' ').slice(1).join(' '),
     email: jugador.email,
     apodo: jugador.apodo ?? '',
+    rut: jugador.rut ?? '',
     sexo: jugador.sexo ?? '',
     categoria: jugador.categoria ?? '',
     lado_preferido: jugador.lado_preferido ?? '',
@@ -235,6 +236,7 @@ function JugadorEditModal({ jugador, onClose, onSaved, onDeleted }: {
         apellido: ap,
         email: form.email.trim(),
         apodo: form.apodo.trim() || null,
+        rut: form.rut.trim() || null,
         sexo: form.sexo || null,
         categoria: form.categoria || null,
         lado_preferido: form.lado_preferido || null,
@@ -305,6 +307,12 @@ function JugadorEditModal({ jugador, onClose, onSaved, onDeleted }: {
           <div>
             <label className={labelCls}>Email</label>
             <input type="email" value={form.email} onChange={e => set('email', e.target.value)} className={inputCls} />
+          </div>
+
+          {/* RUT */}
+          <div>
+            <label className={labelCls}>RUT</label>
+            <input type="text" value={form.rut} onChange={e => set('rut', e.target.value)} placeholder="12.345.678-9" className={inputCls} />
           </div>
 
           {/* Apodo + ELO */}
@@ -421,7 +429,7 @@ export default function AdminJugadores() {
     queryKey: ['admin-jugadores'],
     queryFn: async () => {
       const headers = await adminHeaders('read')
-      const fields = 'id,nombre,nombre_pila,apellido,apodo,email,categoria,lado_preferido,sexo,mixto,gradualidad,elo,estado_cuenta'
+      const fields = 'id,nombre,nombre_pila,apellido,apodo,email,rut,categoria,lado_preferido,sexo,mixto,gradualidad,elo,estado_cuenta'
       const res = await fetch(`${API_URL()}/rest/v1/jugadores?select=${fields}&order=nombre.asc`, { headers })
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`)
       return res.json() as Promise<JugadorRow[]>

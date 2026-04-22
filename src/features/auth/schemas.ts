@@ -7,6 +7,7 @@ export const registerSchema = z.object({
   email: z.string().email('Email inválido'),
   telefono: z.string().optional(),
   apodo: z.string().optional(),
+  rut: z.string().optional(),
   sexo: z.enum(['M', 'F'], { required_error: 'Selecciona tu sexo' }),
 
   // Paso 2: Vinculación SG

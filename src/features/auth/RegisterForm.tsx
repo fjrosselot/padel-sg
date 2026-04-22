@@ -82,6 +82,7 @@ export function RegisterForm() {
         apodo: data.apodo ?? null,
         email: data.email,
         telefono: data.telefono ?? null,
+        rut: data.rut ?? null,
         sexo: data.sexo,
         categoria: data.categoria,
         gradualidad: data.gradualidad,
@@ -163,6 +164,10 @@ export function RegisterForm() {
                     <label htmlFor="apodo" className={labelCls}>Apodo</label>
                     <input id="apodo" {...register('apodo')} className={inputCls} />
                   </div>
+                </div>
+                <div>
+                  <label htmlFor="rut" className={labelCls}>RUT <span className="normal-case text-muted/60">(opcional)</span></label>
+                  <input id="rut" {...register('rut')} placeholder="12.345.678-9" className={inputCls} />
                 </div>
                 <div>
                   <p className={labelCls}>Sexo *</p>
