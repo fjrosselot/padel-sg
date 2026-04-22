@@ -24,6 +24,7 @@ const MasPage = lazy(() => import('./features/mas/MasPage'))
 const CalendarioPage = lazy(() => import('./features/calendario/CalendarioPage'))
 const RankingPage = lazy(() => import('./features/ranking/RankingPage'))
 const PerfilPage = lazy(() => import('./features/perfil/PerfilPage'))
+const TesoreriaAdmin = lazy(() => import('./features/tesoreria/TesoreriaAdmin'))
 
 const fallback = (
   <div className="flex h-full items-center justify-center text-muted">Cargando…</div>
@@ -49,6 +50,7 @@ export const router = createBrowserRouter([
       { path: 'dashboard', element: <Dashboard /> },
       { path: 'admin/usuarios', element: <PendingUsers /> },
       { path: 'admin/temporadas', element: <AdminTemporadas /> },
+      { path: 'admin/tesoreria', element: <TesoreriaAdmin /> },
       { path: 'admin/jugadores', element: <AdminJugadores /> },
       { path: 'torneos', element: <TorneosList /> },
       { path: 'torneos/:id', element: <TorneoDetalle /> },
