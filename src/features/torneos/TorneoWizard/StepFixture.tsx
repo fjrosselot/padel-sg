@@ -1,7 +1,125 @@
 import { useFormContext, useWatch } from 'react-hook-form'
+import { useMemo } from 'react'
 import type { WizardData } from './schema'
 import { Label } from '../../../components/ui/label'
 import { Input } from '../../../components/ui/input'
+
+interface CatSim { nombre: string; partidos: number; duracionMin: number; grupos: number }
+
+function simular(categorias: WizardData['categorias'], cfg: Partial<WizardData>): {
+  cats: CatSim[]
+  totalPartidos: number
+  totalMin: number
+  horaFin: string
+  canchasMinimas: number
+} | null {
+  const { num_canchas, hora_inicio, duracion_partido, pausa_entre_partidos,
+    parejas_por_grupo, cuantos_avanzan, con_consolacion, con_tercer_lugar } = cfg as WizardData
+
+  if (!categorias?.length || !num_canchas || !hora_inicio || !duracion_partido) return null
+
+  const slot = (duracion_partido ?? 60) + (pausa_entre_partidos ?? 0)
+  const [startH, startM] = (hora_inicio ?? '09:00').split(':').map(Number)
+
+  const cats: CatSim[] = categorias.map(cat => {
+    const n = cat.num_parejas ?? 0
+    if (n < 2) return { nombre: cat.nombre, partidos: 0, duracionMin: 0, grupos: 0 }
+
+    if (cat.formato === 'desafio_puntos') {
+      const duracionMin = Math.ceil(n / num_canchas) * slot
+      return { nombre: cat.nombre, partidos: n, duracionMin, grupos: 0 }
+    }
+
+    const ppg = parejas_por_grupo ?? 4
+    const numGrupos = Math.ceil(n / ppg)
+    const base = Math.floor(n / numGrupos)
+    const extra = n % numGrupos
+    let grupoPartidos = 0
+    for (let i = 0; i < numGrupos; i++) {
+      const sz = i < extra ? base + 1 : base
+      grupoPartidos += (sz * (sz - 1)) / 2
+    }
+
+    const advancing = numGrupos * (cuantos_avanzan ?? 2)
+    let playoffPartidos = 0
+    if (advancing >= 2) {
+      if (advancing >= 4) {
+        playoffPartidos += 2 // semis
+        if (con_consolacion) playoffPartidos++
+        if (con_tercer_lugar) playoffPartidos++
+      }
+      playoffPartidos++ // final
+    }
+
+    const total = grupoPartidos + playoffPartidos
+    const duracionMin = Math.ceil(total / num_canchas) * slot
+    return { nombre: cat.nombre, partidos: total, duracionMin, grupos: numGrupos }
+  })
+
+  const totalPartidos = cats.reduce((s, c) => s + c.partidos, 0)
+  const totalMin = Math.ceil(totalPartidos / num_canchas) * slot
+
+  const endTotalMin = startH * 60 + startM + totalMin
+  const endH = Math.floor(endTotalMin / 60)
+  const endM = endTotalMin % 60
+  const horaFin = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`
+
+  // canchas mínimas = max partidos simultáneos en cualquier ronda (simplificado: raíz cuadrada ponderada)
+  const canchasMinimas = Math.max(1, Math.min(Math.ceil(totalPartidos / Math.ceil(totalMin / 60)), num_canchas))
+
+  return { cats, totalPartidos, totalMin, horaFin, canchasMinimas }
+}
+
+function fmtMin(min: number) {
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  return h > 0 ? `${h}h${m > 0 ? ` ${m}min` : ''}` : `${m}min`
+}
+
+function SimPreview({ categorias, allDesafio }: { categorias: WizardData['categorias']; allDesafio: boolean }) {
+  const cfg = useWatch<WizardData>() as Partial<WizardData>
+  const sim = useMemo(() => simular(categorias, cfg), [categorias, cfg])
+  if (!sim) return null
+
+  return (
+    <div className="rounded-xl border border-navy/10 bg-surface overflow-hidden">
+      <div className="px-4 py-2.5 bg-navy/5 border-b border-navy/10">
+        <p className="font-inter text-xs font-bold uppercase tracking-widest text-navy/60">Simulación estimada</p>
+      </div>
+      <div className="p-4 space-y-3">
+        <div className="grid grid-cols-3 gap-3">
+          <div className="text-center">
+            <p className="font-manrope text-xl font-bold text-navy">{sim.totalPartidos}</p>
+            <p className="font-inter text-[10px] uppercase tracking-wide text-muted">Partidos totales</p>
+          </div>
+          <div className="text-center">
+            <p className="font-manrope text-xl font-bold text-navy">{fmtMin(sim.totalMin)}</p>
+            <p className="font-inter text-[10px] uppercase tracking-wide text-muted">Duración total</p>
+          </div>
+          <div className="text-center">
+            <p className="font-manrope text-xl font-bold text-navy">{sim.horaFin}</p>
+            <p className="font-inter text-[10px] uppercase tracking-wide text-muted">Hora fin est.</p>
+          </div>
+        </div>
+
+        {sim.cats.length > 1 && (
+          <div className="space-y-1.5 pt-1 border-t border-navy/5">
+            {sim.cats.map(c => (
+              <div key={c.nombre} className="flex items-center justify-between text-xs">
+                <span className="font-inter font-semibold text-navy">{c.nombre}</span>
+                <span className="font-inter text-muted">
+                  {c.partidos} partidos
+                  {!allDesafio && c.grupos > 0 && ` · ${c.grupos} grupo${c.grupos > 1 ? 's' : ''}`}
+                  {' · '}{fmtMin(c.duracionMin)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 interface Props {
   onCreated?: () => void
@@ -78,6 +196,8 @@ export default function StepFixture(_props: Props) {
           ))}
         </div>
       )}
+
+      <SimPreview categorias={categorias} allDesafio={allDesafio} />
     </div>
   )
 }
