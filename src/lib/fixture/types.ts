@@ -37,6 +37,7 @@ export interface CategoriaFixture {
 }
 
 export interface ConfigFixture {
+  con_grupos: boolean
   parejas_por_grupo: number
   cuantos_avanzan: number
   con_consolacion: boolean

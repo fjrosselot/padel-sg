@@ -186,7 +186,16 @@ export function buildFixture(
   config: ConfigFixture
 ): CategoriaFixture {
   _matchCounter = 0
-  const grupos = buildGroups(parejas, config)
+
+  let grupos: GrupoFixture[]
+  if (!config.con_grupos) {
+    // Americano puro: todos en un solo grupo, sin subdivisión
+    const partidos = generateRoundRobin(parejas, 'grupo', 'A')
+    grupos = [{ letra: 'A', parejas, partidos }]
+  } else {
+    grupos = buildGroups(parejas, config)
+  }
+
   const todosGrupo = grupos.flatMap(g => g.partidos)
   const conTurnos = distributeTurnos(todosGrupo, config)
 

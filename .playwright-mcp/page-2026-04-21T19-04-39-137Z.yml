@@ -1,0 +1,92 @@
+- generic:
+  - generic:
+    - generic:
+      - navigation:
+        - button:
+          - img
+        - list:
+          - listitem:
+            - link:
+              - /url: /dashboard
+              - img
+            - generic: Dashboard
+          - listitem:
+            - link:
+              - /url: /jugadores
+              - img
+            - generic: Jugadores
+          - listitem:
+            - link:
+              - /url: /rankings
+              - img
+            - generic: Rankings
+          - listitem:
+            - link:
+              - /url: /torneos
+              - img
+            - generic: Torneos
+          - listitem:
+            - link:
+              - /url: /ligas
+              - img
+            - generic: Ligas
+          - listitem:
+            - link:
+              - /url: /amistosos
+              - img
+            - generic: Amistosos
+          - listitem:
+            - link:
+              - /url: /calendario
+              - img
+            - generic: Calendario
+          - listitem:
+            - link:
+              - /url: /finanzas
+              - img
+            - generic: Finanzas
+        - generic:
+          - generic:
+            - link:
+              - /url: /admin/jugadores
+              - img
+            - generic: Admin
+      - generic:
+        - banner:
+          - generic:
+            - button:
+              - img
+            - button:
+              - generic: FR
+              - img
+        - main:
+          - generic:
+            - generic:
+              - heading [level=1]: Torneos
+              - button: + Nuevo torneo
+            - generic: No hay torneos creados aún.
+    - region "Notifications alt+T"
+  - dialog "Nuevo torneo" [active] [ref=e80]:
+    - heading "Nuevo torneo" [level=2] [ref=e82]
+    - generic [ref=e83]:
+      - generic [ref=e84]:
+        - paragraph [ref=e87]: Tipo
+        - paragraph [ref=e90]: Categorías
+        - paragraph [ref=e93]: Fixture
+        - paragraph [ref=e96]: Confirmar
+      - generic [ref=e184]:
+        - generic [ref=e185]:
+          - paragraph [ref=e186]: Americano Interno Mayo 2026
+          - paragraph [ref=e187]: Interno SG · 2026-05-10
+          - generic [ref=e188]:
+            - paragraph [ref=e189]: 5a (Varones) — 4 parejas
+            - paragraph [ref=e190]: 4a (Varones) — 4 parejas
+          - paragraph [ref=e191]: 2 canchas · 09:00 · 60min/partido
+        - button "Ver preview del fixture" [ref=e192] [cursor=pointer]
+        - button "Crear torneo" [ref=e193] [cursor=pointer]
+      - generic [ref=e115]:
+        - button "Atrás" [ref=e138] [cursor=pointer]
+        - button "Cancelar" [ref=e116] [cursor=pointer]
+    - button "Close" [ref=e118] [cursor=pointer]:
+      - img [ref=e119]
+      - generic [ref=e122]: Close

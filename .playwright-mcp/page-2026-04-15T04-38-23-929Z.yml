@@ -1,0 +1,74 @@
+- generic [ref=e5]:
+  - navigation [ref=e6]:
+    - img "Pádel SG" [ref=e8]: P·SG
+    - list [ref=e9]:
+      - listitem [ref=e10]:
+        - link "Dashboard" [ref=e11] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e12]
+      - listitem [ref=e17]:
+        - link "Jugadores" [ref=e18] [cursor=pointer]:
+          - /url: /jugadores
+          - img [ref=e19]
+      - listitem [ref=e24]:
+        - link "Rankings" [ref=e25] [cursor=pointer]:
+          - /url: /rankings
+          - img [ref=e26]
+      - listitem [ref=e32]:
+        - link "Torneos" [ref=e33] [cursor=pointer]:
+          - /url: /torneos
+          - img [ref=e34]
+      - listitem [ref=e36]:
+        - link "Ligas" [ref=e37] [cursor=pointer]:
+          - /url: /ligas
+          - img [ref=e38]
+      - listitem [ref=e42]:
+        - link "Amistosos" [ref=e43] [cursor=pointer]:
+          - /url: /amistosos
+          - img [ref=e44]
+      - listitem [ref=e49]:
+        - link "Calendario" [ref=e50] [cursor=pointer]:
+          - /url: /calendario
+          - img [ref=e51]
+      - listitem [ref=e53]:
+        - link "Finanzas" [ref=e54] [cursor=pointer]:
+          - /url: /finanzas
+          - img [ref=e55]
+    - link "Admin" [ref=e59] [cursor=pointer]:
+      - /url: /admin/usuarios
+      - img [ref=e60]
+  - generic [ref=e63]:
+    - banner [ref=e64]:
+      - generic [ref=e65]: Temporada
+      - combobox "Temporada" [ref=e66]:
+        - option "Temporada" [selected]
+      - generic [ref=e67]:
+        - button "Notificaciones" [ref=e68] [cursor=pointer]:
+          - img
+        - button "Ver perfil" [ref=e69] [cursor=pointer]:
+          - generic [ref=e70]: FR
+          - img [ref=e71]
+    - main [ref=e73]:
+      - generic [ref=e74]:
+        - generic [ref=e75]:
+          - heading "Ligas" [level=1] [ref=e76]
+          - button "+ Nueva liga" [ref=e77] [cursor=pointer]
+        - generic [ref=e78]: No hay ligas creadas aún.
+        - dialog "Nueva liga" [ref=e80]:
+          - heading "Nueva liga" [level=2] [ref=e81]
+          - generic [ref=e82]:
+            - generic [ref=e83]:
+              - paragraph [ref=e86]: Configuración
+              - paragraph [ref=e89]: Jugadores
+              - paragraph [ref=e92]: Confirmar
+            - generic [ref=e322]:
+              - generic [ref=e323]:
+                - paragraph [ref=e324]: Liga Test QA
+                - paragraph [ref=e325]: Round Robin · 2026-05-01
+                - paragraph [ref=e326]: 4 jugadores
+                - paragraph [ref=e327]: Se generarán 6 partidos automáticamente
+              - paragraph [ref=e329]: "[object Object]"
+              - button "Crear liga" [ref=e328] [cursor=pointer]
+            - generic [ref=e110]:
+              - button "Atrás" [ref=e314] [cursor=pointer]
+              - button "Cancelar" [ref=e111] [cursor=pointer]

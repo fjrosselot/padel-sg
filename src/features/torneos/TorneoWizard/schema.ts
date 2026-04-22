@@ -19,6 +19,7 @@ export const stepCategoriasSchema = z.object({
 })
 
 export const stepFixtureSchema = z.object({
+  con_grupos: z.boolean(),
   parejas_por_grupo: z.number().min(3).max(8),
   cuantos_avanzan: z.number().min(1).max(4),
   con_consolacion: z.boolean(),

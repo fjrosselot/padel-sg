@@ -41,13 +41,33 @@ export default function StepTipo() {
       <div className="space-y-4">
         <div>
           <Label htmlFor="nombre" className="label-editorial">Nombre del torneo</Label>
-          <Input id="nombre" placeholder="Torneo Otoño 2026" className="mt-1" {...register('nombre')} />
-          {errors.nombre && <p className="text-[#BA1A1A] text-sm mt-1">{errors.nombre.message}</p>}
+          <Input
+            id="nombre"
+            placeholder="Torneo Otoño 2026"
+            className={`mt-1 ${errors.nombre ? 'border-defeat focus-visible:ring-defeat/40' : ''}`}
+            {...register('nombre')}
+          />
+          {errors.nombre && (
+            <p className="text-defeat text-xs mt-1 flex items-center gap-1">
+              <span className="inline-block w-1 h-1 rounded-full bg-defeat" />
+              {errors.nombre.message}
+            </p>
+          )}
         </div>
         <div>
           <Label htmlFor="fecha_inicio" className="label-editorial">Fecha de inicio</Label>
-          <Input id="fecha_inicio" type="date" className="mt-1" {...register('fecha_inicio')} />
-          {errors.fecha_inicio && <p className="text-[#BA1A1A] text-sm mt-1">{errors.fecha_inicio.message}</p>}
+          <Input
+            id="fecha_inicio"
+            type="date"
+            className={`mt-1 ${errors.fecha_inicio ? 'border-defeat focus-visible:ring-defeat/40' : ''}`}
+            {...register('fecha_inicio')}
+          />
+          {errors.fecha_inicio && (
+            <p className="text-defeat text-xs mt-1 flex items-center gap-1">
+              <span className="inline-block w-1 h-1 rounded-full bg-defeat" />
+              {errors.fecha_inicio.message}
+            </p>
+          )}
         </div>
         {tipo === 'vs_colegio' && (
           <div>

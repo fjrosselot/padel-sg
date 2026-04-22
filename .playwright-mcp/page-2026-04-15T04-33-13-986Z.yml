@@ -1,0 +1,91 @@
+- generic [ref=e29]:
+  - navigation [ref=e30]:
+    - img "Pádel SG" [ref=e32]: P·SG
+    - list [ref=e33]:
+      - listitem [ref=e34]:
+        - link "Dashboard" [ref=e35] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e36]
+      - listitem [ref=e41]:
+        - link "Jugadores" [ref=e42] [cursor=pointer]:
+          - /url: /jugadores
+          - img [ref=e43]
+      - listitem [ref=e48]:
+        - link "Rankings" [ref=e49] [cursor=pointer]:
+          - /url: /rankings
+          - img [ref=e50]
+      - listitem [ref=e56]:
+        - link "Torneos" [ref=e57] [cursor=pointer]:
+          - /url: /torneos
+          - img [ref=e58]
+      - listitem [ref=e60]:
+        - link "Ligas" [ref=e61] [cursor=pointer]:
+          - /url: /ligas
+          - img [ref=e62]
+      - listitem [ref=e66]:
+        - link "Amistosos" [ref=e67] [cursor=pointer]:
+          - /url: /amistosos
+          - img [ref=e68]
+      - listitem [ref=e73]:
+        - link "Calendario" [ref=e74] [cursor=pointer]:
+          - /url: /calendario
+          - img [ref=e75]
+      - listitem [ref=e77]:
+        - link "Finanzas" [ref=e78] [cursor=pointer]:
+          - /url: /finanzas
+          - img [ref=e79]
+    - link "Admin" [ref=e83] [cursor=pointer]:
+      - /url: /admin/usuarios
+      - img [ref=e84]
+  - generic [ref=e87]:
+    - banner [ref=e88]:
+      - generic [ref=e89]: Temporada
+      - combobox "Temporada" [ref=e90]:
+        - option "Temporada" [selected]
+      - generic [ref=e91]:
+        - button "Notificaciones" [ref=e92] [cursor=pointer]:
+          - img
+        - button "Ver perfil" [ref=e93] [cursor=pointer]:
+          - generic [ref=e94]: FR
+          - img [ref=e95]
+    - main [ref=e97]:
+      - generic [ref=e98]:
+        - generic [ref=e99]:
+          - heading "Hola, Francisco" [level=1] [ref=e100]
+          - paragraph [ref=e101]: Bienvenido a la Rama Pádel Saint George's
+        - generic [ref=e102]:
+          - generic [ref=e103]:
+            - paragraph [ref=e104]: ELO
+            - paragraph [ref=e105]: "1200"
+          - generic [ref=e106]:
+            - paragraph [ref=e107]: Partidos
+            - paragraph [ref=e108]: "0"
+          - generic [ref=e109]:
+            - paragraph [ref=e110]: Victorias
+            - paragraph [ref=e111]: "0"
+          - generic [ref=e112]:
+            - paragraph [ref=e113]: Categoría
+            - paragraph [ref=e114]: 3a
+        - generic [ref=e115]:
+          - heading "Accesos rápidos" [level=2] [ref=e116]
+          - generic [ref=e117]:
+            - button "Torneos Inscripciones y resultados" [ref=e118] [cursor=pointer]:
+              - img [ref=e120]
+              - generic [ref=e122]:
+                - paragraph [ref=e123]: Torneos
+                - paragraph [ref=e124]: Inscripciones y resultados
+            - button "Ligas Round robin y escalerilla" [ref=e125] [cursor=pointer]:
+              - img [ref=e127]
+              - generic [ref=e131]:
+                - paragraph [ref=e132]: Ligas
+                - paragraph [ref=e133]: Round robin y escalerilla
+            - button "Amistosos Partidos libres" [ref=e134] [cursor=pointer]:
+              - img [ref=e136]
+              - generic [ref=e141]:
+                - paragraph [ref=e142]: Amistosos
+                - paragraph [ref=e143]: Partidos libres
+            - button "Ranking ELO y tabla general" [ref=e144] [cursor=pointer]:
+              - img [ref=e146]
+              - generic [ref=e152]:
+                - paragraph [ref=e153]: Ranking
+                - paragraph [ref=e154]: ELO y tabla general

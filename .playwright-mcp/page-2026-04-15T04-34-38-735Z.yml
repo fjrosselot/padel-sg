@@ -1,0 +1,94 @@
+- generic:
+  - generic:
+    - generic:
+      - navigation:
+        - generic:
+          - img: P·SG
+        - list:
+          - listitem:
+            - link:
+              - /url: /dashboard
+              - img
+          - listitem:
+            - link:
+              - /url: /jugadores
+              - img
+          - listitem:
+            - link:
+              - /url: /rankings
+              - img
+          - listitem:
+            - link:
+              - /url: /torneos
+              - img
+          - listitem:
+            - link:
+              - /url: /ligas
+              - img
+          - listitem:
+            - link:
+              - /url: /amistosos
+              - img
+          - listitem:
+            - link:
+              - /url: /calendario
+              - img
+          - listitem:
+            - link:
+              - /url: /finanzas
+              - img
+        - generic:
+          - link:
+            - /url: /admin/usuarios
+            - img
+      - generic:
+        - banner:
+          - generic: Temporada
+          - combobox
+          - generic:
+            - button:
+              - img
+            - button:
+              - generic: FR
+              - img
+        - main:
+          - generic:
+            - generic:
+              - heading [level=1]: Torneos
+              - button: + Nuevo torneo
+            - generic: No hay torneos creados aún.
+  - dialog "Nuevo torneo" [ref=e78]:
+    - heading "Nuevo torneo" [level=2] [ref=e80]
+    - generic [ref=e81]:
+      - generic [ref=e82]:
+        - paragraph [ref=e85]: Tipo
+        - paragraph [ref=e88]: Categorías
+        - paragraph [ref=e91]: Fixture
+        - paragraph [ref=e94]: Confirmar
+      - generic [ref=e95]:
+        - generic [ref=e96]:
+          - generic [ref=e97]: Tipo de torneo
+          - generic [ref=e98]:
+            - button "Interno SG Solo miembros de la rama entre sí" [active] [pressed] [ref=e99] [cursor=pointer]:
+              - paragraph [ref=e100]: Interno SG
+              - paragraph [ref=e101]: Solo miembros de la rama entre sí
+            - button "vs Colegio Saint George's vs otro colegio" [ref=e102] [cursor=pointer]:
+              - paragraph [ref=e103]: vs Colegio
+              - paragraph [ref=e104]: Saint George's vs otro colegio
+            - button "Externo Torneo en club o federación (seguimiento)" [ref=e105] [cursor=pointer]:
+              - paragraph [ref=e106]: Externo
+              - paragraph [ref=e107]: Torneo en club o federación (seguimiento)
+        - generic [ref=e108]:
+          - generic [ref=e109]:
+            - text: Nombre del torneo
+            - textbox "Nombre del torneo" [ref=e110]:
+              - /placeholder: Torneo Otoño 2026
+          - generic [ref=e111]:
+            - text: Fecha de inicio
+            - textbox "Fecha de inicio" [ref=e112]
+      - generic [ref=e113]:
+        - button "Cancelar" [ref=e114] [cursor=pointer]
+        - button "Siguiente" [ref=e115] [cursor=pointer]
+    - button "Close" [ref=e116] [cursor=pointer]:
+      - img [ref=e117]
+      - generic [ref=e120]: Close

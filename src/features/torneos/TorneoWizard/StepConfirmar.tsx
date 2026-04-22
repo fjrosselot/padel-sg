@@ -21,6 +21,7 @@ export default function StepConfirmar({ onCreated }: Props) {
   const qc = useQueryClient()
 
   const configFixture = {
+    con_grupos: values.con_grupos,
     parejas_por_grupo: values.parejas_por_grupo,
     cuantos_avanzan: values.cuantos_avanzan,
     con_consolacion: values.con_consolacion,

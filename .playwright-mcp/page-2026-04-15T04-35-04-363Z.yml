@@ -1,0 +1,81 @@
+- generic:
+  - generic:
+    - generic:
+      - navigation:
+        - generic:
+          - img: P·SG
+        - list:
+          - listitem:
+            - link:
+              - /url: /dashboard
+              - img
+          - listitem:
+            - link:
+              - /url: /jugadores
+              - img
+          - listitem:
+            - link:
+              - /url: /rankings
+              - img
+          - listitem:
+            - link:
+              - /url: /torneos
+              - img
+          - listitem:
+            - link:
+              - /url: /ligas
+              - img
+          - listitem:
+            - link:
+              - /url: /amistosos
+              - img
+          - listitem:
+            - link:
+              - /url: /calendario
+              - img
+          - listitem:
+            - link:
+              - /url: /finanzas
+              - img
+        - generic:
+          - link:
+            - /url: /admin/usuarios
+            - img
+      - generic:
+        - banner:
+          - generic: Temporada
+          - combobox
+          - generic:
+            - button:
+              - img
+            - button:
+              - generic: FR
+              - img
+        - main:
+          - generic:
+            - generic:
+              - heading [level=1]: Torneos
+              - button: + Nuevo torneo
+            - generic: No hay torneos creados aún.
+  - dialog "Nuevo torneo" [active] [ref=e78]:
+    - heading "Nuevo torneo" [level=2] [ref=e80]
+    - generic [ref=e81]:
+      - generic [ref=e82]:
+        - paragraph [ref=e85]: Tipo
+        - paragraph [ref=e88]: Categorías
+        - paragraph [ref=e91]: Fixture
+        - paragraph [ref=e94]: Confirmar
+      - generic [ref=e167]:
+        - generic [ref=e168]:
+          - paragraph [ref=e169]: Torneo Test QA
+          - paragraph [ref=e170]: Interno SG · 2026-05-01
+          - paragraph [ref=e172]: "3a: 4 parejas"
+          - paragraph [ref=e173]: 2 canchas · 09:00 · 60min/partido
+        - button "Ver preview del fixture" [ref=e174] [cursor=pointer]
+        - button "Crear torneo" [ref=e175] [cursor=pointer]
+      - generic [ref=e113]:
+        - button "Atrás" [ref=e134] [cursor=pointer]
+        - button "Cancelar" [ref=e114] [cursor=pointer]
+    - button "Close" [ref=e116] [cursor=pointer]:
+      - img [ref=e117]
+      - generic [ref=e120]: Close

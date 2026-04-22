@@ -1,0 +1,103 @@
+- generic:
+  - generic:
+    - generic:
+      - navigation:
+        - button:
+          - img
+        - list:
+          - listitem:
+            - link:
+              - /url: /dashboard
+              - img
+            - generic: Dashboard
+          - listitem:
+            - link:
+              - /url: /jugadores
+              - img
+            - generic: Jugadores
+          - listitem:
+            - link:
+              - /url: /rankings
+              - img
+            - generic: Rankings
+          - listitem:
+            - link:
+              - /url: /torneos
+              - img
+            - generic: Torneos
+          - listitem:
+            - link:
+              - /url: /ligas
+              - img
+            - generic: Ligas
+          - listitem:
+            - link:
+              - /url: /amistosos
+              - img
+            - generic: Amistosos
+          - listitem:
+            - link:
+              - /url: /calendario
+              - img
+            - generic: Calendario
+          - listitem:
+            - link:
+              - /url: /finanzas
+              - img
+            - generic: Finanzas
+        - generic:
+          - generic:
+            - link:
+              - /url: /admin/jugadores
+              - img
+            - generic: Admin
+      - generic:
+        - banner:
+          - generic:
+            - button:
+              - img
+            - button:
+              - generic: FR
+              - img
+        - main:
+          - generic:
+            - generic:
+              - heading [level=1]: Torneos
+              - button: + Nuevo torneo
+            - generic: No hay torneos creados aún.
+    - region "Notifications alt+T"
+  - dialog "Nuevo torneo" [ref=e80]:
+    - heading "Nuevo torneo" [level=2] [ref=e82]
+    - generic [ref=e83]:
+      - generic [ref=e84]:
+        - paragraph [ref=e87]: Tipo
+        - paragraph [ref=e90]: Categorías
+        - paragraph [ref=e93]: Fixture
+        - paragraph [ref=e96]: Confirmar
+      - generic [ref=e97]:
+        - generic [ref=e98]:
+          - generic [ref=e99]: Tipo de torneo
+          - generic [ref=e100]:
+            - button "Interno SG Solo miembros de la rama entre sí" [active] [pressed] [ref=e101] [cursor=pointer]:
+              - paragraph [ref=e102]: Interno SG
+              - paragraph [ref=e103]: Solo miembros de la rama entre sí
+            - button "vs Colegio Saint George's vs otro colegio" [ref=e104] [cursor=pointer]:
+              - paragraph [ref=e105]: vs Colegio
+              - paragraph [ref=e106]: Saint George's vs otro colegio
+            - button "Externo Torneo en club o federación (seguimiento)" [ref=e107] [cursor=pointer]:
+              - paragraph [ref=e108]: Externo
+              - paragraph [ref=e109]: Torneo en club o federación (seguimiento)
+        - generic [ref=e110]:
+          - generic [ref=e111]:
+            - text: Nombre del torneo
+            - textbox "Nombre del torneo" [ref=e112]:
+              - /placeholder: Torneo Otoño 2026
+          - generic [ref=e113]:
+            - text: Fecha de inicio
+            - textbox "Fecha de inicio" [ref=e114]
+      - generic [ref=e115]:
+        - button "Cancelar" [ref=e116] [cursor=pointer]
+        - button "Siguiente" [ref=e117] [cursor=pointer]
+    - button "Close" [ref=e118] [cursor=pointer]:
+      - img [ref=e119]
+      - generic [ref=e122]: Close

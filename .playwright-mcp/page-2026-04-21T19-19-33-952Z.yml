@@ -1,0 +1,112 @@
+- generic [ref=e2]:
+  - generic [ref=e4]:
+    - navigation [ref=e5]:
+      - button "Expandir menú" [ref=e6] [cursor=pointer]:
+        - img "Pádel SG" [ref=e7]
+      - list [ref=e8]:
+        - listitem [ref=e9]:
+          - link "Dashboard" [ref=e10] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e11]
+          - generic: Dashboard
+        - listitem [ref=e16]:
+          - link "Jugadores" [ref=e17] [cursor=pointer]:
+            - /url: /jugadores
+            - img [ref=e18]
+          - generic: Jugadores
+        - listitem [ref=e23]:
+          - link "Rankings" [ref=e24] [cursor=pointer]:
+            - /url: /rankings
+            - img [ref=e25]
+          - generic: Rankings
+        - listitem [ref=e31]:
+          - link "Torneos" [ref=e32] [cursor=pointer]:
+            - /url: /torneos
+            - img [ref=e33]
+          - generic: Torneos
+        - listitem [ref=e39]:
+          - link "Ligas" [ref=e40] [cursor=pointer]:
+            - /url: /ligas
+            - img [ref=e41]
+          - generic: Ligas
+        - listitem [ref=e43]:
+          - link "Amistosos" [ref=e44] [cursor=pointer]:
+            - /url: /amistosos
+            - img [ref=e45]
+          - generic: Amistosos
+        - listitem [ref=e50]:
+          - link "Calendario" [ref=e51] [cursor=pointer]:
+            - /url: /calendario
+            - img [ref=e52]
+          - generic: Calendario
+        - listitem [ref=e54]:
+          - link "Finanzas" [ref=e55] [cursor=pointer]:
+            - /url: /finanzas
+            - img [ref=e56]
+          - generic: Finanzas
+      - generic [ref=e60]:
+        - link "Admin" [ref=e61] [cursor=pointer]:
+          - /url: /admin/jugadores
+          - img [ref=e62]
+        - generic: Admin
+    - generic [ref=e65]:
+      - banner [ref=e66]:
+        - generic [ref=e67]:
+          - button "Notificaciones" [ref=e68] [cursor=pointer]:
+            - img
+          - button "Ver perfil" [ref=e69] [cursor=pointer]:
+            - generic [ref=e70]: FR
+            - img [ref=e71]
+      - main [ref=e73]:
+        - generic [ref=e74]:
+          - button "Torneos" [ref=e75] [cursor=pointer]:
+            - img [ref=e76]
+            - text: Torneos
+          - generic [ref=e78]:
+            - generic [ref=e79]:
+              - heading "Americano Interno Mayo 2026" [level=1] [ref=e80]
+              - paragraph [ref=e81]: 2026-05-10
+            - generic [ref=e82]: Inscripciones
+          - button "Generar fixture y comenzar" [ref=e113] [cursor=pointer]
+          - generic [ref=e85]:
+            - generic [ref=e86]:
+              - paragraph [ref=e87]: Fixture
+              - paragraph [ref=e88]: El fixture se generará cuando el torneo pase a inscripción.
+            - generic [ref=e89]:
+              - paragraph [ref=e90]: Inscripciones
+              - generic [ref=e91]:
+                - heading "Inscripciones" [level=2] [ref=e93]
+                - paragraph [ref=e94]: No hay inscripciones aún.
+            - generic [ref=e95]:
+              - paragraph [ref=e96]: Gestión de Roster
+              - generic [ref=e97]:
+                - paragraph [ref=e98]: Roster Admin
+                - generic [ref=e99]:
+                  - generic [ref=e100]:
+                    - generic [ref=e101]:
+                      - text: 5a
+                      - generic [ref=e102]: Varones · 0/4
+                    - button "+ Agregar pareja" [ref=e103] [cursor=pointer]
+                  - generic [ref=e114]:
+                    - paragraph [ref=e115]: Agregar pareja manualmente
+                    - generic [ref=e116]:
+                      - generic [ref=e117]:
+                        - generic [ref=e118]: Jugador 1
+                        - combobox [ref=e119]:
+                          - option "— elige —" [selected]
+                      - generic [ref=e120]:
+                        - generic [ref=e121]: Jugador 2
+                        - combobox [ref=e122]:
+                          - option "— elige —" [selected]
+                    - generic [ref=e123]:
+                      - button "Agregar" [disabled]
+                      - button "Cancelar" [ref=e124] [cursor=pointer]
+                  - paragraph [ref=e105]: Sin inscritos aún.
+                - generic [ref=e106]:
+                  - generic [ref=e107]:
+                    - generic [ref=e108]:
+                      - text: 4a
+                      - generic [ref=e109]: Varones · 0/4
+                    - button "+ Agregar pareja" [ref=e110] [cursor=pointer]
+                  - paragraph [ref=e112]: Sin inscritos aún.
+  - region "Notifications alt+T"

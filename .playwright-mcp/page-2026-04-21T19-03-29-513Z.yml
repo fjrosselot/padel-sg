@@ -1,0 +1,14 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - paragraph [ref=e6]: 💰
+    - heading "Finanzas Familiares" [level=1] [ref=e7]
+    - paragraph [ref=e8]: Acceso privado
+  - generic [ref=e9]:
+    - generic [ref=e10]:
+      - generic [ref=e11]: Email
+      - textbox [active] [ref=e12]
+    - generic [ref=e13]:
+      - generic [ref=e14]: Contraseña
+      - textbox [ref=e15]
+    - button "Entrar" [ref=e16] [cursor=pointer]
+    - button "¿Olvidaste tu contraseña?" [ref=e17] [cursor=pointer]

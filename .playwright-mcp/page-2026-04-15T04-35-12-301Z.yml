@@ -1,0 +1,61 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - img "Pádel SG" [ref=e6]: P·SG
+    - list [ref=e7]:
+      - listitem [ref=e8]:
+        - link "Dashboard" [ref=e9] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e10]
+      - listitem [ref=e15]:
+        - link "Jugadores" [ref=e16] [cursor=pointer]:
+          - /url: /jugadores
+          - img [ref=e17]
+      - listitem [ref=e22]:
+        - link "Rankings" [ref=e23] [cursor=pointer]:
+          - /url: /rankings
+          - img [ref=e24]
+      - listitem [ref=e30]:
+        - link "Torneos" [ref=e31] [cursor=pointer]:
+          - /url: /torneos
+          - img [ref=e32]
+      - listitem [ref=e34]:
+        - link "Ligas" [ref=e35] [cursor=pointer]:
+          - /url: /ligas
+          - img [ref=e36]
+      - listitem [ref=e40]:
+        - link "Amistosos" [ref=e41] [cursor=pointer]:
+          - /url: /amistosos
+          - img [ref=e42]
+      - listitem [ref=e47]:
+        - link "Calendario" [ref=e48] [cursor=pointer]:
+          - /url: /calendario
+          - img [ref=e49]
+      - listitem [ref=e51]:
+        - link "Finanzas" [ref=e52] [cursor=pointer]:
+          - /url: /finanzas
+          - img [ref=e53]
+    - link "Admin" [ref=e57] [cursor=pointer]:
+      - /url: /admin/usuarios
+      - img [ref=e58]
+  - generic [ref=e61]:
+    - banner [ref=e62]:
+      - generic [ref=e63]: Temporada
+      - combobox "Temporada" [ref=e64]:
+        - option "Temporada" [selected]
+      - generic [ref=e65]:
+        - button "Notificaciones" [ref=e66] [cursor=pointer]:
+          - img
+        - button "Ver perfil" [ref=e67] [cursor=pointer]:
+          - generic [ref=e68]: FR
+          - img [ref=e69]
+    - main [ref=e71]:
+      - generic [ref=e72]:
+        - generic [ref=e73]:
+          - heading "Torneos" [level=1] [ref=e74]
+          - button "+ Nuevo torneo" [ref=e75] [cursor=pointer]
+        - button "Ver torneo Torneo Test QA" [ref=e177] [cursor=pointer]:
+          - generic [ref=e178]:
+            - generic [ref=e179]:
+              - paragraph [ref=e180]: Torneo Test QA
+              - paragraph [ref=e181]: Interno · 2026-05-01
+            - generic [ref=e182]: Borrador

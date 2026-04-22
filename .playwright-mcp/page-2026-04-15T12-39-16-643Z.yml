@@ -1,0 +1,28 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - img "Pádel SG" [ref=e6]: P·SG
+    - paragraph [ref=e7]: Pádel Saint George's
+  - generic [ref=e8]:
+    - heading "Bienvenidos" [level=1] [ref=e9]
+    - paragraph [ref=e10]: Ingresa tus credenciales para continuar
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - generic [ref=e13]: Email
+        - textbox "Email" [ref=e14]:
+          - /placeholder: tu@email.com
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e17]: Contraseña
+          - link "¿Olvidaste la tuya?" [ref=e18] [cursor=pointer]:
+            - /url: /reset-password
+        - generic [ref=e19]:
+          - textbox "Contraseña" [ref=e20]:
+            - /placeholder: ••••••••
+          - button "Mostrar contraseña" [ref=e21] [cursor=pointer]:
+            - img [ref=e22]
+      - button "Iniciar sesión" [ref=e25] [cursor=pointer]
+  - paragraph [ref=e26]:
+    - text: ¿No tienes cuenta?
+    - link "Solicitar acceso" [ref=e27] [cursor=pointer]:
+      - /url: /registro
+  - paragraph [ref=e28]: v0.1.0

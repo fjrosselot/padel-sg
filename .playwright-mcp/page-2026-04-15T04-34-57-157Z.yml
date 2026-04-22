@@ -1,0 +1,104 @@
+- generic:
+  - generic:
+    - generic:
+      - navigation:
+        - generic:
+          - img: P·SG
+        - list:
+          - listitem:
+            - link:
+              - /url: /dashboard
+              - img
+          - listitem:
+            - link:
+              - /url: /jugadores
+              - img
+          - listitem:
+            - link:
+              - /url: /rankings
+              - img
+          - listitem:
+            - link:
+              - /url: /torneos
+              - img
+          - listitem:
+            - link:
+              - /url: /ligas
+              - img
+          - listitem:
+            - link:
+              - /url: /amistosos
+              - img
+          - listitem:
+            - link:
+              - /url: /calendario
+              - img
+          - listitem:
+            - link:
+              - /url: /finanzas
+              - img
+        - generic:
+          - link:
+            - /url: /admin/usuarios
+            - img
+      - generic:
+        - banner:
+          - generic: Temporada
+          - combobox
+          - generic:
+            - button:
+              - img
+            - button:
+              - generic: FR
+              - img
+        - main:
+          - generic:
+            - generic:
+              - heading [level=1]: Torneos
+              - button: + Nuevo torneo
+            - generic: No hay torneos creados aún.
+  - dialog "Nuevo torneo" [ref=e78]:
+    - heading "Nuevo torneo" [level=2] [ref=e80]
+    - generic [ref=e81]:
+      - generic [ref=e82]:
+        - paragraph [ref=e85]: Tipo
+        - paragraph [ref=e88]: Categorías
+        - paragraph [ref=e91]: Fixture
+        - paragraph [ref=e94]: Confirmar
+      - generic [ref=e143]:
+        - generic [ref=e144]:
+          - generic [ref=e145]:
+            - text: Parejas por grupo
+            - spinbutton "Parejas por grupo" [ref=e146]: "4"
+          - generic [ref=e147]:
+            - text: Avanzan por grupo
+            - spinbutton "Avanzan por grupo" [ref=e148]: "2"
+          - generic [ref=e149]:
+            - text: Canchas disponibles
+            - spinbutton "Canchas disponibles" [ref=e150]: "2"
+          - generic [ref=e151]:
+            - text: Hora de inicio
+            - textbox "Hora de inicio" [ref=e152]: 09:00
+          - generic [ref=e153]:
+            - text: Duración partido (min)
+            - spinbutton "Duración partido (min)" [ref=e154]: "60"
+          - generic [ref=e155]:
+            - text: Pausa entre partidos (min)
+            - spinbutton "Pausa entre partidos (min)" [ref=e156]: "15"
+        - generic [ref=e157]:
+          - generic [ref=e158] [cursor=pointer]:
+            - checkbox "Copa de consolación (Plata)" [checked] [ref=e159]
+            - generic [ref=e160]: Copa de consolación (Plata)
+          - generic [ref=e161] [cursor=pointer]:
+            - checkbox "Partido por tercer lugar" [checked] [ref=e162]
+            - generic [ref=e163]: Partido por tercer lugar
+          - generic [ref=e164] [cursor=pointer]:
+            - checkbox "Fixture compacto (no esperar fin de ronda)" [ref=e165]
+            - generic [ref=e166]: Fixture compacto (no esperar fin de ronda)
+      - generic [ref=e113]:
+        - button "Atrás" [ref=e134] [cursor=pointer]
+        - button "Cancelar" [ref=e114] [cursor=pointer]
+        - button "Siguiente" [active] [ref=e115] [cursor=pointer]
+    - button "Close" [ref=e116] [cursor=pointer]:
+      - img [ref=e117]
+      - generic [ref=e120]: Close

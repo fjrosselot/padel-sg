@@ -24,6 +24,7 @@ export default function TorneoWizard({ onClose, onCreated }: Props) {
       nombre: '',
       fecha_inicio: '',
       categorias: [],
+      con_grupos: true,
       parejas_por_grupo: 4,
       cuantos_avanzan: 2,
       con_consolacion: true,

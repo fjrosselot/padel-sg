@@ -3,6 +3,7 @@ import { generateRoundRobin, buildGroups, buildPlayoffs, buildFixture, buildDesa
 import type { ParejaFixture, CategoriaConfig, ConfigFixture } from './types'
 
 const defaultConfig: ConfigFixture = {
+  con_grupos: true,
   parejas_por_grupo: 4,
   cuantos_avanzan: 2,
   con_consolacion: true,
@@ -15,6 +16,7 @@ const defaultConfig: ConfigFixture = {
 }
 
 const baseConfig: ConfigFixture = {
+  con_grupos: true,
   parejas_por_grupo: 4, cuantos_avanzan: 2, con_consolacion: false,
   con_tercer_lugar: false, duracion_partido: 60, pausa_entre_partidos: 10,
   num_canchas: 4, hora_inicio: '09:00', fixture_compacto: false,

@@ -1,0 +1,66 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - button "Expandir menú" [ref=e5] [cursor=pointer]:
+        - img "Pádel SG" [ref=e6]
+      - list [ref=e7]:
+        - listitem [ref=e8]:
+          - link "Dashboard" [ref=e9] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e10]
+          - generic: Dashboard
+        - listitem [ref=e15]:
+          - link "Jugadores" [ref=e16] [cursor=pointer]:
+            - /url: /jugadores
+            - img [ref=e17]
+          - generic: Jugadores
+        - listitem [ref=e22]:
+          - link "Rankings" [ref=e23] [cursor=pointer]:
+            - /url: /rankings
+            - img [ref=e24]
+          - generic: Rankings
+        - listitem [ref=e30]:
+          - link "Torneos" [ref=e31] [cursor=pointer]:
+            - /url: /torneos
+            - img [ref=e32]
+          - generic: Torneos
+        - listitem [ref=e38]:
+          - link "Ligas" [ref=e39] [cursor=pointer]:
+            - /url: /ligas
+            - img [ref=e40]
+          - generic: Ligas
+        - listitem [ref=e42]:
+          - link "Amistosos" [ref=e43] [cursor=pointer]:
+            - /url: /amistosos
+            - img [ref=e44]
+          - generic: Amistosos
+        - listitem [ref=e49]:
+          - link "Calendario" [ref=e50] [cursor=pointer]:
+            - /url: /calendario
+            - img [ref=e51]
+          - generic: Calendario
+        - listitem [ref=e53]:
+          - link "Finanzas" [ref=e54] [cursor=pointer]:
+            - /url: /finanzas
+            - img [ref=e55]
+          - generic: Finanzas
+      - generic [ref=e59]:
+        - link "Admin" [ref=e60] [cursor=pointer]:
+          - /url: /admin/jugadores
+          - img [ref=e61]
+        - generic: Admin
+    - generic [ref=e64]:
+      - banner [ref=e65]:
+        - generic [ref=e66]:
+          - button "Notificaciones" [ref=e67] [cursor=pointer]:
+            - img
+          - button "Ver perfil" [ref=e68] [cursor=pointer]:
+            - generic [ref=e69]: FR
+            - img [ref=e70]
+      - main [ref=e72]:
+        - generic [ref=e73]:
+          - generic [ref=e74]:
+            - heading "Torneos" [level=1] [ref=e75]
+            - button "+ Nuevo torneo" [ref=e76] [cursor=pointer]
+          - generic [ref=e77]: Cargando torneos…
+  - region "Notifications alt+T"

@@ -1,0 +1,113 @@
+- generic:
+  - generic:
+    - generic:
+      - navigation:
+        - button:
+          - img
+        - list:
+          - listitem:
+            - link:
+              - /url: /dashboard
+              - img
+            - generic: Dashboard
+          - listitem:
+            - link:
+              - /url: /jugadores
+              - img
+            - generic: Jugadores
+          - listitem:
+            - link:
+              - /url: /rankings
+              - img
+            - generic: Rankings
+          - listitem:
+            - link:
+              - /url: /torneos
+              - img
+            - generic: Torneos
+          - listitem:
+            - link:
+              - /url: /ligas
+              - img
+            - generic: Ligas
+          - listitem:
+            - link:
+              - /url: /amistosos
+              - img
+            - generic: Amistosos
+          - listitem:
+            - link:
+              - /url: /calendario
+              - img
+            - generic: Calendario
+          - listitem:
+            - link:
+              - /url: /finanzas
+              - img
+            - generic: Finanzas
+        - generic:
+          - generic:
+            - link:
+              - /url: /admin/jugadores
+              - img
+            - generic: Admin
+      - generic:
+        - banner:
+          - generic:
+            - button:
+              - img
+            - button:
+              - generic: FR
+              - img
+        - main:
+          - generic:
+            - generic:
+              - heading [level=1]: Torneos
+              - button: + Nuevo torneo
+            - generic: No hay torneos creados aún.
+    - region "Notifications alt+T"
+  - dialog "Nuevo torneo" [ref=e80]:
+    - heading "Nuevo torneo" [level=2] [ref=e82]
+    - generic [ref=e83]:
+      - generic [ref=e84]:
+        - paragraph [ref=e87]: Tipo
+        - paragraph [ref=e90]: Categorías
+        - paragraph [ref=e93]: Fixture
+        - paragraph [ref=e96]: Confirmar
+      - generic [ref=e160]:
+        - generic [ref=e161]:
+          - generic [ref=e162]:
+            - text: Parejas por grupo
+            - spinbutton "Parejas por grupo" [ref=e163]: "4"
+          - generic [ref=e164]:
+            - text: Avanzan por grupo
+            - spinbutton "Avanzan por grupo" [ref=e165]: "2"
+          - generic [ref=e166]:
+            - text: Canchas disponibles
+            - spinbutton "Canchas disponibles" [ref=e167]: "2"
+          - generic [ref=e168]:
+            - text: Hora de inicio
+            - textbox "Hora de inicio" [ref=e169]: 09:00
+          - generic [ref=e170]:
+            - text: Duración partido (min)
+            - spinbutton "Duración partido (min)" [ref=e171]: "60"
+          - generic [ref=e172]:
+            - text: Pausa entre partidos (min)
+            - spinbutton "Pausa entre partidos (min)" [ref=e173]: "15"
+        - generic [ref=e174]:
+          - generic [ref=e175] [cursor=pointer]:
+            - checkbox "Copa de consolación (Plata)" [checked] [ref=e176]
+            - generic [ref=e177]: Copa de consolación (Plata)
+          - generic [ref=e178] [cursor=pointer]:
+            - checkbox "Partido por tercer lugar" [checked] [ref=e179]
+            - generic [ref=e180]: Partido por tercer lugar
+          - generic [ref=e181] [cursor=pointer]:
+            - checkbox "Fixture compacto (no esperar fin de ronda)" [ref=e182]
+            - generic [ref=e183]: Fixture compacto (no esperar fin de ronda)
+      - generic [ref=e115]:
+        - button "Atrás" [ref=e138] [cursor=pointer]
+        - button "Cancelar" [ref=e116] [cursor=pointer]
+        - button "Siguiente" [active] [ref=e117] [cursor=pointer]
+    - button "Close" [ref=e118] [cursor=pointer]:
+      - img [ref=e119]
+      - generic [ref=e122]: Close

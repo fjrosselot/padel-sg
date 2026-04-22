@@ -1,0 +1,98 @@
+- generic:
+  - generic:
+    - generic:
+      - navigation:
+        - button:
+          - img
+        - list:
+          - listitem:
+            - link:
+              - /url: /dashboard
+              - img
+            - generic: Dashboard
+          - listitem:
+            - link:
+              - /url: /jugadores
+              - img
+            - generic: Jugadores
+          - listitem:
+            - link:
+              - /url: /rankings
+              - img
+            - generic: Rankings
+          - listitem:
+            - link:
+              - /url: /torneos
+              - img
+            - generic: Torneos
+          - listitem:
+            - link:
+              - /url: /ligas
+              - img
+            - generic: Ligas
+          - listitem:
+            - link:
+              - /url: /amistosos
+              - img
+            - generic: Amistosos
+          - listitem:
+            - link:
+              - /url: /calendario
+              - img
+            - generic: Calendario
+          - listitem:
+            - link:
+              - /url: /finanzas
+              - img
+            - generic: Finanzas
+        - generic:
+          - generic:
+            - link:
+              - /url: /admin/jugadores
+              - img
+            - generic: Admin
+      - generic:
+        - banner:
+          - generic:
+            - button:
+              - img
+            - button:
+              - generic: FR
+              - img
+        - main:
+          - generic:
+            - generic:
+              - heading [level=1]: Torneos
+              - button: + Nuevo torneo
+            - generic: No hay torneos creados aún.
+    - region "Notifications alt+T"
+  - dialog "Nuevo torneo" [ref=e80]:
+    - heading "Nuevo torneo" [level=2] [ref=e82]
+    - generic [ref=e83]:
+      - generic [ref=e84]:
+        - paragraph [ref=e87]: Tipo
+        - paragraph [ref=e90]: Categorías
+        - paragraph [ref=e93]: Fixture
+        - paragraph [ref=e96]: Confirmar
+      - generic [ref=e123]:
+        - generic [ref=e124]:
+          - generic [ref=e125]: Categorías participantes
+          - generic [ref=e126]:
+            - button "Agregar categoría D" [ref=e127] [cursor=pointer]: + D
+            - button "Agregar categoría C" [ref=e128] [cursor=pointer]: + C
+            - button "Agregar categoría B" [ref=e129] [cursor=pointer]: + B
+            - button "Agregar categoría Open Damas" [ref=e130] [cursor=pointer]: + Open Damas
+            - button "Agregar categoría 5a" [ref=e131] [cursor=pointer]: + 5a
+            - button "Agregar categoría 4a" [ref=e132] [cursor=pointer]: + 4a
+            - button "Agregar categoría 3a" [ref=e133] [cursor=pointer]: + 3a
+            - button "Agregar categoría Open Varones" [ref=e134] [cursor=pointer]: + Open Varones
+            - button "Agregar categoría Mixto" [ref=e135] [cursor=pointer]: + Mixto
+        - paragraph [ref=e136]: Agrega al menos una categoría.
+        - button "+ Agregar categoría" [ref=e137] [cursor=pointer]
+      - generic [ref=e115]:
+        - button "Atrás" [ref=e138] [cursor=pointer]
+        - button "Cancelar" [ref=e116] [cursor=pointer]
+        - button "Siguiente" [active] [ref=e117] [cursor=pointer]
+    - button "Close" [ref=e118] [cursor=pointer]:
+      - img [ref=e119]
+      - generic [ref=e122]: Close
