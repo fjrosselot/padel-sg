@@ -1,5 +1,24 @@
 # DEVLOG — padel-sg
 
+## [2026-04-22 00:30] — Fix Copa Plata + motor fixture completo + mobile login UX
+
+**Resumen:** Se completó la extracción del cálculo matemático del repo de referencia. Copa Plata ahora genera un bracket completo (potencia de 2) en vez de siempre 1 partido. La simulación de StepFixture calcula correctamente `silverTeams = grupos × (ppg - apg)`. En mobile, el heading "Bienvenidos" duplicado fue eliminado del form card y el párrafo del hero fue acortado para ganar espacio vertical.
+
+**Archivos:** `src/lib/fixture/engine.ts`, `src/lib/fixture/types.ts`, `src/features/torneos/TorneoWizard/StepFixture.tsx`, `src/features/torneos/TorneoWizard/FixtureGantt.tsx`, `src/features/auth/LoginForm.tsx`, `package.json`
+
+**Decisiones:**
+- Se extrajo `buildBracket()` helper reutilizable para gold y silver brackets con nombres de fase configurables
+- `buildPlayoffs` recibe `nonClassified?: ParejaFixture[]` — buildFixture los pasa desde `g.parejas.slice(cuantos_avanzan)`
+- Mobile login: `formContent` convertido a función `formContent(showHeading)` para reutilizar sin duplicar JSX
+- Fase `consolacion_cuartos` agregada al union type para brackets plata de 8+ equipos
+
+**Pendientes:**
+- [ ] `fixture_compacto`: el toggle existe pero el scheduler siempre usa modo greedy (no strict-rounds)
+- [ ] Vista de fixture real en TorneoDetalle (bracket visual con resultados)
+- [ ] Flujo de inscripción de parejas a torneo
+
+---
+
 ## [2026-04-21 17:00] — Fix auth + mejoras UX: sort jugadores, rename evento ranking
 
 **Resumen:** Se encontró y eliminó el root cause del bug recurrente "sin jugadores": el flag `psg_emergency_session` en sessionStorage hacía que `useUser()` devolviera un DEV_USER falso, ejecutando todas las queries sin JWT real (RLS retornaba `[]`). Se eliminó el bypass de emergencia de `useUser` y `AuthGuard`. También se ordenó el listado de jugadores por apellido y se renombró el evento de ranking "Torneo Externo Abril 2026" → "OSP Primera Fecha 2026".
