@@ -38,7 +38,6 @@ Versión inicial MVP: 0.1.0
 - **Auth:** Supabase Auth (email/password) con aprobación manual de admin
 - **Deploy:** Vercel
 - **Repo:** https://github.com/fjrosselot/padel-sg
-- **Referencia previa:** Existe versión anterior en Netlify — revisar qué lógica reutilizar
 
 > ⚠️ NO usar Firebase. Supabase cubre todos los casos de uso sin tiempo real.
 > Una sola instancia Supabase Pro con schema separado `padel`.
