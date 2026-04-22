@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import { Camera } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useUser } from '../../hooks/useUser'
 import { padelApi } from '../../lib/padelApi'
+import { usePlayerRankings } from '../../hooks/usePlayerRankings'
 import { PuntosHistorial } from '../ranking/PuntosHistorial'
+import AvatarCropModal from '../../components/AvatarCropModal'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
@@ -36,17 +39,44 @@ export default function PerfilPage() {
   const navigate = useNavigate()
   const qc = useQueryClient()
 
-  const { data: rankingInfo } = useQuery({
-    queryKey: ['ranking-jugador', user?.id, user?.categoria],
-    queryFn: async () => {
-      const rows = await padelApi.get<{ jugador_id: string; puntos_total: number }[]>(
-        `ranking_categoria?categoria=eq.${encodeURIComponent(user!.categoria!)}&select=jugador_id,puntos_total&order=puntos_total.desc`
-      )
-      const pos = rows.findIndex(r => r.jugador_id === user!.id) + 1
-      return { pos: pos > 0 ? pos : null, puntos: rows.find(r => r.jugador_id === user!.id)?.puntos_total ?? 0 }
-    },
-    enabled: !!user?.id && !!user?.categoria,
-  })
+  const { data: rankings } = usePlayerRankings(user?.id)
+
+  // Avatar upload state
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [avatarError, setAvatarError] = useState<string | null>(null)
+  const [cropSrc, setCropSrc] = useState<string | null>(null)
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setAvatarError('Solo se permiten imágenes JPG, PNG o WebP.')
+      return
+    }
+    setAvatarError(null)
+    const reader = new FileReader()
+    reader.onload = () => setCropSrc(reader.result as string)
+    reader.readAsDataURL(file)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const handleCropConfirm = async (blob: Blob) => {
+    if (!user) return
+    setCropSrc(null)
+    setAvatarUploading(true)
+    const path = `${user.id}/avatar.jpg`
+    const { error: uploadError } = await supabase.storage.from('avatars').upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
+    if (uploadError) {
+      setAvatarError('Error al subir la imagen. Intenta nuevamente.')
+      setAvatarUploading(false)
+      return
+    }
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+    await padelApi.patch('jugadores', `id=eq.${user.id}`, { foto_url: `${publicUrl}?t=${Date.now()}` })
+    qc.invalidateQueries({ queryKey: ['user'] })
+    setAvatarUploading(false)
+  }
 
   // Password change state
   const [password, setPassword] = useState('')
@@ -123,19 +153,43 @@ export default function PerfilPage() {
   const initials = user?.nombre?.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() ?? '??'
 
   return (
-    <div className="space-y-6 max-w-md">
+    <div className="space-y-6">
+      {cropSrc && (
+        <AvatarCropModal
+          imageSrc={cropSrc}
+          open={!!cropSrc}
+          onClose={() => setCropSrc(null)}
+          onConfirm={handleCropConfirm}
+        />
+      )}
+
       <h1 className="font-manrope text-2xl font-bold text-navy">Mi perfil</h1>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+      {/* Columna izquierda: info básica */}
+      <div className="space-y-6">
       {/* Info básica */}
       <div className="rounded-xl bg-white shadow-card p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-navy flex items-center justify-center overflow-hidden shrink-0">
-              {user?.foto_url
-                ? <img src={user.foto_url} alt={user.nombre} className="h-full w-full object-cover" />
-                : <span className="font-manrope text-sm font-bold text-gold">{initials}</span>
-              }
-            </div>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="relative h-14 w-14 rounded-full bg-navy flex items-center justify-center overflow-hidden shrink-0 group focus:outline-none"
+              aria-label="Cambiar foto de perfil"
+            >
+              {avatarUploading ? (
+                <span className="h-4 w-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+              ) : user?.foto_url ? (
+                <img src={user.foto_url} alt={user.nombre} className="h-full w-full object-cover" />
+              ) : (
+                <span className="font-manrope text-sm font-bold text-gold">{initials}</span>
+              )}
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="h-4 w-4 text-white" />
+              </div>
+            </button>
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarChange} />
             <div>
               <p className="font-manrope text-base font-bold text-navy">{user?.nombre}</p>
               <p className="font-inter text-xs text-muted">{user?.email}</p>
@@ -150,19 +204,32 @@ export default function PerfilPage() {
           </button>
         </div>
 
+        {avatarError && (
+          <p className="font-inter text-xs text-defeat">{avatarError}</p>
+        )}
+
         {!editMode ? (
           <div className="grid grid-cols-2 gap-2 pt-1">
-            {[
-              { label: 'Apodo', value: user?.apodo ?? '—' },
-              { label: 'Ranking', value: rankingInfo?.pos ? `${user?.categoria} / #${rankingInfo.pos} · ${rankingInfo.puntos} pts` : '—' },
-              { label: 'Categoría', value: user?.categoria ?? '—' },
-              { label: 'Lado preferido', value: user?.lado_preferido ?? '—' },
-            ].map(({ label, value }) => (
-              <div key={label}>
-                <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted">{label}</p>
-                <p className="font-manrope text-sm font-bold text-navy capitalize">{String(value)}</p>
-              </div>
-            ))}
+            <div>
+              <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted">Apodo</p>
+              <p className="font-manrope text-sm font-bold text-navy">{user?.apodo ?? '—'}</p>
+            </div>
+            <div>
+              <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted">Categoría</p>
+              <p className="font-manrope text-sm font-bold text-navy">{user?.categoria ?? '—'}</p>
+            </div>
+            <div>
+              <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted">Lado preferido</p>
+              <p className="font-manrope text-sm font-bold text-navy capitalize">{user?.lado_preferido ?? '—'}</p>
+            </div>
+            <div>
+              <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted">Rankings</p>
+              {rankings && rankings.length > 0 ? rankings.map(r => (
+                <p key={`${r.categoria}_${r.sexo}`} className="font-manrope text-sm font-bold text-navy">
+                  {r.categoria} · #{r.posicion} <span className="font-normal text-muted text-xs">({r.puntos_total} pts)</span>
+                </p>
+              )) : <p className="font-manrope text-sm font-bold text-navy">—</p>}
+            </div>
           </div>
         ) : (
           <div className="space-y-4 pt-1">
@@ -212,91 +279,67 @@ export default function PerfilPage() {
         )}
       </div>
 
-      {/* Cambio de contraseña */}
-      <div className="rounded-xl bg-white shadow-card p-4 space-y-4">
-        <h2 className="font-manrope text-sm font-bold text-navy">Cambiar contraseña</h2>
-
+      {/* Contraseña compacta */}
+      <div className="rounded-xl bg-white shadow-card p-4">
+        <h2 className="font-manrope text-sm font-bold text-navy mb-3">Cambiar contraseña</h2>
         {pwSuccess && (
-          <div role="alert" className="rounded-lg border border-success/30 bg-success/10 px-4 py-3 font-inter text-sm text-success">
-            Contraseña actualizada correctamente.
-          </div>
+          <p className="font-inter text-xs text-success mb-3">Contraseña actualizada correctamente.</p>
         )}
-
-        <form onSubmit={handleChangePassword} className="space-y-4">
-          <div>
-            <Label htmlFor="perfil-password">Nueva contraseña</Label>
-            <div className="relative mt-1">
+        <form onSubmit={handleChangePassword} className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="relative">
               <Input
                 id="perfil-password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="Mínimo 8 caracteres"
+                placeholder="Nueva contraseña"
                 required
-                className="pr-11"
+                className="pr-9 h-9 text-sm"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate hover:text-muted"
+                aria-label={showPassword ? 'Ocultar' : 'Mostrar'}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate hover:text-muted"
               >
                 {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                 )}
               </button>
             </div>
-          </div>
-
-          <div>
-            <Label htmlFor="perfil-confirm">Confirmar contraseña</Label>
             <Input
               id="perfil-confirm"
               type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
               value={confirm}
               onChange={e => setConfirm(e.target.value)}
-              placeholder="Repite la contraseña"
+              placeholder="Confirmar contraseña"
               required
-              className="mt-1"
+              className="h-9 text-sm"
             />
           </div>
-
-          {pwError && (
-            <div role="alert" className="rounded-lg border border-defeat/30 bg-defeat/10 px-4 py-3 font-inter text-sm text-defeat">
-              {pwError}
-            </div>
-          )}
-
-          <Button
-            type="submit"
-            disabled={pwLoading}
-            className="w-full bg-gold text-navy font-bold rounded-lg"
-          >
+          {pwError && <p className="font-inter text-xs text-defeat">{pwError}</p>}
+          <Button type="submit" disabled={pwLoading} className="w-full h-9 bg-gold text-navy font-bold rounded-lg text-sm">
             {pwLoading ? 'Guardando…' : 'Cambiar contraseña'}
           </Button>
         </form>
       </div>
 
-      {/* Historial de puntos */}
-      {user?.id && <PuntosHistorial jugadorId={user.id} />}
-
       {/* Cerrar sesión */}
-      <Button
-        variant="outline"
-        onClick={handleSignOut}
-        className="w-full border border-defeat/40 text-defeat hover:bg-defeat/10"
-      >
+      <Button variant="outline" onClick={handleSignOut} className="w-full border border-defeat/40 text-defeat hover:bg-defeat/10">
         Cerrar sesión
       </Button>
+      </div>{/* fin columna izquierda */}
+
+      {/* Columna derecha: historial */}
+      <div className="space-y-6">
+      {user?.id && <PuntosHistorial jugadorId={user.id} />}
+      </div>{/* fin columna derecha */}
+      </div>{/* fin grid */}
     </div>
   )
 }

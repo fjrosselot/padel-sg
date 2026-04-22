@@ -30,4 +30,6 @@ export const padelApi = {
     }) as Promise<T>,
   patch: (table: string, filter: string, body: unknown) => req(`${table}?${filter}`, 'PATCH', body),
   delete: (table: string, filter: string) => req(`${table}?${filter}`, 'DELETE'),
+  rpc: <T = unknown>(fn: string, params?: Record<string, unknown>) =>
+    req(`rpc/${fn}`, 'POST', params ?? {}) as Promise<T>,
 }

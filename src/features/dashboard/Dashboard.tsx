@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Trophy, BarChart3, Handshake, Medal } from 'lucide-react'
 import { useUser } from '@/hooks/useUser'
 import { padelApi } from '@/lib/padelApi'
+import { usePlayerRankings } from '@/hooks/usePlayerRankings'
 
 const QUICK_LINKS = [
   { to: '/torneos', icon: Trophy, label: 'Torneos', desc: 'Inscripciones y resultados' },
@@ -38,18 +39,7 @@ export function Dashboard() {
     },
   })
 
-  const { data: rankingCat } = useQuery({
-    queryKey: ['ranking-cat-pos', user?.id, user?.categoria],
-    enabled: !!user?.id && !!user?.categoria,
-    queryFn: async () => {
-      const rows = await padelApi.get<{ jugador_id: string; puntos_total: number }[]>(
-        `ranking_categoria?categoria=eq.${encodeURIComponent(user!.categoria!)}&select=jugador_id,puntos_total&order=puntos_total.desc`
-      )
-      const pos = rows.findIndex(r => r.jugador_id === user!.id) + 1
-      const puntos = rows.find(r => r.jugador_id === user!.id)?.puntos_total ?? 0
-      return { pos: pos > 0 ? pos : null, puntos, total: rows.length }
-    },
-  })
+  const { data: rankings } = usePlayerRankings(user?.id)
 
   const firstName = user?.nombre_pila ?? user?.nombre?.split(' ')[0] ?? 'Jugador'
 
@@ -70,11 +60,21 @@ export function Dashboard() {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="Categoría" value={user?.categoria ?? '—'} />
-        <StatCard
-          label="Ranking"
-          value={rankingCat?.pos ? `#${rankingCat.pos}` : '—'}
-          sub={rankingCat?.pos ? `${rankingCat.puntos} pts` : undefined}
-        />
+        <div className="rounded-xl bg-white p-4 shadow-card">
+          <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted">Ranking</p>
+          {rankings && rankings.length > 0 ? (
+            <div className="mt-1 space-y-1">
+              {rankings.map(r => (
+                <div key={`${r.categoria}_${r.sexo}`} className="flex items-baseline gap-1.5">
+                  <span className="font-manrope text-xl font-bold text-navy leading-tight">#{r.posicion}</span>
+                  <span className="font-inter text-xs text-muted">{r.categoria} · {r.puntos_total} pts</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-1 font-manrope text-2xl font-bold text-navy leading-tight">—</p>
+          )}
+        </div>
         <StatCard label="Partidos" value={stats ? jugados : '—'} />
         <StatCard
           label="Ganados"

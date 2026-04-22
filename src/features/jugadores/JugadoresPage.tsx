@@ -280,7 +280,7 @@ export default function JugadoresPage() {
 
       <div className="space-y-2">
         {categorias.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-0.5 no-scrollbar">
             <FilterPill label="Todas" active={filtroCategoria === 'todas'} onClick={() => setFiltroCategoria('todas')} />
             {categorias.map(cat => (
               <FilterPill key={cat} label={cat} active={filtroCategoria === cat}
@@ -288,7 +288,7 @@ export default function JugadoresPage() {
             ))}
           </div>
         )}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-0.5 no-scrollbar">
           <FilterPill label="Hombre" active={filtroSexo === 'M'} onClick={() => setFiltroSexo(filtroSexo === 'M' ? 'todos' : 'M')} />
           <FilterPill label="Mujer" active={filtroSexo === 'F'} onClick={() => setFiltroSexo(filtroSexo === 'F' ? 'todos' : 'F')} />
           <div className="w-px bg-navy/10 shrink-0" />
@@ -371,7 +371,7 @@ export default function JugadoresPage() {
             {rows.map((row, idx) => {
               const j = row.original
               const tags = [
-                j.categoria ? `Cat. ${j.categoria}` : null,
+                j.categoria ?? null,
                 j.lado_preferido ? LADO_LABEL[j.lado_preferido] : null,
                 j.mixto && j.mixto !== 'no' ? MIXTO_LABEL[j.mixto] : null,
               ].filter(Boolean)

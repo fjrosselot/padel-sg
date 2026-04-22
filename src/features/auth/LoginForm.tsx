@@ -27,17 +27,13 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string
 const ANON_KEY_VAL = import.meta.env.VITE_SUPABASE_ANON_KEY as string
 
 async function fetchLoginStats() {
-  const headers = { apikey: ANON_KEY_VAL, Authorization: `Bearer ${ANON_KEY_VAL}`, 'Accept-Profile': 'padel' }
-  const [jugRes, torRes, parRes] = await Promise.all([
-    fetch(`${SUPABASE_URL}/rest/v1/jugadores?select=id&estado_cuenta=eq.activo`, { headers }),
-    fetch(`${SUPABASE_URL}/rest/v1/torneos?select=id&fecha_inicio=gte.2026-01-01&fecha_inicio=lt.2027-01-01`, { headers }),
-    fetch(`${SUPABASE_URL}/rest/v1/partidos?select=id&estado=eq.jugado`, { headers }),
-  ])
-  const [jugs, tors, parts] = await Promise.all([jugRes.json(), torRes.json(), parRes.json()])
+  const headers = { apikey: ANON_KEY_VAL, Authorization: `Bearer ${ANON_KEY_VAL}`, 'Content-Profile': 'padel', 'Content-Type': 'application/json' }
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_login_stats`, { method: 'POST', headers, body: '{}' })
+  const data = await res.json()
   return {
-    jugadores: Array.isArray(jugs) ? jugs.length : 0,
-    torneos: Array.isArray(tors) ? tors.length : 0,
-    partidos: Array.isArray(parts) ? parts.length : 0,
+    jugadores: Number(data?.jugadores ?? 0),
+    torneos: Number(data?.torneos ?? 0),
+    partidos: Number(data?.partidos ?? 0),
   }
 }
 
@@ -85,7 +81,7 @@ function VisualPanel() {
           </h1>
           <div className="h-1.5 w-24 rounded-sm bg-gold" />
           <p style={{ margin: 0, maxWidth: 440, fontFamily: 'var(--font-body)', fontSize: 15, lineHeight: 1.55, color: 'rgba(255,255,255,0.85)' }}>
-            La plataforma interna de la Rama de Pádel de Saint George's College. Rankings ELO, torneos, ligas y partidos amistosos — todo en un solo lugar.
+            Bienvenido a la plataforma de la Rama de Pádel de Saint George's College. Acá encontrarás información de jugadores, torneos, rankings, partidos amistosos — todo en un solo lugar.
           </p>
         </div>
 
@@ -369,6 +365,9 @@ export function LoginForm() {
                 Entra a<br/>
                 <span style={{ color: '#F5C518', fontStyle: 'italic' }}>la cancha.</span>
               </h1>
+              <p className="m-0 font-inter text-sm" style={{ color: 'rgba(255,255,255,0.80)', lineHeight: 1.55, maxWidth: 360 }}>
+                Bienvenido a la plataforma de la Rama de Pádel de Saint George's College. Acá encontrarás información de jugadores, torneos, rankings, partidos amistosos — todo en un solo lugar.
+              </p>
             </div>
           </div>
         </section>

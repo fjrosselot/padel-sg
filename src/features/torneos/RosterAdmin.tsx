@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { padelApi } from '../../lib/padelApi'
 import { Button } from '../../components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog'
 import { useUser } from '../../hooks/useUser'
 import type { CategoriaConfig } from '../../lib/fixture/types'
 import { SEXO_LABEL } from './TorneoWizard/constants'
@@ -72,6 +73,12 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
     },
   })
 
+  const updateEstado = useMutation({
+    mutationFn: ({ inscripcionId, nuevoEstado }: { inscripcionId: string; nuevoEstado: 'confirmada' | 'rechazada' }) =>
+      padelApi.patch('inscripciones', `id=eq.${inscripcionId}`, { estado: nuevoEstado }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['inscripciones', torneoId] }),
+  })
+
   const promoverEspera = useMutation({
     mutationFn: (inscripcionId: string) =>
       padelApi.patch('inscripciones', `id=eq.${inscripcionId}`, { lista_espera: false, posicion_espera: null, estado: 'confirmada' }),
@@ -87,11 +94,69 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['inscripciones', torneoId] }),
   })
 
+  const closeModal = () => { setAddingCat(null); setJ1Id(''); setJ2Id('') }
+
   if (!isAdmin) return null
 
   return (
     <div className="space-y-6">
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted">Roster Admin</p>
+
+      {/* Modal agregar pareja */}
+      <Dialog open={!!addingCat} onOpenChange={open => { if (!open) closeModal() }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-manrope text-navy">
+              Agregar pareja — {addingCat}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div>
+              <label className="text-xs font-semibold text-muted uppercase tracking-widest block mb-1.5">Jugador 1</label>
+              <PlayerCombobox
+                players={jugadoresOptions}
+                value={j1Id}
+                onChange={id => { setJ1Id(id); setJ2Id('') }}
+                placeholder="Buscar jugador…"
+                excludeId={j2Id}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted uppercase tracking-widest block mb-1.5">Jugador 2</label>
+              <PlayerCombobox
+                players={jugadoresOptions}
+                value={j2Id}
+                onChange={setJ2Id}
+                placeholder="Buscar jugador…"
+                excludeId={j1Id}
+                suggestedIds={pastCompaneros ?? []}
+              />
+            </div>
+            {addPareja.error && (
+              <p className="text-xs text-defeat">
+                {(() => {
+                  const msg = addPareja.error instanceof Error ? addPareja.error.message : ''
+                  if (msg.includes('row-level security')) return 'Sin permisos para inscribir. Verifica que tu cuenta tenga rol de administrador.'
+                  if (msg.includes('duplicate') || msg.includes('unique')) return 'Uno o ambos jugadores ya están inscritos en este torneo.'
+                  if (msg.includes('ambos jugadores')) return 'Debes seleccionar ambos jugadores antes de agregar.'
+                  return 'No se pudo agregar la pareja. Intenta nuevamente o contacta al soporte.'
+                })()}
+              </p>
+            )}
+            <div className="flex gap-2 pt-1">
+              <Button
+                onClick={() => addingCat && addPareja.mutate({ cat: addingCat })}
+                disabled={!j1Id || !j2Id || addPareja.isPending}
+                className="flex-1 bg-gold text-navy font-bold"
+              >
+                {addPareja.isPending ? 'Agregando…' : 'Agregar pareja'}
+              </Button>
+              <Button variant="outline" onClick={closeModal} className="flex-1">
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {categorias.map(cat => {
         const activas = inscripciones?.filter(i => i.categoria_nombre === cat.nombre && !i.lista_espera) ?? []
@@ -111,7 +176,7 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
                 variant="outline"
                 className="text-xs h-7 px-2"
                 onClick={() => {
-                  setAddingCat(addingCat === cat.nombre ? null : cat.nombre)
+                  setAddingCat(cat.nombre)
                   setJ1Id('')
                   setJ2Id('')
                 }}
@@ -120,58 +185,6 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
               </Button>
             </div>
 
-            {addingCat === cat.nombre && (
-              <div className="px-4 py-3 bg-gold/5 border-t border-gold/20 space-y-3">
-                <p className="text-xs font-semibold text-navy">Agregar pareja manualmente</p>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-xs text-muted block mb-1">Jugador 1</label>
-                    <PlayerCombobox
-                      players={jugadoresOptions}
-                      value={j1Id}
-                      onChange={id => { setJ1Id(id); setJ2Id('') }}
-                      placeholder="— elige —"
-                      excludeId={j2Id}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-muted block mb-1">Jugador 2</label>
-                    <PlayerCombobox
-                      players={jugadoresOptions}
-                      value={j2Id}
-                      onChange={setJ2Id}
-                      placeholder="— elige —"
-                      excludeId={j1Id}
-                      suggestedIds={pastCompaneros ?? []}
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => addPareja.mutate({ cat: cat.nombre })}
-                    disabled={!j1Id || !j2Id || addPareja.isPending}
-                    className="bg-gold text-navy font-bold text-xs"
-                  >
-                    {addPareja.isPending ? 'Agregando…' : 'Agregar'}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => { setAddingCat(null); setJ1Id(''); setJ2Id('') }}
-                    className="text-xs"
-                  >
-                    Cancelar
-                  </Button>
-                </div>
-                {addPareja.error && (
-                  <p className="text-xs text-defeat">
-                    {addPareja.error instanceof Error ? addPareja.error.message : 'Error'}
-                  </p>
-                )}
-              </div>
-            )}
-
             <div className="divide-y divide-navy/5">
               {activas.map(ins => (
                 <RosterRow
@@ -179,6 +192,8 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
                   ins={ins}
                   onEliminar={() => eliminarInscripcion.mutate(ins.id)}
                   eliminating={deletingId === ins.id}
+                  onConfirmar={ins.estado === 'pendiente' ? () => updateEstado.mutate({ inscripcionId: ins.id, nuevoEstado: 'confirmada' }) : undefined}
+                  onRechazar={ins.estado === 'pendiente' ? () => updateEstado.mutate({ inscripcionId: ins.id, nuevoEstado: 'rechazada' }) : undefined}
                 />
               ))}
               {espera.length > 0 && (

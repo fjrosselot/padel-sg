@@ -156,6 +156,15 @@
     box-shadow: 0 4px 20px rgba(20, 75, 219, 0.20);
   }
 
+  /* Ocultar scrollbar en contenedores con scroll horizontal */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Estado activo del sidebar */
   .sidebar-active {
     background-color: #3b66f5;

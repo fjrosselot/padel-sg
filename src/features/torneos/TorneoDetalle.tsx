@@ -183,15 +183,11 @@ export default function TorneoDetalle() {
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-4">Inscripciones</p>
-          <InscripcionesPanel torneoId={torneo.id} estado={torneo.estado} categorias={categoriasConfig} />
+          {isAdmin
+            ? <RosterAdmin torneoId={torneo.id} categorias={categoriasConfig} />
+            : <InscripcionesPanel torneoId={torneo.id} estado={torneo.estado} categorias={categoriasConfig} />
+          }
         </div>
-
-        {isAdmin && (
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-4">Gestión de Roster</p>
-            <RosterAdmin torneoId={torneo.id} categorias={categoriasConfig} />
-          </div>
-        )}
       </div>
 
       {partidoModal && (

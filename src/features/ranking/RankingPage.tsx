@@ -103,15 +103,16 @@ export default function RankingPage() {
       </div>
 
       <div className="space-y-2">
-        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
           <FilterPill label="Todas" active={filtro === 'todas'} onClick={() => setFiltro('todas')} />
           {hombres.length > 0 && (
             <>
               <div className="w-px bg-navy/10 shrink-0" />
+              <span className="shrink-0 font-inter text-[10px] font-bold uppercase tracking-widest text-muted">Hombres</span>
               {hombres.map(x => (
                 <FilterPill
                   key={x.key}
-                  label={`H: ${x.cat}`}
+                  label={x.cat}
                   active={filtro === x.key}
                   onClick={() => setFiltro(filtro === x.key ? 'todas' : x.key)}
                 />
@@ -121,10 +122,11 @@ export default function RankingPage() {
           {mujeres.length > 0 && (
             <>
               <div className="w-px bg-navy/10 shrink-0" />
+              <span className="shrink-0 font-inter text-[10px] font-bold uppercase tracking-widest text-muted">Damas</span>
               {mujeres.map(x => (
                 <FilterPill
                   key={x.key}
-                  label={`M: ${x.cat}`}
+                  label={x.cat}
                   active={filtro === x.key}
                   onClick={() => setFiltro(filtro === x.key ? 'todas' : x.key)}
                 />

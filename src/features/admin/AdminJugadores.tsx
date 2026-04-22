@@ -653,7 +653,7 @@ export default function AdminJugadores() {
           <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
             <Pill label="Todas" active={filtroCategoria === 'todas'} onClick={() => setFiltroCategoria('todas')} />
             {categorias.map(cat => (
-              <Pill key={cat} label={`Cat. ${cat}`} active={filtroCategoria === cat}
+              <Pill key={cat} label={cat} active={filtroCategoria === cat}
                 onClick={() => setFiltroCategoria(filtroCategoria === cat ? 'todas' : cat)} />
             ))}
           </div>

@@ -157,7 +157,8 @@ function VistaCalendario({ eventos }: { eventos: Evento[] }) {
     return days
   }, [mes])
 
-  const mesLabel = mes.toLocaleDateString('es-CL', { month: 'long', year: 'numeric', timeZone: 'America/Santiago' })
+  const mesNombre = mes.toLocaleDateString('es-CL', { month: 'long', timeZone: 'America/Santiago' })
+  const mesLabel = mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1) + ' ' + mes.getFullYear()
   const hoyStr = toDateStr(hoy)
 
   const eventosDia = diaSeleccionado ? (eventsByDay.get(diaSeleccionado) ?? []) : []
@@ -170,7 +171,7 @@ function VistaCalendario({ eventos }: { eventos: Evento[] }) {
           className="p-1.5 rounded-lg hover:bg-surface text-muted hover:text-navy transition-colors">
           <ChevronLeft className="h-5 w-5" />
         </button>
-        <p className="font-manrope text-sm font-bold text-navy capitalize">{mesLabel}</p>
+        <p className="font-manrope text-sm font-bold text-navy">{mesLabel}</p>
         <button type="button" onClick={() => setMes(m => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
           className="p-1.5 rounded-lg hover:bg-surface text-muted hover:text-navy transition-colors">
           <ChevronRight className="h-5 w-5" />
@@ -335,7 +336,7 @@ export default function CalendarioPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="font-manrope text-2xl font-bold text-navy">Calendario</h1>
-        <div className="flex rounded-lg border border-navy/15 bg-white overflow-hidden shadow-card">
+        <div className="flex md:hidden rounded-lg border border-navy/15 bg-white overflow-hidden shadow-card">
           <button
             type="button"
             onClick={() => setVista('lista')}
@@ -359,10 +360,19 @@ export default function CalendarioPage() {
         </div>
       </div>
 
-      {vista === 'lista'
-        ? <VistaLista eventos={eventos} />
-        : <VistaCalendario eventos={eventos} />
-      }
+      {/* Desktop: ambas vistas lado a lado */}
+      <div className="hidden md:grid md:grid-cols-[1fr_360px] md:gap-6 md:items-start">
+        <VistaCalendario eventos={eventos} />
+        <VistaLista eventos={eventos} />
+      </div>
+
+      {/* Mobile: una vista a la vez */}
+      <div className="md:hidden">
+        {vista === 'lista'
+          ? <VistaLista eventos={eventos} />
+          : <VistaCalendario eventos={eventos} />
+        }
+      </div>
     </div>
   )
 }
