@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { X, Check } from 'lucide-react'
+import { X, Check, Search } from 'lucide-react'
 import { adminHeaders } from '@/lib/adminHeaders'
 import type { JugadorSimple } from './types'
 
@@ -24,6 +24,7 @@ export default function NuevoCobro({ onClose, onCreated }: Props) {
   const [fecha, setFecha] = useState('')
   const [activar, setActivar] = useState(true)
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [busqueda, setBusqueda] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -157,19 +158,33 @@ export default function NuevoCobro({ onClose, onCreated }: Props) {
                 <button onClick={() => setSelected(new Set())} className="hover:text-navy">Ninguno</button>
               </div>
             </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted pointer-events-none" />
+              <input
+                value={busqueda}
+                onChange={e => setBusqueda(e.target.value)}
+                placeholder="Buscar jugador…"
+                className="w-full rounded-lg border border-navy/15 pl-8 pr-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none"
+              />
+            </div>
             <div className="max-h-48 overflow-y-auto rounded-lg border border-navy/10 divide-y divide-navy/5">
-              {jugadores.map(j => (
-                <button
-                  key={j.id} type="button"
-                  onClick={() => toggle(j.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${selected.has(j.id) ? 'bg-gold/5' : 'hover:bg-surface'}`}
-                >
-                  <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${selected.has(j.id) ? 'border-gold bg-gold' : 'border-navy/20'}`}>
-                    {selected.has(j.id) && <Check className="h-2.5 w-2.5 text-navy" strokeWidth={3} />}
-                  </span>
-                  <span className="font-inter text-sm text-navy">{j.apellido}, {j.nombre_pila}</span>
-                </button>
-              ))}
+              {jugadores
+                .filter(j => {
+                  const q = busqueda.toLowerCase()
+                  return !q || j.apellido.toLowerCase().includes(q) || j.nombre_pila.toLowerCase().includes(q)
+                })
+                .map(j => (
+                  <button
+                    key={j.id} type="button"
+                    onClick={() => toggle(j.id)}
+                    className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${selected.has(j.id) ? 'bg-gold/5' : 'hover:bg-surface'}`}
+                  >
+                    <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${selected.has(j.id) ? 'border-gold bg-gold' : 'border-navy/20'}`}>
+                      {selected.has(j.id) && <Check className="h-2.5 w-2.5 text-navy" strokeWidth={3} />}
+                    </span>
+                    <span className="font-inter text-sm text-navy">{j.apellido}, {j.nombre_pila}</span>
+                  </button>
+                ))}
             </div>
           </div>
 
