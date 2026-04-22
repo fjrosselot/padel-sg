@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { CheckCircle2, Circle, Trophy, CalendarDays, Zap, Wallet } from 'lucide-react'
+import { CheckCircle2, Circle, Trophy, CalendarDays, Zap, Wallet, Shirt, PartyPopper } from 'lucide-react'
 import { adminHeaders } from '@/lib/adminHeaders'
 import type { Pago } from './types'
 
@@ -11,11 +11,16 @@ const TIPO_ICON: Record<string, React.ElementType> = {
   inscripcion_torneo: Trophy,
   cuota_mensual: CalendarDays,
   actividad: Zap,
+  indumentaria: Shirt,
+  convivencia: PartyPopper,
 }
 const TIPO_LABEL: Record<string, string> = {
   inscripcion_torneo: 'Torneo',
   cuota_mensual: 'Mensual',
   actividad: 'Actividad',
+  indumentaria: 'Indumentaria',
+  convivencia: 'Convivencia',
+  otro: 'Otro',
 }
 
 interface Props {

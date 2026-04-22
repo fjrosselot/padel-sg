@@ -10,6 +10,9 @@ const TIPOS = [
   { value: 'inscripcion_torneo', label: 'Inscripción torneo' },
   { value: 'cuota_mensual', label: 'Cuota mensual' },
   { value: 'actividad', label: 'Actividad' },
+  { value: 'indumentaria', label: 'Indumentaria' },
+  { value: 'convivencia', label: 'Convivencia' },
+  { value: 'otro', label: 'Otro' },
 ] as const
 
 interface Props {
@@ -19,7 +22,7 @@ interface Props {
 
 export default function NuevoCobro({ onClose, onCreated }: Props) {
   const [nombre, setNombre] = useState('')
-  const [tipo, setTipo] = useState<'inscripcion_torneo' | 'cuota_mensual' | 'actividad'>('actividad')
+  const [tipo, setTipo] = useState<typeof TIPOS[number]['value']>('actividad')
   const [monto, setMonto] = useState('')
   const [fecha, setFecha] = useState('')
   const [activar, setActivar] = useState(true)
@@ -123,8 +126,10 @@ export default function NuevoCobro({ onClose, onCreated }: Props) {
             <div className="space-y-1.5">
               <label className="font-inter text-[11px] font-semibold uppercase tracking-wider text-muted">Monto (CLP)</label>
               <input
-                type="number" value={monto} onChange={e => setMonto(e.target.value)}
-                placeholder="25000"
+                type="text" inputMode="numeric"
+                value={monto ? Number(monto).toLocaleString('es-CL') : ''}
+                onChange={e => setMonto(e.target.value.replace(/\D/g, ''))}
+                placeholder="25.000"
                 className="w-full rounded-lg border border-navy/20 px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none"
               />
             </div>

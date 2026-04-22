@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Wallet, CheckCircle2, Circle, Trophy, CalendarDays, Zap } from 'lucide-react'
+import { Wallet, CheckCircle2, Circle, Trophy, CalendarDays, Zap, Shirt, PartyPopper } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import type { Pago } from '@/features/tesoreria/types'
 
@@ -11,16 +11,24 @@ const TIPO_ICON: Record<string, React.ElementType> = {
   inscripcion_torneo: Trophy,
   cuota_mensual: CalendarDays,
   actividad: Zap,
+  indumentaria: Shirt,
+  convivencia: PartyPopper,
 }
 const TIPO_LABEL: Record<string, string> = {
   inscripcion_torneo: 'Torneo',
   cuota_mensual: 'Mensual',
   actividad: 'Actividad',
+  indumentaria: 'Indumentaria',
+  convivencia: 'Convivencia',
+  otro: 'Otro',
 }
 const TIPO_COLOR: Record<string, string> = {
   inscripcion_torneo: 'bg-gold/10 text-gold',
   cuota_mensual: 'bg-blue-50 text-blue-600',
   actividad: 'bg-purple-50 text-purple-600',
+  indumentaria: 'bg-orange-50 text-orange-600',
+  convivencia: 'bg-pink-50 text-pink-600',
+  otro: 'bg-surface text-muted',
 }
 
 interface CobrosResult {

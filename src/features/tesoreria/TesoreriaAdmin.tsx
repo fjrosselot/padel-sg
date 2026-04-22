@@ -12,11 +12,17 @@ const TIPO_BADGE: Record<string, string> = {
   inscripcion_torneo: 'bg-gold/10 text-gold border-gold/30',
   cuota_mensual: 'bg-blue-50 text-blue-700 border-blue-200',
   actividad: 'bg-purple-50 text-purple-700 border-purple-200',
+  indumentaria: 'bg-orange-50 text-orange-700 border-orange-200',
+  convivencia: 'bg-pink-50 text-pink-700 border-pink-200',
+  otro: 'bg-surface text-muted border-navy/15',
 }
 const TIPO_LABEL: Record<string, string> = {
   inscripcion_torneo: 'Torneo',
   cuota_mensual: 'Mensual',
   actividad: 'Actividad',
+  indumentaria: 'Indumentaria',
+  convivencia: 'Convivencia',
+  otro: 'Otro',
 }
 
 type Filter = 'todos' | 'pagados' | 'pendientes'
@@ -281,11 +287,12 @@ export default function TesoreriaAdmin() {
                 />
                 <div className="flex gap-2">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     className="flex-1 rounded-lg border border-navy/20 px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none"
-                    value={editing.monto}
-                    onChange={e => setEditing(v => v && ({ ...v, monto: e.target.value }))}
-                    placeholder="Monto"
+                    value={editing.monto ? Number(editing.monto).toLocaleString('es-CL') : ''}
+                    onChange={e => setEditing(v => v && ({ ...v, monto: e.target.value.replace(/\D/g, '') }))}
+                    placeholder="25.000"
                   />
                   <input
                     type="date"
