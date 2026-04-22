@@ -38,8 +38,10 @@ export default function TesoreriaAdmin() {
     queryKey: ['cobros'],
     queryFn: async () => {
       const h = await adminHeaders('read')
-      const r = await fetch(`${SB}/rest/v1/cobros?select=*,torneo:torneos(nombre)&order=created_at.desc`, { headers: h })
-      return r.json()
+      const r = await fetch(`${SB}/rest/v1/cobros?select=*&order=created_at.desc`, { headers: h })
+      if (!r.ok) throw new Error(`Error ${r.status}`)
+      const data = await r.json()
+      return Array.isArray(data) ? data : []
     },
   })
 
@@ -60,8 +62,10 @@ export default function TesoreriaAdmin() {
         fetch(`${SB}/rest/v1/cobro_jugadores?cobro_id=eq.${selectedId}&select=*,jugador:jugadores(nombre_pila,apellido)&order=jugador.apellido.asc`, { headers: h }),
         fetch(`${SB}/rest/v1/pagos?cobro_id=eq.${selectedId}&select=*`, { headers: h }),
       ])
+      if (!jRes.ok) throw new Error(`Error cobro_jugadores ${jRes.status}`)
+      if (!pRes.ok) throw new Error(`Error pagos ${pRes.status}`)
       const [jugadores, pagos] = await Promise.all([jRes.json(), pRes.json()])
-      return { jugadores, pagos }
+      return { jugadores: Array.isArray(jugadores) ? jugadores : [], pagos: Array.isArray(pagos) ? pagos : [] }
     },
   })
 
