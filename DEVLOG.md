@@ -1,5 +1,24 @@
 # DEVLOG — padel-sg
 
+## [2026-04-22 17:00] — Módulo Tesorería: bugs fixes y gestión de cobros
+
+**Resumen:** Se corrigieron varios bugs en el módulo de Tesorería recién lanzado: el join inválido `torneo:torneos(nombre)` que rompía la query de cobros con un `.map is not a function`, y el `order=jugador.apellido.asc` en PostgREST que impedía cargar los jugadores del cobro (retornaba error → guard → `[]`). Se agregaron acciones de gestión de cobros (editar, eliminar, agregar/quitar jugadores). El sidebar desktop ahora se abre expandido por defecto. `PagosJugador` integrado en `JugadorDetalle` para admins.
+
+**Archivos:** `src/features/tesoreria/TesoreriaAdmin.tsx`, `src/features/tesoreria/PagosJugador.tsx` (nuevo), `src/features/finanzas/FinanzasPage.tsx`, `src/features/jugadores/JugadorDetalle.tsx`, `src/components/layout/Sidebar.tsx`, `package.json`
+
+**Decisiones:**
+- PostgREST no soporta `order=alias.columna.asc` cuando el join usa alias (`jugador:jugadores`) — se ordena en cliente con `.sort()`
+- Join `torneo:torneos` eliminado del query de cobros (sin FK definida en Supabase) — se puede agregar como campo solo si se crea la FK explícitamente
+- Acciones de cobro (editar/eliminar/agregar jugadores) implementadas inline en TesoreriaAdmin sin subcomponentes adicionales
+- FinanzasPage: filtro explícito `jugador_id=eq.${userId}` evita que RLS de admin exponga filas de otros jugadores
+
+**Pendientes:**
+- [ ] Marcar pagos con fecha y método personalizables (hoy hardcodea transferencia + fecha actual)
+- [ ] Vista "Mis Pagos" del jugador muestra fechas en formato ISO — formatear a es-CL
+- [ ] KPI "Pendientes hoy" en Tesorería muestra "—" siempre (calcular real desde detail queries)
+
+---
+
 ## [2026-04-22 00:30] — Fix Copa Plata + motor fixture completo + mobile login UX
 
 **Resumen:** Se completó la extracción del cálculo matemático del repo de referencia. Copa Plata ahora genera un bracket completo (potencia de 2) en vez de siempre 1 partido. La simulación de StepFixture calcula correctamente `silverTeams = grupos × (ppg - apg)`. En mobile, el heading "Bienvenidos" duplicado fue eliminado del form card y el párrafo del hero fue acortado para ganar espacio vertical.
