@@ -132,7 +132,7 @@ export function Sidebar() {
 
         <div className={`flex items-center px-2 py-1 ${expanded ? 'justify-between' : 'justify-center'}`}>
           {expanded && <span className="font-inter text-[10px] text-white/30">versión</span>}
-          <span className="font-inter text-xs font-bold text-gold">v0.2.0</span>
+          <span className="font-inter text-xs font-bold text-gold">v{__APP_VERSION__}</span>
         </div>
       </div>
     </nav>
