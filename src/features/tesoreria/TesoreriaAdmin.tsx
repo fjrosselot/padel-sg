@@ -62,7 +62,7 @@ export default function TesoreriaAdmin() {
     queryFn: async () => {
       const h = await adminHeaders('read')
       const [jRes, pRes] = await Promise.all([
-        fetch(`${SB}/rest/v1/cobro_jugadores?cobro_id=eq.${selectedId}&select=*,jugador:jugadores(nombre_pila,apellido)&order=jugador.apellido.asc`, { headers: h }),
+        fetch(`${SB}/rest/v1/cobro_jugadores?cobro_id=eq.${selectedId}&select=*,jugador:jugadores(nombre_pila,apellido)`, { headers: h }),
         fetch(`${SB}/rest/v1/pagos?cobro_id=eq.${selectedId}&select=*`, { headers: h }),
       ])
       if (!jRes.ok) throw new Error(`Error cobro_jugadores ${jRes.status}`)
@@ -72,11 +72,13 @@ export default function TesoreriaAdmin() {
     },
   })
 
-  const rows: JugadorRow[] = (detail?.jugadores ?? []).map(cj => {
-    const pagosJugador = (detail?.pagos ?? []).filter(p => p.jugador_id === cj.jugador_id)
-    const totalPagado = pagosJugador.reduce((s, p) => s + p.monto, 0)
-    return { ...cj, pagado: totalPagado >= cj.monto, totalPagado }
-  })
+  const rows: JugadorRow[] = (detail?.jugadores ?? [])
+    .map(cj => {
+      const pagosJugador = (detail?.pagos ?? []).filter(p => p.jugador_id === cj.jugador_id)
+      const totalPagado = pagosJugador.reduce((s, p) => s + p.monto, 0)
+      return { ...cj, pagado: totalPagado >= cj.monto, totalPagado }
+    })
+    .sort((a, b) => a.jugador.apellido.localeCompare(b.jugador.apellido, 'es'))
 
   const filtered = rows.filter(r =>
     filter === 'todos' ? true : filter === 'pagados' ? r.pagado : !r.pagado
