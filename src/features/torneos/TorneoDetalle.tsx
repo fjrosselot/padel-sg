@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Banknote } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminHeaders } from '../../lib/adminHeaders'
 import { useUser } from '../../hooks/useUser'
@@ -25,6 +25,7 @@ import FixtureView from './FixtureView'
 import InscripcionesPanel from './InscripcionesPanel'
 import ResultadosModal from './ResultadosModal'
 import RosterAdmin from './RosterAdmin'
+import GenerarCobroModal from './GenerarCobroModal'
 import { buildFixture, buildDesafioFixture } from '../../lib/fixture/engine'
 import type { Database } from '../../lib/types/database.types'
 import type { CategoriaConfig, CategoriaFixture, PartidoFixture, ParejaFixture, ConfigFixture } from '../../lib/fixture/types'
@@ -43,6 +44,7 @@ export default function TorneoDetalle() {
   const navigate = useNavigate()
   const { data: user } = useUser()
   const [partidoModal, setPartidoModal] = useState<PartidoFixture | null>(null)
+  const [showCobro, setShowCobro] = useState(false)
 
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
 
@@ -125,6 +127,19 @@ export default function TorneoDetalle() {
         <Badge>{ESTADO_LABELS[torneo.estado]}</Badge>
       </div>
 
+      {isAdmin && (torneo.estado === 'inscripcion' || torneo.estado === 'en_curso') && (
+        <div className="flex gap-2 mt-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs rounded-lg border-navy/20 text-navy gap-1.5"
+            onClick={() => setShowCobro(true)}
+          >
+            <Banknote className="h-3.5 w-3.5" /> Cobro inscripción
+          </Button>
+        </div>
+      )}
+
       {isAdmin && (torneo.estado === 'borrador' || torneo.estado === 'inscripcion') && (
         <div className="flex gap-2 mt-2 flex-wrap">
           {torneo.estado === 'borrador' && (
@@ -190,6 +205,13 @@ export default function TorneoDetalle() {
         </div>
       </div>
 
+      {showCobro && (
+        <GenerarCobroModal
+          torneoId={torneo.id}
+          torneoNombre={torneo.nombre}
+          onClose={() => setShowCobro(false)}
+        />
+      )}
       {partidoModal && (
         <ResultadosModal
           partido={partidoModal}
