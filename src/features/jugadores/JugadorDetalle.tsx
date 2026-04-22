@@ -243,7 +243,7 @@ export default function JugadorDetalle() {
               { label: 'Lado preferido', value: jugador.lado_preferido ? LADO_LABEL[jugador.lado_preferido] : '—' },
               { label: 'Juega mixto', value: (jugador as { mixto?: string | null }).mixto ? MIXTO_LABEL[(jugador as { mixto: string }).mixto] : '—' },
               ...((jugador as { frecuencia_semanal?: string | null }).frecuencia_semanal ? [{ label: 'Frecuencia', value: (jugador as { frecuencia_semanal: string }).frecuencia_semanal }] : []),
-              ...((jugador as { rut?: string | null }).rut ? [{ label: 'RUT', value: (jugador as { rut: string }).rut }] : []),
+              ...((jugador as { rut?: string | null }).rut ? [{ label: 'RUT', value: (jugador as unknown as { rut: string }).rut }] : []),
             ].map(({ label, value }, idx, arr) => (
               <div key={label} className={`flex items-center justify-between px-4 py-3 ${idx !== arr.length - 1 ? 'border-b border-surface-high' : ''}`}>
                 <span className="font-inter text-sm text-muted">{label}</span>

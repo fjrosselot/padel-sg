@@ -10,9 +10,10 @@ import {
   type RowSelectionState,
 } from '@tanstack/react-table'
 import { toast } from 'sonner'
-import { Search, ChevronsUpDown, ChevronUp, ChevronDown, Zap, Pencil, Trash2 } from 'lucide-react'
+import { Search, ChevronsUpDown, ChevronUp, ChevronDown, Zap, Pencil, Trash2, Mail } from 'lucide-react'
 import { supabase, type Jugador } from '../../lib/supabase'
 import { adminHeaders } from '../../lib/adminHeaders'
+import { sendInvite } from '../../lib/sendInvite'
 
 type JugadorRow = Pick<Jugador, 'id' | 'nombre' | 'nombre_pila' | 'apellido' | 'apodo' | 'email' | 'categoria' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'elo' | 'estado_cuenta'> & { rut?: string | null }
 type EditableField = 'apodo' | 'categoria' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'estado_cuenta'
@@ -120,10 +121,12 @@ function CycleCell({ value, cycle, onChange }: {
 }
 
 // ── barra de edición masiva ───────────────────────────────────────────────
-function BulkBar({ count, onApply, onClear }: {
+function BulkBar({ count, onApply, onClear, onInvite, inviting }: {
   count: number
   onApply: (field: EditableField, value: string) => void
   onClear: () => void
+  onInvite: () => void
+  inviting: boolean
 }) {
   const [bulkField, setBulkField] = useState<EditableField | ''>('')
   const [bulkValue, setBulkValue] = useState('')
@@ -189,6 +192,15 @@ function BulkBar({ count, onApply, onClear }: {
           {applying ? 'Aplicando…' : 'Aplicar'}
         </button>
       </div>
+      <button
+        type="button"
+        onClick={onInvite}
+        disabled={inviting}
+        className="flex items-center gap-1.5 rounded-md border border-white/20 px-3 py-1 font-inter text-xs text-white hover:border-white/50 disabled:opacity-40 transition-colors shrink-0"
+      >
+        <Mail className="h-3.5 w-3.5" />
+        {inviting ? 'Enviando…' : 'Enviar invitación'}
+      </button>
       <button type="button" onClick={onClear}
         className="font-inter text-xs text-white/50 hover:text-white transition-colors shrink-0">
         Deseleccionar
@@ -419,6 +431,8 @@ export default function AdminJugadores() {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [editingJugador, setEditingJugador] = useState<JugadorRow | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [invitingId, setInvitingId] = useState<string | null>(null)
+  const [bulkInviting, setBulkInviting] = useState(false)
   const [filtroSexo, setFiltroSexo] = useState<'todos' | 'M' | 'F'>('todos')
   const [filtroLado, setFiltroLado] = useState<'todos' | 'drive' | 'reves' | 'ambos'>('todos')
   const [filtroMixto, setFiltroMixto] = useState<'todos' | 'si' | 'no'>('todos')
@@ -448,6 +462,31 @@ export default function AdminJugadores() {
       qc.invalidateQueries({ queryKey: ['admin-jugadores'] })
     }
   }, [qc])
+
+  const handleInvite = useCallback(async (jugador: JugadorRow) => {
+    setInvitingId(jugador.id)
+    try {
+      await sendInvite(jugador.email)
+      toast.success(`Invitación enviada a ${jugador.nombre_pila ?? jugador.nombre}`)
+    } catch (e) {
+      toast.error(`Error al invitar a ${jugador.email}: ${String(e)}`)
+    } finally {
+      setInvitingId(null)
+    }
+  }, [])
+
+  const bulkInvite = useCallback(async () => {
+    const selectedIds = Object.keys(rowSelection).filter(k => rowSelection[k])
+    const targets = jugadores?.filter(j => selectedIds.includes(j.id)) ?? []
+    setBulkInviting(true)
+    const results = await Promise.allSettled(targets.map(j => sendInvite(j.email)))
+    const ok = results.filter(r => r.status === 'fulfilled').length
+    const fail = results.filter(r => r.status === 'rejected').length
+    if (ok > 0) toast.success(`${ok} invitación${ok > 1 ? 'es' : ''} enviada${ok > 1 ? 's' : ''}`)
+    if (fail > 0) toast.error(`${fail} envío${fail > 1 ? 's' : ''} fallaron`)
+    setBulkInviting(false)
+    setRowSelection({})
+  }, [jugadores, rowSelection])
 
   // Guardado masivo en paralelo
   const bulkSave = useCallback(async (field: EditableField, value: string) => {
@@ -536,8 +575,19 @@ export default function AdminJugadores() {
       cell: ({ row }) => {
         const id = row.original.id
         const isConfirming = confirmDeleteId === id
+        const isInviting = invitingId === id
         return (
           <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => handleInvite(row.original)}
+              disabled={isInviting}
+              aria-label="Enviar invitación"
+              title="Enviar invitación"
+              className="rounded-lg p-1.5 text-muted hover:text-navy hover:bg-surface transition-colors disabled:opacity-40"
+            >
+              <Mail className="h-3.5 w-3.5" />
+            </button>
             <button
               type="button"
               onClick={() => setEditingJugador(row.original)}
@@ -588,7 +638,7 @@ export default function AdminJugadores() {
       },
       enableSorting: false,
     }),
-  ], [save, setEditingJugador, confirmDeleteId, qc])
+  ], [save, setEditingJugador, confirmDeleteId, invitingId, handleInvite, qc])
 
   const categorias = useMemo(() => {
     if (!jugadores) return []
@@ -696,6 +746,8 @@ export default function AdminJugadores() {
           count={selectedCount}
           onApply={bulkSave}
           onClear={() => setRowSelection({})}
+          onInvite={bulkInvite}
+          inviting={bulkInviting}
         />
       )}
 
