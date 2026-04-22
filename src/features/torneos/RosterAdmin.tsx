@@ -23,6 +23,7 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
   const [j1Id, setJ1Id] = useState('')
   const [j2Id, setJ2Id] = useState('')
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [categoriaFiltro, setCategoriaFiltro] = useState<string | null>(null)
 
   const { data: inscripciones } = useQuery({
     queryKey: ['inscripciones', torneoId],
@@ -33,14 +34,21 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
 
   const catActiva = categorias.find(c => c.nombre === addingCat)
 
-  const { data: jugadoresOptions } = useQuery({
+  const { data: jugadoresRaw } = useQuery({
     queryKey: ['jugadores-activos-select', catActiva?.sexo],
     queryFn: () => {
       const sexoFilter = catActiva?.sexo === 'M' ? '&sexo=eq.M' : catActiva?.sexo === 'F' ? '&sexo=eq.F' : ''
-      return padelApi.get<{ id: string; nombre: string; apodo: string | null; sexo: 'M' | 'F' | null }[]>(`jugadores?select=id,nombre,apodo,sexo&estado_cuenta=eq.activo${sexoFilter}&order=nombre.asc`)
+      return padelApi.get<{ id: string; nombre: string; apodo: string | null; sexo: 'M' | 'F' | null; categoria: string | null }[]>(
+        `jugadores?select=id,nombre,apodo,sexo,categoria&estado_cuenta=eq.activo${sexoFilter}&order=nombre.asc`
+      )
     },
     enabled: !!addingCat,
   })
+
+  const categoriasDisponibles = [...new Set((jugadoresRaw ?? []).map(j => j.categoria).filter(Boolean))].sort() as string[]
+  const jugadoresOptions = categoriaFiltro
+    ? jugadoresRaw?.filter(j => j.categoria === categoriaFiltro)
+    : jugadoresRaw
 
   const { data: pastCompaneros } = usePastCompaneros(j1Id || undefined)
 
@@ -94,7 +102,7 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['inscripciones', torneoId] }),
   })
 
-  const closeModal = () => { setAddingCat(null); setJ1Id(''); setJ2Id('') }
+  const closeModal = () => { setAddingCat(null); setJ1Id(''); setJ2Id(''); setCategoriaFiltro(null) }
 
   if (!isAdmin) return null
 
@@ -110,6 +118,30 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
+            {categoriasDisponibles.length > 1 && (
+              <div>
+                <label className="text-xs font-semibold text-muted uppercase tracking-widest block mb-1.5">Filtrar por categoría</label>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => { setCategoriaFiltro(null); setJ1Id(''); setJ2Id('') }}
+                    className={`rounded-full px-3 py-1 font-inter text-xs font-semibold transition-colors ${!categoriaFiltro ? 'bg-navy text-gold' : 'bg-surface text-muted hover:text-navy'}`}
+                  >
+                    Todos
+                  </button>
+                  {categoriasDisponibles.map(cat => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => { setCategoriaFiltro(cat); setJ1Id(''); setJ2Id('') }}
+                      className={`rounded-full px-3 py-1 font-inter text-xs font-semibold transition-colors ${categoriaFiltro === cat ? 'bg-navy text-gold' : 'bg-surface text-muted hover:text-navy'}`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div>
               <label className="text-xs font-semibold text-muted uppercase tracking-widest block mb-1.5">Jugador 1</label>
               <PlayerCombobox
