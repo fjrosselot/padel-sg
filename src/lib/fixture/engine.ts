@@ -126,22 +126,52 @@ export function buildPlayoffs(
   return partidos
 }
 
+function slotToTurno(slotIdx: number, config: ConfigFixture): string {
+  const { hora_inicio, duracion_partido, pausa_entre_partidos } = config
+  const slotMinutes = duracion_partido + pausa_entre_partidos
+  const [startH, startM] = hora_inicio.split(':').map(Number)
+  const totalMinutes = startH * 60 + startM + slotIdx * slotMinutes
+  const h = Math.floor(totalMinutes / 60)
+  const m = totalMinutes % 60
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}
+
 function distributeTurnos(
   partidos: PartidoFixture[],
   config: ConfigFixture
 ): PartidoFixture[] {
-  const { num_canchas, hora_inicio, duracion_partido, pausa_entre_partidos } = config
-  const slotMinutes = duracion_partido + pausa_entre_partidos
-  const [startH, startM] = hora_inicio.split(':').map(Number)
+  const { num_canchas } = config
+  // slot → pair IDs playing in that slot
+  const slotPairs = new Map<number, Set<string>>()
+  // slot → courts used
+  const slotCourts = new Map<number, number>()
 
-  return partidos.map((p, i) => {
-    const slotIdx = Math.floor(i / num_canchas)
-    const cancha = (i % num_canchas) + 1
-    const totalMinutes = slotIdx * slotMinutes
-    const hour = startH + Math.floor((startM + totalMinutes) / 60)
-    const min = (startM + totalMinutes) % 60
-    const turno = `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`
-    return { ...p, cancha, turno }
+  return partidos.map(p => {
+    const p1id = p.pareja1?.id
+    const p2id = p.pareja2?.id
+
+    // Find earliest slot with no conflict and a free court
+    let slotIdx = 0
+    while (true) {
+      const playing = slotPairs.get(slotIdx) ?? new Set<string>()
+      const courtsUsed = slotCourts.get(slotIdx) ?? 0
+      const conflict = (p1id && p1id !== 'bye' && playing.has(p1id)) ||
+                       (p2id && p2id !== 'bye' && playing.has(p2id))
+      if (!conflict && courtsUsed < num_canchas) break
+      slotIdx++
+    }
+
+    if (!slotPairs.has(slotIdx)) slotPairs.set(slotIdx, new Set())
+    if (!slotCourts.has(slotIdx)) slotCourts.set(slotIdx, 0)
+
+    const playing = slotPairs.get(slotIdx)!
+    if (p1id && p1id !== 'bye') playing.add(p1id)
+    if (p2id && p2id !== 'bye') playing.add(p2id)
+
+    const cancha = slotCourts.get(slotIdx)! + 1
+    slotCourts.set(slotIdx, cancha)
+
+    return { ...p, cancha, turno: slotToTurno(slotIdx, config) }
   })
 }
 

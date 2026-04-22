@@ -167,7 +167,19 @@ export default function StepFixture(_props: Props) {
         </div>
         <div>
           <Label htmlFor="hora_inicio" className="label-editorial">Hora de inicio</Label>
-          <Input id="hora_inicio" type="time" className="mt-1" {...register('hora_inicio')} />
+          <select
+            id="hora_inicio"
+            {...register('hora_inicio')}
+            className="mt-1 w-full rounded-lg border border-navy/20 bg-white px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none"
+          >
+            {Array.from({ length: (21 - 8) * 4 + 1 }, (_, i) => {
+              const totalMin = 8 * 60 + i * 15
+              const h = Math.floor(totalMin / 60)
+              const m = totalMin % 60
+              const val = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+              return <option key={val} value={val}>{val}</option>
+            })}
+          </select>
         </div>
         <div>
           <Label htmlFor="duracion_partido" className="label-editorial">Duración partido (min)</Label>
