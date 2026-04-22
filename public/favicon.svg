@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Background -->
+  <rect width="32" height="32" rx="8" fill="#0B1929"/>
+
+  <!-- Racket head (circle) -->
+  <circle cx="16" cy="13" r="9" fill="#F5C518" />
+
+  <!-- Grid lines horizontal -->
+  <line x1="7.2" y1="10.5" x2="24.8" y2="10.5" stroke="#0B1929" stroke-width="0.9" stroke-linecap="round"/>
+  <line x1="7" y1="13"   x2="25"   y2="13"   stroke="#0B1929" stroke-width="0.9" stroke-linecap="round"/>
+  <line x1="7.2" y1="15.5" x2="24.8" y2="15.5" stroke="#0B1929" stroke-width="0.9" stroke-linecap="round"/>
+
+  <!-- Grid lines vertical -->
+  <line x1="12.5" y1="4.2" x2="12.5" y2="21.8" stroke="#0B1929" stroke-width="0.9" stroke-linecap="round"/>
+  <line x1="16"   y1="4"   x2="16"   y2="22"   stroke="#0B1929" stroke-width="0.9" stroke-linecap="round"/>
+  <line x1="19.5" y1="4.2" x2="19.5" y2="21.8" stroke="#0B1929" stroke-width="0.9" stroke-linecap="round"/>
+
+  <!-- Racket outline -->
+  <circle cx="16" cy="13" r="9" stroke="#0B1929" stroke-width="1.2" fill="none"/>
+
+  <!-- Handle -->
+  <rect x="14.2" y="21.5" width="3.6" height="7" rx="1.8" fill="#F5C518"/>
+  <rect x="14.2" y="21.5" width="3.6" height="7" rx="1.8" stroke="#0B1929" stroke-width="0.8"/>
+</svg>
