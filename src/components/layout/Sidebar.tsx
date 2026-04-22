@@ -17,7 +17,7 @@ const NAV_ITEMS = [
   { to: '/ligas', icon: BarChart3, label: 'Ligas' },
   { to: '/amistosos', icon: Handshake, label: 'Amistosos' },
   { to: '/calendario', icon: CalendarDays, label: 'Calendario' },
-  { to: '/finanzas', icon: Banknote, label: 'Finanzas' },
+  { to: '/finanzas', icon: Banknote, label: 'Pagos' },
 ]
 
 const ADMIN_ITEMS = [
