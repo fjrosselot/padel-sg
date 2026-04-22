@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { CheckCircle2, Circle, Plus, Users, Banknote, AlertCircle, Archive } from 'lucide-react'
+import { CheckCircle2, Circle, Plus, Users, Banknote, AlertCircle, Archive, Trash2, UserPlus, Pencil, X, Check } from 'lucide-react'
 import { adminHeaders } from '@/lib/adminHeaders'
 import type { Cobro, CobroJugador, Pago } from './types'
 import NuevoCobro from './NuevoCobro'
@@ -33,6 +33,9 @@ export default function TesoreriaAdmin() {
   const [showNuevo, setShowNuevo] = useState(false)
   const [bulk, setBulk] = useState<Set<string>>(new Set())
   const [bulkMode, setBulkMode] = useState(false)
+  const [showAddJugadores, setShowAddJugadores] = useState(false)
+  const [editing, setEditing] = useState<{ nombre: string; monto: string; vencimiento: string } | null>(null)
+  const [addSelected, setAddSelected] = useState<Set<string>>(new Set())
 
   const { data: cobros = [] } = useQuery<Cobro[]>({
     queryKey: ['cobros'],
@@ -123,6 +126,78 @@ export default function TesoreriaAdmin() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cobros'] }),
   })
 
+  const eliminarCobro = useMutation({
+    mutationFn: async (id: string) => {
+      const h = await adminHeaders('write')
+      await fetch(`${SB}/rest/v1/pagos?cobro_id=eq.${id}`, { method: 'DELETE', headers: h })
+      await fetch(`${SB}/rest/v1/cobro_jugadores?cobro_id=eq.${id}`, { method: 'DELETE', headers: h })
+      const r = await fetch(`${SB}/rest/v1/cobros?id=eq.${id}`, { method: 'DELETE', headers: h })
+      if (!r.ok) throw new Error(`Error ${r.status}`)
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['cobros'] })
+      setSelectedId(null)
+    },
+  })
+
+  const editarCobro = useMutation({
+    mutationFn: async ({ id, nombre, monto, vencimiento }: { id: string; nombre: string; monto: number; vencimiento: string | null }) => {
+      const h = await adminHeaders('write')
+      const body: Record<string, unknown> = { nombre, monto_base: monto }
+      if (vencimiento) body.fecha_vencimiento = vencimiento
+      else body.fecha_vencimiento = null
+      const r = await fetch(`${SB}/rest/v1/cobros?id=eq.${id}`, { method: 'PATCH', headers: h, body: JSON.stringify(body) })
+      if (!r.ok) throw new Error(`Error ${r.status}`)
+      // update monto on all cobro_jugadores
+      await fetch(`${SB}/rest/v1/cobro_jugadores?cobro_id=eq.${id}`, { method: 'PATCH', headers: h, body: JSON.stringify({ monto }) })
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['cobros'] })
+      qc.invalidateQueries({ queryKey: ['cobro-detail', selectedId] })
+      setEditing(null)
+    },
+  })
+
+  const agregarJugadores = useMutation({
+    mutationFn: async (jugadorIds: string[]) => {
+      if (!selectedId || jugadorIds.length === 0) return
+      const h = await adminHeaders('write')
+      const monto = selectedCobro!.monto_base
+      const rows = jugadorIds.map(jid => ({ cobro_id: selectedId, jugador_id: jid, monto }))
+      const r = await fetch(`${SB}/rest/v1/cobro_jugadores`, { method: 'POST', headers: h, body: JSON.stringify(rows) })
+      if (!r.ok) throw new Error(`Error ${r.status}`)
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['cobro-detail', selectedId] })
+      setShowAddJugadores(false)
+      setAddSelected(new Set())
+    },
+  })
+
+  const quitarJugador = useMutation({
+    mutationFn: async (jugadorId: string) => {
+      const h = await adminHeaders('write')
+      await fetch(`${SB}/rest/v1/pagos?cobro_id=eq.${selectedId}&jugador_id=eq.${jugadorId}`, { method: 'DELETE', headers: h })
+      await fetch(`${SB}/rest/v1/cobro_jugadores?cobro_id=eq.${selectedId}&jugador_id=eq.${jugadorId}`, { method: 'DELETE', headers: h })
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['cobro-detail', selectedId] }),
+  })
+
+  const { data: todosJugadores = [] } = useQuery<{ id: string; nombre_pila: string; apellido: string }[]>({
+    queryKey: ['jugadores-activos'],
+    queryFn: async () => {
+      const h = await adminHeaders('read')
+      const r = await fetch(`${SB}/rest/v1/jugadores?estado=eq.activo&select=id,nombre_pila,apellido&order=apellido.asc`, { headers: h })
+      if (!r.ok) return []
+      const data = await r.json()
+      return Array.isArray(data) ? data : []
+    },
+    enabled: showAddJugadores,
+  })
+
+  const jugadoresEnCobro = new Set((detail?.jugadores ?? []).map(cj => cj.jugador_id))
+  const jugadoresDisponibles = todosJugadores.filter(j => !jugadoresEnCobro.has(j.id))
+
   const morosos = (() => {
     const map = new Map<string, { nombre: string; count: number }>()
     cobros.filter(c => c.estado === 'activo').forEach(cobro => {
@@ -182,24 +257,130 @@ export default function TesoreriaAdmin() {
       {selectedCobro && (
         <div className="rounded-xl bg-white shadow-card overflow-hidden">
           {/* Header cobro */}
-          <div className="px-5 py-4 border-b border-navy/8 flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <p className="font-manrope text-base font-bold text-navy">{selectedCobro.nombre}</p>
-                {selectedCobro.estado === 'borrador' && (
-                  <button onClick={() => activarCobro.mutate(selectedCobro.id)} className="text-[10px] rounded-full bg-yellow-50 border border-yellow-200 text-yellow-700 px-2 py-0.5 font-inter font-semibold hover:bg-yellow-100">
-                    Borrador — activar
+          <div className="px-5 py-4 border-b border-navy/8">
+            {editing ? (
+              <div className="space-y-2">
+                <input
+                  className="w-full rounded-lg border border-navy/20 px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none"
+                  value={editing.nombre}
+                  onChange={e => setEditing(v => v && ({ ...v, nombre: e.target.value }))}
+                  placeholder="Nombre del cobro"
+                />
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    className="flex-1 rounded-lg border border-navy/20 px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none"
+                    value={editing.monto}
+                    onChange={e => setEditing(v => v && ({ ...v, monto: e.target.value }))}
+                    placeholder="Monto"
+                  />
+                  <input
+                    type="date"
+                    className="flex-1 rounded-lg border border-navy/20 px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none"
+                    value={editing.vencimiento}
+                    onChange={e => setEditing(v => v && ({ ...v, vencimiento: e.target.value }))}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => editarCobro.mutate({ id: selectedCobro.id, nombre: editing.nombre, monto: Number(editing.monto), vencimiento: editing.vencimiento || null })}
+                    disabled={editarCobro.isPending || !editing.nombre || !editing.monto}
+                    className="flex items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 font-inter text-xs font-bold text-navy disabled:opacity-50"
+                  >
+                    <Check className="h-3.5 w-3.5" /> Guardar
+                  </button>
+                  <button onClick={() => setEditing(null)} className="rounded-lg border border-navy/20 px-3 py-1.5 font-inter text-xs text-muted hover:bg-surface">
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-manrope text-base font-bold text-navy">{selectedCobro.nombre}</p>
+                    {selectedCobro.estado === 'borrador' && (
+                      <button onClick={() => activarCobro.mutate(selectedCobro.id)} className="text-[10px] rounded-full bg-yellow-50 border border-yellow-200 text-yellow-700 px-2 py-0.5 font-inter font-semibold hover:bg-yellow-100">
+                        Borrador — activar
+                      </button>
+                    )}
+                  </div>
+                  <p className="font-inter text-xs text-muted mt-0.5">
+                    {fmt(selectedCobro.monto_base)} · {selectedCobro.fecha_vencimiento ? `Vence ${selectedCobro.fecha_vencimiento}` : 'Sin vencimiento'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <div className="text-right mr-2">
+                    <p className="font-manrope text-lg font-bold text-navy">{pagados}/{rows.length}</p>
+                    <p className="font-inter text-[10px] text-muted">{fmt(recaudado)} de {fmt(esperado)}</p>
+                  </div>
+                  <button
+                    onClick={() => { setShowAddJugadores(v => !v); setAddSelected(new Set()) }}
+                    className="rounded-lg p-2 hover:bg-surface text-muted hover:text-navy"
+                    title="Agregar jugadores"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setEditing({ nombre: selectedCobro.nombre, monto: String(selectedCobro.monto_base), vencimiento: selectedCobro.fecha_vencimiento ?? '' })}
+                    className="rounded-lg p-2 hover:bg-surface text-muted hover:text-navy"
+                    title="Editar cobro"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => { if (window.confirm(`¿Eliminar "${selectedCobro.nombre}"? Esto borra también los pagos registrados.`)) eliminarCobro.mutate(selectedCobro.id) }}
+                    disabled={eliminarCobro.isPending}
+                    className="rounded-lg p-2 hover:bg-defeat/10 text-muted hover:text-defeat"
+                    title="Eliminar cobro"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Panel agregar jugadores */}
+            {showAddJugadores && !editing && (
+              <div className="mt-4 border-t border-navy/8 pt-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="font-inter text-xs font-semibold text-muted uppercase tracking-wider">Agregar jugadores</p>
+                  <button onClick={() => { setShowAddJugadores(false); setAddSelected(new Set()) }} className="text-muted hover:text-navy">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                {jugadoresDisponibles.length === 0 ? (
+                  <p className="font-inter text-xs text-muted">Todos los jugadores activos ya están en este cobro.</p>
+                ) : (
+                  <div className="max-h-48 overflow-y-auto divide-y divide-navy/5 rounded-lg border border-navy/10">
+                    {jugadoresDisponibles.map(j => {
+                      const sel = addSelected.has(j.id)
+                      return (
+                        <button
+                          key={j.id}
+                          onClick={() => setAddSelected(s => { const n = new Set(s); sel ? n.delete(j.id) : n.add(j.id); return n })}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-surface/50 ${sel ? 'bg-gold/5' : ''}`}
+                        >
+                          <div className={`h-4 w-4 shrink-0 rounded border flex items-center justify-center ${sel ? 'bg-gold border-gold' : 'border-navy/20'}`}>
+                            {sel && <Check className="h-3 w-3 text-navy" />}
+                          </div>
+                          <span className="font-inter text-sm text-navy">{j.apellido}, {j.nombre_pila}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+                {addSelected.size > 0 && (
+                  <button
+                    onClick={() => agregarJugadores.mutate(Array.from(addSelected))}
+                    disabled={agregarJugadores.isPending}
+                    className="rounded-lg bg-gold px-4 py-2 font-inter text-sm font-bold text-navy disabled:opacity-50"
+                  >
+                    {agregarJugadores.isPending ? 'Agregando…' : `Agregar ${addSelected.size} jugador${addSelected.size !== 1 ? 'es' : ''}`}
                   </button>
                 )}
               </div>
-              <p className="font-inter text-xs text-muted mt-0.5">
-                {fmt(selectedCobro.monto_base)} · {selectedCobro.fecha_vencimiento ? `Vence ${selectedCobro.fecha_vencimiento}` : 'Sin vencimiento'}
-              </p>
-            </div>
-            <div className="text-right shrink-0">
-              <p className="font-manrope text-lg font-bold text-navy">{pagados}/{rows.length}</p>
-              <p className="font-inter text-[10px] text-muted">{fmt(recaudado)} de {fmt(esperado)}</p>
-            </div>
+            )}
           </div>
 
           {/* Barra de progreso */}
@@ -257,17 +438,27 @@ export default function TesoreriaAdmin() {
                       </p>
                       <p className="font-inter text-[11px] text-muted">{fmt(row.monto)}</p>
                     </div>
-                    <button
-                      onClick={() => !bulkMode && togglePago.mutate({ row })}
-                      disabled={togglePago.isPending}
-                      className="flex items-center gap-1.5 font-inter text-xs font-medium transition-colors"
-                    >
-                      {row.pagado ? (
-                        <><CheckCircle2 className="h-5 w-5 text-green-500" /><span className="text-green-600">Pagado</span></>
-                      ) : (
-                        <><Circle className="h-5 w-5 text-navy/25" /><span className="text-muted">Pendiente</span></>
-                      )}
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => !bulkMode && togglePago.mutate({ row })}
+                        disabled={togglePago.isPending}
+                        className="flex items-center gap-1.5 font-inter text-xs font-medium transition-colors"
+                      >
+                        {row.pagado ? (
+                          <><CheckCircle2 className="h-5 w-5 text-green-500" /><span className="text-green-600">Pagado</span></>
+                        ) : (
+                          <><Circle className="h-5 w-5 text-navy/25" /><span className="text-muted">Pendiente</span></>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => quitarJugador.mutate(row.jugador_id)}
+                        disabled={quitarJugador.isPending}
+                        className="rounded p-1 text-muted hover:text-defeat hover:bg-defeat/10"
+                        title="Quitar del cobro"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
                 )
               })}
