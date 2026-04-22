@@ -5,6 +5,7 @@ import type { Pago } from './types'
 
 const SB = import.meta.env.VITE_SUPABASE_URL as string
 const fmt = (n: number) => `$${n.toLocaleString('es-CL')}`
+const fmtFecha = (s: string) => new Date(s + 'T12:00:00').toLocaleDateString('es-CL', { day: 'numeric', month: 'short', timeZone: 'America/Santiago' })
 
 const TIPO_ICON: Record<string, React.ElementType> = {
   inscripcion_torneo: Trophy,
@@ -92,10 +93,10 @@ export function PagosJugador({ jugadorId }: Props) {
                 <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                   <span className="font-inter text-[10px] text-muted">{TIPO_LABEL[d.cobro.tipo] ?? d.cobro.tipo}</span>
                   {d.cobro.fecha_vencimiento && (
-                    <span className="font-inter text-[10px] text-muted">· vence {d.cobro.fecha_vencimiento}</span>
+                    <span className="font-inter text-[10px] text-muted">· vence {fmtFecha(d.cobro.fecha_vencimiento)}</span>
                   )}
                   {d.pagado && d.ultimoPago && (
-                    <span className="font-inter text-[10px] text-green-600">· pagado {d.ultimoPago.fecha_pago}</span>
+                    <span className="font-inter text-[10px] text-green-600">· pagado {fmtFecha(d.ultimoPago.fecha_pago)}</span>
                   )}
                 </div>
               </div>

@@ -34,6 +34,9 @@ export default function TesoreriaAdmin() {
   const [bulk, setBulk] = useState<Set<string>>(new Set())
   const [bulkMode, setBulkMode] = useState(false)
   const [showAddJugadores, setShowAddJugadores] = useState(false)
+  const today = new Date().toISOString().slice(0, 10)
+  const [pagoForm, setPagoForm] = useState<{ jugadorId: string; fecha: string; metodo: string } | null>(null)
+  const [bulkForm, setBulkForm] = useState<{ fecha: string; metodo: string } | null>(null)
   const [editing, setEditing] = useState<{ nombre: string; monto: string; vencimiento: string } | null>(null)
   const [addSelected, setAddSelected] = useState<Set<string>>(new Set())
 
@@ -90,34 +93,34 @@ export default function TesoreriaAdmin() {
   const esperado = rows.reduce((s, r) => s + r.monto, 0)
 
   const togglePago = useMutation({
-    mutationFn: async ({ row }: { row: JugadorRow }) => {
+    mutationFn: async ({ row, fecha, metodo }: { row: JugadorRow; fecha: string; metodo: string }) => {
       const h = await adminHeaders('write')
       if (row.pagado) {
         await fetch(`${SB}/rest/v1/pagos?cobro_id=eq.${selectedId}&jugador_id=eq.${row.jugador_id}`, { method: 'DELETE', headers: h })
       } else {
         await fetch(`${SB}/rest/v1/pagos`, {
           method: 'POST', headers: h,
-          body: JSON.stringify({ cobro_id: selectedId, jugador_id: row.jugador_id, monto: row.monto, fecha_pago: new Date().toISOString().slice(0, 10), metodo: 'transferencia' }),
+          body: JSON.stringify({ cobro_id: selectedId, jugador_id: row.jugador_id, monto: row.monto, fecha_pago: fecha, metodo }),
         })
       }
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['cobro-detail', selectedId] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['cobro-detail', selectedId] }); setPagoForm(null) },
   })
 
   const marcarBulk = useMutation({
     mutationFn: async () => {
       const h = await adminHeaders('write')
+      const { fecha, metodo } = bulkForm!
       const pendientesBulk = Array.from(bulk).map(jid => rows.find(r => r.jugador_id === jid)).filter(r => r && !r.pagado) as JugadorRow[]
       if (!pendientesBulk.length) return
       await fetch(`${SB}/rest/v1/pagos`, {
         method: 'POST', headers: h,
         body: JSON.stringify(pendientesBulk.map(r => ({
-          cobro_id: selectedId, jugador_id: r.jugador_id, monto: r.monto,
-          fecha_pago: new Date().toISOString().slice(0, 10), metodo: 'transferencia',
+          cobro_id: selectedId, jugador_id: r.jugador_id, monto: r.monto, fecha_pago: fecha, metodo,
         }))),
       })
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['cobro-detail', selectedId] }); setBulk(new Set()); setBulkMode(false) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['cobro-detail', selectedId] }); setBulk(new Set()); setBulkMode(false); setBulkForm(null) },
   })
 
   const activarCobro = useMutation({
@@ -200,6 +203,14 @@ export default function TesoreriaAdmin() {
   const jugadoresEnCobro = new Set((detail?.jugadores ?? []).map(cj => cj.jugador_id))
   const jugadoresDisponibles = todosJugadores.filter(j => !jugadoresEnCobro.has(j.id))
 
+  const activosConDetalle = cobros.filter(c => c.estado === 'activo' && qc.getQueryData(['cobro-detail', c.id]))
+  const totalSinPagar = activosConDetalle.reduce((sum, cobro) => {
+    const det = qc.getQueryData<{ jugadores: CobroJugador[]; pagos: Pago[] }>(['cobro-detail', cobro.id])!
+    return sum + det.jugadores.filter(cj =>
+      det.pagos.filter(p => p.jugador_id === cj.jugador_id).reduce((s, p) => s + p.monto, 0) < cj.monto
+    ).length
+  }, 0)
+
   const morosos = (() => {
     const map = new Map<string, { nombre: string; count: number }>()
     cobros.filter(c => c.estado === 'activo').forEach(cobro => {
@@ -229,7 +240,7 @@ export default function TesoreriaAdmin() {
       <div className="grid grid-cols-3 gap-3">
         {[
           { icon: Banknote, label: 'Cobros activos', value: cobros.filter(c => c.estado === 'activo').length },
-          { icon: Users, label: 'Pendientes hoy', value: cobros.filter(c => c.estado === 'activo').length > 0 ? '—' : 0 },
+          { icon: Users, label: 'Sin pagar', value: activosConDetalle.length > 0 ? totalSinPagar : '—' },
           { icon: AlertCircle, label: 'Morosos', value: morosos.length },
         ].map(k => (
           <div key={k.label} className="rounded-xl bg-white shadow-card p-4">
@@ -404,17 +415,39 @@ export default function TesoreriaAdmin() {
               </button>
             ))}
             <button
-              onClick={() => { setBulkMode(v => !v); setBulk(new Set()) }}
+              onClick={() => { setBulkMode(v => !v); setBulk(new Set()); setBulkForm(null) }}
               className={`ml-auto rounded-full px-3 py-1 font-inter text-xs font-medium border transition-colors ${bulkMode ? 'bg-navy text-white border-navy' : 'border-navy/15 text-muted'}`}
             >
               Lote
             </button>
-            {bulkMode && bulk.size > 0 && (
-              <button onClick={() => marcarBulk.mutate()} disabled={marcarBulk.isPending}
-                className="rounded-full px-3 py-1 font-inter text-xs font-bold bg-gold text-navy disabled:opacity-60"
+            {bulkMode && bulk.size > 0 && !bulkForm && (
+              <button onClick={() => setBulkForm({ fecha: today, metodo: 'transferencia' })}
+                className="rounded-full px-3 py-1 font-inter text-xs font-bold bg-gold text-navy"
               >
                 Marcar {bulk.size} pagado{bulk.size !== 1 ? 's' : ''}
               </button>
+            )}
+            {bulkMode && bulkForm && (
+              <div className="flex items-center gap-2 flex-wrap w-full mt-1">
+                <input type="date" value={bulkForm.fecha}
+                  onChange={e => setBulkForm(v => v && ({ ...v, fecha: e.target.value }))}
+                  className="rounded-lg border border-navy/20 px-2 py-1 font-inter text-xs text-navy focus:border-gold focus:outline-none"
+                />
+                <select value={bulkForm.metodo}
+                  onChange={e => setBulkForm(v => v && ({ ...v, metodo: e.target.value }))}
+                  className="rounded-lg border border-navy/20 px-2 py-1 font-inter text-xs text-navy focus:border-gold focus:outline-none"
+                >
+                  <option value="transferencia">Transferencia</option>
+                  <option value="efectivo">Efectivo</option>
+                  <option value="otro">Otro</option>
+                </select>
+                <button onClick={() => marcarBulk.mutate()} disabled={marcarBulk.isPending}
+                  className="rounded-full px-3 py-1 font-inter text-xs font-bold bg-gold text-navy disabled:opacity-60"
+                >
+                  {marcarBulk.isPending ? 'Marcando…' : `Confirmar ${bulk.size}`}
+                </button>
+                <button onClick={() => setBulkForm(null)} className="text-muted hover:text-navy"><X className="h-3.5 w-3.5" /></button>
+              </div>
             )}
           </div>
 
@@ -427,40 +460,71 @@ export default function TesoreriaAdmin() {
             <div className="divide-y divide-navy/5">
               {filtered.map(row => {
                 const inBulk = bulk.has(row.jugador_id)
+                const showForm = pagoForm?.jugadorId === row.jugador_id && !row.pagado
                 return (
-                  <div key={row.jugador_id} className="flex items-center gap-3 px-5 py-3 hover:bg-surface/50">
-                    {bulkMode && !row.pagado && (
-                      <button onClick={() => setBulk(s => { const n = new Set(s); inBulk ? n.delete(row.jugador_id) : n.add(row.jugador_id); return n })}
-                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${inBulk ? 'bg-gold border-gold' : 'border-navy/20'}`}
-                      />
+                  <div key={row.jugador_id}>
+                    <div className="flex items-center gap-3 px-5 py-3 hover:bg-surface/50">
+                      {bulkMode && !row.pagado && (
+                        <button onClick={() => setBulk(s => { const n = new Set(s); inBulk ? n.delete(row.jugador_id) : n.add(row.jugador_id); return n })}
+                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${inBulk ? 'bg-gold border-gold' : 'border-navy/20'}`}
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-inter text-sm font-medium text-navy truncate">
+                          {row.jugador.apellido}, {row.jugador.nombre_pila}
+                        </p>
+                        <p className="font-inter text-[11px] text-muted">{fmt(row.monto)}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => {
+                            if (bulkMode) return
+                            if (row.pagado) togglePago.mutate({ row, fecha: today, metodo: 'transferencia' })
+                            else setPagoForm(showForm ? null : { jugadorId: row.jugador_id, fecha: today, metodo: 'transferencia' })
+                          }}
+                          disabled={togglePago.isPending}
+                          className="flex items-center gap-1.5 font-inter text-xs font-medium transition-colors"
+                        >
+                          {row.pagado ? (
+                            <><CheckCircle2 className="h-5 w-5 text-green-500" /><span className="text-green-600">Pagado</span></>
+                          ) : (
+                            <><Circle className={`h-5 w-5 ${showForm ? 'text-gold' : 'text-navy/25'}`} /><span className="text-muted">Pendiente</span></>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => quitarJugador.mutate(row.jugador_id)}
+                          disabled={quitarJugador.isPending}
+                          className="rounded p-1 text-muted hover:text-defeat hover:bg-defeat/10"
+                          title="Quitar del cobro"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                    {showForm && (
+                      <div className="px-5 pb-3 flex items-center gap-2 flex-wrap border-t border-navy/5 bg-surface/30">
+                        <input type="date" value={pagoForm!.fecha}
+                          onChange={e => setPagoForm(v => v && ({ ...v, fecha: e.target.value }))}
+                          className="rounded-lg border border-navy/20 px-2 py-1.5 font-inter text-xs text-navy focus:border-gold focus:outline-none"
+                        />
+                        <select value={pagoForm!.metodo}
+                          onChange={e => setPagoForm(v => v && ({ ...v, metodo: e.target.value }))}
+                          className="rounded-lg border border-navy/20 px-2 py-1.5 font-inter text-xs text-navy focus:border-gold focus:outline-none"
+                        >
+                          <option value="transferencia">Transferencia</option>
+                          <option value="efectivo">Efectivo</option>
+                          <option value="otro">Otro</option>
+                        </select>
+                        <button
+                          onClick={() => togglePago.mutate({ row, fecha: pagoForm!.fecha, metodo: pagoForm!.metodo })}
+                          disabled={togglePago.isPending}
+                          className="rounded-lg bg-gold px-3 py-1.5 font-inter text-xs font-bold text-navy disabled:opacity-50"
+                        >
+                          {togglePago.isPending ? 'Guardando…' : 'Confirmar pago'}
+                        </button>
+                        <button onClick={() => setPagoForm(null)} className="text-muted hover:text-navy"><X className="h-3.5 w-3.5" /></button>
+                      </div>
                     )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-inter text-sm font-medium text-navy truncate">
-                        {row.jugador.apellido}, {row.jugador.nombre_pila}
-                      </p>
-                      <p className="font-inter text-[11px] text-muted">{fmt(row.monto)}</p>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        onClick={() => !bulkMode && togglePago.mutate({ row })}
-                        disabled={togglePago.isPending}
-                        className="flex items-center gap-1.5 font-inter text-xs font-medium transition-colors"
-                      >
-                        {row.pagado ? (
-                          <><CheckCircle2 className="h-5 w-5 text-green-500" /><span className="text-green-600">Pagado</span></>
-                        ) : (
-                          <><Circle className="h-5 w-5 text-navy/25" /><span className="text-muted">Pendiente</span></>
-                        )}
-                      </button>
-                      <button
-                        onClick={() => quitarJugador.mutate(row.jugador_id)}
-                        disabled={quitarJugador.isPending}
-                        className="rounded p-1 text-muted hover:text-defeat hover:bg-defeat/10"
-                        title="Quitar del cobro"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
                   </div>
                 )
               })}
