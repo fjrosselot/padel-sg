@@ -52,6 +52,12 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
 
   const { data: pastCompaneros } = usePastCompaneros(j1Id || undefined)
 
+  const inscritosIds = new Set(
+    (inscripciones ?? [])
+      .filter(i => i.estado !== 'rechazada')
+      .flatMap(i => [i.jugador1_id, i.jugador2_id])
+  )
+
   const addPareja = useMutation({
     mutationFn: async ({ cat }: { cat: string }) => {
       if (!j1Id || !j2Id) throw new Error('Selecciona ambos jugadores')
@@ -150,6 +156,7 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
                 onChange={id => { setJ1Id(id); setJ2Id('') }}
                 placeholder="Buscar jugador…"
                 excludeId={j2Id}
+                inscritosIds={inscritosIds}
               />
             </div>
             <div>
@@ -161,6 +168,7 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
                 placeholder="Buscar jugador…"
                 excludeId={j1Id}
                 suggestedIds={pastCompaneros ?? []}
+                inscritosIds={inscritosIds}
               />
             </div>
             {addPareja.error && (

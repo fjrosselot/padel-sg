@@ -17,6 +17,7 @@ interface Props {
   placeholder?: string
   excludeId?: string
   suggestedIds?: string[]
+  inscritosIds?: Set<string>
   className?: string
 }
 
@@ -27,6 +28,7 @@ export function PlayerCombobox({
   placeholder = '— elige jugador —',
   excludeId,
   suggestedIds = [],
+  inscritosIds,
   className = '',
 }: Props) {
   const [open, setOpen] = useState(false)
@@ -48,20 +50,29 @@ export function PlayerCombobox({
   const selected = available.find(p => p.id === value) ?? players.find(p => p.id === value)
 
   const term = search.toLowerCase()
-  const filtered = search
-    ? available.filter(p =>
-        p.nombre.toLowerCase().includes(term) || p.apodo?.toLowerCase().includes(term)
-      )
-    : available
+  const matchesTerm = (p: JugadorOption) =>
+    p.nombre.toLowerCase().includes(term) || !!p.apodo?.toLowerCase().includes(term)
+
+  const [disponibles, yaInscritos] = available.reduce<[JugadorOption[], JugadorOption[]]>(
+    ([disp, insc], p) => {
+      if (inscritosIds?.has(p.id)) insc.push(p)
+      else disp.push(p)
+      return [disp, insc]
+    },
+    [[], []]
+  )
+
+  const filteredDisp = search ? disponibles.filter(matchesTerm) : disponibles
+  const filteredInsc = search ? yaInscritos.filter(matchesTerm) : yaInscritos
 
   const suggested = suggestedIds
-    .map(id => available.find(p => p.id === id))
+    .map(id => disponibles.find(p => p.id === id))
     .filter((p): p is JugadorOption => !!p)
     .slice(0, 5)
 
   const rest = search
-    ? filtered
-    : filtered.filter(p => !suggestedIds.includes(p.id))
+    ? filteredDisp
+    : filteredDisp.filter(p => !suggestedIds.includes(p.id))
 
   function select(id: string) {
     onChange(id)
@@ -117,7 +128,19 @@ export function PlayerCombobox({
               <OptionRow key={p.id} player={p} selected={p.id === value} onSelect={select} />
             ))}
 
-            {filtered.length === 0 && (
+            {filteredInsc.length > 0 && (
+              <>
+                <div className="mx-3 border-t border-navy/5 my-1" />
+                <p className="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted">
+                  Ya inscritos en este torneo
+                </p>
+                {filteredInsc.map(p => (
+                  <OptionRow key={p.id} player={p} selected={false} onSelect={() => {}} disabled />
+                ))}
+              </>
+            )}
+
+            {filteredDisp.length === 0 && filteredInsc.length === 0 && (
               <p className="px-3 py-3 text-sm text-muted text-center">Sin resultados</p>
             )}
           </div>
@@ -131,21 +154,35 @@ function OptionRow({
   player,
   selected,
   onSelect,
+  disabled,
 }: {
   player: JugadorOption
   selected: boolean
   onSelect: (id: string) => void
+  disabled?: boolean
 }) {
   return (
     <button
       type="button"
-      onClick={() => onSelect(player.id)}
-      className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-gold/5 ${
-        selected ? 'bg-gold/10 font-semibold text-navy' : 'text-navy'
+      onClick={() => !disabled && onSelect(player.id)}
+      disabled={disabled}
+      className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center justify-between gap-2 ${
+        disabled
+          ? 'text-muted/50 cursor-not-allowed'
+          : selected
+          ? 'bg-gold/10 font-semibold text-navy hover:bg-gold/10'
+          : 'text-navy hover:bg-gold/5'
       }`}
     >
-      {player.nombre}
-      {player.apodo && <span className="ml-1 text-xs text-muted">({player.apodo})</span>}
+      <span>
+        {player.nombre}
+        {player.apodo && <span className="ml-1 text-xs text-muted">({player.apodo})</span>}
+      </span>
+      {disabled && (
+        <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted/60 bg-surface rounded px-1.5 py-0.5">
+          inscrito
+        </span>
+      )}
     </button>
   )
 }
