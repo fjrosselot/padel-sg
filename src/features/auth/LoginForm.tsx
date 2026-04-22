@@ -367,8 +367,8 @@ export function LoginForm() {
                 Entra a<br/>
                 <span style={{ color: '#F5C518', fontStyle: 'italic' }}>la cancha.</span>
               </h1>
-              <p className="m-0 font-inter text-sm" style={{ color: 'rgba(255,255,255,0.80)', lineHeight: 1.5 }}>
-                Plataforma de la Rama de Pádel · Saint George's College
+              <p className="m-0 font-inter text-sm" style={{ color: 'rgba(255,255,255,0.80)', lineHeight: 1.55, maxWidth: 360 }}>
+                Bienvenido a la plataforma de la Rama de Pádel de Saint George's College. Acá encontrarás información de jugadores, torneos, rankings, partidos amistosos — todo en un solo lugar.
               </p>
             </div>
           </div>
