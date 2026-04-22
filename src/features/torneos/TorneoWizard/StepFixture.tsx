@@ -43,12 +43,12 @@ function simular(categorias: WizardData['categorias'], cfg: Partial<WizardData>)
     const advancing = numGrupos * (cuantos_avanzan ?? 2)
     let playoffPartidos = 0
     if (advancing >= 2) {
-      if (advancing >= 4) {
-        playoffPartidos += 2 // semis
-        if (con_consolacion) playoffPartidos++
-        if (con_tercer_lugar) playoffPartidos++
-      }
-      playoffPartidos++ // final
+      // Power-of-2 bracket: size - 1 total match slots
+      let bracketSize = 1
+      while (bracketSize < advancing) bracketSize *= 2
+      playoffPartidos += bracketSize - 1
+      if (con_consolacion) playoffPartidos++
+      if (con_tercer_lugar && advancing >= 4) playoffPartidos++
     }
 
     const total = grupoPartidos + playoffPartidos

@@ -10,6 +10,12 @@ import type {
 let _matchCounter = 0
 function nextId() { return `match_${++_matchCounter}` }
 
+function nextPow2(n: number): number {
+  let s = 1
+  while (s < n) s *= 2
+  return s
+}
+
 export function generateRoundRobin(
   parejas: ParejaFixture[],
   fase: PartidoFixture['fase'] = 'grupo',
@@ -79,49 +85,48 @@ export function buildPlayoffs(
 
   if (n <= 1) return []
 
-  if (n === 2) {
-    partidos.push({
-      id: nextId(), fase: 'final', grupo: null, numero: 1,
-      pareja1: classified[0], pareja2: classified[1],
-      cancha: null, turno: null, ganador: null, resultado: null, resultado_bloqueado: false,
-    })
-    return partidos
-  }
+  // Power-of-2 bracket: rounds from [size/2] (first round) down to [1] (final)
+  const size = nextPow2(n)
+  const rounds: number[] = []
+  let m = size / 2
+  while (m >= 1) { rounds.push(m); m = Math.floor(m / 2) }
 
-  if (n >= 4) {
-    partidos.push({
-      id: nextId(), fase: 'semifinal', grupo: null, numero: 1,
-      pareja1: classified[0], pareja2: classified[3],
-      cancha: null, turno: null, ganador: null, resultado: null, resultado_bloqueado: false,
-    })
-    partidos.push({
-      id: nextId(), fase: 'semifinal', grupo: null, numero: 2,
-      pareja1: classified[1], pareja2: classified[2],
-      cancha: null, turno: null, ganador: null, resultado: null, resultado_bloqueado: false,
-    })
+  let num = 1
 
-    if (con_consolacion) {
+  for (let roundIdx = 0; roundIdx < rounds.length; roundIdx++) {
+    const matchesInRound = rounds[roundIdx]
+    const isFinal = roundIdx === rounds.length - 1
+    const isSemi = !isFinal && roundIdx === rounds.length - 2
+    const fase: PartidoFixture['fase'] = isFinal ? 'final' : isSemi ? 'semifinal' : 'cuartos'
+
+    for (let i = 0; i < matchesInRound; i++) {
+      // First round: seed i vs seed (size-1-i) — standard bracket seeding
+      // Byes when classified[size-1-i] is beyond the actual n teams
+      const p1 = roundIdx === 0 ? (classified[i] ?? null) : null
+      const p2 = roundIdx === 0 ? (classified[size - 1 - i] ?? null) : null
       partidos.push({
-        id: nextId(), fase: 'consolacion_final', grupo: null, numero: 1,
-        pareja1: null, pareja2: null,
-        cancha: null, turno: null, ganador: null, resultado: null, resultado_bloqueado: false,
-      })
-    }
-
-    if (con_tercer_lugar) {
-      partidos.push({
-        id: nextId(), fase: 'tercer_lugar', grupo: null, numero: 1,
-        pareja1: null, pareja2: null,
+        id: nextId(), fase, grupo: null, numero: num++,
+        pareja1: p1, pareja2: p2,
         cancha: null, turno: null, ganador: null, resultado: null, resultado_bloqueado: false,
       })
     }
   }
 
-  partidos.push({
-    id: nextId(), fase: 'final', grupo: null, numero: 1,
-    pareja1: null, pareja2: null,
-    cancha: null, turno: null, ganador: null, resultado: null, resultado_bloqueado: false,
-  })
+  if (con_tercer_lugar && n >= 4) {
+    partidos.push({
+      id: nextId(), fase: 'tercer_lugar', grupo: null, numero: 1,
+      pareja1: null, pareja2: null,
+      cancha: null, turno: null, ganador: null, resultado: null, resultado_bloqueado: false,
+    })
+  }
+
+  if (con_consolacion) {
+    partidos.push({
+      id: nextId(), fase: 'consolacion_final', grupo: null, numero: 1,
+      pareja1: null, pareja2: null,
+      cancha: null, turno: null, ganador: null, resultado: null, resultado_bloqueado: false,
+    })
+  }
 
   return partidos
 }
