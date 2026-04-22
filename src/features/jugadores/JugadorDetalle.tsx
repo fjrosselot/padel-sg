@@ -1,11 +1,13 @@
 import { useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, Trophy, Target, Percent, Flame, Users } from 'lucide-react'
+import { ArrowLeft, Trophy, Target, Percent, Flame, Users, Wallet } from 'lucide-react'
 import { padelApi } from '../../lib/padelApi'
 import type { Jugador } from '../../lib/supabase'
 import { usePlayerRankings } from '../../hooks/usePlayerRankings'
 import { PuntosHistorial } from '../ranking/PuntosHistorial'
+import { useUser } from '../../hooks/useUser'
+import { PagosJugador } from '../tesoreria/PagosJugador'
 
 const LADO_LABEL: Record<string, string> = { drive: 'Drive', reves: 'Revés', ambos: 'Ambos' }
 const MIXTO_LABEL: Record<string, string> = { si: 'Sí', no: 'No', a_veces: 'A veces' }
@@ -89,6 +91,8 @@ function PartidoCard({ p, jugadorId }: { p: PartidoHistorial; jugadorId: string 
 export default function JugadorDetalle() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { data: user } = useUser()
+  const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
 
   const { data: jugador, isLoading, error } = useQuery({
     queryKey: ['jugador', id],
@@ -291,6 +295,18 @@ export default function JugadorDetalle() {
           </div>
 
           <PuntosHistorial jugadorId={id!} />
+
+          {isAdmin && (
+            <div className="rounded-xl bg-white shadow-card overflow-hidden">
+              <div className="px-4 py-3 border-b border-surface-high flex items-center gap-2">
+                <Wallet className="h-4 w-4 text-muted" />
+                <p className="font-manrope text-sm font-bold text-navy">Pagos</p>
+              </div>
+              <div className="p-4">
+                <PagosJugador jugadorId={id!} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
