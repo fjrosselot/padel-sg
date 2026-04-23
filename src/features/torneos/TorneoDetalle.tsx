@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Banknote, Pencil, Trash2 } from 'lucide-react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
+import { padelApi } from '../../lib/padelApi'
 import * as Tabs from '@radix-ui/react-tabs'
 import { useUser } from '../../hooks/useUser'
 import { padelGet, padelPatch, ESTADO_LABELS } from './torneoApi'
@@ -421,23 +422,131 @@ function TabsDetalle({
 
       {isAdmin && hasDesafioSembrado && (
         <Tabs.Content value="sembrado">
-          <div className="space-y-8">
-            {sembradoCats.map(cat => (
-              <div key={cat.nombre}>
-                {sembradoCats.length > 1 && (
-                  <p className="font-inter text-sm font-semibold text-navy mb-3">{cat.nombre}</p>
-                )}
-                <SembradoPanel
-                  torneoId={torneo.id}
-                  cat={cat}
-                  inscripciones={(inscripciones ?? []).filter(i => i.categoria_nombre === cat.nombre)}
-                  colegioRival={torneo.colegio_rival ?? 'Rival'}
-                />
-              </div>
-            ))}
-          </div>
+          <SembradoTabContent
+            torneoId={torneo.id}
+            sembradoCats={sembradoCats}
+            inscripciones={inscripciones ?? []}
+            colegioRival={torneo.colegio_rival ?? 'Rival'}
+            torneoCategorias={torneo.categorias as unknown as CategoriaConfig[]}
+          />
         </Tabs.Content>
       )}
     </Tabs.Root>
+  )
+}
+
+interface SembradoTabContentProps {
+  torneoId: string
+  sembradoCats: CategoriaConfig[]
+  inscripciones: InscripcionRow[]
+  colegioRival: string
+  torneoCategorias: CategoriaConfig[]
+}
+
+function SembradoTabContent({
+  torneoId, sembradoCats, inscripciones, colegioRival, torneoCategorias,
+}: SembradoTabContentProps) {
+  const qc = useQueryClient()
+
+  const [sgOrders, setSgOrders] = useState<Record<string, InscripcionRow[]>>(() => {
+    const result: Record<string, InscripcionRow[]> = {}
+    for (const cat of sembradoCats) {
+      const confirmed = inscripciones
+        .filter(i => i.categoria_nombre === cat.nombre && !i.lista_espera && i.estado !== 'rechazada')
+      result[cat.nombre] = [...confirmed].sort((a, b) => {
+        if (a.sembrado == null && b.sembrado == null) return 0
+        if (a.sembrado == null) return 1
+        if (b.sembrado == null) return -1
+        return a.sembrado - b.sembrado
+      })
+    }
+    return result
+  })
+
+  const [rivalNamesMap, setRivalNamesMap] = useState<Record<string, string[]>>(() => {
+    const result: Record<string, string[]> = {}
+    for (const cat of sembradoCats) {
+      const existing = cat.rival_pairs ?? []
+      const confirmed = inscripciones.filter(
+        i => i.categoria_nombre === cat.nombre && !i.lista_espera && i.estado !== 'rechazada'
+      )
+      const slots = Math.max(confirmed.length, existing.length)
+      result[cat.nombre] = Array.from({ length: slots }, (_, i) => existing[i] ?? '')
+    }
+    return result
+  })
+
+  const [isDirty, setIsDirty] = useState(false)
+
+  function handleSgOrderChange(catNombre: string, order: InscripcionRow[]) {
+    setSgOrders(prev => ({ ...prev, [catNombre]: order }))
+    setIsDirty(true)
+  }
+
+  function handleRivalNamesChange(catNombre: string, names: string[]) {
+    setRivalNamesMap(prev => ({ ...prev, [catNombre]: names }))
+    setIsDirty(true)
+  }
+
+  const saveAll = useMutation({
+    mutationFn: async () => {
+      // 1. Patch inscripciones sembrado order
+      await Promise.all(
+        sembradoCats.flatMap(cat => {
+          const order = sgOrders[cat.nombre] ?? []
+          return order.map((ins, idx) =>
+            padelApi.patch('inscripciones', `id=eq.${ins.id}`, { sembrado: idx + 1 })
+          )
+        })
+      )
+      // 2. Patch all rival_pairs in one torneos update
+      const updated = (torneoCategorias ?? []).map(c => {
+        const names = rivalNamesMap[c.nombre]
+        return names !== undefined ? { ...c, rival_pairs: names } : c
+      })
+      await padelApi.patch('torneos', `id=eq.${torneoId}`, { categorias: updated })
+    },
+    onSuccess: () => {
+      setIsDirty(false)
+      qc.invalidateQueries({ queryKey: ['inscripciones', torneoId] })
+      qc.invalidateQueries({ queryKey: ['torneo', torneoId] })
+    },
+  })
+
+  return (
+    <div className="space-y-8">
+      {sembradoCats.map(cat => (
+        <div key={cat.nombre}>
+          {sembradoCats.length > 1 && (
+            <p className="font-inter text-sm font-semibold text-navy mb-1">{cat.nombre}</p>
+          )}
+          <SembradoPanel
+            cat={cat}
+            colegioRival={colegioRival}
+            sgOrder={sgOrders[cat.nombre] ?? []}
+            onSgOrderChange={order => handleSgOrderChange(cat.nombre, order)}
+            rivalNames={rivalNamesMap[cat.nombre] ?? []}
+            onRivalNamesChange={names => handleRivalNamesChange(cat.nombre, names)}
+          />
+        </div>
+      ))}
+
+      {isDirty && (
+        <div className="pt-2 border-t border-navy/10 flex items-center justify-between gap-4">
+          {saveAll.isError && (
+            <p className="text-xs text-defeat font-inter">
+              {saveAll.error instanceof Error ? saveAll.error.message : 'Error al guardar'}
+            </p>
+          )}
+          <Button
+            onClick={() => saveAll.mutate()}
+            disabled={saveAll.isPending}
+            className="ml-auto bg-gold text-navy font-bold text-sm"
+          >
+            {saveAll.isPending ? 'Guardando…' : 'Guardar cambios'}
+          </Button>
+        </div>
+      )}
+    </div>
   )
 }

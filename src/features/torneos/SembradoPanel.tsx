@@ -1,73 +1,32 @@
 import { useRef, useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { GripVertical, Pencil } from 'lucide-react'
-import { padelApi } from '../../lib/padelApi'
-import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import type { CategoriaConfig } from '../../lib/fixture/types'
 import type { InscripcionRow } from './RosterRow'
 
 interface Props {
-  torneoId: string
   cat: CategoriaConfig
-  inscripciones: InscripcionRow[]
   colegioRival: string
+  sgOrder: InscripcionRow[]
+  onSgOrderChange: (order: InscripcionRow[]) => void
+  rivalNames: string[]
+  onRivalNamesChange: (names: string[]) => void
 }
 
-export default function SembradoPanel({ torneoId, cat, inscripciones, colegioRival }: Props) {
-  const qc = useQueryClient()
-
-  const confirmed = inscripciones.filter(i => !i.lista_espera && i.estado !== 'rechazada')
-  const initialOrder = [...confirmed].sort((a, b) => {
-    if (a.sembrado == null && b.sembrado == null) return 0
-    if (a.sembrado == null) return 1
-    if (b.sembrado == null) return -1
-    return a.sembrado - b.sembrado
-  })
-
-  const [sgOrder, setSgOrder] = useState<InscripcionRow[]>(initialOrder)
-  const [rivalNames, setRivalNames] = useState<string[]>(() => {
-    const existing = cat.rival_pairs ?? []
-    const slots = Math.max(initialOrder.length, existing.length)
-    return Array.from({ length: slots }, (_, i) => existing[i] ?? '')
-  })
+export default function SembradoPanel({
+  cat, colegioRival, sgOrder, onSgOrderChange, rivalNames, onRivalNamesChange,
+}: Props) {
   const [dragIdx, setDragIdx] = useState<number | null>(null)
   const [dragOver, setDragOver] = useState<number | null>(null)
   const [editingRivalIdx, setEditingRivalIdx] = useState<number | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const saveSembrado = useMutation({
-    mutationFn: () =>
-      Promise.all(
-        sgOrder.map((ins, idx) =>
-          padelApi.patch('inscripciones', `id=eq.${ins.id}`, { sembrado: idx + 1 })
-        )
-      ),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['inscripciones', torneoId] }),
-  })
-
-  const saveRival = useMutation({
-    mutationFn: async () => {
-      const rows = await padelApi.get<{ categorias: unknown }[]>(
-        `torneos?id=eq.${torneoId}&select=categorias`
-      )
-      const cats = (rows[0]?.categorias as CategoriaConfig[]) ?? []
-      const updated = cats.map(c =>
-        c.nombre === cat.nombre ? { ...c, rival_pairs: rivalNames } : c
-      )
-      await padelApi.patch('torneos', `id=eq.${torneoId}`, { categorias: updated })
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['torneo', torneoId] }),
-  })
-
   function handleDrop(toIdx: number) {
     if (dragIdx === null || dragIdx === toIdx) return
-    setSgOrder(prev => {
-      const next = [...prev]
-      const [item] = next.splice(dragIdx, 1)
-      next.splice(toIdx, 0, item)
-      return next
-    })
+    const next = [...sgOrder]
+    const [item] = next.splice(dragIdx, 1)
+    next.splice(toIdx, 0, item)
+    onSgOrderChange(next)
     setDragIdx(null)
     setDragOver(null)
   }
@@ -109,17 +68,6 @@ export default function SembradoPanel({ torneoId, cat, inscripciones, colegioRiv
           {sgOrder.length === 0 && (
             <p className="text-xs text-muted">Sin inscritos confirmados.</p>
           )}
-          <Button
-            size="sm"
-            onClick={() => saveSembrado.mutate()}
-            disabled={saveSembrado.isPending || sgOrder.length === 0}
-            className="w-full text-xs bg-gold text-navy font-bold"
-          >
-            {saveSembrado.isPending ? 'Guardando…' : 'Guardar orden SG'}
-          </Button>
-          {saveSembrado.isSuccess && (
-            <p className="text-xs text-success text-center">Orden guardado</p>
-          )}
         </div>
 
         {/* Rival column */}
@@ -135,7 +83,7 @@ export default function SembradoPanel({ torneoId, cat, inscripciones, colegioRiv
                   onChange={e => {
                     const next = [...rivalNames]
                     next[idx] = e.target.value
-                    setRivalNames(next)
+                    onRivalNamesChange(next)
                   }}
                   onBlur={() => setEditingRivalIdx(null)}
                   onKeyDown={e => { if (e.key === 'Enter') setEditingRivalIdx(null) }}
@@ -163,17 +111,6 @@ export default function SembradoPanel({ torneoId, cat, inscripciones, colegioRiv
           ))}
           {slots === 0 && (
             <p className="text-xs text-muted">Agrega inscritos SG primero.</p>
-          )}
-          <Button
-            size="sm"
-            onClick={() => saveRival.mutate()}
-            disabled={saveRival.isPending || slots === 0}
-            className="w-full text-xs bg-gold text-navy font-bold"
-          >
-            {saveRival.isPending ? 'Guardando…' : `Guardar ${colegioRival || 'rival'}`}
-          </Button>
-          {saveRival.isSuccess && (
-            <p className="text-xs text-success text-center">Guardado</p>
           )}
         </div>
       </div>
