@@ -18,15 +18,23 @@ function catColor(nombre: string): string {
   return '#64748b'
 }
 
+function catBg(nombre: string): string {
+  const c = catColor(nombre)
+  return c + '22'
+}
+
+const ELIM_ORO = new Set(['cuartos', 'semifinal', 'tercer_lugar', 'final'])
+const ELIM_PLATA = new Set(['consolacion_cuartos', 'consolacion_sf', 'consolacion_final'])
+
 const FASE_LABEL: Record<string, string> = {
   grupo: 'Grupo',
   cuartos: 'Cuartos',
   semifinal: 'Semifinal',
   tercer_lugar: '3er lugar',
-  final: '🏆 Final',
-  consolacion_cuartos: 'Cuartos Plata',
+  final: 'Final',
+  consolacion_cuartos: 'QF Plata',
   consolacion_sf: 'SF Plata',
-  consolacion_final: '🥈 Final Plata',
+  consolacion_final: '🥈 Final',
   desafio: 'Desafío',
 }
 
@@ -35,7 +43,7 @@ function partidoLabel(p: PartidoFixture): string {
     case 'grupo':              return `P·${p.numero}`
     case 'cuartos':            return `C·${p.numero}`
     case 'semifinal':          return `SF·${p.numero}`
-    case 'tercer_lugar':       return `3P`
+    case 'tercer_lugar':       return '3P'
     case 'final':              return `F·${p.numero}`
     case 'consolacion_cuartos':return `CP·${p.numero}`
     case 'consolacion_sf':     return `SF·P${p.numero}`
@@ -62,62 +70,67 @@ function MatchCell({ entry }: { entry: MatchEntry }) {
   const [s1, s2] = parseScores(partido.resultado)
   const win1 = partido.ganador === 1
   const win2 = partido.ganador === 2
-  const pending = !partido.pareja1 || !partido.pareja2
-  const played = !!partido.ganador
+  const pending = !partido.ganador
 
-  const cupShadow = isPlata
-    ? '0 0 0 1.5px #94a3b8'
-    : '0 0 0 1.5px #F5C518'
-  const topColor = catColor(catNombre)
+  const stripeColor = isPlata ? '#94b0cc'
+    : ELIM_ORO.has(partido.fase) ? '#e8c547'
+    : catColor(catNombre)
+
+  const roundBadgeStyle = ELIM_PLATA.has(partido.fase)
+    ? { background: '#e0f2fe', color: '#0369a1' }
+    : ELIM_ORO.has(partido.fase)
+    ? { background: '#fef9e7', color: '#92400e' }
+    : { background: '#f1f5f9', color: '#64748b' }
+
+  const finalBorder = partido.fase === 'final'
+    ? { border: '1.5px solid #e8c547' }
+    : partido.fase === 'consolacion_final'
+    ? { border: '1.5px solid #94b0cc' }
+    : { border: '1px solid rgba(0,0,0,0.08)' }
 
   return (
     <div
-      className={`rounded-lg p-2 h-full flex flex-col gap-1 ${played ? 'opacity-75' : ''} ${pending ? 'opacity-45' : ''}`}
-      style={{
-        background: '#f8fafc',
-        borderTop: `2.5px solid ${topColor}`,
-        boxShadow: cupShadow,
-        borderRadius: 8,
-        minHeight: 76,
-      }}
+      className={`rounded-lg overflow-hidden flex flex-col ${pending ? '' : 'opacity-[0.88]'}`}
+      style={{ ...finalBorder, minHeight: 90 }}
     >
-      <div className="flex items-center gap-1.5">
-        <span className="font-inter text-[9px] font-bold text-muted bg-white rounded px-1 py-0.5 border border-navy/10">
-          {partidoLabel(partido)}
-        </span>
-        <span className="font-inter text-[9px] text-muted uppercase tracking-wide truncate flex-1">
-          {FASE_LABEL[partido.fase] ?? partido.fase}
-        </span>
-        <span
-          className="font-inter text-[8px] font-bold rounded px-1 py-0.5 shrink-0"
-          style={{ background: topColor + '22', color: topColor }}
-        >
-          {catNombre}
-        </span>
-      </div>
-
-      <div className="flex items-center justify-between gap-1">
-        <span className={`font-inter text-[10px] flex-1 truncate ${
-          pending ? 'text-muted italic' : win1 ? 'font-semibold text-navy' : 'text-slate'
-        }`}>
-          {partido.pareja1?.nombre ?? 'Por definir'}
-        </span>
-        <span className={`font-manrope text-xs font-bold shrink-0 ${win1 ? 'text-gold' : 'text-muted'}`}>
-          {s1}
-        </span>
-      </div>
-
-      <div className="h-px bg-navy/5" />
-
-      <div className="flex items-center justify-between gap-1">
-        <span className={`font-inter text-[10px] flex-1 truncate ${
-          pending ? 'text-muted italic' : win2 ? 'font-semibold text-navy' : 'text-slate'
-        }`}>
-          {partido.pareja2?.nombre ?? 'Por definir'}
-        </span>
-        <span className={`font-manrope text-xs font-bold shrink-0 ${win2 ? 'text-gold' : 'text-muted'}`}>
-          {s2}
-        </span>
+      <div style={{ height: 3, background: stripeColor, flexShrink: 0 }} />
+      <div className="flex flex-col gap-0 p-1.5 bg-white flex-1">
+        <div className="flex items-center justify-between gap-1 mb-1">
+          <span className="font-inter text-[9px] font-bold rounded px-1 py-px" style={roundBadgeStyle}>
+            {partidoLabel(partido)}
+          </span>
+          <span
+            className="font-inter text-[9px] font-bold rounded px-1 py-px shrink-0"
+            style={{ background: catBg(catNombre), color: catColor(catNombre) }}
+          >
+            {catNombre}
+          </span>
+        </div>
+        <div className="flex items-center gap-1 min-h-[22px]">
+          <span className={`font-inter text-[11px] flex-1 truncate ${
+            pending ? 'text-[#94a3b8] italic' : win1 ? 'font-bold text-[#162844]' : 'text-[#1e293b]'
+          }`}>
+            {partido.pareja1?.nombre ?? 'Por definir'}
+          </span>
+          <span className={`font-bold text-[10px] shrink-0 min-w-[28px] text-right tracking-[0.1em] ${
+            pending ? 'text-[#94a3b8]' : win1 ? 'text-[#16a34a]' : 'text-[#94b0cc]'
+          }`}>
+            {s1}
+          </span>
+        </div>
+        <div className="h-px my-0.5" style={{ background: '#f1f5f9' }} />
+        <div className="flex items-center gap-1 min-h-[22px]">
+          <span className={`font-inter text-[11px] flex-1 truncate ${
+            pending ? 'text-[#94a3b8] italic' : win2 ? 'font-bold text-[#162844]' : 'text-[#1e293b]'
+          }`}>
+            {partido.pareja2?.nombre ?? 'Por definir'}
+          </span>
+          <span className={`font-bold text-[10px] shrink-0 min-w-[28px] text-right tracking-[0.1em] ${
+            pending ? 'text-[#94a3b8]' : win2 ? 'text-[#16a34a]' : 'text-[#94b0cc]'
+          }`}>
+            {s2}
+          </span>
+        </div>
       </div>
     </div>
   )
@@ -125,24 +138,21 @@ function MatchCell({ entry }: { entry: MatchEntry }) {
 
 function Legend({ catNames }: { catNames: string[] }) {
   return (
-    <div className="flex flex-wrap gap-3 mb-4">
+    <div className="flex flex-wrap gap-3 items-center mb-4 font-inter text-[12px] text-muted">
       {catNames.map(name => (
         <div key={name} className="flex items-center gap-1.5">
-          <span
-            className="inline-block w-2.5 h-2.5 rounded-sm"
-            style={{ background: catColor(name) }}
-          />
-          <span className="font-inter text-xs text-muted">{name}</span>
+          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: catColor(name) }} />
+          {name}
         </div>
       ))}
-      <div className="w-px bg-navy/10 mx-1" />
+      <div className="w-px h-4 bg-navy/10" />
       <div className="flex items-center gap-1.5">
-        <span className="inline-block w-2.5 h-2.5 rounded-full border-2 border-gold" />
-        <span className="font-inter text-xs text-muted">Copa Oro</span>
+        <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-[#e8c547]" />
+        Copa Oro
       </div>
       <div className="flex items-center gap-1.5">
-        <span className="inline-block w-2.5 h-2.5 rounded-full border-2 border-slate" />
-        <span className="font-inter text-xs text-muted">Copa Plata</span>
+        <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-[#94b0cc]" />
+        Copa Plata
       </div>
     </div>
   )
@@ -158,7 +168,7 @@ export default function HorarioTab({ categorias }: Props) {
   for (const cat of categorias) {
     const plataIds = new Set(cat.consola.map(p => p.id))
     const allPartidos: PartidoFixture[] = [
-      ...cat.grupos.flatMap(g => g.partidos),
+      ...(cat.grupos ?? []).flatMap(g => g.partidos),
       ...cat.faseEliminatoria,
       ...cat.consola,
       ...(cat.partidos ?? []),
@@ -192,42 +202,56 @@ export default function HorarioTab({ categorias }: Props) {
     <div>
       <Legend catNames={catNames} />
 
-      <div className="overflow-x-auto rounded-xl border border-navy/10">
-        <table className="border-collapse" style={{ minWidth: courts.length * 156 + 88 }}>
+      <div className="overflow-x-auto rounded-xl border border-[#e2e8f0] shadow-[0_1px_8px_rgba(0,0,0,0.06)]">
+        <table className="border-collapse bg-white w-full" style={{ minWidth: courts.length * 156 + 80 }}>
           <thead>
             <tr>
-              <th className="bg-navy text-left px-3 py-2.5 rounded-tl-xl" style={{ width: 88 }}>
-                <span className="font-inter text-[9px] font-bold uppercase tracking-widest text-white/40">
+              <th
+                className="text-left px-3 py-2.5"
+                style={{ background: '#0f1e35', width: 80, borderBottom: '2px solid #25507f' }}
+              >
+                <span className="font-inter text-[10px] font-bold uppercase tracking-[0.1em] text-white">
                   Cancha
                 </span>
               </th>
-              {times.map((t, ti) => (
+              {times.map(t => (
                 <th
                   key={t}
-                  className={`bg-navy px-2 py-2.5 text-center ${ti === times.length - 1 ? 'rounded-tr-xl' : ''}`}
-                  style={{ minWidth: 148 }}
+                  className="text-center px-3 py-2.5 whitespace-nowrap"
+                  style={{ background: '#162844', minWidth: 148, borderBottom: '2px solid #25507f' }}
                 >
-                  <p className="font-manrope text-sm font-bold text-gold">{t}</p>
+                  <span className="font-manrope text-[11px] font-bold tracking-[0.05em] text-[#e8c547]">{t}</span>
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {courts.map((court, ci) => (
-              <tr key={court} className={ci % 2 === 0 ? 'bg-white' : 'bg-surface/50'}>
-                <td className="bg-navy px-3 py-2 align-middle">
-                  <p className="font-manrope text-sm font-bold text-white">C{court}</p>
+              <tr key={court} style={{ background: ci % 2 === 0 ? 'white' : '#f8fafc' }}>
+                <td
+                  className="text-center align-middle font-manrope text-[13px] font-bold text-[#162844] whitespace-nowrap"
+                  style={{
+                    background: '#f8fafc',
+                    border: '1px solid #e8eef4',
+                    borderLeft: '4px solid #162844',
+                    padding: '0 16px',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  C{court}
                 </td>
                 {times.map(t => {
                   const entry = lookup.get(`${court}|${t}`)
                   return (
-                    <td key={t} className="p-1.5 align-top">
+                    <td key={t} className="align-top" style={{ padding: 6, border: '1px solid #e8eef4', minWidth: 148 }}>
                       {entry ? (
                         <MatchCell entry={entry} />
                       ) : (
-                        <div className="rounded-lg bg-surface/30 flex items-center justify-center"
-                          style={{ minHeight: 76 }}>
-                          <span className="text-navy/10 text-lg">·</span>
+                        <div
+                          className="rounded-md flex items-center justify-center text-[#cbd5e1] text-[11px]"
+                          style={{ minHeight: 90, background: '#f8fafc' }}
+                        >
+                          —
                         </div>
                       )}
                     </td>
