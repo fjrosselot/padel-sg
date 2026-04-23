@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Banknote, Pencil, Trash2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as Tabs from '@radix-ui/react-tabs'
-import { adminHeaders } from '../../lib/adminHeaders'
 import { useUser } from '../../hooks/useUser'
+import { padelGet, padelPatch, ESTADO_LABELS } from './torneoApi'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import FixtureTab from './FixtureTab'
@@ -16,34 +16,17 @@ import ResultadosModal from './ResultadosModal'
 import RosterAdmin from './RosterAdmin'
 import GenerarCobroModal from './GenerarCobroModal'
 import EditTorneoModal from './EditTorneoModal'
-import { padelApi } from '../../lib/padelApi'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog'
+import DeleteTorneoDialog from './DeleteTorneoDialog'
 import { buildFixture, buildDesafioFixture } from '../../lib/fixture/engine'
 import type { Database } from '../../lib/types/database.types'
 import type { CategoriaConfig, CategoriaFixture, PartidoFixture, ParejaFixture, ConfigFixture } from '../../lib/fixture/types'
 
 type Torneo = Database['padel']['Tables']['torneos']['Row']
 
-const SB = import.meta.env.VITE_SUPABASE_URL as string
-
-async function padelGet(path: string) {
-  const headers = await adminHeaders('read')
-  const res = await fetch(`${SB}/rest/v1/${path}`, { headers })
-  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message ?? `Error ${res.status}`) }
-  return res.json()
-}
-
-async function padelPatch(table: string, id: string, body: Record<string, unknown>) {
-  const headers = await adminHeaders('write')
-  const res = await fetch(`${SB}/rest/v1/${table}?id=eq.${id}`, { method: 'PATCH', headers, body: JSON.stringify(body) })
-  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message ?? `Error ${res.status}`) }
-}
-
-const ESTADO_LABELS: Record<string, string> = {
-  borrador: 'Borrador',
-  inscripcion: 'Inscripciones',
-  en_curso: 'En curso',
-  finalizado: 'Finalizado',
+function impactMessage(estado: string): string {
+  if (estado === 'borrador') return 'Se eliminará el torneo y su configuración.'
+  if (estado === 'inscripcion') return 'Se eliminará el torneo y todas las inscripciones asociadas.'
+  return 'Se eliminará el torneo, inscripciones, partidos y resultados registrados.'
 }
 
 const TAB_CLS = [
@@ -61,7 +44,6 @@ export default function TorneoDetalle() {
   const [activeTab, setActiveTab] = useState('fixture')
   const [showEdit, setShowEdit] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
-  const [deleteConfirmed, setDeleteConfirmed] = useState(false)
 
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
   const qc = useQueryClient()
@@ -75,14 +57,6 @@ export default function TorneoDetalle() {
   const abrirInscripciones = useMutation({
     mutationFn: () => padelPatch('torneos', id!, { estado: 'inscripcion' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['torneo', id] }),
-  })
-
-  const deleteTorneo = useMutation({
-    mutationFn: () => padelApi.delete('torneos', `id=eq.${id!}`),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['torneos'] })
-      navigate('/torneos')
-    },
   })
 
   const generarFixture = useMutation({
@@ -277,16 +251,13 @@ export default function TorneoDetalle() {
           </p>
           <div className="flex items-start justify-between gap-4">
             <p className="font-inter text-sm text-defeat/80">
-              {torneo.estado === 'borrador' && 'Se eliminará el torneo y su configuración.'}
-              {torneo.estado === 'inscripcion' && 'Se eliminará el torneo y todas las inscripciones asociadas.'}
-              {(torneo.estado === 'en_curso' || torneo.estado === 'finalizado') &&
-                'Se eliminará el torneo, inscripciones, partidos y resultados registrados.'}
+              {impactMessage(torneo.estado)}
             </p>
             <Button
               size="sm"
               variant="outline"
               className="text-xs rounded-lg border-defeat/30 text-defeat gap-1.5 hover:bg-defeat/10 shrink-0"
-              onClick={() => { setShowDelete(true); setDeleteConfirmed(false) }}
+              onClick={() => setShowDelete(true)}
             >
               <Trash2 className="h-3.5 w-3.5" /> Eliminar torneo
             </Button>
@@ -300,58 +271,13 @@ export default function TorneoDetalle() {
       )}
 
       {/* Delete confirmation dialog */}
-      <Dialog open={showDelete} onOpenChange={open => { if (!open) { setShowDelete(false); setDeleteConfirmed(false) } }}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="font-manrope text-navy">Eliminar torneo</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-2">
-            <p className="font-inter text-sm text-navy">
-              Estás por eliminar{' '}
-              <span className="text-defeat font-bold">{torneo.nombre}</span>.
-            </p>
-            <p className="font-inter text-sm text-muted">
-              {torneo.estado === 'borrador' && 'Se eliminará el torneo y su configuración.'}
-              {torneo.estado === 'inscripcion' && 'Se eliminará el torneo y todas las inscripciones asociadas.'}
-              {(torneo.estado === 'en_curso' || torneo.estado === 'finalizado') &&
-                'Se eliminará el torneo, inscripciones, partidos y resultados registrados.'}
-            </p>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                id="delete-confirm"
-                checked={deleteConfirmed}
-                onChange={e => setDeleteConfirmed(e.target.checked)}
-                className="accent-defeat w-4 h-4 cursor-pointer"
-              />
-              <span className="font-inter text-sm text-navy">Entiendo que esta acción es irreversible</span>
-            </label>
-            {deleteTorneo.error && (
-              <p className="text-xs text-defeat font-inter">
-                {deleteTorneo.error instanceof Error ? deleteTorneo.error.message : 'Error al eliminar'}
-              </p>
-            )}
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowDelete(false)}
-                className="rounded-lg text-xs"
-              >
-                Cancelar
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => deleteTorneo.mutate()}
-                disabled={!deleteConfirmed || deleteTorneo.isPending}
-                className="bg-defeat text-white rounded-lg text-xs font-semibold hover:bg-defeat/90"
-              >
-                {deleteTorneo.isPending ? 'Eliminando…' : 'Eliminar definitivamente'}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <DeleteTorneoDialog
+        torneoId={id!}
+        torneoNombre={torneo.nombre}
+        torneoEstado={torneo.estado}
+        open={showDelete}
+        onOpenChange={open => { if (!open) setShowDelete(false) }}
+      />
 
       {showCobro && (
         <GenerarCobroModal
