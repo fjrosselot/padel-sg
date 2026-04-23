@@ -2,6 +2,7 @@ import { useFormContext, useWatch } from 'react-hook-form'
 import { useMemo } from 'react'
 import type { WizardData } from './schema'
 import { FixtureGantt } from './FixtureGantt'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
 // ── Primitivos locales ────────────────────────────────────────────────────────
 
@@ -239,111 +240,116 @@ export default function StepFixture(_props: Props) {
   })
 
   return (
-    <div className="space-y-5">
+    <Tabs defaultValue="config" className="space-y-4">
+      <TabsList className="w-full">
+        <TabsTrigger value="config" className="flex-1">Configuración</TabsTrigger>
+        <TabsTrigger value="sim" className="flex-1">Simulación</TabsTrigger>
+      </TabsList>
 
-      {/* Formato toggles */}
-      <div className="space-y-2">
-        <p className="font-inter text-[10px] font-semibold uppercase tracking-widest text-muted">Formato</p>
-        <div className="grid grid-cols-2 gap-2">
-          {anyDesafio && (
-            <TogglePill
-              checked={conGrupos}
-              onChange={v => setValue('con_grupos', v)}
-              label="Grupos (RR)"
-            />
-          )}
-          {!allDesafio && (
-            <>
+      <TabsContent value="config" className="space-y-5 mt-0">
+        {/* Formato toggles */}
+        <div className="space-y-2">
+          <p className="font-inter text-[10px] font-semibold uppercase tracking-widest text-muted">Formato</p>
+          <div className="grid grid-cols-2 gap-2">
+            {anyDesafio && (
               <TogglePill
-                checked={conConsolacion}
-                onChange={v => setValue('con_consolacion', v)}
-                label="Copa Plata"
+                checked={conGrupos}
+                onChange={v => setValue('con_grupos', v)}
+                label="Grupos (RR)"
               />
-              <TogglePill
-                checked={conTercerLugar}
-                onChange={v => setValue('con_tercer_lugar', v)}
-                label="3er lugar"
-              />
-              <TogglePill
-                checked={fixtureCompacto}
-                onChange={v => setValue('fixture_compacto', v)}
-                label="Fixture compacto"
-              />
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Grupos options */}
-      {!allDesafio && conGrupos && (
-        <div className="grid grid-cols-2 gap-6">
-          <Stepper
-            label="Parejas / grupo"
-            value={ppg}
-            onChange={v => setValue('parejas_por_grupo', v)}
-            min={3} max={8}
-          />
-          <Stepper
-            label="Avanzan"
-            value={adv}
-            onChange={v => setValue('cuantos_avanzan', v)}
-            min={1} max={4}
-          />
-        </div>
-      )}
-
-      {!allDesafio && !conGrupos && (
-        <div className="rounded-lg bg-gold/10 border border-gold/30 px-3 py-2 text-sm text-navy">
-          <strong>Americano puro:</strong> todos juegan entre sí en un solo grupo.
-          Los primeros <strong>{adv}</strong> clasifican al playoff.
-          <div className="mt-2">
-            <Stepper
-              label="Clasifican al playoff"
-              value={adv}
-              onChange={v => setValue('cuantos_avanzan', v)}
-              min={2} max={8}
-            />
+            )}
+            {!allDesafio && (
+              <>
+                <TogglePill
+                  checked={conConsolacion}
+                  onChange={v => setValue('con_consolacion', v)}
+                  label="Copa Plata"
+                />
+                <TogglePill
+                  checked={conTercerLugar}
+                  onChange={v => setValue('con_tercer_lugar', v)}
+                  label="3er lugar"
+                />
+                <TogglePill
+                  checked={fixtureCompacto}
+                  onChange={v => setValue('fixture_compacto', v)}
+                  label="Fixture compacto"
+                />
+              </>
+            )}
           </div>
         </div>
-      )}
 
-      {/* Canchas + hora */}
-      <div className="grid grid-cols-2 gap-6 items-end">
-        <Stepper
-          label="Canchas disponibles"
-          value={canchas}
-          onChange={v => setValue('num_canchas', v)}
-          min={1} max={20}
-        />
-        <div className="space-y-1.5">
-          <span className="font-inter text-[10px] font-semibold uppercase tracking-widest text-muted">Hora de inicio</span>
-          <select
-            value={horaInicio}
-            onChange={e => setValue('hora_inicio', e.target.value)}
-            className="w-full rounded-lg border border-navy/20 bg-white px-3 py-2 font-manrope text-base font-bold text-navy focus:border-gold focus:outline-none"
-          >
-            {horaOptions.map(v => <option key={v} value={v}>{v}</option>)}
-          </select>
+        {/* Grupos options */}
+        {!allDesafio && conGrupos && (
+          <div className="grid grid-cols-2 gap-6">
+            <Stepper
+              label="Parejas / grupo"
+              value={ppg}
+              onChange={v => setValue('parejas_por_grupo', v)}
+              min={3} max={8}
+            />
+            <Stepper
+              label="Avanzan"
+              value={adv}
+              onChange={v => setValue('cuantos_avanzan', v)}
+              min={1} max={4}
+            />
+          </div>
+        )}
+
+        {!allDesafio && !conGrupos && (
+          <div className="rounded-lg bg-gold/10 border border-gold/30 px-3 py-2 text-sm text-navy">
+            <strong>Americano puro:</strong> todos juegan entre sí en un solo grupo.
+            Los primeros <strong>{adv}</strong> clasifican al playoff.
+            <div className="mt-2">
+              <Stepper
+                label="Clasifican al playoff"
+                value={adv}
+                onChange={v => setValue('cuantos_avanzan', v)}
+                min={2} max={8}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Canchas + hora */}
+        <div className="grid grid-cols-2 gap-6 items-end">
+          <Stepper
+            label="Canchas disponibles"
+            value={canchas}
+            onChange={v => setValue('num_canchas', v)}
+            min={1} max={20}
+          />
+          <div className="space-y-1.5">
+            <span className="font-inter text-[10px] font-semibold uppercase tracking-widest text-muted">Hora de inicio</span>
+            <select
+              value={horaInicio}
+              onChange={e => setValue('hora_inicio', e.target.value)}
+              className="w-full rounded-lg border border-navy/20 bg-white px-3 py-2 font-manrope text-base font-bold text-navy focus:border-gold focus:outline-none"
+            >
+              {horaOptions.map(v => <option key={v} value={v}>{v}</option>)}
+            </select>
+          </div>
         </div>
-      </div>
 
-      {/* Sliders */}
-      <SliderField
-        label="Duración partido"
-        value={duracion} onChange={v => setValue('duracion_partido', v)}
-        min={30} max={120} step={5} unit="min"
-      />
-      <SliderField
-        label="Pausa entre partidos"
-        value={pausa} onChange={v => setValue('pausa_entre_partidos', v)}
-        min={0} max={30} step={5} unit="min"
-      />
+        {/* Sliders */}
+        <SliderField
+          label="Duración partido"
+          value={duracion} onChange={v => setValue('duracion_partido', v)}
+          min={30} max={120} step={5} unit="min"
+        />
+        <SliderField
+          label="Pausa entre partidos"
+          value={pausa} onChange={v => setValue('pausa_entre_partidos', v)}
+          min={0} max={30} step={5} unit="min"
+        />
+      </TabsContent>
 
-      {/* Simulación */}
-      <SimPreview categorias={categorias} allDesafio={allDesafio} />
-
-      {/* Gantt */}
-      <FixtureGantt categorias={categorias} cfg={cfg} />
-    </div>
+      <TabsContent value="sim" className="space-y-4 mt-0">
+        <SimPreview categorias={categorias} allDesafio={allDesafio} />
+        <FixtureGantt categorias={categorias} cfg={cfg} />
+      </TabsContent>
+    </Tabs>
   )
 }
