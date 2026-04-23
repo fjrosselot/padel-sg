@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { ChevronUp, ChevronDown } from 'lucide-react'
+import { GripVertical } from 'lucide-react'
 import { padelApi } from '../../lib/padelApi'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
@@ -31,6 +31,8 @@ export default function SembradoPanel({ torneoId, cat, inscripciones, colegioRiv
     const slots = Math.max(initialOrder.length, existing.length)
     return Array.from({ length: slots }, (_, i) => existing[i] ?? '')
   })
+  const [dragIdx, setDragIdx] = useState<number | null>(null)
+  const [dragOver, setDragOver] = useState<number | null>(null)
 
   const saveSembrado = useMutation({
     mutationFn: () =>
@@ -56,22 +58,16 @@ export default function SembradoPanel({ torneoId, cat, inscripciones, colegioRiv
     onSuccess: () => qc.invalidateQueries({ queryKey: ['torneo', torneoId] }),
   })
 
-  function moveUp(idx: number) {
-    if (idx === 0) return
+  function handleDrop(toIdx: number) {
+    if (dragIdx === null || dragIdx === toIdx) return
     setSgOrder(prev => {
       const next = [...prev]
-      ;[next[idx - 1], next[idx]] = [next[idx], next[idx - 1]]
+      const [item] = next.splice(dragIdx, 1)
+      next.splice(toIdx, 0, item)
       return next
     })
-  }
-
-  function moveDown(idx: number) {
-    setSgOrder(prev => {
-      if (idx >= prev.length - 1) return prev
-      const next = [...prev]
-      ;[next[idx], next[idx + 1]] = [next[idx + 1], next[idx]]
-      return next
-    })
+    setDragIdx(null)
+    setDragOver(null)
   }
 
   const slots = Math.max(sgOrder.length, rivalNames.length)
@@ -85,29 +81,22 @@ export default function SembradoPanel({ torneoId, cat, inscripciones, colegioRiv
         <div className="space-y-2">
           <p className="font-inter text-xs font-semibold text-navy">SG</p>
           {sgOrder.map((ins, idx) => (
-            <div key={ins.id} className="flex items-center gap-1.5 p-2 bg-surface rounded-lg">
+            <div
+              key={ins.id}
+              draggable
+              onDragStart={() => setDragIdx(idx)}
+              onDragOver={e => { e.preventDefault(); setDragOver(idx) }}
+              onDrop={() => handleDrop(idx)}
+              onDragEnd={() => { setDragIdx(null); setDragOver(null) }}
+              className={`flex items-center gap-1.5 p-2 rounded-lg transition-colors cursor-grab active:cursor-grabbing
+                ${dragOver === idx && dragIdx !== idx ? 'bg-gold/20 border border-gold/40' : 'bg-surface'}
+                ${dragIdx === idx ? 'opacity-40' : ''}`}
+            >
+              <GripVertical className="h-3.5 w-3.5 text-muted shrink-0" />
               <span className="font-inter text-xs font-bold text-gold w-5 text-center tabular-nums">{idx + 1}</span>
               <span className="flex-1 font-inter text-xs text-navy truncate">
                 {ins.jugador1?.nombre ?? '?'} / {ins.jugador2?.nombre ?? '?'}
               </span>
-              <div className="flex flex-col gap-0">
-                <button
-                  type="button"
-                  onClick={() => moveUp(idx)}
-                  disabled={idx === 0}
-                  className="text-muted hover:text-navy disabled:opacity-30 transition-colors"
-                >
-                  <ChevronUp className="h-3 w-3" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => moveDown(idx)}
-                  disabled={idx === sgOrder.length - 1}
-                  className="text-muted hover:text-navy disabled:opacity-30 transition-colors"
-                >
-                  <ChevronDown className="h-3 w-3" />
-                </button>
-              </div>
             </div>
           ))}
           {sgOrder.length === 0 && (
@@ -139,7 +128,7 @@ export default function SembradoPanel({ torneoId, cat, inscripciones, colegioRiv
                   next[idx] = e.target.value
                   setRivalNames(next)
                 }}
-                placeholder="Apellido / Apellido"
+                placeholder={`Jugador ${cat.nombre} #${idx + 1}`}
                 className="flex-1 h-7 text-xs"
               />
             </div>
