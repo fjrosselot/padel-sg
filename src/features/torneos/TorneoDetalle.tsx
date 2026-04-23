@@ -67,6 +67,7 @@ export default function TorneoDetalle() {
       const configFixture = torneo!.config_fixture as unknown as ConfigFixture
       if (!configFixture) throw new Error('El torneo no tiene configuración de fixture guardada.')
 
+      let sembradoMatchOffset = 0
       const categoriasFixture = categoriasConfig.map(cat => {
         const catInscritas = inscritas.filter((i: any) => i.categoria_nombre === cat.nombre)
 
@@ -80,7 +81,9 @@ export default function TorneoDetalle() {
             elo1: i.j1?.elo ?? 1200,
             elo2: i.j2?.elo ?? 1200,
           }))
-          return buildDesafioSembradoFixture(cat, sgParejas, cat.rival_pairs ?? [], configFixture)
+          const result = buildDesafioSembradoFixture(cat, sgParejas, cat.rival_pairs ?? [], configFixture, sembradoMatchOffset)
+          sembradoMatchOffset += result.partidos.length
+          return result
         }
 
         const parejas: ParejaFixture[] = catInscritas.map((i: any) => ({

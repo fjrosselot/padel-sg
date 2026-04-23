@@ -281,7 +281,8 @@ export function buildDesafioSembradoFixture(
   cat: CategoriaConfig,
   sgParejas: ParejaFixture[],
   rivalNames: string[],
-  config: ConfigFixture
+  config: ConfigFixture,
+  matchOffset = 0
 ): CategoriaFixture {
   _matchCounter = 0
   const n = Math.min(sgParejas.length, rivalNames.length)
@@ -289,8 +290,9 @@ export function buildDesafioSembradoFixture(
   const slot = config.duracion_partido + config.pausa_entre_partidos
 
   const partidos: PartidoFixture[] = Array.from({ length: n }, (_, idx) => {
-    const cancha = (idx % config.num_canchas) + 1
-    const ronda = Math.floor(idx / config.num_canchas)
+    const globalIdx = matchOffset + idx
+    const cancha = (globalIdx % config.num_canchas) + 1
+    const ronda = Math.floor(globalIdx / config.num_canchas)
     const totalMinutes = h * 60 + m + ronda * slot
     const hh = String(Math.floor(totalMinutes / 60)).padStart(2, '0')
     const mm = String(totalMinutes % 60).padStart(2, '0')
