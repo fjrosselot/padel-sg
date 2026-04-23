@@ -59,7 +59,7 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
   const [numCanchas, setNumCanchas] = useState(initialConfig.num_canchas ?? 2)
   const [horaInicio, setHoraInicio] = useState(initialConfig.hora_inicio ?? '09:00')
 
-  const showColegioRival = tipo === 'vs_colegio' || torneo.tipo === 'vs_colegio'
+  const showColegioRival = tipo === 'vs_colegio'
 
   const { mutate, isPending, error } = useMutation({
     mutationFn: async () => {
@@ -200,7 +200,7 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
                     {categorias.map((cat, idx) => {
                       const sexo = cat.sexo as 'M' | 'F' | 'Mixto'
                       return (
-                        <div key={idx} className="flex items-center gap-2 p-2 bg-surface rounded-lg">
+                        <div key={cat.nombre} className="flex items-center gap-2 p-2 bg-surface rounded-lg">
                           <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${SEXO_COLOR[sexo]}`}>
                             {SEXO_LABEL[sexo]}
                           </span>
