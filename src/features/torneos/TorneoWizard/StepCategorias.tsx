@@ -30,6 +30,7 @@ function SexoBadge({ idx }: { idx: number }) {
 export default function StepCategorias() {
   const { register, control, formState: { errors } } = useFormContext<WizardData>()
   const { fields, append, remove } = useFieldArray({ control, name: 'categorias' })
+  const tipo = useWatch({ name: 'tipo' }) as string
 
   return (
     <div className="space-y-4">
@@ -84,6 +85,9 @@ export default function StepCategorias() {
             >
               <option value="americano_grupos">Americano</option>
               <option value="desafio_puntos">Desafío</option>
+              {tipo === 'vs_colegio' && (
+                <option value="desafio_sembrado">Desafío sembrado</option>
+              )}
             </select>
 
             <div className="flex items-center gap-2">

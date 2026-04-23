@@ -114,7 +114,7 @@ function simular(categorias: WizardData['categorias'], cfg: Partial<WizardData>)
     const n = cat.num_parejas ?? 0
     if (n < 2) return { nombre: cat.nombre, partidos: 0, duracionMin: 0, grupos: 0 }
 
-    if (cat.formato === 'desafio_puntos') {
+    if (cat.formato === 'desafio_puntos' || cat.formato === 'desafio_sembrado') {
       return { nombre: cat.nombre, partidos: n, duracionMin: Math.ceil(n / num_canchas) * slot, grupos: 0 }
     }
 
@@ -216,8 +216,10 @@ interface Props { onCreated?: () => void }
 export default function StepFixture(_props: Props) {
   const { watch, setValue } = useFormContext<WizardData>()
   const categorias = useWatch({ name: 'categorias' }) as WizardData['categorias']
-  const allDesafio = categorias?.length > 0 && categorias.every(c => c.formato === 'desafio_puntos')
-  const anyDesafio = categorias?.some(c => c.formato !== 'desafio_puntos')
+  const isDesafioFormat = (c: { formato?: string }) =>
+    c.formato === 'desafio_puntos' || c.formato === 'desafio_sembrado'
+  const allDesafio = categorias?.length > 0 && categorias.every(isDesafioFormat)
+  const anyDesafio = categorias?.some(c => !isDesafioFormat(c))
 
   const conGrupos = watch('con_grupos')
   const conConsolacion = watch('con_consolacion')
