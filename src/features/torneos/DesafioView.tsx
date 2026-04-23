@@ -35,7 +35,7 @@ function DesafioCategoria({
             {totalJugados}/{partidos.length} jugados
           </span>
           <div className="flex items-center gap-1.5 rounded-lg border border-navy/10 bg-navy/[0.04] px-2.5 py-1">
-            <span className="font-inter text-[10px] font-bold uppercase tracking-wider text-muted">SG</span>
+            <span className="font-inter text-[10px] font-bold uppercase tracking-wider text-muted">Saint George</span>
             <span className="font-manrope text-base font-bold text-gold tabular-nums leading-none">{sgPts}</span>
             <span className="text-navy/30 text-xs mx-0.5">–</span>
             <span className="font-manrope text-base font-bold text-navy tabular-nums leading-none">{rivalPts}</span>
