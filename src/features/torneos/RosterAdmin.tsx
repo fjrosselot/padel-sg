@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Pencil } from 'lucide-react'
 import { padelApi } from '../../lib/padelApi'
 import { Button } from '../../components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog'
 import { useUser } from '../../hooks/useUser'
-import type { CategoriaConfig } from '../../lib/fixture/types'
+import type { CategoriaConfig, ParejaFixture } from '../../lib/fixture/types'
 import { SEXO_LABEL } from './TorneoWizard/constants'
 import RosterRow from './RosterRow'
 import type { InscripcionRow } from './RosterRow'
 import { PlayerCombobox, usePastCompaneros } from './PlayerCombobox'
+import EditParejaModal from './EditParejaModal'
 
 interface Props {
   torneoId: string
@@ -24,6 +26,7 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
   const [j2Id, setJ2Id] = useState('')
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [categoriaFiltro, setCategoriaFiltro] = useState<string | null>(null)
+  const [editingPareja, setEditingPareja] = useState<{ inscripcionId: string; pareja: ParejaFixture } | null>(null)
 
   const { data: inscripciones } = useQuery({
     queryKey: ['inscripciones', torneoId],
@@ -227,14 +230,37 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
 
             <div className="divide-y divide-navy/5">
               {activas.map(ins => (
-                <RosterRow
-                  key={ins.id}
-                  ins={ins}
-                  onEliminar={() => eliminarInscripcion.mutate(ins.id)}
-                  eliminating={deletingId === ins.id}
-                  onConfirmar={ins.estado === 'pendiente' ? () => updateEstado.mutate({ inscripcionId: ins.id, nuevoEstado: 'confirmada' }) : undefined}
-                  onRechazar={ins.estado === 'pendiente' ? () => updateEstado.mutate({ inscripcionId: ins.id, nuevoEstado: 'rechazada' }) : undefined}
-                />
+                <div key={ins.id} className="relative flex items-center">
+                  <div className="flex-1">
+                    <RosterRow
+                      ins={ins}
+                      onEliminar={() => eliminarInscripcion.mutate(ins.id)}
+                      eliminating={deletingId === ins.id}
+                      onConfirmar={ins.estado === 'pendiente' ? () => updateEstado.mutate({ inscripcionId: ins.id, nuevoEstado: 'confirmada' }) : undefined}
+                      onRechazar={ins.estado === 'pendiente' ? () => updateEstado.mutate({ inscripcionId: ins.id, nuevoEstado: 'rechazada' }) : undefined}
+                    />
+                  </div>
+                  {ins.estado !== 'rechazada' && (
+                    <button
+                      type="button"
+                      aria-label="Editar pareja"
+                      onClick={() => setEditingPareja({
+                        inscripcionId: ins.id,
+                        pareja: {
+                          id: ins.id,
+                          nombre: `${ins.jugador1?.nombre ?? '?'} / ${ins.jugador2?.nombre ?? '?'}`,
+                          jugador1_id: ins.jugador1_id,
+                          jugador2_id: ins.jugador2_id,
+                          elo1: 0,
+                          elo2: 0,
+                        },
+                      })}
+                      className="shrink-0 mr-3 text-muted hover:text-navy transition-colors p-1 rounded"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
               ))}
               {espera.length > 0 && (
                 <div className="px-4 py-2 bg-navy/[0.02]">
@@ -258,6 +284,14 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
           </div>
         )
       })}
+      {editingPareja && (
+        <EditParejaModal
+          torneoId={torneoId}
+          inscripcionId={editingPareja.inscripcionId}
+          pareja={editingPareja.pareja}
+          onClose={() => setEditingPareja(null)}
+        />
+      )}
     </div>
   )
 }
