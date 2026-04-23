@@ -5,6 +5,22 @@ import { Input } from '../../../components/ui/input'
 import { Button } from '../../../components/ui/button'
 import { SEXO_LABEL, SEXO_COLOR } from './constants'
 
+function ParejasStepper({ idx }: { idx: number }) {
+  const { setValue } = useFormContext<WizardData>()
+  const value = (useWatch({ name: `categorias.${idx}.num_parejas` }) as number) ?? 4
+  const set = (v: number) => setValue(`categorias.${idx}.num_parejas`, Math.max(2, Math.min(64, v)))
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="text-sm text-muted whitespace-nowrap">Parejas:</span>
+      <button type="button" onClick={() => set(value - 1)} disabled={value <= 2}
+        className="w-6 h-6 rounded border border-navy/20 flex items-center justify-center font-mono text-sm text-navy disabled:opacity-30 hover:border-gold hover:text-gold transition-colors">−</button>
+      <span className="w-6 text-center font-manrope text-sm font-bold text-navy tabular-nums">{value}</span>
+      <button type="button" onClick={() => set(value + 1)} disabled={value >= 64}
+        className="w-6 h-6 rounded border border-navy/20 flex items-center justify-center font-mono text-sm text-navy disabled:opacity-30 hover:border-gold hover:text-gold transition-colors">+</button>
+    </div>
+  )
+}
+
 const CATEGORIAS_PRESET: Array<{ nombre: string; sexo: 'M' | 'F' | 'Mixto' }> = [
   { nombre: 'D', sexo: 'F' },
   { nombre: 'C', sexo: 'F' },
@@ -90,14 +106,7 @@ export default function StepCategorias() {
               )}
             </select>
 
-            <div className="flex items-center gap-2">
-              <Label htmlFor={`cat-parejas-${idx}`} className="text-sm text-muted whitespace-nowrap">Parejas:</Label>
-              <Input
-                id={`cat-parejas-${idx}`}
-                type="number" min={2} max={64} className="w-16"
-                {...register(`categorias.${idx}.num_parejas`, { valueAsNumber: true })}
-              />
-            </div>
+            <ParejasStepper idx={idx} />
 
             <button
               type="button"
