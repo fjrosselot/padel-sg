@@ -88,17 +88,32 @@ export default function JugadoresPage() {
 
   const rankingMap = useMemo(() => {
     const map = new Map<string, { pos: number; puntos: number }>()
-    if (!rankingRows) return map
-    const byCategoria = new Map<string, { jugador_id: string; puntos_total: number }[]>()
-    for (const r of rankingRows) {
-      if (!byCategoria.has(r.categoria)) byCategoria.set(r.categoria, [])
-      byCategoria.get(r.categoria)!.push(r)
+    if (!jugadores) return map
+    // Assign positions from ranking_categoria (players with points)
+    const rankedCountByCategoria = new Map<string, number>()
+    if (rankingRows) {
+      const byCategoria = new Map<string, { jugador_id: string; puntos_total: number }[]>()
+      for (const r of rankingRows) {
+        if (!byCategoria.has(r.categoria)) byCategoria.set(r.categoria, [])
+        byCategoria.get(r.categoria)!.push(r)
+      }
+      byCategoria.forEach((rows, cat) => {
+        rows.forEach((r, i) => map.set(r.jugador_id, { pos: i + 1, puntos: r.puntos_total }))
+        rankedCountByCategoria.set(cat, rows.length)
+      })
     }
-    byCategoria.forEach(rows => {
-      rows.forEach((r, i) => map.set(r.jugador_id, { pos: i + 1, puntos: r.puntos_total }))
-    })
+    // Assign positions to 0-point players not in ranking_categoria
+    const nextPos = new Map<string, number>(
+      [...rankedCountByCategoria.entries()].map(([cat, n]) => [cat, n + 1])
+    )
+    for (const j of jugadores) {
+      if (!j.categoria || map.has(j.id)) continue
+      const pos = nextPos.get(j.categoria) ?? 1
+      map.set(j.id, { pos, puntos: 0 })
+      nextPos.set(j.categoria, pos + 1)
+    }
     return map
-  }, [rankingRows])
+  }, [rankingRows, jugadores])
 
   const jugadoresConRanking = useMemo(() =>
     (jugadores ?? []).map((j, i) => ({
