@@ -97,6 +97,7 @@ export default function EditParejaModal({ torneoId, inscripcionId, pareja, onClo
 
   const saveReplace = useMutation({
     mutationFn: async () => {
+      if (torneoEstado === 'finalizado') throw new Error('No se puede reemplazar jugadores en un torneo finalizado')
       if (!nuevoJugadorId) throw new Error('Selecciona un jugador')
       const nuevoJugador = jugadores?.find(j => j.id === nuevoJugadorId)
       if (!nuevoJugador) throw new Error('Jugador no encontrado')
@@ -256,7 +257,7 @@ export default function EditParejaModal({ torneoId, inscripcionId, pareja, onClo
               <button
                 type="button"
                 onClick={() => saveReplace.mutate()}
-                disabled={saveReplace.isPending || !nuevoJugadorId}
+                disabled={saveReplace.isPending || !nuevoJugadorId || torneoEstado === 'finalizado'}
                 className="px-4 py-2 text-sm font-semibold font-inter bg-navy text-gold rounded-lg hover:bg-navy/90 transition-colors disabled:opacity-50"
               >
                 {saveReplace.isPending ? 'Guardando...' : 'Reemplazar'}
