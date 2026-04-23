@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Banknote } from 'lucide-react'
+import { ArrowLeft, Banknote, Pencil, Trash2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as Tabs from '@radix-ui/react-tabs'
 import { adminHeaders } from '../../lib/adminHeaders'
@@ -15,6 +15,9 @@ import InscripcionesPanel from './InscripcionesPanel'
 import ResultadosModal from './ResultadosModal'
 import RosterAdmin from './RosterAdmin'
 import GenerarCobroModal from './GenerarCobroModal'
+import EditTorneoModal from './EditTorneoModal'
+import { padelApi } from '../../lib/padelApi'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog'
 import { buildFixture, buildDesafioFixture } from '../../lib/fixture/engine'
 import type { Database } from '../../lib/types/database.types'
 import type { CategoriaConfig, CategoriaFixture, PartidoFixture, ParejaFixture, ConfigFixture } from '../../lib/fixture/types'
@@ -56,6 +59,9 @@ export default function TorneoDetalle() {
   const [partidoModal, setPartidoModal] = useState<PartidoFixture | null>(null)
   const [showCobro, setShowCobro] = useState(false)
   const [activeTab, setActiveTab] = useState('fixture')
+  const [showEdit, setShowEdit] = useState(false)
+  const [showDelete, setShowDelete] = useState(false)
+  const [deleteConfirmed, setDeleteConfirmed] = useState(false)
 
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
   const qc = useQueryClient()
@@ -69,6 +75,14 @@ export default function TorneoDetalle() {
   const abrirInscripciones = useMutation({
     mutationFn: () => padelPatch('torneos', id!, { estado: 'inscripcion' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['torneo', id] }),
+  })
+
+  const deleteTorneo = useMutation({
+    mutationFn: () => padelApi.delete('torneos', `id=eq.${id!}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['torneos'] })
+      navigate('/torneos')
+    },
   })
 
   const generarFixture = useMutation({
@@ -136,7 +150,19 @@ export default function TorneoDetalle() {
           <h1 className="text-2xl font-bold font-manrope text-navy">{torneo.nombre}</h1>
           <p className="text-muted text-sm font-inter">{torneo.fecha_inicio}</p>
         </div>
-        <Badge>{ESTADO_LABELS[torneo.estado]}</Badge>
+        <div className="flex items-center gap-2">
+          {isAdmin && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs rounded-lg border-navy/20 text-navy gap-1.5"
+              onClick={() => setShowEdit(true)}
+            >
+              <Pencil className="h-3.5 w-3.5" /> Editar
+            </Button>
+          )}
+          <Badge>{ESTADO_LABELS[torneo.estado]}</Badge>
+        </div>
       </div>
 
       {isAdmin && (torneo.estado === 'inscripcion' || torneo.estado === 'en_curso') && (
@@ -242,6 +268,90 @@ export default function TorneoDetalle() {
           }
         </div>
       </div>
+
+      {/* Danger Zone */}
+      {isAdmin && (
+        <div className="rounded-xl border border-defeat/20 bg-defeat/5 p-4 space-y-3 mt-2">
+          <p className="font-inter text-[10px] font-bold uppercase tracking-widest text-defeat/60">
+            Zona de peligro
+          </p>
+          <div className="flex items-start justify-between gap-4">
+            <p className="font-inter text-sm text-defeat/80">
+              {torneo.estado === 'borrador' && 'Se eliminará el torneo y su configuración.'}
+              {torneo.estado === 'inscripcion' && 'Se eliminará el torneo y todas las inscripciones asociadas.'}
+              {(torneo.estado === 'en_curso' || torneo.estado === 'finalizado') &&
+                'Se eliminará el torneo, inscripciones, partidos y resultados registrados.'}
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs rounded-lg border-defeat/30 text-defeat gap-1.5 hover:bg-defeat/10 shrink-0"
+              onClick={() => { setShowDelete(true); setDeleteConfirmed(false) }}
+            >
+              <Trash2 className="h-3.5 w-3.5" /> Eliminar torneo
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Edit modal */}
+      {showEdit && (
+        <EditTorneoModal torneo={torneo} onClose={() => setShowEdit(false)} />
+      )}
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={showDelete} onOpenChange={open => { if (!open) { setShowDelete(false); setDeleteConfirmed(false) } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-manrope text-navy">Eliminar torneo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <p className="font-inter text-sm text-navy">
+              Estás por eliminar{' '}
+              <span className="text-defeat font-bold">{torneo.nombre}</span>.
+            </p>
+            <p className="font-inter text-sm text-muted">
+              {torneo.estado === 'borrador' && 'Se eliminará el torneo y su configuración.'}
+              {torneo.estado === 'inscripcion' && 'Se eliminará el torneo y todas las inscripciones asociadas.'}
+              {(torneo.estado === 'en_curso' || torneo.estado === 'finalizado') &&
+                'Se eliminará el torneo, inscripciones, partidos y resultados registrados.'}
+            </p>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                id="delete-confirm"
+                checked={deleteConfirmed}
+                onChange={e => setDeleteConfirmed(e.target.checked)}
+                className="accent-defeat w-4 h-4 cursor-pointer"
+              />
+              <span className="font-inter text-sm text-navy">Entiendo que esta acción es irreversible</span>
+            </label>
+            {deleteTorneo.error && (
+              <p className="text-xs text-defeat font-inter">
+                {deleteTorneo.error instanceof Error ? deleteTorneo.error.message : 'Error al eliminar'}
+              </p>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDelete(false)}
+                className="rounded-lg text-xs"
+              >
+                Cancelar
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => deleteTorneo.mutate()}
+                disabled={!deleteConfirmed || deleteTorneo.isPending}
+                className="bg-defeat text-white rounded-lg text-xs font-semibold hover:bg-defeat/90"
+              >
+                {deleteTorneo.isPending ? 'Eliminando…' : 'Eliminar definitivamente'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {showCobro && (
         <GenerarCobroModal
