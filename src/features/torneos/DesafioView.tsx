@@ -23,39 +23,42 @@ function DesafioCategoria({
   const rivalPts = partidos.filter(p => p.ganador === 2).length
   const totalJugados = partidos.filter(p => p.ganador !== null).length
   const isSembrado = categoria.formato === 'desafio_sembrado'
+  const rivalLabel = colegioRival ?? 'Rival'
 
   return (
-    <div className="space-y-4">
-      <h3 className="font-manrope text-lg font-bold text-navy">{categoria.nombre}</h3>
-      <div className="flex items-center justify-between rounded-xl bg-navy p-4">
-        <div className="text-center">
-          <p className="text-xs text-white/60 uppercase tracking-wide">SG</p>
-          <p className="text-3xl font-bold text-gold">{sgPts}</p>
-        </div>
-        <div className="text-center text-white/40 text-xs">
-          {totalJugados}/{partidos.length} jugados
-        </div>
-        <div className="text-center">
-          <p className="text-xs text-white/60 uppercase tracking-wide">{colegioRival ?? 'Rival'}</p>
-          <p className="text-3xl font-bold text-white">{rivalPts}</p>
+    <div className="space-y-2">
+      {/* Compact header */}
+      <div className="flex items-center justify-between gap-4">
+        <span className="font-manrope text-sm font-bold text-navy">{categoria.nombre}</span>
+        <div className="flex items-center gap-3">
+          <span className="font-inter text-xs text-muted tabular-nums">
+            {totalJugados}/{partidos.length} jugados
+          </span>
+          <div className="flex items-center gap-1.5 rounded-lg border border-navy/10 bg-navy/[0.04] px-2.5 py-1">
+            <span className="font-inter text-[10px] font-bold uppercase tracking-wider text-muted">SG</span>
+            <span className="font-manrope text-base font-bold text-gold tabular-nums leading-none">{sgPts}</span>
+            <span className="text-navy/30 text-xs mx-0.5">–</span>
+            <span className="font-manrope text-base font-bold text-navy tabular-nums leading-none">{rivalPts}</span>
+            <span className="font-inter text-[10px] font-bold uppercase tracking-wider text-muted">{rivalLabel}</span>
+          </div>
         </div>
       </div>
-      <div className="space-y-1">
+
+      {/* Match rows */}
+      <div className="rounded-xl border border-navy/5 overflow-hidden divide-y divide-navy/5">
         {partidos.map(p => (
-          <div key={p.id}>
-            {isSembrado && (
-              <p className="font-inter text-[10px] font-bold uppercase tracking-widest text-muted px-2 pt-2">
-                Sembrado {p.numero}
-              </p>
-            )}
-            <PartidoRow
-              partido={p}
-              torneoId={torneoId}
-              isAdmin={isAdmin}
-              onCargarResultado={onCargarResultado}
-            />
-          </div>
+          <PartidoRow
+            key={p.id}
+            partido={p}
+            torneoId={torneoId}
+            isAdmin={isAdmin}
+            onCargarResultado={onCargarResultado}
+            sembradoNum={isSembrado ? p.numero : undefined}
+          />
         ))}
+        {partidos.length === 0 && (
+          <p className="px-3 py-2 text-xs text-muted font-inter">Sin partidos.</p>
+        )}
       </div>
     </div>
   )
@@ -63,7 +66,7 @@ function DesafioCategoria({
 
 export default function DesafioView({ categorias, torneoId, isAdmin, onCargarResultado, colegioRival }: Props) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       {categorias.map(cat => (
         <DesafioCategoria
           key={cat.nombre}

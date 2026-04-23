@@ -9,9 +9,10 @@ interface Props {
   torneoId: string
   isAdmin: boolean
   onCargarResultado: (partido: PartidoFixture) => void
+  sembradoNum?: number
 }
 
-export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResultado }: Props) {
+export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResultado, sembradoNum }: Props) {
   const qc = useQueryClient()
 
   const toggleBloqueo = useMutation({
@@ -33,6 +34,11 @@ export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResulta
     <div className={`flex items-center gap-2 p-2 rounded-lg text-sm ${
       partido.ganador ? 'bg-surface-high' : 'bg-surface'
     }`}>
+      {sembradoNum !== undefined && (
+        <span className="text-gold font-inter text-xs font-bold w-4 shrink-0 text-center tabular-nums">
+          {sembradoNum}
+        </span>
+      )}
       <span className="text-muted w-14 shrink-0 font-inter text-xs">
         {partido.turno ?? '--:--'} C{partido.cancha ?? '?'}
       </span>
