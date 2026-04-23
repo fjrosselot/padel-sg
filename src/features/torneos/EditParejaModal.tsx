@@ -71,6 +71,7 @@ export default function EditParejaModal({ torneoId, inscripcionId, pareja, onClo
       padelApi.get<JugadorOption[]>(
         'jugadores?select=id,nombre,apodo,sexo&estado_cuenta=eq.activo&order=nombre.asc'
       ),
+    staleTime: 0,
   })
 
   const torneoEstado = torneoData?.estado ?? ''
@@ -173,6 +174,12 @@ export default function EditParejaModal({ torneoId, inscripcionId, pareja, onClo
               </p>
             )}
 
+            {!fixtureGenerado && (
+              <p className="text-xs text-muted font-inter italic">
+                El nombre se puede personalizar una vez generado el fixture.
+              </p>
+            )}
+
             <div className="flex justify-end gap-2">
               <button
                 type="button"
@@ -184,7 +191,7 @@ export default function EditParejaModal({ torneoId, inscripcionId, pareja, onClo
               <button
                 type="button"
                 onClick={() => saveRename.mutate()}
-                disabled={saveRename.isPending}
+                disabled={saveRename.isPending || !fixtureGenerado}
                 className="px-4 py-2 text-sm font-semibold font-inter bg-navy text-gold rounded-lg hover:bg-navy/90 transition-colors disabled:opacity-50"
               >
                 {saveRename.isPending ? 'Guardando...' : 'Guardar'}
