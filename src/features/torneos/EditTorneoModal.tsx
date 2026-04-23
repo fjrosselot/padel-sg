@@ -74,17 +74,20 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
         body.colegio_rival = colegioRival || null
       }
 
+      body.config_fixture = {
+        ...initialConfig,
+        hora_inicio: horaInicio,
+        ...(isBorrador && {
+          duracion_partido: duracionPartido,
+          pausa_entre_partidos: pausaEntrePartidos,
+          num_canchas: numCanchas,
+        }),
+      }
+
       if (isBorrador) {
         body.tipo = tipo
         if (isCategoriaConfig) {
           body.categorias = categorias
-        }
-        body.config_fixture = {
-          ...initialConfig,
-          duracion_partido: duracionPartido,
-          pausa_entre_partidos: pausaEntrePartidos,
-          num_canchas: numCanchas,
-          hora_inicio: horaInicio,
         }
       }
 
@@ -144,6 +147,19 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
               value={fechaInicio}
               onChange={e => setFechaInicio(e.target.value)}
             />
+          </div>
+
+          {/* Hora de inicio */}
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-hora-top" className="label-editorial">Hora de inicio</Label>
+            <select
+              id="edit-hora-top"
+              value={horaInicio}
+              onChange={e => setHoraInicio(e.target.value)}
+              className="w-full rounded-lg border border-navy/20 bg-white px-3 py-2 text-sm text-navy focus:border-gold focus:outline-none"
+            >
+              {horaOptions.map(v => <option key={v} value={v}>{v}</option>)}
+            </select>
           </div>
 
           {/* Colegio rival — shown when tipo is vs_colegio */}
@@ -276,17 +292,6 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <Label htmlFor="edit-hora" className="text-xs text-muted uppercase tracking-widest">Hora de inicio</Label>
-                    <select
-                      id="edit-hora"
-                      value={horaInicio}
-                      onChange={e => setHoraInicio(e.target.value)}
-                      className="w-full rounded-lg border border-navy/20 bg-white px-3 py-2 text-sm text-navy focus:border-gold focus:outline-none"
-                    >
-                      {horaOptions.map(v => <option key={v} value={v}>{v}</option>)}
-                    </select>
-                  </div>
                 </div>
               </div>
             </>
