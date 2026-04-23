@@ -31,22 +31,22 @@ export default function RosterRow({
   const isPending = ins.estado === 'pendiente'
 
   return (
-    <div className="flex items-center justify-between px-4 py-2.5">
-      <div>
-        <p className="text-sm font-medium text-navy">
+    <div className="flex items-center justify-between px-4 py-2.5 gap-2">
+      <div className="flex items-center gap-2 min-w-0">
+        <p className="text-sm font-medium text-navy truncate">
           {ins.jugador1?.nombre ?? ins.jugador1_id} / {ins.jugador2?.nombre ?? ins.jugador2_id}
         </p>
-        <div className="flex items-center gap-2 mt-0.5">
+        {ins.estado !== 'confirmada' && (
           <Badge
-            variant={ins.estado === 'confirmada' ? 'default' : ins.estado === 'rechazada' ? 'destructive' : 'outline'}
-            className="text-[10px] h-4"
+            variant={ins.estado === 'rechazada' ? 'destructive' : 'outline'}
+            className="text-[10px] h-4 shrink-0"
           >
             {ins.estado}
           </Badge>
-          {waitPos != null && (
-            <span className="text-[10px] text-gold font-semibold">Espera #{waitPos}</span>
-          )}
-        </div>
+        )}
+        {waitPos != null && (
+          <span className="text-[10px] text-gold font-semibold shrink-0">Espera #{waitPos}</span>
+        )}
       </div>
       <div className="flex items-center gap-1.5">
         {onPromover && (
