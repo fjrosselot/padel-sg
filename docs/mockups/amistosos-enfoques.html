@@ -1,0 +1,213 @@
+<h2>3 enfoques — Amistosos</h2>
+<p class="subtitle">Filtros · Historial · Mejor presentación visual</p>
+
+<div class="cards">
+
+  <!-- ENFOQUE A: Tabs + filtros -->
+  <div class="card" data-choice="amistosos-a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#edf1f7;padding:12px;display:flex;justify-content:center;">
+      <div style="width:210px;font-family:sans-serif;background:#f8fafc;border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,0.13);">
+
+        <!-- Header -->
+        <div style="background:linear-gradient(135deg,#162844 0%,#25507f 100%);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="color:#fff;font-size:13px;font-weight:700">Amistosos</div>
+            <div style="color:#94b0cc;font-size:7.5px;margin-top:1px">3 partidas disponibles</div>
+          </div>
+          <div style="background:#e8c547;border-radius:7px;padding:4px 9px;color:#162844;font-size:7.5px;font-weight:700">+ Nueva</div>
+        </div>
+
+        <!-- Tabs -->
+        <div style="display:flex;border-bottom:2px solid #dce6f0;background:#fff;">
+          <div style="flex:1;padding:6px 4px;text-align:center;border-bottom:2px solid #162844;margin-bottom:-2px">
+            <div style="color:#162844;font-size:7.5px;font-weight:700">Disponibles</div>
+          </div>
+          <div style="flex:1;padding:6px 4px;text-align:center">
+            <div style="color:#94b0cc;font-size:7.5px">Mis partidas</div>
+          </div>
+          <div style="flex:1;padding:6px 4px;text-align:center">
+            <div style="color:#94b0cc;font-size:7.5px">Historial</div>
+          </div>
+        </div>
+
+        <!-- Filtros pills -->
+        <div style="padding:6px 8px;display:flex;gap:4px;flex-wrap:wrap;background:#fff;border-bottom:1px solid #edf2f8;">
+          <div style="background:#162844;border-radius:20px;padding:2px 8px;color:#fff;font-size:6.5px;font-weight:700">Todas</div>
+          <div style="border:1px solid #dce6f0;border-radius:20px;padding:2px 8px;color:#94b0cc;font-size:6.5px">Busca compañero</div>
+          <div style="border:1px solid #dce6f0;border-radius:20px;padding:2px 8px;color:#94b0cc;font-size:6.5px">Busca rivales</div>
+          <div style="border:1px solid #dce6f0;border-radius:20px;padding:2px 8px;color:#94b0cc;font-size:6.5px">4a</div>
+          <div style="border:1px solid #dce6f0;border-radius:20px;padding:2px 8px;color:#94b0cc;font-size:6.5px">Mixto</div>
+        </div>
+
+        <!-- Cards disponibles -->
+        <div style="padding:7px 8px;display:flex;flex-direction:column;gap:5px;">
+
+          <div style="background:#fff;border-radius:10px;padding:9px 10px;box-shadow:0 1px 6px rgba(0,0,0,0.08);">
+            <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:5px">
+              <div>
+                <div style="color:#162844;font-size:9px;font-weight:700">Sáb 26 abr · 09:00</div>
+                <div style="color:#94b0cc;font-size:7.5px;margin-top:1px">Pancho · Cancha 3 · 4a</div>
+              </div>
+              <div style="background:#edf2f8;border-radius:20px;padding:2px 7px;color:#162844;font-size:6.5px;font-weight:700">Busca compañero</div>
+            </div>
+            <div style="background:#e8c547;border-radius:6px;padding:5px;text-align:center;color:#162844;font-size:7.5px;font-weight:700">Unirme</div>
+          </div>
+
+          <div style="background:#fff;border-radius:10px;padding:9px 10px;box-shadow:0 1px 6px rgba(0,0,0,0.08);">
+            <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:5px">
+              <div>
+                <div style="color:#162844;font-size:9px;font-weight:700">Dom 27 abr · 11:00</div>
+                <div style="color:#94b0cc;font-size:7.5px;margin-top:1px">Matías · Cat. Open · Mixto ✓</div>
+              </div>
+              <div style="background:#edf2f8;border-radius:20px;padding:2px 7px;color:#162844;font-size:6.5px;font-weight:700">Busca rivales</div>
+            </div>
+            <div style="background:#162844;border-radius:6px;padding:5px;text-align:center;color:#e8c547;font-size:7.5px;font-weight:700">Ver detalles</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Tabs + filtros pills ⭐ Recomendado</h3>
+      <p>3 tabs: Disponibles (con filtros pills) · Mis partidas (confirmadas pendientes) · Historial (jugadas). Filtros sticky bajo los tabs. Cards rediseñadas con CTA principal gold.</p>
+    </div>
+  </div>
+
+  <!-- ENFOQUE B: Feed unificado con sección destacada -->
+  <div class="card" data-choice="amistosos-b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#edf1f7;padding:12px;display:flex;justify-content:center;">
+      <div style="width:210px;font-family:sans-serif;background:#f8fafc;border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,0.13);">
+
+        <!-- Header con CTA prominente -->
+        <div style="background:linear-gradient(135deg,#162844 0%,#25507f 100%);padding:12px 14px;">
+          <div style="color:#fff;font-size:13px;font-weight:700;margin-bottom:8px">Amistosos</div>
+          <!-- CTA grande -->
+          <div style="background:#e8c547;border-radius:9px;padding:7px 10px;display:flex;align-items:center;gap:7px;">
+            <div style="width:22px;height:22px;border-radius:6px;background:#162844;display:flex;align-items:center;justify-content:center;color:#e8c547;font-size:11px;flex-shrink:0">+</div>
+            <div>
+              <div style="color:#162844;font-size:8.5px;font-weight:700">Publicar partida</div>
+              <div style="color:#8b6914;font-size:6.5px">¿Buscas compañero o rivales?</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtros horizontales -->
+        <div style="padding:6px 8px;display:flex;gap:4px;background:#fff;border-bottom:1px solid #edf2f8;overflow-x:auto">
+          <div style="background:#162844;border-radius:20px;padding:2px 8px;color:#fff;font-size:6.5px;font-weight:700;white-space:nowrap">Todas</div>
+          <div style="border:1px solid #dce6f0;border-radius:20px;padding:2px 8px;color:#94b0cc;font-size:6.5px;white-space:nowrap">Compañero</div>
+          <div style="border:1px solid #dce6f0;border-radius:20px;padding:2px 8px;color:#94b0cc;font-size:6.5px;white-space:nowrap">Rivales</div>
+          <div style="border:1px solid #dce6f0;border-radius:20px;padding:2px 8px;color:#94b0cc;font-size:6.5px;white-space:nowrap">4a</div>
+        </div>
+
+        <!-- Tu partida confirmada destacada -->
+        <div style="margin:7px 8px 0;background:#fffef0;border:1.5px solid #e8c54745;border-radius:10px;padding:9px 10px;">
+          <div style="color:#94b0cc;font-size:6px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px">Tu partida confirmada</div>
+          <div style="color:#162844;font-size:9px;font-weight:700">Vie 25 abr · 19:00</div>
+          <div style="color:#94b0cc;font-size:7.5px;margin-top:1px">Con Rodrigo · Cancha 2 · 4a</div>
+          <div style="margin-top:5px;background:#22c55e15;border-radius:5px;padding:3px 7px;display:inline-block;color:#15803d;font-size:7px;font-weight:700">● Confirmada</div>
+        </div>
+
+        <!-- Feed disponibles -->
+        <div style="padding:7px 8px;display:flex;flex-direction:column;gap:4px;">
+          <div style="color:#94b0cc;font-size:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Disponibles</div>
+          <div style="background:#fff;border-radius:8px;padding:7px 9px;box-shadow:0 1px 5px rgba(0,0,0,0.07);display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="color:#162844;font-size:8.5px;font-weight:700">Sáb 26 · 09:00 · Pancho</div>
+              <div style="color:#94b0cc;font-size:7px">Cancha 3 · 4a · Busca compañero</div>
+            </div>
+            <div style="background:#e8c547;border-radius:5px;padding:3px 7px;color:#162844;font-size:7px;font-weight:700">Unirme</div>
+          </div>
+          <div style="background:#fff;border-radius:8px;padding:7px 9px;box-shadow:0 1px 5px rgba(0,0,0,0.07);display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="color:#162844;font-size:8.5px;font-weight:700">Dom 27 · 11:00 · Matías</div>
+              <div style="color:#94b0cc;font-size:7px">Open · Busca rivales · Mixto</div>
+            </div>
+            <div style="background:#edf2f8;border-radius:5px;padding:3px 7px;color:#162844;font-size:7px;font-weight:600">Ver</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Feed unificado con destacado personal</h3>
+      <p>Header con CTA "Publicar partida" prominente. Tu partida confirmada destacada en card dorada arriba. Feed de disponibles debajo con filtros. Sin tabs — todo en un scroll.</p>
+    </div>
+  </div>
+
+  <!-- ENFOQUE C: Dos secciones + FAB -->
+  <div class="card" data-choice="amistosos-c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#edf1f7;padding:12px;display:flex;justify-content:center;">
+      <div style="width:210px;font-family:sans-serif;background:#f8fafc;border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,0.13);position:relative;">
+
+        <!-- Header compacto -->
+        <div style="background:#162844;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="color:#fff;font-size:13px;font-weight:700">Amistosos</div>
+          <div style="color:#94b0cc;font-size:7.5px">3 disponibles · 1 confirmada</div>
+        </div>
+
+        <!-- Sección 1: Disponibles -->
+        <div style="padding:8px 9px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="color:#94b0cc;font-size:6.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Disponibles</div>
+            <div style="display:flex;gap:3px">
+              <div style="border:1px solid #dce6f0;border-radius:20px;padding:1.5px 6px;color:#94b0cc;font-size:6px">4a</div>
+              <div style="border:1px solid #dce6f0;border-radius:20px;padding:1.5px 6px;color:#94b0cc;font-size:6px">Compañero</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="background:#fff;border-radius:9px;padding:8px 9px;box-shadow:0 1px 5px rgba(0,0,0,0.07);">
+              <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:5px">
+                <div>
+                  <div style="color:#162844;font-size:9px;font-weight:700">Sáb 26 abr · 09:00</div>
+                  <div style="color:#94b0cc;font-size:7px;margin-top:1px">Pancho · C3 · 4a</div>
+                </div>
+                <div style="background:#edf2f8;border-radius:20px;padding:2px 6px;color:#162844;font-size:6px;font-weight:700">Compañero</div>
+              </div>
+              <div style="background:#e8c547;border-radius:5px;padding:4px;text-align:center;color:#162844;font-size:7px;font-weight:700">Unirme</div>
+            </div>
+            <div style="background:#fff;border-radius:9px;padding:8px 9px;box-shadow:0 1px 5px rgba(0,0,0,0.07);">
+              <div style="display:flex;justify-content:space-between;align-items:start;">
+                <div>
+                  <div style="color:#162844;font-size:9px;font-weight:700">Dom 27 abr · 11:00</div>
+                  <div style="color:#94b0cc;font-size:7px;margin-top:1px">Matías · Open · Mixto</div>
+                </div>
+                <div style="background:#edf2f8;border-radius:20px;padding:2px 6px;color:#162844;font-size:6px;font-weight:700">Rivales</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Divisor con label -->
+        <div style="display:flex;align-items:center;gap:6px;padding:0 9px 6px">
+          <div style="height:1px;flex:1;background:#dce6f0"></div>
+          <div style="color:#94b0cc;font-size:6.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Mis partidas</div>
+          <div style="height:1px;flex:1;background:#dce6f0"></div>
+        </div>
+
+        <!-- Sección 2: Mis partidas -->
+        <div style="padding:0 9px 9px;display:flex;flex-direction:column;gap:4px">
+          <div style="background:#fffef0;border:1px solid #e8c54740;border-radius:9px;padding:7px 9px;">
+            <div style="color:#94b0cc;font-size:5.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Confirmada</div>
+            <div style="color:#162844;font-size:8.5px;font-weight:700">Vie 25 abr · 19:00</div>
+            <div style="color:#94b0cc;font-size:7px;margin-top:1px">Con Rodrigo · Cancha 2</div>
+          </div>
+          <div style="background:#f8fafc;border-radius:9px;padding:7px 9px;border:1px solid #edf2f8">
+            <div style="color:#94b0cc;font-size:5.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Jugado · hace 3 días</div>
+            <div style="color:#162844;font-size:8.5px;font-weight:700">Mar 22 abr · Pancho+Matías 6-3 6-2</div>
+          </div>
+        </div>
+
+        <!-- FAB flotante -->
+        <div style="position:absolute;bottom:10px;right:10px;background:#e8c547;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(232,197,71,0.4);color:#162844;font-size:14px;font-weight:700">+</div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Dos secciones + botón flotante (FAB)</h3>
+      <p>Sin tabs. Scroll con dos secciones separadas por divisor: "Disponibles" (con filtros inline) + "Mis partidas" (confirmadas + historial). FAB gold "+" para nueva partida.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;text-align:center">⭐ Recomiendo A — los tabs separan claramente los 3 contextos sin sobrecargar el scroll.</p>

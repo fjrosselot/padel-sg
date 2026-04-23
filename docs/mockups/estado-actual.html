@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estado Actual — 3 Páginas</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f1f5f9; padding: 20px; }
+  h1 { text-align: center; color: #1e3a5f; font-size: 15px; margin-bottom: 20px; font-weight: 700; letter-spacing: 0.5px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+  .panel { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
+  .panel-title { background: #1e3a5f; color: white; font-size: 11px; font-weight: 700; padding: 8px 12px; text-align: center; letter-spacing: 1px; text-transform: uppercase; }
+  .panel-body { padding: 0; }
+
+  /* JUGADORES */
+  .search-bar { padding: 8px 10px; border-bottom: 1px solid #f0f4f8; }
+  .search-bar input { width: 100%; border: 1px solid #dce6f0; border-radius: 6px; padding: 5px 8px; font-size: 10px; color: #374151; background: #f8fafc; }
+  .filter-pills { padding: 6px 10px; border-bottom: 1px solid #f0f4f8; display: flex; gap: 4px; flex-wrap: wrap; }
+  .pill { font-size: 8px; padding: 2px 7px; border-radius: 10px; border: 1px solid #dce6f0; color: #64748b; cursor: pointer; white-space: nowrap; }
+  .pill.active { background: #1e3a5f; color: white; border-color: #1e3a5f; }
+  .filter-label { font-size: 7px; color: #94b0cc; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; display: block; margin-bottom: 2px; }
+  .filter-group { width: 100%; }
+
+  .jugadores-table { width: 100%; border-collapse: collapse; font-size: 8px; }
+  .jugadores-table th { background: #f8fafc; color: #94b0cc; font-weight: 600; text-transform: uppercase; font-size: 6.5px; padding: 5px 8px; text-align: left; letter-spacing: 0.5px; border-bottom: 1px solid #edf2f8; }
+  .jugadores-table td { padding: 5px 8px; border-bottom: 1px solid #f8fafc; color: #374151; vertical-align: middle; }
+  .jugadores-table tr:hover td { background: #f8fafc; }
+  .avatar-cell { display: flex; align-items: center; gap: 5px; }
+  .av { width: 20px; height: 20px; border-radius: 50%; background: #dce6f0; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; color: #1e3a5f; flex-shrink: 0; }
+  .rank-badge { background: #1e3a5f; color: white; border-radius: 3px; font-size: 6px; font-weight: 700; padding: 1px 3px; }
+  .cat-badge { background: #edf2f8; color: #1e3a5f; border-radius: 3px; font-size: 6.5px; font-weight: 600; padding: 1px 4px; }
+
+  /* RANKING */
+  .rank-filters { padding: 8px 10px; border-bottom: 1px solid #f0f4f8; display: flex; gap: 4px; flex-wrap: wrap; }
+  .rank-cat-header { padding: 8px 10px 4px; font-size: 9px; font-weight: 700; color: #1e3a5f; }
+  .rank-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 10px 10px; }
+  .rank-card { border: 1px solid #edf2f8; border-radius: 8px; padding: 8px; }
+  .rank-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+  .cat-title { font-size: 9px; font-weight: 700; color: #1e3a5f; }
+  .cat-subtitle { font-size: 7px; color: #94b0cc; }
+  .rank-row { display: flex; align-items: center; gap: 5px; padding: 2px 0; }
+  .rank-pos { width: 14px; height: 14px; border-radius: 50%; background: #f0f4f8; display: flex; align-items: center; justify-content: center; font-size: 6.5px; font-weight: 700; color: #1e3a5f; flex-shrink: 0; }
+  .rank-pos.gold { background: #e8c547; }
+  .rank-pos.silver { background: #c0c0c0; }
+  .rank-pos.bronze { background: #cd7f32; color: white; }
+  .rank-name { font-size: 7.5px; color: #374151; flex: 1; }
+  .rank-pts { font-size: 7px; font-weight: 700; color: #1e3a5f; }
+  .separator { font-size: 7px; color: #94b0cc; text-align: center; padding: 2px 0; }
+
+  /* PAGOS */
+  .pagos-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; border-bottom: 1px solid #edf2f8; }
+  .pago-stat { border-radius: 8px; padding: 8px 10px; }
+  .pago-stat.pendiente { background: #fff5f5; border: 1px solid #fecaca; }
+  .pago-stat.pagado { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .pago-stat-label { font-size: 7.5px; color: #64748b; margin-bottom: 2px; }
+  .pago-stat-amount { font-size: 13px; font-weight: 700; }
+  .pago-stat.pendiente .pago-stat-amount { color: #dc2626; }
+  .pago-stat.pagado .pago-stat-amount { color: #16a34a; }
+
+  .cobros-list { padding: 0 10px 10px; }
+  .cobro-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #f8fafc; }
+  .cobro-icon { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 8px; }
+  .cobro-icon.pend { background: #fff5f5; color: #dc2626; border: 1px solid #fecaca; }
+  .cobro-icon.paid { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+  .cobro-info { flex: 1; }
+  .cobro-name { font-size: 8px; font-weight: 600; color: #1e3a5f; }
+  .cobro-meta { font-size: 7px; color: #94b0cc; }
+  .cobro-amount { font-size: 9px; font-weight: 700; }
+  .cobro-amount.pend { color: #dc2626; }
+  .cobro-amount.paid { color: #16a34a; }
+
+  .note { font-size: 7px; color: #94b0cc; text-align: center; padding: 4px 10px 8px; font-style: italic; }
+</style>
+</head>
+<body><div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#162844,#25507f);padding:8px 16px;display:flex;align-items:center;font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.2)"><a href="index.html" style="color:#e8c547;font-size:11px;font-weight:700;text-decoration:none">← Volver al índice</a></div><div style="height:38px"></div>
+<h1>Estado Actual — Jugadores · Ranking · Mis Pagos</h1>
+
+<div class="grid">
+
+  <!-- JUGADORES -->
+  <div class="panel">
+    <div class="panel-title">👥 Jugadores</div>
+    <div class="panel-body">
+      <div class="search-bar">
+        <input type="text" placeholder="🔍 Buscar por nombre, apellido, apodo…" readonly>
+      </div>
+      <div class="filter-pills">
+        <div class="filter-group">
+          <span class="filter-label">Categoría</span>
+          <div style="display:flex;gap:3px;flex-wrap:wrap">
+            <span class="pill active">Todas</span>
+            <span class="pill">3a (H)</span>
+            <span class="pill">4a (H)</span>
+            <span class="pill">5a (H)</span>
+            <span class="pill">Open (H)</span>
+            <span class="pill">B (D)</span>
+            <span class="pill">C (D)</span>
+          </div>
+        </div>
+        <div class="filter-group" style="margin-top:4px">
+          <span class="filter-label">Sexo</span>
+          <div style="display:flex;gap:3px">
+            <span class="pill active">Todos</span>
+            <span class="pill">H</span>
+            <span class="pill">D</span>
+          </div>
+        </div>
+        <div class="filter-group" style="margin-top:4px">
+          <span class="filter-label">Lado · Mixto</span>
+          <div style="display:flex;gap:3px">
+            <span class="pill active">Cualquier lado</span>
+            <span class="pill">Drive</span>
+            <span class="pill">Revés</span>
+            <span class="pill">Mixto ✓</span>
+          </div>
+        </div>
+      </div>
+      <table class="jugadores-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Apellido</th>
+            <th>Nombre</th>
+            <th>Cat</th>
+            <th>Rk</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="avatar-cell"><div class="av">PR</div><span class="rank-badge">1</span></div></td>
+            <td>Rosselot</td>
+            <td>Pancho</td>
+            <td><span class="cat-badge">4a</span></td>
+            <td>#1 · 180pts</td>
+          </tr>
+          <tr>
+            <td><div class="avatar-cell"><div class="av">MG</div><span class="rank-badge">2</span></div></td>
+            <td>González</td>
+            <td>Matías</td>
+            <td><span class="cat-badge">4a</span></td>
+            <td>#2 · 165pts</td>
+          </tr>
+          <tr>
+            <td><div class="avatar-cell"><div class="av">JL</div><span class="rank-badge">3</span></div></td>
+            <td>López</td>
+            <td>Juan</td>
+            <td><span class="cat-badge">3a</span></td>
+            <td>#1 · 210pts</td>
+          </tr>
+          <tr>
+            <td><div class="avatar-cell"><div class="av">CS</div><span class="rank-badge">4</span></div></td>
+            <td>Silva</td>
+            <td>Carlos</td>
+            <td><span class="cat-badge">5a</span></td>
+            <td>#1 · 140pts</td>
+          </tr>
+          <tr>
+            <td><div class="avatar-cell"><div class="av">AF</div></div></td>
+            <td>Fernández</td>
+            <td>Andrés</td>
+            <td><span class="cat-badge">4a</span></td>
+            <td>— · 0pts</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note">Columnas reales: apellido · nombre · teléfono · apodo · sexo · lado · mixto · rank posición · puntos</p>
+    </div>
+  </div>
+
+  <!-- RANKING -->
+  <div class="panel">
+    <div class="panel-title">🏆 Ranking</div>
+    <div class="panel-body">
+      <div class="rank-filters">
+        <span class="pill active">Todas</span>
+        <span class="pill">3a (H)</span>
+        <span class="pill">4a (H)</span>
+        <span class="pill">5a (H)</span>
+        <span class="pill">Open (H)</span>
+        <span class="pill">B (D)</span>
+        <span class="pill">C (D)</span>
+        <span class="pill">D (D)</span>
+        <span class="pill">Open (D)</span>
+      </div>
+      <div class="rank-cat-header">Vista Todas (compacto)</div>
+      <div class="rank-grid">
+        <!-- 3a Hombres -->
+        <div class="rank-card">
+          <div class="rank-card-header">
+            <div>
+              <div class="cat-title">3a Hombres</div>
+              <div class="cat-subtitle">4 jugadores</div>
+            </div>
+          </div>
+          <div class="rank-row"><div class="rank-pos gold">1</div><div class="rank-name">J. López</div><div class="rank-pts">210</div></div>
+          <div class="rank-row"><div class="rank-pos silver">2</div><div class="rank-name">R. Muñoz</div><div class="rank-pts">185</div></div>
+          <div class="rank-row"><div class="rank-pos bronze">3</div><div class="rank-name">F. Castro</div><div class="rank-pts">160</div></div>
+          <div class="separator">+ 1 más</div>
+        </div>
+        <!-- 4a Hombres -->
+        <div class="rank-card">
+          <div class="rank-card-header">
+            <div>
+              <div class="cat-title">4a Hombres</div>
+              <div class="cat-subtitle">6 jugadores</div>
+            </div>
+          </div>
+          <div class="rank-row"><div class="rank-pos gold">1</div><div class="rank-name">P. Rosselot</div><div class="rank-pts">180</div></div>
+          <div class="rank-row"><div class="rank-pos silver">2</div><div class="rank-name">M. González</div><div class="rank-pts">165</div></div>
+          <div class="rank-row"><div class="rank-pos bronze">3</div><div class="rank-name">D. Torres</div><div class="rank-pts">140</div></div>
+          <div class="separator">+ 3 más</div>
+        </div>
+        <!-- 5a Hombres -->
+        <div class="rank-card">
+          <div class="rank-card-header">
+            <div>
+              <div class="cat-title">5a Hombres</div>
+              <div class="cat-subtitle">5 jugadores</div>
+            </div>
+          </div>
+          <div class="rank-row"><div class="rank-pos gold">1</div><div class="rank-name">C. Silva</div><div class="rank-pts">140</div></div>
+          <div class="rank-row"><div class="rank-pos silver">2</div><div class="rank-name">P. Vargas</div><div class="rank-pts">120</div></div>
+          <div class="rank-row"><div class="rank-pos bronze">3</div><div class="rank-name">L. Díaz</div><div class="rank-pts">95</div></div>
+          <div class="separator">+ 2 más</div>
+        </div>
+        <!-- B Damas -->
+        <div class="rank-card">
+          <div class="rank-card-header">
+            <div>
+              <div class="cat-title">B Damas</div>
+              <div class="cat-subtitle">4 jugadoras</div>
+            </div>
+          </div>
+          <div class="rank-row"><div class="rank-pos gold">1</div><div class="rank-name">A. Martínez</div><div class="rank-pts">175</div></div>
+          <div class="rank-row"><div class="rank-pos silver">2</div><div class="rank-name">C. Reyes</div><div class="rank-pts">155</div></div>
+          <div class="rank-row"><div class="rank-pos bronze">3</div><div class="rank-name">V. Herrera</div><div class="rank-pts">130</div></div>
+          <div class="separator">+ 1 más</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MIS PAGOS -->
+  <div class="panel">
+    <div class="panel-title">💳 Mis Pagos</div>
+    <div class="panel-body">
+      <!-- Resumen -->
+      <div class="pagos-summary">
+        <div class="pago-stat pendiente">
+          <div class="pago-stat-label">Pendiente</div>
+          <div class="pago-stat-amount">$35.000</div>
+        </div>
+        <div class="pago-stat pagado">
+          <div class="pago-stat-label">Pagado</div>
+          <div class="pago-stat-amount">$85.000</div>
+        </div>
+      </div>
+      <!-- Lista cobros -->
+      <div class="cobros-list">
+        <div style="font-size:7.5px;font-weight:600;color:#94b0cc;letter-spacing:0.5px;text-transform:uppercase;padding:6px 0 4px">Pendientes</div>
+        <div class="cobro-item">
+          <div class="cobro-icon pend">○</div>
+          <div class="cobro-info">
+            <div class="cobro-name">Inscripción Liga Invierno</div>
+            <div class="cobro-meta">Torneo · Vence 30 abr</div>
+          </div>
+          <div class="cobro-amount pend">$20.000</div>
+        </div>
+        <div class="cobro-item">
+          <div class="cobro-icon pend">○</div>
+          <div class="cobro-info">
+            <div class="cobro-name">Cuota mensual — Abr</div>
+            <div class="cobro-meta">Mensualidad · Vence 25 abr</div>
+          </div>
+          <div class="cobro-amount pend">$15.000</div>
+        </div>
+        <div style="font-size:7.5px;font-weight:600;color:#94b0cc;letter-spacing:0.5px;text-transform:uppercase;padding:8px 0 4px">Pagados</div>
+        <div class="cobro-item">
+          <div class="cobro-icon paid">✓</div>
+          <div class="cobro-info">
+            <div class="cobro-name">Inscripción Liga Verano</div>
+            <div class="cobro-meta">Torneo · Pagado 10 feb</div>
+          </div>
+          <div class="cobro-amount paid">$30.000</div>
+        </div>
+        <div class="cobro-item">
+          <div class="cobro-icon paid">✓</div>
+          <div class="cobro-info">
+            <div class="cobro-name">Cuota mensual — Mar</div>
+            <div class="cobro-meta">Mensualidad · Pagado 22 mar</div>
+          </div>
+          <div class="cobro-amount paid">$15.000</div>
+        </div>
+        <div class="cobro-item">
+          <div class="cobro-icon paid">✓</div>
+          <div class="cobro-info">
+            <div class="cobro-name">Cuota mensual — Feb</div>
+            <div class="cobro-meta">Mensualidad · Pagado 21 feb</div>
+          </div>
+          <div class="cobro-amount paid">$15.000</div>
+        </div>
+        <div class="cobro-item">
+          <div class="cobro-icon paid">✓</div>
+          <div class="cobro-info">
+            <div class="cobro-name">Cuota mensual — Ene</div>
+            <div class="cobro-meta">Mensualidad · Pagado 20 ene</div>
+          </div>
+          <div class="cobro-amount paid">$25.000</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bracket — Copa Oro y Copa Plata</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f8fafc; color: #1e293b; }
+
+    .page-header {
+      background: linear-gradient(135deg, #162844, #25507f);
+      color: white;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    .page-header h1 { font-size: 20px; font-weight: 700; }
+    .page-header p { font-size: 13px; color: #94b0cc; margin-top: 4px; }
+
+    .container { padding: 0 16px 48px; }
+
+    .copa-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #162844;
+      border-left: 4px solid #e8c547;
+      padding-left: 12px;
+      margin: 0 0 16px;
+    }
+
+    .bracket-scroll {
+      overflow-x: auto;
+      padding-bottom: 16px;
+      margin-bottom: 32px;
+    }
+
+    .bracket-tree {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      min-width: max-content;
+    }
+
+    .bracket-round {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .round-label {
+      font-size: 9px;
+      font-weight: 700;
+      color: #94b0cc;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 12px;
+      height: 16px;
+    }
+
+    /* Each match card is 72px tall: 35px top row + 1px divider + 35px bottom row */
+    .match-card {
+      width: 200px;
+      background: white;
+      border: 1.5px solid rgba(22,40,68,0.12);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      height: 72px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .match-card.final-card {
+      border: 2px solid #e8c547;
+      box-shadow: 0 0 0 3px rgba(232,197,71,0.2), 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .match-card.plata-card {
+      border: 2px solid #94b0cc;
+      box-shadow: 0 0 0 3px rgba(148,176,204,0.2);
+    }
+
+    /* Winner row: subtle gold tint */
+    .player-row {
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      height: 35px;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .player-row.winner-row {
+      background: rgba(232,197,71,0.06);
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .player-row.loser-row {
+      background: white;
+    }
+
+    .player-name {
+      font-size: 12px;
+      color: #334155;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .player-name.winner {
+      font-weight: 700;
+      color: #162844;
+    }
+
+    .player-name.pending-name {
+      color: #94a3b8;
+      font-style: italic;
+    }
+
+    /* Score: each set as separate number, space-separated */
+    .player-score {
+      font-size: 12px;
+      font-weight: 700;
+      text-align: right;
+      white-space: nowrap;
+      letter-spacing: 0.12em;
+      flex-shrink: 0;
+      min-width: 38px;
+    }
+
+    .score-winner { color: #e8c547; }
+    .score-loser { color: #94b0cc; }
+    .score-pending { color: #cbd5e1; }
+
+    /* Trophy */
+    .trophy-end {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 16px;
+      font-size: 28px;
+      align-self: center;
+    }
+    .trophy-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #e8c547;
+      margin-top: 4px;
+      text-align: center;
+    }
+    .trophy-end.plata .trophy-label { color: #94b0cc; }
+
+    /* ---- Copa Oro layout ---- */
+    /* QF column: 4 cards with specific gaps to align with SF */
+    /* Card height = 72px. Gap between QF1+QF2 = 36px so SF1 center = (72+36+72)/2 = 90 from top */
+    /* SF1 top = 90 - 36 = 54. That's margin-top for SF1 */
+    /* Between QF3 and QF4 same gap 36. Extra gap between the two pairs = 72px */
+    /* So layout: QF1(72) gap36 QF2(72) gap72 QF3(72) gap36 QF4(72) */
+    /* SF1 center = QF1_center + (QF2_center - QF1_center)/2 = 36 + (36+36+72-1)/2 ... */
+    /* Let's compute precisely: */
+    /* QF1: top=0, center=36 */
+    /* QF2: top=72+36=108, center=144 */
+    /* QF pair1 center = (36+144)/2 = 90 */
+    /* SF1 center must be at 90 -> top of SF1 = 90-36 = 54 */
+    /* QF3: top = 108+72+72 = 252, center = 288 */
+    /* QF4: top = 252+72+36=360, center=396 */
+    /* QF pair2 center = (288+396)/2 = 342 */
+    /* SF2 center = 342 -> top of SF2 = 342-36 = 306 */
+    /* Total SF column height to span both cards = 306+72 = 378 */
+    /* Final center = (90+342)/2 = 216 -> top of Final = 216-36=180 */
+    /* SVG QF->SF: height = 378, from top */
+    /*   line from x=0,y=36 (QF1 center) to x=20,y=36 */
+    /*   line from x=0,y=144 (QF2 center) to x=20,y=144 */
+    /*   vertical x=20 from y=36 to y=144 */
+    /*   horizontal x=20 to x=40 at y=90 (SF1 center) */
+    /*   line from x=0,y=288 (QF3 center) to x=20,y=288 */
+    /*   line from x=0,y=396 (QF4 center) to x=20,y=396 */
+    /*   vertical x=20 from y=288 to y=396 */
+    /*   horizontal x=20 to x=40 at y=342 (SF2 center) */
+    /* SVG SF->Final: height = 378 */
+    /*   SF1 center at y=90 (since SF1 has margin-top 54 + 36 = 90) */
+    /*   SF2 center at y=342 */
+    /*   Final center at y=216 */
+
+    .qf-column {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sf-column {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .final-column {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+  </style>
+</head>
+<body>
+
+<div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#162844,#25507f);padding:8px 16px;display:flex;align-items:center;font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.2)"><a href="index.html" style="color:#e8c547;font-size:11px;font-weight:700;text-decoration:none">← Volver al índice</a></div><div style="height:38px"></div>
+
+<div class="page-header">
+  <h1>Bracket — Copa Oro y Copa Plata</h1>
+  <p>4a Masculino · Torneo Saint George's · 26 de abril, 2026</p>
+</div>
+
+<div class="container">
+
+  <!-- ===================== COPA ORO ===================== -->
+  <div class="copa-label">Copa Oro 🏆</div>
+
+  <div class="bracket-scroll">
+    <div class="bracket-tree">
+
+      <!-- CUARTOS column -->
+      <div>
+        <div class="round-label">Cuartos de Final</div>
+        <div class="qf-column">
+
+          <!-- QF1 — Rosselot/Torres 6 6 vs Díaz/Leal 3 4 -->
+          <div class="match-card">
+            <div class="player-row winner-row">
+              <span class="player-name winner">Rosselot / Torres</span>
+              <span class="player-score score-winner">6  6</span>
+            </div>
+            <div class="player-row loser-row">
+              <span class="player-name">Díaz / Leal</span>
+              <span class="player-score score-loser">3  4</span>
+            </div>
+          </div>
+
+          <!-- gap 36px between QF1 and QF2 -->
+          <div style="height:36px;"></div>
+
+          <!-- QF2 — Moreno/Pérez 6 6 vs García/Ruiz 2 1 -->
+          <div class="match-card">
+            <div class="player-row winner-row">
+              <span class="player-name winner">Moreno / Pérez</span>
+              <span class="player-score score-winner">6  6</span>
+            </div>
+            <div class="player-row loser-row">
+              <span class="player-name">García / Ruiz</span>
+              <span class="player-score score-loser">2  1</span>
+            </div>
+          </div>
+
+          <!-- gap 72px between pairs -->
+          <div style="height:72px;"></div>
+
+          <!-- QF3 — Araya/Muñoz 4 7 6 vs Silva/Ramos 6 5 3 (3 sets — show 2 main) -->
+          <div class="match-card">
+            <div class="player-row winner-row">
+              <span class="player-name winner">Araya / Muñoz</span>
+              <span class="player-score score-winner" style="letter-spacing:0.06em;font-size:11px;">4 7 6</span>
+            </div>
+            <div class="player-row loser-row">
+              <span class="player-name">Silva / Ramos</span>
+              <span class="player-score score-loser" style="letter-spacing:0.06em;font-size:11px;">6 5 3</span>
+            </div>
+          </div>
+
+          <!-- gap 36px between QF3 and QF4 -->
+          <div style="height:36px;"></div>
+
+          <!-- QF4 — Vega/Castro vs López/Herrera (pending) -->
+          <div class="match-card">
+            <div class="player-row winner-row" style="background:white;border-bottom:1px solid #f1f5f9;">
+              <span class="player-name pending-name">Vega / Castro</span>
+              <span class="player-score score-pending">—</span>
+            </div>
+            <div class="player-row loser-row">
+              <span class="player-name pending-name">López / Herrera</span>
+              <span class="player-score score-pending">—</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- CONNECTOR QF → SF -->
+      <!-- Total QF height: 72+36+72+72+72+36+72 = 432 -->
+      <!-- QF1 center: 36 -->
+      <!-- QF2 center: 72+36+36 = 144 -->
+      <!-- SF1 center: (36+144)/2 = 90 -->
+      <!-- QF3 center: 72+36+72+72+36 = 288 -->
+      <!-- QF4 center: 72+36+72+72+36+72+36 = 396 ... wait -->
+      <!-- recalc: QF1(top=0,h=72) gap(36) QF2(top=108,h=72) gap(72) QF3(top=252,h=72) gap(36) QF4(top=360,h=72) -->
+      <!-- QF1 center = 36, QF2 center = 108+36=144, QF3 center=252+36=288, QF4 center=360+36=396 -->
+      <!-- SF1 center = (36+144)/2 = 90, SF2 center=(288+396)/2=342 -->
+      <!-- SVG height = 396+36 = 432 -->
+      <div style="width:44px;flex-shrink:0;margin-top:28px;">
+        <svg width="44" height="432" viewBox="0 0 44 432" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- QF1 exit -->
+          <line x1="0" y1="36" x2="22" y2="36" stroke="#cbd5e1" stroke-width="1.5"/>
+          <!-- QF2 exit -->
+          <line x1="0" y1="144" x2="22" y2="144" stroke="#cbd5e1" stroke-width="1.5"/>
+          <!-- vertical join pair 1 -->
+          <line x1="22" y1="36" x2="22" y2="144" stroke="#cbd5e1" stroke-width="1.5"/>
+          <!-- SF1 entry at y=90 -->
+          <line x1="22" y1="90" x2="44" y2="90" stroke="#cbd5e1" stroke-width="1.5"/>
+
+          <!-- QF3 exit -->
+          <line x1="0" y1="288" x2="22" y2="288" stroke="#cbd5e1" stroke-width="1.5"/>
+          <!-- QF4 exit -->
+          <line x1="0" y1="396" x2="22" y2="396" stroke="#cbd5e1" stroke-width="1.5"/>
+          <!-- vertical join pair 2 -->
+          <line x1="22" y1="288" x2="22" y2="396" stroke="#cbd5e1" stroke-width="1.5"/>
+          <!-- SF2 entry at y=342 -->
+          <line x1="22" y1="342" x2="44" y2="342" stroke="#cbd5e1" stroke-width="1.5"/>
+        </svg>
+      </div>
+
+      <!-- SEMIS column -->
+      <!-- SF1 top = 90 - 36 = 54, SF2 top = 342 - 36 = 306 -->
+      <div>
+        <div class="round-label">Semifinal</div>
+        <div class="sf-column">
+          <!-- spacer to push SF1 down to top=54 -->
+          <div style="height:54px;"></div>
+
+          <!-- SF1 — Rosselot/Torres vs Moreno/Pérez (pending) -->
+          <div class="match-card">
+            <div class="player-row winner-row" style="background:white;border-bottom:1px solid #f1f5f9;">
+              <span class="player-name pending-name">Rosselot / Torres</span>
+              <span class="player-score score-pending">—</span>
+            </div>
+            <div class="player-row loser-row">
+              <span class="player-name pending-name">Moreno / Pérez</span>
+              <span class="player-score score-pending">—</span>
+            </div>
+          </div>
+
+          <!-- gap between SF1 and SF2: 306 - (54+72) = 180 -->
+          <div style="height:180px;"></div>
+
+          <!-- SF2 — Araya/Muñoz vs TBD (pending) -->
+          <div class="match-card">
+            <div class="player-row winner-row" style="background:white;border-bottom:1px solid #f1f5f9;">
+              <span class="player-name pending-name">Araya / Muñoz</span>
+              <span class="player-score score-pending">—</span>
+            </div>
+            <div class="player-row loser-row">
+              <span class="player-name pending-name">Por definir</span>
+              <span class="player-score score-pending">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONNECTOR SF → FINAL -->
+      <!-- SF1 center relative to connector start = 90 (54+36) -->
+      <!-- SF2 center = 342 (306+36) -->
+      <!-- Final center = (90+342)/2 = 216 -->
+      <div style="width:44px;flex-shrink:0;margin-top:28px;">
+        <svg width="44" height="432" viewBox="0 0 44 432" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="0" y1="90" x2="22" y2="90" stroke="#cbd5e1" stroke-width="1.5"/>
+          <line x1="0" y1="342" x2="22" y2="342" stroke="#cbd5e1" stroke-width="1.5"/>
+          <line x1="22" y1="90" x2="22" y2="342" stroke="#cbd5e1" stroke-width="1.5"/>
+          <line x1="22" y1="216" x2="44" y2="216" stroke="#cbd5e1" stroke-width="1.5"/>
+        </svg>
+      </div>
+
+      <!-- FINAL column -->
+      <!-- Final top = 216 - 36 = 180 -->
+      <div>
+        <div class="round-label">Final</div>
+        <div class="final-column">
+          <div style="height:180px;"></div>
+          <div class="match-card final-card">
+            <div class="player-row winner-row" style="background:rgba(232,197,71,0.04);border-bottom:1px solid #f5edd5;">
+              <span class="player-name pending-name">Ganador SF1</span>
+              <span class="player-score score-pending">—</span>
+            </div>
+            <div class="player-row loser-row">
+              <span class="player-name pending-name">Ganador SF2</span>
+              <span class="player-score score-pending">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TROPHY -->
+      <div class="trophy-end" style="margin-top:28px;">
+        <div>🏆</div>
+        <div class="trophy-label">Copa<br>Oro</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================== COPA PLATA ===================== -->
+  <div class="copa-label" style="margin-top:8px;border-left-color:#94b0cc;">Copa Plata 🥈</div>
+
+  <div class="bracket-scroll">
+    <div class="bracket-tree">
+
+      <!-- SF PLATA column -->
+      <!-- SP1 center=36, SP2: gap between them -->
+      <!-- SP1(top=0,h=72) gap(36) SP2(top=108,h=72) -->
+      <!-- SP1 center=36, SP2 center=144, Final center=90 -->
+      <div>
+        <div class="round-label">Semifinal Plata</div>
+        <div class="qf-column">
+
+          <!-- SP1 — Díaz/Leal 7 6 vs Silva/Ramos 6 4 -->
+          <div class="match-card">
+            <div class="player-row winner-row">
+              <span class="player-name winner">Díaz / Leal</span>
+              <span class="player-score score-winner">7  6</span>
+            </div>
+            <div class="player-row loser-row">
+              <span class="player-name">Silva / Ramos</span>
+              <span class="player-score score-loser">6  4</span>
+            </div>
+          </div>
+
+          <div style="height:36px;"></div>
+
+          <!-- SP2 — pending -->
+          <div class="match-card">
+            <div class="player-row winner-row" style="background:white;border-bottom:1px solid #f1f5f9;">
+              <span class="player-name pending-name">García / Ruiz</span>
+              <span class="player-score score-pending">—</span>
+            </div>
+            <div class="player-row loser-row">
+              <span class="player-name pending-name">López / Herrera</span>
+              <span class="player-score score-pending">—</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- CONNECTOR SP → Final Plata (dashed, muted-blue) -->
+      <!-- SP1 center=36, SP2 center=144, Final center=90 -->
+      <div style="width:44px;flex-shrink:0;margin-top:28px;">
+        <svg width="44" height="180" viewBox="0 0 44 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="0" y1="36" x2="22" y2="36" stroke="#94b0cc" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <line x1="0" y1="144" x2="22" y2="144" stroke="#94b0cc" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <line x1="22" y1="36" x2="22" y2="144" stroke="#94b0cc" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <line x1="22" y1="90" x2="44" y2="90" stroke="#94b0cc" stroke-width="1.5" stroke-dasharray="4 3"/>
+        </svg>
+      </div>
+
+      <!-- FINAL PLATA column -->
+      <!-- Final top = 90 - 36 = 54 -->
+      <div>
+        <div class="round-label">Final Plata</div>
+        <div class="final-column">
+          <div style="height:54px;"></div>
+          <div class="match-card plata-card">
+            <div class="player-row winner-row" style="background:rgba(148,176,204,0.06);border-bottom:1px solid #e8eef4;">
+              <span class="player-name pending-name">Ganador SP1</span>
+              <span class="player-score score-pending">—</span>
+            </div>
+            <div class="player-row loser-row">
+              <span class="player-name pending-name">Ganador SP2</span>
+              <span class="player-score score-pending">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLATA TROPHY -->
+      <div class="trophy-end plata" style="margin-top:28px;">
+        <div>🥈</div>
+        <div class="trophy-label">Copa<br>Plata</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div style="margin-top:16px;padding:12px 16px;background:white;border:1px solid #e2e8f0;border-radius:8px;display:flex;gap:20px;flex-wrap:wrap;font-size:11px;color:#64748b;">
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(232,197,71,0.06);border:1px solid #e2e8f0;margin-right:4px;"></span>Fila ganador</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:white;border:1px solid #e2e8f0;margin-right:4px;"></span>Fila perdedor</span>
+    <span><span style="color:#e8c547;font-weight:700;margin-right:4px;">6  4</span>Score ganador (por set)</span>
+    <span><span style="color:#94b0cc;font-weight:700;margin-right:4px;">3  2</span>Score perdedor</span>
+    <span><span style="font-size:14px;margin-right:4px;">🏆</span>Copa Oro</span>
+    <span><span style="font-size:14px;margin-right:4px;">🥈</span>Copa Plata — líneas punteadas</span>
+  </div>
+
+  <p style="text-align:center;font-size:11px;color:#94b0cc;margin-top:12px;">← desliza para ver más →</p>
+
+</div>
+</body>
+</html>

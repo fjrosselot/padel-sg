@@ -1,0 +1,256 @@
+<h2>3 enfoques — Rediseño Perfil</h2>
+<p class="subtitle">Misma estructura: col izquierda (datos + edición) · col derecha (historial). Distintas jerarquías visuales.</p>
+
+<div class="cards">
+
+  <!-- ENFOQUE A: Hero atlético con avatar grande -->
+  <div class="card" data-choice="perfil-a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#edf1f7;padding:12px;display:flex;justify-content:center;">
+      <div style="width:210px;font-family:sans-serif;display:flex;flex-direction:column;gap:6px;">
+
+        <!-- Col izquierda -->
+        <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.1);">
+          <!-- Hero navy con avatar centrado -->
+          <div style="background:linear-gradient(160deg,#162844 0%,#25507f 100%);padding:16px;text-align:center;">
+            <div style="width:52px;height:52px;border-radius:50%;background:#e8c547;display:flex;align-items:center;justify-content:center;color:#162844;font-weight:700;font-size:16px;margin:0 auto 8px;box-shadow:0 0 0 3px #ffffff30">FR</div>
+            <div style="color:#fff;font-size:12px;font-weight:700">Pancho Rosselot</div>
+            <div style="color:#94b0cc;font-size:8px;margin-top:2px">fjrosselot@gmail.com</div>
+            <div style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;background:#e8c54720;border:1px solid #e8c54740;border-radius:20px;padding:2px 10px;">
+              <span style="color:#e8c547;font-size:8px;font-weight:700">4a</span>
+              <span style="color:#94b0cc;font-size:7px">· Drive · #5 ranking</span>
+            </div>
+          </div>
+          <!-- Stats rápidos -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #edf2f8;">
+            <div style="padding:8px 4px;text-align:center;border-right:1px solid #edf2f8">
+              <div style="color:#162844;font-size:12px;font-weight:700">1284</div>
+              <div style="color:#94b0cc;font-size:6px;text-transform:uppercase;letter-spacing:.5px">ELO</div>
+            </div>
+            <div style="padding:8px 4px;text-align:center;border-right:1px solid #edf2f8">
+              <div style="color:#162844;font-size:12px;font-weight:700">24</div>
+              <div style="color:#94b0cc;font-size:6px;text-transform:uppercase;letter-spacing:.5px">Partidos</div>
+            </div>
+            <div style="padding:8px 4px;text-align:center">
+              <div style="color:#162844;font-size:12px;font-weight:700">58%</div>
+              <div style="color:#94b0cc;font-size:6px;text-transform:uppercase;letter-spacing:.5px">Win rate</div>
+            </div>
+          </div>
+          <!-- Edición + contraseña compactos -->
+          <div style="padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="color:#94b0cc;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Datos de perfil</span>
+              <span style="color:#e8c547;font-size:8px;font-weight:700">Editar</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+              <div style="background:#f8fafc;border-radius:6px;padding:5px 7px">
+                <div style="color:#94b0cc;font-size:6px;text-transform:uppercase;letter-spacing:.5px">Apodo</div>
+                <div style="color:#162844;font-size:8px;font-weight:700;margin-top:1px">Pancho</div>
+              </div>
+              <div style="background:#f8fafc;border-radius:6px;padding:5px 7px">
+                <div style="color:#94b0cc;font-size:6px;text-transform:uppercase;letter-spacing:.5px">Lado</div>
+                <div style="color:#162844;font-size:8px;font-weight:700;margin-top:1px">Drive</div>
+              </div>
+            </div>
+            <div style="border-top:1px solid #edf2f8;padding-top:7px;display:flex;justify-content:space-between;align-items:center">
+              <span style="color:#94b0cc;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Contraseña</span>
+              <span style="color:#162844;font-size:8px;font-weight:600;background:#edf2f8;border-radius:5px;padding:2px 7px">Cambiar</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Col derecha (historial) -->
+        <div style="background:#fff;border-radius:12px;padding:10px 12px;box-shadow:0 2px 12px rgba(0,0,0,0.1);">
+          <div style="color:#94b0cc;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Historial de puntos</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f0f4f8">
+              <span style="color:#162844;font-size:8px">Americano Abril 2026</span>
+              <span style="color:#e8c547;font-size:8px;font-weight:700">+20 pts</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f0f4f8">
+              <span style="color:#162844;font-size:8px">OSP Primera Fecha</span>
+              <span style="color:#e8c547;font-size:8px;font-weight:700">+5 pts</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0">
+              <span style="color:#162844;font-size:8px">Americano Marzo</span>
+              <span style="color:#94b0cc;font-size:8px;font-weight:700">+5 pts</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Hero atlético centrado</h3>
+      <p>Avatar grande centrado en navy con pill de categoría+ranking. Stats ELO/Partidos/Win% en fila. Edición compacta debajo como sección colapsable.</p>
+    </div>
+  </div>
+
+  <!-- ENFOQUE B: Tarjeta de jugador horizontal -->
+  <div class="card" data-choice="perfil-b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#edf1f7;padding:12px;display:flex;justify-content:center;">
+      <div style="width:210px;font-family:sans-serif;display:flex;flex-direction:column;gap:6px;">
+
+        <!-- Col izquierda -->
+        <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.1);">
+
+          <!-- Header horizontal: avatar izquierda + info derecha -->
+          <div style="background:linear-gradient(135deg,#162844 0%,#25507f 100%);padding:12px 14px;display:flex;align-items:center;gap:10px;">
+            <div style="width:44px;height:44px;border-radius:50%;background:#e8c547;display:flex;align-items:center;justify-content:center;color:#162844;font-weight:700;font-size:14px;flex-shrink:0;box-shadow:0 0 0 2px #ffffff40">FR</div>
+            <div style="flex:1;min-width:0">
+              <div style="color:#fff;font-size:11px;font-weight:700;line-height:1.2">Pancho Rosselot</div>
+              <div style="color:#94b0cc;font-size:7px;margin-top:1px">fjrosselot@gmail.com</div>
+            </div>
+            <div style="text-align:right">
+              <div style="color:#e8c547;font-size:13px;font-weight:700">#5</div>
+              <div style="color:#94b0cc;font-size:6px;text-transform:uppercase;letter-spacing:.5px">Ranking</div>
+            </div>
+          </div>
+
+          <!-- Badges de atributos -->
+          <div style="padding:8px 12px;display:flex;gap:5px;flex-wrap:wrap;border-bottom:1px solid #edf2f8">
+            <div style="background:#162844;border-radius:20px;padding:2px 8px;color:#fff;font-size:7px;font-weight:700">4a Cat.</div>
+            <div style="background:#edf2f8;border-radius:20px;padding:2px 8px;color:#162844;font-size:7px;font-weight:700">Drive</div>
+            <div style="background:#edf2f8;border-radius:20px;padding:2px 8px;color:#162844;font-size:7px;font-weight:700">ELO 1284</div>
+            <div style="background:#edf2f8;border-radius:20px;padding:2px 8px;color:#162844;font-size:7px;font-weight:700">58% wins</div>
+          </div>
+
+          <!-- Edición como form simple -->
+          <div style="padding:10px 12px;display:flex;flex-direction:column;gap:7px">
+            <div style="display:flex;justify-content:space-between">
+              <span style="color:#94b0cc;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Mis datos</span>
+              <span style="color:#e8c547;font-size:8px;font-weight:700">✎ Editar</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+              <div style="background:#f8fafc;border-radius:6px;padding:5px 7px">
+                <div style="color:#94b0cc;font-size:6px;text-transform:uppercase;letter-spacing:.5px">Apodo</div>
+                <div style="color:#162844;font-size:8px;font-weight:700;margin-top:1px">Pancho</div>
+              </div>
+              <div style="background:#f8fafc;border-radius:6px;padding:5px 7px">
+                <div style="color:#94b0cc;font-size:6px;text-transform:uppercase;letter-spacing:.5px">Categoría</div>
+                <div style="color:#162844;font-size:8px;font-weight:700;margin-top:1px">4a</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contraseña + cerrar sesión -->
+          <div style="padding:8px 12px 10px;border-top:1px solid #edf2f8;display:flex;gap:5px">
+            <div style="flex:1;background:#edf2f8;border-radius:7px;padding:5px 8px;text-align:center;font-size:8px;color:#162844;font-weight:600">Cambiar contraseña</div>
+            <div style="background:#fef2f2;border-radius:7px;padding:5px 8px;text-align:center;font-size:8px;color:#dc2626;font-weight:600">Salir</div>
+          </div>
+        </div>
+
+        <!-- Historial -->
+        <div style="background:#fff;border-radius:12px;padding:10px 12px;box-shadow:0 2px 12px rgba(0,0,0,0.1);">
+          <div style="color:#94b0cc;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Historial de puntos</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f0f4f8">
+              <span style="color:#162844;font-size:8px">Americano Abril 2026</span>
+              <span style="color:#e8c547;font-size:8px;font-weight:700">+20 pts</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0">
+              <span style="color:#162844;font-size:8px">OSP Primera Fecha</span>
+              <span style="color:#94b0cc;font-size:8px;font-weight:700">+5 pts</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Header horizontal + badges ⭐ Recomendado</h3>
+      <p>Avatar + nombre + ranking en header compacto horizontal. Atributos como pills (categoría, lado, ELO, win%). Edición y acciones secundarias abajo. Contraseña y cerrar sesión como botones paralelos.</p>
+    </div>
+  </div>
+
+  <!-- ENFOQUE C: Tarjeta de identidad estilo carnet -->
+  <div class="card" data-choice="perfil-c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#edf1f7;padding:12px;display:flex;justify-content:center;">
+      <div style="width:210px;font-family:sans-serif;display:flex;flex-direction:column;gap:6px;">
+
+        <!-- Carnet de jugador -->
+        <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.1);">
+
+          <!-- Carnet full navy -->
+          <div style="background:#162844;padding:12px 14px;position:relative;overflow:hidden;">
+            <!-- Decoración: círculo grande translúcido -->
+            <div style="position:absolute;right:-20px;top:-20px;width:80px;height:80px;border-radius:50%;background:#ffffff08"></div>
+            <div style="position:absolute;right:10px;bottom:-30px;width:60px;height:60px;border-radius:50%;background:#e8c54710"></div>
+
+            <div style="display:flex;gap:10px;align-items:center;position:relative">
+              <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#25507f,#162844);border:2px solid #e8c54760;display:flex;align-items:center;justify-content:center;color:#e8c547;font-weight:700;font-size:14px;flex-shrink:0">FR</div>
+              <div style="flex:1">
+                <div style="color:#94b0cc;font-size:6px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px">Jugador</div>
+                <div style="color:#fff;font-size:11px;font-weight:700">Pancho Rosselot</div>
+                <div style="color:#94b0cc;font-size:7px;margin-top:1px">Pancho · Drive</div>
+              </div>
+              <div style="text-align:center;background:#e8c54715;border:1px solid #e8c54740;border-radius:8px;padding:4px 7px">
+                <div style="color:#e8c547;font-size:14px;font-weight:700">#5</div>
+                <div style="color:#94b0cc;font-size:6px;text-transform:uppercase;letter-spacing:.5px">4a</div>
+              </div>
+            </div>
+
+            <!-- Barra de stats -->
+            <div style="display:flex;gap:0;margin-top:10px;background:#ffffff0a;border-radius:7px;overflow:hidden;position:relative">
+              <div style="flex:1;padding:5px 4px;text-align:center;border-right:1px solid #ffffff15">
+                <div style="color:#fff;font-size:10px;font-weight:700">1284</div>
+                <div style="color:#94b0cc;font-size:5px;text-transform:uppercase;letter-spacing:.5px">ELO</div>
+              </div>
+              <div style="flex:1;padding:5px 4px;text-align:center;border-right:1px solid #ffffff15">
+                <div style="color:#fff;font-size:10px;font-weight:700">24</div>
+                <div style="color:#94b0cc;font-size:5px;text-transform:uppercase;letter-spacing:.5px">Partidos</div>
+              </div>
+              <div style="flex:1;padding:5px 4px;text-align:center">
+                <div style="color:#e8c547;font-size:10px;font-weight:700">58%</div>
+                <div style="color:#94b0cc;font-size:5px;text-transform:uppercase;letter-spacing:.5px">Victorias</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edición debajo del carnet -->
+          <div style="padding:9px 12px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between">
+              <span style="color:#94b0cc;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Editar perfil</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+              <div style="background:#f8fafc;border-radius:6px;padding:5px 7px">
+                <div style="color:#94b0cc;font-size:6px;text-transform:uppercase">Apodo</div>
+                <div style="color:#162844;font-size:8px;font-weight:700;margin-top:1px">Pancho</div>
+              </div>
+              <div style="background:#f8fafc;border-radius:6px;padding:5px 7px">
+                <div style="color:#94b0cc;font-size:6px;text-transform:uppercase">Categoría</div>
+                <div style="color:#162844;font-size:8px;font-weight:700;margin-top:1px">4a</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:4px;margin-top:2px">
+              <div style="flex:1;background:#edf2f8;border-radius:6px;padding:5px;text-align:center;font-size:7px;color:#162844;font-weight:600">Cambiar contraseña</div>
+              <div style="background:#fef2f2;border-radius:6px;padding:5px 8px;text-align:center;font-size:7px;color:#dc2626;font-weight:600">Salir</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Historial -->
+        <div style="background:#fff;border-radius:12px;padding:10px 12px;box-shadow:0 2px 12px rgba(0,0,0,0.1);">
+          <div style="color:#94b0cc;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Historial de puntos</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f0f4f8">
+              <span style="color:#162844;font-size:8px">Americano Abril 2026</span>
+              <span style="color:#e8c547;font-size:8px;font-weight:700">+20 pts</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0">
+              <span style="color:#162844;font-size:8px">OSP Primera Fecha</span>
+              <span style="color:#94b0cc;font-size:8px;font-weight:700">+5 pts</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Carnet de jugador</h3>
+      <p>Avatar con bordes redondeados estilo carnet en navy full. Círculos decorativos de fondo. Stats en barra integrada al carnet. Más identidad visual, más "tarjeta deportiva".</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;text-align:center">⭐ Recomiendo B — el más limpio y funcional. La C tiene más carácter si quieres algo con más identidad.</p>

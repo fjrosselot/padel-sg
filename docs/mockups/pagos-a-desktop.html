@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Pagos A — Mobile + Desktop</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f1f5f9; padding: 20px; }
+  h1 { text-align: center; color: #162844; font-size: 14px; margin-bottom: 4px; font-weight: 700; }
+  .sub { text-align: center; color: #94b0cc; font-size: 10px; margin-bottom: 20px; }
+  .wrap { display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start; }
+  .view-label { font-size: 9px; font-weight: 700; color: #94b0cc; text-align: center; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* ── shared ── */
+  .utag { display: inline-flex; align-items: center; border-radius: 4px; padding: 1px 5px; font-size: 6.5px; font-weight: 700; }
+  .u-overdue { background: #fff5f5; color: #dc2626; border: 1px solid #fecaca; }
+  .u-warn    { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+  .u-paid    { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+
+  /* ══════════════════════════
+     MOBILE
+  ══════════════════════════ */
+  .mobile { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.10); overflow: hidden; width: 300px; }
+
+  .m-header { background: linear-gradient(135deg,#162844 0%,#25507f 100%); padding: 14px 16px; }
+  .m-header-row { display: flex; justify-content: space-between; align-items: flex-start; }
+  .m-title { font-size: 13px; font-weight: 700; color: white; }
+  .m-subtitle { font-size: 7.5px; color: #94b0cc; margin-top: 2px; }
+
+  /* resumen 2 cols */
+  .m-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 14px; border-bottom: 1px solid #edf2f8; }
+  .m-stat { border-radius: 8px; padding: 8px 10px; }
+  .m-stat.pend { background: #fff5f5; border: 1px solid #fecaca; }
+  .m-stat.paid { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .m-stat-lbl { font-size: 7.5px; color: #64748b; margin-bottom: 2px; }
+  .m-stat-amt { font-size: 15px; font-weight: 700; }
+  .m-stat.pend .m-stat-amt { color: #dc2626; }
+  .m-stat.paid .m-stat-amt { color: #16a34a; }
+
+  /* section header */
+  .m-sec { display: flex; justify-content: space-between; align-items: center; padding: 6px 14px 4px; background: #f8fafc; border-bottom: 1px solid #edf2f8; border-top: 1px solid #edf2f8; margin-top: 2px; }
+  .m-sec-label { font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 4px; }
+  .m-sec-total { font-size: 8px; font-weight: 700; }
+  .label-overdue { color: #dc2626; }
+  .label-warn    { color: #d97706; }
+  .label-paid    { color: #94b0cc; }
+  .total-overdue { color: #dc2626; }
+  .total-warn    { color: #d97706; }
+  .total-paid    { color: #16a34a; }
+
+  /* cobro row mobile */
+  .m-cobro { display: flex; align-items: flex-start; gap: 8px; padding: 9px 14px; border-bottom: 1px solid #f8fafc; }
+  .m-ci { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; margin-top: 1px; }
+  .ci-overdue { background: #fff5f5; color: #dc2626; border: 1px solid #fecaca; }
+  .ci-warn    { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+  .ci-paid    { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+  .m-cbody { flex: 1; }
+  .m-cname { font-size: 8.5px; font-weight: 600; color: #162844; }
+  .m-cmeta { font-size: 7px; color: #94b0cc; margin-top: 1px; }
+  .m-ctag  { margin-top: 3px; }
+  .m-cright { text-align: right; flex-shrink: 0; }
+  .m-camt { font-size: 9px; font-weight: 700; }
+  .amt-overdue { color: #dc2626; }
+  .amt-warn    { color: #d97706; }
+  .amt-paid    { color: #16a34a; }
+  .m-camt-sub { font-size: 6.5px; color: #94b0cc; margin-top: 1px; }
+
+  /* paid toggle */
+  .m-paid-toggle { display: flex; justify-content: center; align-items: center; gap: 4px; padding: 8px 14px; font-size: 7.5px; color: #94b0cc; cursor: pointer; }
+  .m-paid-toggle:hover { background: #f8fafc; }
+
+  /* ══════════════════════════
+     DESKTOP
+  ══════════════════════════ */
+  .desktop { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.10); overflow: hidden; }
+
+  .d-header { background: linear-gradient(135deg,#162844 0%,#25507f 100%); padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; }
+  .d-title { font-size: 15px; font-weight: 700; color: white; }
+  .d-subtitle { font-size: 8px; color: #94b0cc; margin-top: 2px; }
+
+  /* resumen 4 cols desktop */
+  .d-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 14px 24px; border-bottom: 1px solid #edf2f8; }
+  .d-stat { border-radius: 10px; padding: 10px 14px; }
+  .d-stat.overdue { background: #fff5f5; border: 1.5px solid #fecaca; }
+  .d-stat.warn    { background: #fffbeb; border: 1.5px solid #fde68a; }
+  .d-stat.ok      { background: #f0fdf4; border: 1.5px solid #bbf7d0; }
+  .d-stat.neutral { background: #f8fafc; border: 1.5px solid #dce6f0; }
+  .d-stat-lbl { font-size: 7.5px; color: #64748b; margin-bottom: 3px; }
+  .d-stat-amt { font-size: 16px; font-weight: 700; }
+  .d-stat.overdue .d-stat-amt { color: #dc2626; }
+  .d-stat.warn    .d-stat-amt { color: #d97706; }
+  .d-stat.ok      .d-stat-amt { color: #16a34a; }
+  .d-stat.neutral .d-stat-amt { color: #162844; }
+  .d-stat-count { font-size: 7px; color: #94b0cc; margin-top: 2px; }
+
+  /* section header desktop */
+  .d-sec { display: flex; justify-content: space-between; align-items: center; padding: 8px 24px 6px; background: #f8fafc; border-bottom: 1px solid #edf2f8; border-top: 1px solid #edf2f8; margin-top: 4px; }
+  .d-sec-label { font-size: 7.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 4px; }
+  .d-sec-total { font-size: 9px; font-weight: 700; }
+
+  /* cobro row desktop */
+  .d-cobro { display: flex; align-items: center; gap: 12px; padding: 11px 24px; border-bottom: 1px solid #f8fafc; }
+  .d-cobro:hover { background: #f8fafc; }
+  .d-ci { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+  .d-cinfo { flex: 1; }
+  .d-cname { font-size: 9.5px; font-weight: 600; color: #162844; }
+  .d-cmeta { font-size: 8px; color: #94b0cc; margin-top: 1px; display: flex; align-items: center; gap: 6px; }
+  .d-cright { text-align: right; min-width: 90px; }
+  .d-camt { font-size: 11px; font-weight: 700; }
+  .d-camt-sub { font-size: 7.5px; color: #94b0cc; }
+  .d-ctag { min-width: 80px; text-align: right; }
+
+  /* paid section collapsible */
+  .d-paid-hdr { display: flex; justify-content: space-between; align-items: center; padding: 8px 24px; border-top: 1px solid #edf2f8; background: #f8fafc; cursor: pointer; }
+  .d-paid-hdr:hover { background: #edf2f8; }
+</style>
+</head>
+<body><div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#162844,#25507f);padding:8px 16px;display:flex;align-items:center;gap:12px;font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.2)"><a href="index.html" style="color:#e8c547;font-size:11px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:5px">← Volver al índice</a></div><div style="height:36px"></div>
+<h1>Mis Pagos A — Diseño Aprobado</h1>
+<p class="sub">Urgencia primero · Vencidos → Próximos → Pagados (colapsables) · Mobile y Desktop</p>
+
+<div class="wrap">
+
+  <!-- ── MOBILE ── -->
+  <div>
+    <div class="view-label">📱 Mobile</div>
+    <div class="mobile">
+      <div class="m-header">
+        <div class="m-title">Mis Pagos</div>
+        <div class="m-subtitle">2 cobros pendientes · 4 pagados</div>
+      </div>
+
+      <!-- Resumen -->
+      <div class="m-summary">
+        <div class="m-stat pend">
+          <div class="m-stat-lbl">Por pagar</div>
+          <div class="m-stat-amt">$35.000</div>
+        </div>
+        <div class="m-stat paid">
+          <div class="m-stat-lbl">Pagado año</div>
+          <div class="m-stat-amt">$85.000</div>
+        </div>
+      </div>
+
+      <!-- VENCIDOS -->
+      <div class="m-sec">
+        <span class="m-sec-label label-overdue">● Vencidos</span>
+        <span class="m-sec-total total-overdue">$15.000</span>
+      </div>
+      <div class="m-cobro">
+        <div class="m-ci ci-overdue">○</div>
+        <div class="m-cbody">
+          <div class="m-cname">Cuota mensual — Mar</div>
+          <div class="m-cmeta">Mensual · Venció 25 mar</div>
+          <div class="m-ctag"><span class="utag u-overdue">● Vencido</span></div>
+        </div>
+        <div class="m-cright">
+          <div class="m-camt amt-overdue">$15.000</div>
+        </div>
+      </div>
+
+      <!-- PRÓXIMOS A VENCER -->
+      <div class="m-sec">
+        <span class="m-sec-label label-warn">◐ Vence esta semana</span>
+        <span class="m-sec-total total-warn">$20.000</span>
+      </div>
+      <div class="m-cobro">
+        <div class="m-ci ci-warn">○</div>
+        <div class="m-cbody">
+          <div class="m-cname">Inscripción Liga Invierno</div>
+          <div class="m-cmeta">Torneo · Vence 25 abr</div>
+          <div class="m-ctag"><span class="utag u-warn">Vence en 2 días</span></div>
+        </div>
+        <div class="m-cright">
+          <div class="m-camt amt-warn">$20.000</div>
+        </div>
+      </div>
+
+      <!-- PAGADOS (toggle) -->
+      <div class="m-sec">
+        <span class="m-sec-label label-paid">✓ Pagados (4)</span>
+        <span class="m-sec-total total-paid">$85.000</span>
+      </div>
+      <div class="m-cobro">
+        <div class="m-ci ci-paid">✓</div>
+        <div class="m-cbody">
+          <div class="m-cname">Inscripción Liga Verano</div>
+          <div class="m-cmeta">Torneo · Pagado 10 feb</div>
+        </div>
+        <div class="m-cright">
+          <div class="m-camt amt-paid">$30.000</div>
+        </div>
+      </div>
+      <div class="m-cobro">
+        <div class="m-ci ci-paid">✓</div>
+        <div class="m-cbody">
+          <div class="m-cname">Cuota mensual — Feb</div>
+          <div class="m-cmeta">Mensual · Pagado 21 feb</div>
+        </div>
+        <div class="m-cright">
+          <div class="m-camt amt-paid">$15.000</div>
+        </div>
+      </div>
+      <div class="m-paid-toggle">Ver 2 más ▼</div>
+    </div>
+  </div>
+
+  <!-- ── DESKTOP ── -->
+  <div>
+    <div class="view-label">🖥 Desktop</div>
+    <div class="desktop">
+      <div class="d-header">
+        <div>
+          <div class="d-title">Mis Pagos</div>
+          <div class="d-subtitle">2 cobros pendientes · 1 vencido · 4 pagados este año</div>
+        </div>
+      </div>
+
+      <!-- Resumen 4 cols desktop -->
+      <div class="d-summary">
+        <div class="d-stat overdue">
+          <div class="d-stat-lbl">Vencidos</div>
+          <div class="d-stat-amt">$15.000</div>
+          <div class="d-stat-count">1 cobro</div>
+        </div>
+        <div class="d-stat warn">
+          <div class="d-stat-lbl">Vence esta semana</div>
+          <div class="d-stat-amt">$20.000</div>
+          <div class="d-stat-count">1 cobro</div>
+        </div>
+        <div class="d-stat ok">
+          <div class="d-stat-lbl">Pagado este año</div>
+          <div class="d-stat-amt">$85.000</div>
+          <div class="d-stat-count">4 cobros</div>
+        </div>
+        <div class="d-stat neutral">
+          <div class="d-stat-lbl">Total asignado</div>
+          <div class="d-stat-amt">$120.000</div>
+          <div class="d-stat-count">6 cobros</div>
+        </div>
+      </div>
+
+      <!-- VENCIDOS -->
+      <div class="d-sec" style="margin-top:0">
+        <span class="d-sec-label label-overdue">● Vencidos</span>
+        <span class="d-sec-total total-overdue">$15.000</span>
+      </div>
+      <div class="d-cobro">
+        <div class="d-ci ci-overdue">○</div>
+        <div class="d-cinfo">
+          <div class="d-cname">Cuota mensual — Marzo</div>
+          <div class="d-cmeta">
+            <span>Mensual</span>
+            <span style="color:#dc2626;font-weight:600">· Venció 25 mar 2026</span>
+          </div>
+        </div>
+        <div class="d-ctag" style="text-align:right;padding-right:16px">
+          <span class="utag u-overdue" style="font-size:7.5px;padding:2px 8px">● Vencido</span>
+        </div>
+        <div class="d-cright">
+          <div class="d-camt amt-overdue">$15.000</div>
+        </div>
+      </div>
+
+      <!-- PRÓXIMOS -->
+      <div class="d-sec">
+        <span class="d-sec-label label-warn">◐ Vence esta semana</span>
+        <span class="d-sec-total total-warn">$20.000</span>
+      </div>
+      <div class="d-cobro">
+        <div class="d-ci ci-warn">○</div>
+        <div class="d-cinfo">
+          <div class="d-cname">Inscripción Liga Invierno 2026</div>
+          <div class="d-cmeta">
+            <span>Torneo</span>
+            <span>· Vence 25 abr 2026</span>
+          </div>
+        </div>
+        <div class="d-ctag" style="text-align:right;padding-right:16px">
+          <span class="utag u-warn" style="font-size:7.5px;padding:2px 8px">Vence en 2 días</span>
+        </div>
+        <div class="d-cright">
+          <div class="d-camt amt-warn">$20.000</div>
+        </div>
+      </div>
+
+      <!-- PAGADOS (header colapsable) -->
+      <div class="d-paid-hdr">
+        <span class="d-sec-label label-paid" style="font-size:8px">✓ Pagados — 4 cobros ▼</span>
+        <span class="d-sec-total total-paid" style="font-size:9.5px">$85.000</span>
+      </div>
+      <div class="d-cobro">
+        <div class="d-ci ci-paid">✓</div>
+        <div class="d-cinfo">
+          <div class="d-cname">Inscripción Liga Verano 2026</div>
+          <div class="d-cmeta"><span>Torneo</span><span style="color:#16a34a">· Pagado 10 feb 2026</span></div>
+        </div>
+        <div class="d-ctag" style="padding-right:16px;text-align:right">
+          <span class="utag u-paid" style="font-size:7.5px;padding:2px 8px">Pagado</span>
+        </div>
+        <div class="d-cright">
+          <div class="d-camt amt-paid">$30.000</div>
+        </div>
+      </div>
+      <div class="d-cobro">
+        <div class="d-ci ci-paid">✓</div>
+        <div class="d-cinfo">
+          <div class="d-cname">Cuota mensual — Febrero</div>
+          <div class="d-cmeta"><span>Mensual</span><span style="color:#16a34a">· Pagado 21 feb 2026</span></div>
+        </div>
+        <div class="d-ctag" style="padding-right:16px;text-align:right">
+          <span class="utag u-paid" style="font-size:7.5px;padding:2px 8px">Pagado</span>
+        </div>
+        <div class="d-cright">
+          <div class="d-camt amt-paid">$15.000</div>
+        </div>
+      </div>
+      <div class="d-cobro">
+        <div class="d-ci ci-paid">✓</div>
+        <div class="d-cinfo">
+          <div class="d-cname">Cuota mensual — Enero</div>
+          <div class="d-cmeta"><span>Mensual</span><span style="color:#16a34a">· Pagado 20 ene 2026</span></div>
+        </div>
+        <div class="d-ctag" style="padding-right:16px;text-align:right">
+          <span class="utag u-paid" style="font-size:7.5px;padding:2px 8px">Pagado</span>
+        </div>
+        <div class="d-cright">
+          <div class="d-camt amt-paid">$25.000</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

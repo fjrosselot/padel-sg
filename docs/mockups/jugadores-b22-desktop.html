@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jugadores B2.2 — Mobile + Desktop</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f1f5f9; padding: 20px; }
+  h1 { text-align: center; color: #162844; font-size: 14px; margin-bottom: 4px; font-weight: 700; }
+  .sub { text-align: center; color: #94b0cc; font-size: 10px; margin-bottom: 20px; }
+
+  .wrap { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
+
+  /* ── shared ── */
+  .badge { font-size: 6.5px; padding: 1px 5px; border-radius: 4px; font-weight: 600; }
+  .b-cat { background: #edf2f8; color: #162844; }
+  .b-lado { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+  .b-rev  { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+  .pill { font-size: 7.5px; padding: 3px 8px; border-radius: 10px; border: 1px solid #dce6f0; color: #64748b; cursor: pointer; white-space: nowrap; }
+  .pill.on  { background: #162844; color: white; border-color: #162844; }
+  .pill.gold{ background: #e8c547; color: #162844; border-color: #e8c547; font-weight: 700; }
+  .chip { display: inline-flex; align-items: center; gap: 3px; background: #edf2f8; border: 1px solid #dce6f0; border-radius: 10px; padding: 3px 8px; font-size: 7.5px; color: #162844; font-weight: 600; }
+  .chip .x { color: #94b0cc; cursor: pointer; }
+  .chip.gold { background: #fef9ee; border-color: #fde68a; color: #b45309; }
+  .av { border-radius: 50%; background: linear-gradient(135deg,#25507f,#162844); display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; flex-shrink: 0; }
+  .av.b2 { background: linear-gradient(135deg,#3d7abf,#25507f); }
+  .av.g2 { background: linear-gradient(135deg,#1a6b3a,#25507f); }
+  .av.p2 { background: linear-gradient(135deg,#7c3aed,#25507f); }
+  .av.s2 { background: linear-gradient(135deg,#64748b,#475569); }
+  .pos { border-radius: 3px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .pos.g { background: #e8c547; color: #162844; }
+  .pos.s { background: #e2e8f0; color: #475569; }
+  .pos.br{ background: #fed7aa; color: #9a3412; }
+  .pos.n { background: #f1f5f9; color: #94b0cc; }
+  .pts { font-weight: 700; color: #162844; }
+  .pts.m { color: #94b0cc; }
+
+  /* ══════════════════════════════
+     MOBILE
+  ══════════════════════════════ */
+  .mobile { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.10); overflow: hidden; width: 320px; }
+
+  .m-header { background: linear-gradient(135deg,#162844 0%,#25507f 100%); padding: 14px 16px 12px; }
+  .m-header-row { display: flex; justify-content: space-between; align-items: flex-start; }
+  .m-title { font-size: 13px; font-weight: 700; color: white; }
+  .m-count { font-size: 7.5px; color: #94b0cc; margin-top: 2px; }
+
+  .m-search { padding: 10px 14px 6px; }
+  .m-search input { width: 100%; border: 1px solid #dce6f0; border-radius: 8px; padding: 8px 12px; font-size: 9.5px; background: #f8fafc; color: #374151; }
+
+  .m-filter-bar { padding: 0 14px 8px; display: flex; gap: 6px; align-items: center; }
+  .m-filter-btn { border: 1px solid #162844; background: #162844; color: white; border-radius: 8px; padding: 5px 12px; font-size: 8px; cursor: pointer; font-weight: 600; white-space: nowrap; }
+  .m-chips { display: flex; gap: 5px; flex-wrap: wrap; flex: 1; }
+
+  /* expand panel mobile */
+  .m-expand { border-top: 1px solid #edf2f8; border-bottom: 1px solid #edf2f8; padding: 10px 14px; background: #f8fafc; }
+  .m-exp-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; align-items: center; }
+  .m-exp-label { font-size: 6.5px; color: #94b0cc; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 38px; flex-shrink: 0; }
+  .m-exp-btns { display: flex; justify-content: flex-end; gap: 6px; margin-top: 2px; }
+  .btn-limpiar { background: transparent; color: #94b0cc; border: 1px solid #dce6f0; border-radius: 6px; padding: 4px 10px; font-size: 7.5px; cursor: pointer; }
+  .btn-aplicar { background: #162844; color: white; border: none; border-radius: 6px; padding: 4px 14px; font-size: 7.5px; font-weight: 600; cursor: pointer; }
+
+  /* mobile rows */
+  .m-list { }
+  .m-row { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 1px solid #f8fafc; cursor: pointer; }
+  .m-row:hover { background: #f8fafc; }
+  .m-av { width: 34px; height: 34px; font-size: 10px; position: relative; }
+  .m-pos-badge { position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 6.5px; font-weight: 700; border: 1.5px solid white; }
+  .m-info { flex: 1; }
+  .m-name { font-size: 9px; font-weight: 700; color: #162844; }
+  .m-meta { font-size: 7.5px; color: #94b0cc; margin-top: 1px; }
+  .m-right { text-align: right; }
+  .m-pts { font-size: 9.5px; font-weight: 700; color: #162844; }
+  .m-pts-label { font-size: 7px; color: #94b0cc; }
+
+  /* ══════════════════════════════
+     DESKTOP
+  ══════════════════════════════ */
+  .desktop { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.10); overflow: hidden; }
+
+  .d-header { background: linear-gradient(135deg,#162844 0%,#25507f 100%); padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
+  .d-title { font-size: 15px; font-weight: 700; color: white; }
+  .d-count { font-size: 8px; color: #94b0cc; margin-top: 2px; }
+
+  .d-toolbar { padding: 12px 20px 8px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #edf2f8; }
+  .d-search { flex: 1; position: relative; }
+  .d-search input { width: 100%; border: 1px solid #dce6f0; border-radius: 8px; padding: 8px 12px; font-size: 10px; background: #f8fafc; }
+  .d-filter-btn { border: 1px solid #162844; background: #162844; color: white; border-radius: 8px; padding: 7px 14px; font-size: 8.5px; cursor: pointer; font-weight: 600; white-space: nowrap; }
+  .count-badge { background: #e8c547; color: #162844; border-radius: 10px; padding: 1px 5px; font-size: 7px; font-weight: 800; margin-left: 3px; }
+
+  .d-chips-row { padding: 6px 20px 0; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; min-height: 30px; }
+  .clear-all { font-size: 7.5px; color: #94b0cc; text-decoration: underline; cursor: pointer; margin-left: 2px; }
+
+  /* desktop expand */
+  .d-expand { border-top: 1px solid #edf2f8; border-bottom: 1px solid #edf2f8; padding: 10px 20px; background: #f8fafc; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .d-exp-col { }
+  .d-exp-label { font-size: 7px; color: #94b0cc; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+  .d-exp-pills { display: flex; gap: 4px; flex-wrap: wrap; }
+  .d-exp-footer { padding: 8px 20px 0; grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; }
+  .d-btn-clear { background: transparent; color: #94b0cc; border: 1px solid #dce6f0; border-radius: 7px; padding: 5px 14px; font-size: 8px; cursor: pointer; }
+  .d-btn-apply { background: #162844; color: white; border: none; border-radius: 7px; padding: 5px 18px; font-size: 8px; font-weight: 600; cursor: pointer; }
+
+  /* desktop table */
+  table.dt { width: 100%; border-collapse: collapse; font-size: 9px; }
+  table.dt thead th { background: #f8fafc; color: #94b0cc; font-weight: 700; text-transform: uppercase; font-size: 7px; padding: 8px 12px; text-align: left; letter-spacing: 0.5px; border-bottom: 2px solid #edf2f8; cursor: pointer; }
+  table.dt thead th:hover { color: #162844; }
+  table.dt thead th .sort { color: #dce6f0; margin-left: 2px; font-size: 8px; }
+  table.dt thead th.sorted .sort { color: #e8c547; }
+  table.dt tbody td { padding: 10px 12px; border-bottom: 1px solid #f8fafc; vertical-align: middle; }
+  table.dt tbody tr:hover td { background: #f8fafc; }
+  .td-pl { display: flex; align-items: center; gap: 9px; }
+  .dt-name { font-size: 9px; font-weight: 700; color: #162844; }
+  .dt-sub  { font-size: 7.5px; color: #94b0cc; margin-top: 1px; }
+  .dt-pos { width: 18px; height: 18px; font-size: 7.5px; border-radius: 4px; }
+  .dt-pts { font-weight: 700; font-size: 10px; color: #162844; }
+  .dt-pts.m { color: #cbd5e1; }
+  .dt-tel { font-size: 8px; color: #94b0cc; }
+
+  /* label */
+  .view-label { font-size: 9px; font-weight: 700; color: #94b0cc; text-align: center; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
+</style>
+</head>
+<body><div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#162844,#25507f);padding:8px 16px;display:flex;align-items:center;gap:12px;font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.2)"><a href="index.html" style="color:#e8c547;font-size:11px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:5px">← Volver al índice</a></div><div style="height:36px"></div>
+<h1>Jugadores B2.2 — Diseño Aprobado</h1>
+<p class="sub">Expand Inline + Chips Activos · Mobile y Desktop</p>
+
+<div class="wrap">
+
+  <!-- ── MOBILE ── -->
+  <div>
+    <div class="view-label">📱 Mobile</div>
+    <div class="mobile">
+      <div class="m-header">
+        <div class="m-title">Jugadores</div>
+        <div class="m-count">24 jugadores · 4a (H) · Mixto ✓</div>
+      </div>
+
+      <div class="m-search">
+        <input type="text" placeholder="🔍 Buscar nombre, apodo…" readonly>
+      </div>
+
+      <div class="m-filter-bar">
+        <span class="m-filter-btn">⚙ Filtros ▲</span>
+        <div class="m-chips">
+          <div class="chip">4a (H) <span class="x">×</span></div>
+          <div class="chip gold">Mixto ✓ <span class="x">×</span></div>
+        </div>
+      </div>
+
+      <!-- Expand abierto -->
+      <div class="m-expand">
+        <div class="m-exp-row">
+          <span class="m-exp-label">Categ.</span>
+          <span class="pill">Todas</span>
+          <span class="pill on">4a (H)</span>
+          <span class="pill">3a (H)</span>
+          <span class="pill">5a (H)</span>
+          <span class="pill">Damas ▾</span>
+        </div>
+        <div class="m-exp-row">
+          <span class="m-exp-label">Sexo</span>
+          <span class="pill on">Todos</span>
+          <span class="pill">H</span>
+          <span class="pill">D</span>
+        </div>
+        <div class="m-exp-row">
+          <span class="m-exp-label">Lado</span>
+          <span class="pill on">Cualq.</span>
+          <span class="pill">Drive</span>
+          <span class="pill">Revés</span>
+          <span class="pill gold">Mixto ✓</span>
+        </div>
+        <div class="m-exp-btns">
+          <span class="btn-limpiar">Limpiar</span>
+          <span class="btn-aplicar">Aplicar</span>
+        </div>
+      </div>
+
+      <!-- Lista de jugadores -->
+      <div class="m-list">
+        <div class="m-row">
+          <div class="av m-av" style="width:34px;height:34px;font-size:10px">PR
+            <div class="m-pos-badge pos g">1</div>
+          </div>
+          <div class="m-info">
+            <div class="m-name">Pancho Rosselot</div>
+            <div class="m-meta">4a Hombres · Drive · <span style="color:#b45309">Mixto</span></div>
+          </div>
+          <div class="m-right">
+            <div class="m-pts">180 pts</div>
+            <div class="m-pts-label">#1 en 4a</div>
+          </div>
+        </div>
+
+        <div class="m-row">
+          <div class="av b2 m-av" style="width:34px;height:34px;font-size:10px">MG
+            <div class="m-pos-badge pos s">2</div>
+          </div>
+          <div class="m-info">
+            <div class="m-name">Matías González</div>
+            <div class="m-meta">4a Hombres · Revés · <span style="color:#b45309">Mixto</span></div>
+          </div>
+          <div class="m-right">
+            <div class="m-pts">165 pts</div>
+            <div class="m-pts-label">#2 en 4a</div>
+          </div>
+        </div>
+
+        <div class="m-row">
+          <div class="av g2 m-av" style="width:34px;height:34px;font-size:10px">CA
+            <div class="m-pos-badge pos br">3</div>
+          </div>
+          <div class="m-info">
+            <div class="m-name">Carlos Aldunate</div>
+            <div class="m-meta">4a Hombres · Drive · <span style="color:#b45309">Mixto</span></div>
+          </div>
+          <div class="m-right">
+            <div class="m-pts">142 pts</div>
+            <div class="m-pts-label">#3 en 4a</div>
+          </div>
+        </div>
+
+        <div class="m-row">
+          <div class="av s2 m-av" style="width:34px;height:34px;font-size:10px">AF
+            <div class="m-pos-badge pos n">—</div>
+          </div>
+          <div class="m-info">
+            <div class="m-name">Andrés Fernández</div>
+            <div class="m-meta">4a Hombres · — · <span style="color:#b45309">Mixto</span></div>
+          </div>
+          <div class="m-right">
+            <div class="m-pts" style="color:#cbd5e1">0 pts</div>
+            <div class="m-pts-label">Sin ranking</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DESKTOP ── -->
+  <div>
+    <div class="view-label">🖥 Desktop</div>
+    <div class="desktop">
+      <div class="d-header">
+        <div>
+          <div class="d-title">Jugadores</div>
+          <div class="d-count">Mostrando 4 de 24 · filtros activos: 4a (H), Mixto ✓</div>
+        </div>
+      </div>
+
+      <div class="d-toolbar">
+        <div class="d-search">
+          <input type="text" placeholder="🔍 Buscar por nombre, apellido o apodo…" readonly>
+        </div>
+        <span class="d-filter-btn">⚙ Filtros <span class="count-badge">2</span> ▲</span>
+      </div>
+
+      <!-- Chips -->
+      <div class="d-chips-row">
+        <div class="chip" style="font-size:8px;padding:4px 10px">4a (H) <span class="x">×</span></div>
+        <div class="chip gold" style="font-size:8px;padding:4px 10px">Mixto ✓ <span class="x">×</span></div>
+        <span class="clear-all">Limpiar todo</span>
+      </div>
+
+      <!-- Expand desktop: 3 columnas -->
+      <div class="d-expand">
+        <div class="d-exp-col">
+          <div class="d-exp-label">Categoría</div>
+          <div class="d-exp-pills">
+            <span class="pill">Todas</span>
+            <span class="pill on">4a (H)</span>
+            <span class="pill">3a (H)</span>
+            <span class="pill">5a (H)</span>
+            <span class="pill">Open (H)</span>
+            <span class="pill">B (D)</span>
+            <span class="pill">C (D)</span>
+            <span class="pill">D (D)</span>
+          </div>
+        </div>
+        <div class="d-exp-col">
+          <div class="d-exp-label">Sexo</div>
+          <div class="d-exp-pills">
+            <span class="pill on">Todos</span>
+            <span class="pill">Hombres</span>
+            <span class="pill">Damas</span>
+          </div>
+        </div>
+        <div class="d-exp-col">
+          <div class="d-exp-label">Lado · Mixto</div>
+          <div class="d-exp-pills">
+            <span class="pill on">Cualquiera</span>
+            <span class="pill">Drive</span>
+            <span class="pill">Revés</span>
+            <span class="pill gold">Mixto ✓</span>
+          </div>
+        </div>
+        <div class="d-exp-footer">
+          <span class="d-btn-clear">Limpiar filtros</span>
+          <span class="d-btn-apply">Aplicar</span>
+        </div>
+      </div>
+
+      <!-- Tabla desktop -->
+      <table class="dt">
+        <thead>
+          <tr>
+            <th>Jugador <span class="sort">↕</span></th>
+            <th>Categoría <span class="sort">↕</span></th>
+            <th class="sorted">Posición <span class="sort" style="color:#e8c547">↑</span></th>
+            <th>Puntos <span class="sort">↕</span></th>
+            <th>Lado</th>
+            <th>Teléfono</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="td-pl">
+                <div class="av" style="width:32px;height:32px;font-size:10px">PR</div>
+                <div>
+                  <div class="dt-name">Pancho Rosselot</div>
+                  <div class="dt-sub">"Pancho" · Drive · <span style="color:#b45309">Mixto</span></div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge b-cat" style="font-size:7.5px;padding:2px 7px">4a H</span></td>
+            <td><div class="pos g dt-pos">1</div></td>
+            <td class="dt-pts">180</td>
+            <td><span class="badge b-lado" style="font-size:7.5px;padding:2px 7px">Drive</span></td>
+            <td class="dt-tel">+56 9 1234 5678</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="td-pl">
+                <div class="av b2" style="width:32px;height:32px;font-size:10px">MG</div>
+                <div>
+                  <div class="dt-name">Matías González</div>
+                  <div class="dt-sub">"Mati" · Revés · <span style="color:#b45309">Mixto</span></div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge b-cat" style="font-size:7.5px;padding:2px 7px">4a H</span></td>
+            <td><div class="pos s dt-pos">2</div></td>
+            <td class="dt-pts">165</td>
+            <td><span class="badge b-rev" style="font-size:7.5px;padding:2px 7px">Revés</span></td>
+            <td class="dt-tel">+56 9 8765 4321</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="td-pl">
+                <div class="av g2" style="width:32px;height:32px;font-size:10px">CA</div>
+                <div>
+                  <div class="dt-name">Carlos Aldunate</div>
+                  <div class="dt-sub">"Cali" · Drive · <span style="color:#b45309">Mixto</span></div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge b-cat" style="font-size:7.5px;padding:2px 7px">4a H</span></td>
+            <td><div class="pos br dt-pos">3</div></td>
+            <td class="dt-pts">142</td>
+            <td><span class="badge b-lado" style="font-size:7.5px;padding:2px 7px">Drive</span></td>
+            <td class="dt-tel">+56 9 5555 1234</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="td-pl">
+                <div class="av s2" style="width:32px;height:32px;font-size:10px">AF</div>
+                <div>
+                  <div class="dt-name">Andrés Fernández</div>
+                  <div class="dt-sub">— · <span style="color:#b45309">Mixto</span></div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge b-cat" style="font-size:7.5px;padding:2px 7px">4a H</span></td>
+            <td><div class="pos n dt-pos">—</div></td>
+            <td class="dt-pts m">0</td>
+            <td style="color:#cbd5e1;font-size:8px">—</td>
+            <td class="dt-tel">+56 9 9999 0000</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

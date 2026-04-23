@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horario — Grilla por Cancha y Hora</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f8fafc; color: #1e293b; }
+
+    .page-header {
+      background: linear-gradient(135deg, #162844, #25507f);
+      color: white;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .page-header h1 { font-size: 20px; font-weight: 700; }
+    .page-header p { font-size: 13px; color: #94b0cc; margin-top: 4px; }
+
+    .container { padding: 0 16px 48px; }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 12px;
+      color: #64748b;
+    }
+    .legend-dot { display: inline-flex; align-items: center; gap: 5px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .legend-divider { width: 1px; height: 16px; background: #e2e8f0; }
+
+    /* Scroll wrapper */
+    .table-scroll {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    }
+
+    /* Grid table */
+    table {
+      border-collapse: collapse;
+      min-width: 760px;
+      width: 100%;
+      background: white;
+    }
+
+    /* Header row */
+    thead tr th {
+      background: #162844;
+      color: #e8c547;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 10px 14px;
+      text-align: center;
+      white-space: nowrap;
+      border-bottom: 2px solid #25507f;
+    }
+    thead tr th:first-child {
+      color: white;
+      background: #0f1e35;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* Row alternation */
+    tbody tr:nth-child(even) { background: #f8fafc; }
+    tbody tr:nth-child(odd) { background: white; }
+
+    /* Cancha column — light style with left border */
+    tbody tr td:first-child {
+      background: #f8fafc;
+      border-left: 4px solid #162844;
+      color: #162844;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      padding: 0 16px;
+      white-space: nowrap;
+      vertical-align: middle;
+      letter-spacing: 0.05em;
+    }
+
+    tbody tr td {
+      padding: 6px;
+      vertical-align: top;
+      border: 1px solid #e8eef4;
+      min-width: 148px;
+      width: 148px;
+    }
+
+    /* Match cell */
+    .cell-empty {
+      min-height: 90px;
+      background: #f8fafc;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #cbd5e1;
+      font-size: 11px;
+    }
+
+    .match-cell {
+      border-radius: 7px;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .match-cell.played { opacity: 0.85; }
+
+    .cell-stripe {
+      height: 3px;
+      flex-shrink: 0;
+    }
+    .stripe-4a { background: #3b82f6; }
+    .stripe-open { background: #ec4899; }
+    .stripe-oro { background: #e8c547; }
+    .stripe-plata { background: #94b0cc; }
+
+    .cell-body {
+      padding: 6px 8px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      background: white;
+    }
+
+    .cell-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      margin-bottom: 4px;
+    }
+
+    .badge-round {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 1px 5px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .badge-cat {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+    .cat-4a { background: #dbeafe; color: #1d4ed8; }
+    .cat-open { background: #fce7f3; color: #be185d; }
+
+    /* Player rows in cell — 2 rows only */
+    .cell-player {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-height: 22px;
+    }
+
+    .cell-player-name {
+      font-size: 11px;
+      color: #1e293b;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cell-player-name.winner { font-weight: 700; color: #162844; }
+    .cell-player-name.tbd { color: #94a3b8; font-style: italic; }
+
+    /* Score: each set as separate number, right-aligned */
+    .cell-score {
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+      letter-spacing: 0.1em;
+      min-width: 30px;
+      text-align: right;
+    }
+    .score-win { color: #16a34a; }
+    .score-pending { color: #94a3b8; }
+    .score-loss { color: #94b0cc; }
+
+    .cell-divider {
+      height: 1px;
+      background: #f1f5f9;
+      margin: 2px 0;
+    }
+
+    .scroll-hint {
+      text-align: center;
+      font-size: 11px;
+      color: #94b0cc;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#162844,#25507f);padding:8px 16px;display:flex;align-items:center;font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.2)"><a href="index.html" style="color:#e8c547;font-size:11px;font-weight:700;text-decoration:none">← Volver al índice</a></div><div style="height:38px"></div>
+
+<div class="page-header">
+  <h1>Horario — Grilla por Cancha y Hora</h1>
+  <p>Torneo Saint George's · Sábado 26 de abril, 2026</p>
+</div>
+
+<div class="container">
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-dot"><div class="dot" style="background:#3b82f6;"></div> 4a Masculino</div>
+    <div class="legend-dot"><div class="dot" style="background:#ec4899;"></div> Open Femenino</div>
+    <div class="legend-divider"></div>
+    <div class="legend-dot"><div class="dot" style="background:#e8c547;"></div> Copa Oro</div>
+    <div class="legend-dot"><div class="dot" style="background:#94b0cc;"></div> Copa Plata</div>
+    <div class="legend-divider"></div>
+    <div class="legend-dot"><span style="font-size:10px;background:#dcfce7;color:#16a34a;padding:1px 5px;border-radius:3px;font-weight:700;">JUGADO</span></div>
+    <div class="legend-dot"><span style="font-size:10px;background:#f1f5f9;color:#94a3b8;padding:1px 5px;border-radius:3px;font-weight:700;">PENDIENTE</span></div>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th style="min-width:64px;">Cancha</th>
+          <th>09:00</th>
+          <th>10:00</th>
+          <th>11:00</th>
+          <th>12:00</th>
+          <th>13:00</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- ===== C1 ===== -->
+        <tr>
+          <td>C1</td>
+
+          <!-- 09:00 C1 — 4a P·1 Rosselot/Torres vs Díaz/Leal → 6-3 6-2 -->
+          <td>
+            <div class="match-cell played">
+              <div class="cell-stripe stripe-4a"></div>
+              <div class="cell-body">
+                <div class="cell-header">
+                  <span class="badge-round">P·1</span>
+                  <span class="badge-cat cat-4a">4a Masc.</span>
+                </div>
+                <div class="cell-player">
+                  <span class="cell-player-name winner">Rosselot/Torres</span>
+                  <span class="cell-score score-win">6  6</span>
+                </div>
+                <div class="cell-divider"></div>
+                <div class="cell-player">
+                  <span class="cell-player-name">Díaz/Leal</span>
+                  <span class="cell-score score-loss">3  2</span>
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- 10:00 C1 — 4a P·4 Rosselot/Torres vs García/Ruiz → 7-5 6-3 -->
+          <td>
+            <div class="match-cell played">
+              <div class="cell-stripe stripe-4a"></div>
+              <div class="cell-body">
+                <div class="cell-header">
+                  <span class="badge-round">P·4</span>
+                  <span class="badge-cat cat-4a">4a Masc.</span>
+                </div>
+                <div class="cell-player">
+                  <span class="cell-player-name winner">Rosselot/Torres</span>
+                  <span class="cell-score score-win">7  6</span>
+                </div>
+                <div class="cell-divider"></div>
+                <div class="cell-player">
+                  <span class="cell-player-name">García/Ruiz</span>
+                  <span class="cell-score score-loss">5  3</span>
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- 11:00 C1 — 4a Cuartos Rosselot/Torres vs Moreno/Pérez (pending) -->
+          <td>
+            <div class="match-cell">
+              <div class="cell-stripe stripe-oro"></div>
+              <div class="cell-body">
+                <div class="cell-header">
+                  <span class="badge-round" style="background:#fef9e7;color:#92400e;">Cuartos</span>
+                  <span class="badge-cat cat-4a">4a Masc.</span>
+                </div>
+                <div class="cell-player">
+                  <span class="cell-player-name tbd">Rosselot/Torres</span>
+                  <span class="cell-score score-pending">—</span>
+                </div>
+                <div class="cell-divider"></div>
+                <div class="cell-player">
+                  <span class="cell-player-name tbd">Moreno/Pérez</span>
+                  <span class="cell-score score-pending">—</span>
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- 12:00 C1 — 4a SF Oro (TBD) -->
+          <td>
+            <div class="match-cell" style="border:1.5px solid #e8c547;">
+              <div class="cell-stripe stripe-oro"></div>
+              <div class="cell-body">
+                <div class="cell-header">
+                  <span class="badge-round" style="background:#fef9e7;color:#92400e;">SF Oro</span>
+                  <span class="badge-cat cat-4a">4a Masc.</span>
+                </div>
+                <div class="cell-player">
+                  <span class="cell-player-name tbd">Por definir</span>
+                  <span class="cell-score score-pending">—</span>
+                </div>
+                <div class="cell-divider"></div>
+                <div class="cell-player">
+                  <span class="cell-player-name tbd">Por definir</span>
+                  <span class="cell-score score-pending">—</span>
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- 13:00 C1 — empty -->
+          <td>
+            <div class="cell-empty">—</div>
+          </td>
+        </tr>
+
+        <!-- ===== C2 ===== -->
+        <tr>
+          <td>C2</td>
+
+          <!-- 09:00 C2 — Open P·1 Vidal/Andrade vs Cáceres/Molina → 6-4 3-6 7-5 -->
+          <td>
+            <div class="match-cell played">
+              <div class="cell-stripe stripe-open"></div>
+              <div class="cell-body">
+                <div class="cell-header">
+                  <span class="badge-round">P·1</span>
+                  <span class="badge-cat cat-open">Open Fem.</span>
+                </div>
+                <div class="cell-player">
+                  <span class="cell-player-name winner">Vidal/Andrade</span>
+                  <span class="cell-score score-win" style="font-size:9px;">6  3  7</span>
+                </div>
+                <div class="cell-divider"></div>
+                <div class="cell-player">
+                  <span class="cell-player-name">Cáceres/Molina</span>
+                  <span class="cell-score score-loss" style="font-size:9px;">4  6  5</span>
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- 10:00 C2 — 4a P·2 Araya/Muñoz vs Silva/Ramos → 4-6 7-5 6-3 -->
+          <td>
+            <div class="match-cell played">
+              <div class="cell-stripe stripe-4a"></div>
+              <div class="cell-body">
+                <div class="cell-header">
+                  <span class="badge-round">P·2</span>
+                  <span class="badge-cat cat-4a">4a Masc.</span>
+                </div>
+                <div class="cell-player">
+                  <span class="cell-player-name winner">Araya/Muñoz</span>
+                  <span class="cell-score score-win" style="font-size:9px;">4  7  6</span>
+                </div>
+                <div class="cell-divider"></div>
+                <div class="cell-player">
+                  <span class="cell-player-name">Silva/Ramos</span>
+                  <span class="cell-score score-loss" style="font-size:9px;">6  5  3</span>
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- 11:00 C2 — 4a P·5 Vega/Castro vs López/Herrera (pending) -->
+          <td>
+            <div class="match-cell">
+              <div class="cell-stripe stripe-4a"></div>
+              <div class="cell-body">
+                <div class="cell-header">
+                  <span class="badge-round">P·5</span>
+                  <span class="badge-cat cat-4a">4a Masc.</span>
+                </div>
+                <div class="cell-player">
+                  <span class="cell-player-name tbd">Vega/Castro</span>
+                  <span class="cell-score score-pending">—</span>
+                </div>
+                <div class="cell-divider"></div>
+                <div class="cell-player">
+                  <span class="cell-player-name tbd">López/Herrera</span>
+                  <span class="cell-score score-pending">—</span>
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- 12:00 C2 — 4a SF Araya/Muñoz vs TBD (pending) -->
+          <td>
+            <div class="match-cell">
+              <div class="cell-stripe stripe-oro"></div>
+              <div class="cell-body">
+                <div class="cell-header">
+                  <span class="badge-round" style="background:#fef9e7;color:#92400e;">SF Oro</span>
+                  <span class="badge-cat cat-4a">4a Masc.</span>
+                </div>
+                <div class="cell-player">
+                  <span class="cell-player-name tbd">Araya/Muñoz</span>
+                  <span class="cell-score score-pending">—</span>
+                </div>
+                <div class="cell-divider"></div>
+                <div class="cell-player">
+                  <span class="cell-player-name tbd">Por definir</span>
+                  <span class="cell-score score-pending">—</span>
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- 13:00 C2 — empty -->
+          <td>
+            <div class="cell-empty">—</div>
+          </td>
+        </tr>
+
+        <!-- ===== C3 ===== -->
+        <tr>
+          <td>C3</td>
+
+          <!-- 09:00 C3 — Open P·2 Cáceres/Molina vs Fuentes/Ibáñez → 6-1 6-0 -->
+          <td>
+            <div class="match-cell played">
+              <div class="cell-stripe stripe-open"></div>
+              <div class="cell-body">
+                <div class="cell-header">
+                  <span class="badge-round">P·2</span>
+                  <span class="badge-cat cat-open">Open Fem.</span>
+                </div>
+                <div class="cell-player">
+                  <span class="cell-player-name winner">Cáceres/Molina</span>
+                  <span class="cell-score score-win">6  6</span>
+                </div>
+                <div class="cell-divider"></div>
+                <div class="cell-player">
+                  <span class="cell-player-name">Fuentes/Ibáñez</span>
+                  <span class="cell-score score-loss">1  0</span>
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- 10:00 C3 — 4a P·3 Vega/Castro vs López/Herrera → 6-4 6-3 -->
+          <td>
+            <div class="match-cell played">
+              <div class="cell-stripe stripe-4a"></div>
+              <div class="cell-body">
+                <div class="cell-header">
+                  <span class="badge-round">P·3</span>
+                  <span class="badge-cat cat-4a">4a Masc.</span>
+                </div>
+                <div class="cell-player">
+                  <span class="cell-player-name winner">Vega/Castro</span>
+                  <span class="cell-score score-win">6  6</span>
+                </div>
+                <div class="cell-divider"></div>
+                <div class="cell-player">
+                  <span class="cell-player-name">López/Herrera</span>
+                  <span class="cell-score score-loss">4  3</span>
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- 11:00 C3 — 4a P·6 Rosselot/Torres vs Araya/Muñoz (pending) -->
+          <td>
+            <div class="match-cell">
+              <div class="cell-stripe stripe-4a"></div>
+              <div class="cell-body">
+                <div class="cell-header">
+                  <span class="badge-round">P·6</span>
+                  <span class="badge-cat cat-4a">4a Masc.</span>
+                </div>
+                <div class="cell-player">
+                  <span class="cell-player-name tbd">Rosselot/Torres</span>
+                  <span class="cell-score score-pending">—</span>
+                </div>
+                <div class="cell-divider"></div>
+                <div class="cell-player">
+                  <span class="cell-player-name tbd">Araya/Muñoz</span>
+                  <span class="cell-score score-pending">—</span>
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- 12:00 C3 — Copa Plata Cuartos (played) -->
+          <td>
+            <div class="match-cell played">
+              <div class="cell-stripe stripe-plata"></div>
+              <div class="cell-body">
+                <div class="cell-header">
+                  <span class="badge-round" style="background:#e0f2fe;color:#0369a1;">QF Plata</span>
+                  <span class="badge-cat cat-4a">4a Masc.</span>
+                </div>
+                <div class="cell-player">
+                  <span class="cell-player-name winner">Díaz/Leal</span>
+                  <span class="cell-score score-win">7  6</span>
+                </div>
+                <div class="cell-divider"></div>
+                <div class="cell-player">
+                  <span class="cell-player-name">Silva/Ramos</span>
+                  <span class="cell-score score-loss">6  4</span>
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- 13:00 C3 — Copa Plata Final (pending) -->
+          <td>
+            <div class="match-cell" style="border:1.5px solid #94b0cc;">
+              <div class="cell-stripe stripe-plata"></div>
+              <div class="cell-body">
+                <div class="cell-header">
+                  <span class="badge-round" style="background:#e0f2fe;color:#0369a1;">🥈 Final</span>
+                  <span class="badge-cat cat-4a">4a Masc.</span>
+                </div>
+                <div class="cell-player">
+                  <span class="cell-player-name tbd">Por definir</span>
+                  <span class="cell-score score-pending">—</span>
+                </div>
+                <div class="cell-divider"></div>
+                <div class="cell-player">
+                  <span class="cell-player-name tbd">Por definir</span>
+                  <span class="cell-score score-pending">—</span>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <p class="scroll-hint">← desliza para ver más →</p>
+
+  <!-- Summary stats -->
+  <div style="margin-top:20px;display:flex;flex-wrap:wrap;gap:10px;">
+    <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:12px 20px;text-align:center;min-width:100px;">
+      <div style="font-size:22px;font-weight:700;color:#162844;">15</div>
+      <div style="font-size:10px;color:#94b0cc;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Total partidos</div>
+    </div>
+    <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:12px 20px;text-align:center;min-width:100px;">
+      <div style="font-size:22px;font-weight:700;color:#16a34a;">8</div>
+      <div style="font-size:10px;color:#94b0cc;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Jugados</div>
+    </div>
+    <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:12px 20px;text-align:center;min-width:100px;">
+      <div style="font-size:22px;font-weight:700;color:#e8c547;">7</div>
+      <div style="font-size:10px;color:#94b0cc;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Pendientes</div>
+    </div>
+    <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:12px 20px;text-align:center;min-width:100px;">
+      <div style="font-size:22px;font-weight:700;color:#162844;">3</div>
+      <div style="font-size:10px;color:#94b0cc;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Canchas activas</div>
+    </div>
+    <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:12px 20px;text-align:center;min-width:100px;">
+      <div style="font-size:22px;font-weight:700;color:#162844;">2</div>
+      <div style="font-size:10px;color:#94b0cc;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Categorías</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jugadores B2 — Variantes de Filtros</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f1f5f9; padding: 20px; }
+  h1 { text-align: center; color: #162844; font-size: 14px; margin-bottom: 4px; font-weight: 700; }
+  .sub { text-align: center; color: #94b0cc; font-size: 10px; margin-bottom: 20px; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .panel { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
+  .panel-header { background: linear-gradient(135deg, #162844 0%, #25507f 100%); padding: 12px 14px; }
+  .panel-label { font-size: 9px; font-weight: 800; color: #e8c547; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 2px; }
+  .panel-title { font-size: 13px; font-weight: 700; color: white; }
+  .panel-sub { font-size: 8px; color: #94b0cc; margin-top: 1px; }
+
+  /* shared: chips activos */
+  .chips-row { padding: 6px 12px 0; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; min-height: 28px; }
+  .chip { display: inline-flex; align-items: center; gap: 3px; background: #edf2f8; border: 1px solid #dce6f0; border-radius: 10px; padding: 3px 8px; font-size: 7.5px; color: #162844; font-weight: 600; }
+  .chip .x { color: #94b0cc; cursor: pointer; font-size: 9px; line-height: 1; }
+  .chip.gold { background: #fef9ee; border-color: #fde68a; color: #b45309; }
+  .chips-empty { font-size: 7.5px; color: #cbd5e1; font-style: italic; }
+  .clear-all { font-size: 7px; color: #94b0cc; text-decoration: underline; cursor: pointer; }
+
+  /* shared: tabla */
+  table.t { width: 100%; border-collapse: collapse; font-size: 8px; }
+  table.t thead th { background: #f8fafc; color: #94b0cc; font-weight: 700; text-transform: uppercase; font-size: 6.5px; padding: 6px 10px; text-align: left; letter-spacing: 0.5px; border-bottom: 2px solid #edf2f8; }
+  table.t tbody td { padding: 7px 10px; border-bottom: 1px solid #f8fafc; color: #374151; vertical-align: middle; }
+  table.t tbody tr:hover td { background: #f8fafc; }
+  .td-pl { display: flex; align-items: center; gap: 7px; }
+  .av { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg,#25507f,#162844); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; color: white; flex-shrink: 0; }
+  .av.b { background: linear-gradient(135deg,#3d7abf,#25507f); }
+  .av.g { background: linear-gradient(135deg,#1a6b3a,#25507f); }
+  .av.p { background: linear-gradient(135deg,#7c3aed,#25507f); }
+  .av.s { background: linear-gradient(135deg,#64748b,#475569); }
+  .td-n { font-size: 8.5px; font-weight: 600; color: #162844; }
+  .td-s { font-size: 7px; color: #94b0cc; }
+  .badge { font-size: 6.5px; padding: 1px 5px; border-radius: 4px; font-weight: 600; }
+  .b-cat { background: #edf2f8; color: #162844; }
+  .b-lado { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+  .b-rev { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+  .pts { font-weight: 700; color: #162844; font-size: 8.5px; }
+  .pos { width: 16px; height: 16px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 6.5px; font-weight: 700; }
+  .pos.g { background: #e8c547; color: #162844; }
+  .pos.s { background: #e2e8f0; color: #475569; }
+  .pos.n { background: #f1f5f9; color: #94b0cc; }
+  .pill { font-size: 7.5px; padding: 3px 8px; border-radius: 10px; border: 1px solid #dce6f0; color: #64748b; cursor: pointer; white-space: nowrap; }
+  .pill.on { background: #162844; color: white; border-color: #162844; }
+  .pill.gold { background: #e8c547; color: #162844; border-color: #e8c547; font-weight: 700; }
+
+  /* verdict */
+  .verdict { padding: 8px 12px; background: #f8fafc; border-top: 1px solid #edf2f8; }
+  .verdict-title { font-size: 7.5px; font-weight: 700; color: #162844; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .vrow { display: flex; gap: 4px; margin-bottom: 2px; }
+  .vt { font-size: 7.5px; color: #475569; line-height: 1.3; }
+  .rec { background: #fef9ee; border-top: 2px solid #e8c547; }
+  .rec .verdict-title { color: #b45309; }
+
+  /* ===== B2.1 — Pills siempre visibles ===== */
+  .b21-search { padding: 10px 12px 8px; }
+  .b21-search input { width: 100%; border: 1px solid #dce6f0; border-radius: 7px; padding: 7px 10px; font-size: 9px; background: #f8fafc; }
+  .b21-filters { padding: 6px 12px 8px; border-bottom: 1px solid #edf2f8; }
+  .f-group { margin-bottom: 5px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .f-group-label { font-size: 6.5px; color: #94b0cc; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 36px; flex-shrink: 0; }
+
+  /* ===== B2.2 — Expand inline ===== */
+  .b22-top { padding: 10px 12px 8px; display: flex; gap: 6px; align-items: center; }
+  .b22-top input { flex: 1; border: 1px solid #dce6f0; border-radius: 7px; padding: 7px 10px; font-size: 9px; background: #f8fafc; }
+  .toggle-btn { border: 1px solid #162844; border-radius: 7px; padding: 5px 10px; font-size: 8px; color: white; background: #162844; cursor: pointer; white-space: nowrap; font-weight: 600; display: flex; align-items: center; gap: 3px; }
+  .toggle-btn span.count { background: #e8c547; color: #162844; border-radius: 10px; padding: 0px 4px; font-size: 6.5px; font-weight: 800; }
+  .inline-expand { border-top: 1px solid #edf2f8; border-bottom: 1px solid #edf2f8; padding: 8px 12px; background: #f8fafc; }
+  .ie-row { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; margin-bottom: 4px; }
+  .ie-label { font-size: 6.5px; color: #94b0cc; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 36px; flex-shrink: 0; }
+  .ie-apply { display: flex; justify-content: flex-end; margin-top: 4px; }
+  .btn-apply { background: #162844; color: white; border: none; border-radius: 6px; padding: 4px 12px; font-size: 8px; font-weight: 600; cursor: pointer; }
+  .btn-clear { background: transparent; color: #94b0cc; border: 1px solid #dce6f0; border-radius: 6px; padding: 4px 10px; font-size: 8px; cursor: pointer; margin-right: 6px; }
+
+  /* ===== B2.3 — Bottom sheet ===== */
+  .b23-top { padding: 10px 12px 8px; display: flex; gap: 6px; align-items: center; }
+  .b23-top input { flex: 1; border: 1px solid #dce6f0; border-radius: 7px; padding: 7px 10px; font-size: 9px; background: #f8fafc; }
+  .btn-ghost { border: 1px solid #dce6f0; border-radius: 7px; padding: 5px 10px; font-size: 8px; color: #64748b; background: white; cursor: pointer; white-space: nowrap; }
+  .sheet-hint { margin: 0 12px 8px; border: 1.5px dashed #dce6f0; border-radius: 10px; overflow: hidden; }
+  .sheet-header { background: #f8fafc; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #edf2f8; }
+  .sheet-title { font-size: 8.5px; font-weight: 700; color: #162844; }
+  .sheet-close { font-size: 10px; color: #94b0cc; cursor: pointer; }
+  .sheet-body { padding: 8px 10px; }
+  .sheet-group { margin-bottom: 7px; }
+  .sheet-group-title { font-size: 7px; color: #94b0cc; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .sheet-pills { display: flex; gap: 4px; flex-wrap: wrap; }
+  .sheet-footer { padding: 6px 10px; border-top: 1px solid #edf2f8; display: flex; gap: 6px; justify-content: flex-end; background: white; }
+  .sheet-note { padding: 4px 10px 6px; font-size: 7px; color: #94b0cc; text-align: center; font-style: italic; }
+</style>
+</head>
+<body><div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#162844,#25507f);padding:8px 16px;display:flex;align-items:center;font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.2)"><a href="index.html" style="color:#e8c547;font-size:11px;font-weight:700;text-decoration:none">← Volver al índice</a></div><div style="height:38px"></div>
+<h1>B2 — Iteración del Mecanismo de Filtros</h1>
+<p class="sub">Todos mantienen chips activos · Cambia solo cómo se editan los filtros</p>
+
+<div class="grid">
+
+  <!-- B2.1: Pills siempre visibles -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-label">B2.1</div>
+      <div class="panel-title">Pills Siempre Visibles</div>
+      <div class="panel-sub">Sin abrir nada · Estado al instante</div>
+    </div>
+
+    <div class="b21-search">
+      <input type="text" placeholder="🔍 Buscar nombre, apodo…" readonly>
+    </div>
+
+    <!-- Chips activos -->
+    <div class="chips-row">
+      <div class="chip">4a (H) <span class="x">×</span></div>
+      <div class="chip gold">Mixto ✓ <span class="x">×</span></div>
+      <span class="clear-all">Limpiar todo</span>
+    </div>
+
+    <!-- Pills por grupo, siempre visibles -->
+    <div class="b21-filters">
+      <div class="f-group">
+        <span class="f-group-label">Categ.</span>
+        <span class="pill">Todas</span>
+        <span class="pill on">4a (H)</span>
+        <span class="pill">3a (H)</span>
+        <span class="pill">5a (H)</span>
+        <span class="pill">Open (H)</span>
+        <span class="pill">Damas ▾</span>
+      </div>
+      <div class="f-group">
+        <span class="f-group-label">Sexo</span>
+        <span class="pill on">Todos</span>
+        <span class="pill">H</span>
+        <span class="pill">D</span>
+      </div>
+      <div class="f-group">
+        <span class="f-group-label">Lado</span>
+        <span class="pill on">Cualq.</span>
+        <span class="pill">Drive</span>
+        <span class="pill">Revés</span>
+        <span class="pill gold">Mixto ✓</span>
+      </div>
+    </div>
+
+    <table class="t">
+      <thead><tr><th>Jugador</th><th>Cat</th><th>Pos</th><th>Pts</th><th>Lado</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="td-pl"><div class="av">PR</div><div><div class="td-n">P. Rosselot</div><div class="td-s">Mixto ✓</div></div></div></td>
+          <td><span class="badge b-cat">4a</span></td>
+          <td><div class="pos g">1</div></td>
+          <td class="pts">180</td>
+          <td><span class="badge b-lado">Drive</span></td>
+        </tr>
+        <tr>
+          <td><div class="td-pl"><div class="av b">MG</div><div><div class="td-n">M. González</div><div class="td-s">Mixto ✓</div></div></div></td>
+          <td><span class="badge b-cat">4a</span></td>
+          <td><div class="pos s">2</div></td>
+          <td class="pts">165</td>
+          <td><span class="badge b-rev">Revés</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="verdict">
+      <div class="verdict-title">Evaluación</div>
+      <div class="vrow"><span>✓</span><span class="vt">Cero clics para ver o cambiar filtros — todo expuesto</span></div>
+      <div class="vrow"><span>✓</span><span class="vt">Chips redundan el estado activo, refuerzo visual doble</span></div>
+      <div class="vrow"><span>✗</span><span class="vt">Más altura fija — tabla aparece más abajo en pantalla</span></div>
+      <div class="vrow"><span>✗</span><span class="vt">3 filas de filtros puede sentirse denso en mobile</span></div>
+    </div>
+  </div>
+
+  <!-- B2.2: Expand inline (recomendado) -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-label">B2.2 — Recomendado</div>
+      <div class="panel-title">Expand Inline + Aplicar</div>
+      <div class="panel-sub">Un click · Filtros agrupados · Tabla no salta</div>
+    </div>
+
+    <div class="b22-top">
+      <input type="text" placeholder="🔍 Buscar…" readonly>
+      <span class="toggle-btn">⚙ Filtros <span class="count">2</span> ▲</span>
+    </div>
+
+    <!-- Chips activos -->
+    <div class="chips-row" style="padding-bottom:6px">
+      <div class="chip">4a (H) <span class="x">×</span></div>
+      <div class="chip gold">Mixto ✓ <span class="x">×</span></div>
+      <span class="clear-all">Limpiar</span>
+    </div>
+
+    <!-- Expand inline abierto -->
+    <div class="inline-expand">
+      <div class="ie-row">
+        <span class="ie-label">Categ.</span>
+        <span class="pill">Todas</span>
+        <span class="pill on">4a (H)</span>
+        <span class="pill">3a (H)</span>
+        <span class="pill">5a (H)</span>
+        <span class="pill">Damas ▾</span>
+      </div>
+      <div class="ie-row">
+        <span class="ie-label">Sexo</span>
+        <span class="pill on">Todos</span>
+        <span class="pill">H</span>
+        <span class="pill">D</span>
+      </div>
+      <div class="ie-row">
+        <span class="ie-label">Lado</span>
+        <span class="pill on">Cualq.</span>
+        <span class="pill">Drive</span>
+        <span class="pill">Revés</span>
+        <span class="pill gold">Mixto ✓</span>
+      </div>
+      <div class="ie-apply">
+        <span class="btn-clear">Limpiar</span>
+        <span class="btn-apply">Aplicar</span>
+      </div>
+    </div>
+
+    <table class="t">
+      <thead><tr><th>Jugador</th><th>Cat</th><th>Pos</th><th>Pts</th><th>Lado</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="td-pl"><div class="av">PR</div><div><div class="td-n">P. Rosselot</div><div class="td-s">Mixto ✓</div></div></div></td>
+          <td><span class="badge b-cat">4a</span></td>
+          <td><div class="pos g">1</div></td>
+          <td class="pts">180</td>
+          <td><span class="badge b-lado">Drive</span></td>
+        </tr>
+        <tr>
+          <td><div class="td-pl"><div class="av b">MG</div><div><div class="td-n">M. González</div><div class="td-s">Mixto ✓</div></div></div></td>
+          <td><span class="badge b-cat">4a</span></td>
+          <td><div class="pos s">2</div></td>
+          <td class="pts">165</td>
+          <td><span class="badge b-rev">Revés</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="verdict rec">
+      <div class="verdict-title">⭐ Recomendado</div>
+      <div class="vrow"><span>✓</span><span class="vt">Un clic abre/cierra — predecible, sin overlay ni contexto perdido</span></div>
+      <div class="vrow"><span>✓</span><span class="vt">"Aplicar" evita que la tabla salte con cada click de pill</span></div>
+      <div class="vrow"><span>✓</span><span class="vt">Chips siempre muestran el estado aunque el panel esté cerrado</span></div>
+      <div class="vrow"><span>✗</span><span class="vt">Tabla se desplaza cuando abre — asumible dado que es intencional</span></div>
+    </div>
+  </div>
+
+  <!-- B2.3: Bottom sheet / drawer -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-label">B2.3</div>
+      <div class="panel-title">Sheet Lateral / Bottom Sheet</div>
+      <div class="panel-sub">Tabla nunca se mueve · Overlay en mobile</div>
+    </div>
+
+    <div class="b23-top">
+      <input type="text" placeholder="🔍 Buscar…" readonly>
+      <span class="btn-ghost">⚙ Filtros (2)</span>
+    </div>
+
+    <!-- Chips activos -->
+    <div class="chips-row" style="border-bottom:1px solid #edf2f8;padding-bottom:8px;margin-bottom:0">
+      <div class="chip">4a (H) <span class="x">×</span></div>
+      <div class="chip gold">Mixto ✓ <span class="x">×</span></div>
+      <span class="clear-all">Limpiar</span>
+    </div>
+
+    <!-- Sheet simulado -->
+    <div class="sheet-hint">
+      <div class="sheet-header">
+        <span class="sheet-title">Filtros</span>
+        <span class="sheet-close">✕</span>
+      </div>
+      <div class="sheet-body">
+        <div class="sheet-group">
+          <div class="sheet-group-title">Categoría</div>
+          <div class="sheet-pills">
+            <span class="pill">Todas</span>
+            <span class="pill on">4a (H)</span>
+            <span class="pill">3a (H)</span>
+            <span class="pill">5a (H)</span>
+            <span class="pill">Open (H)</span>
+            <span class="pill">B (D)</span>
+            <span class="pill">C (D)</span>
+          </div>
+        </div>
+        <div class="sheet-group">
+          <div class="sheet-group-title">Lado · Mixto</div>
+          <div class="sheet-pills">
+            <span class="pill on">Cualquiera</span>
+            <span class="pill">Drive</span>
+            <span class="pill">Revés</span>
+            <span class="pill gold">Mixto ✓</span>
+          </div>
+        </div>
+      </div>
+      <div class="sheet-footer">
+        <span class="btn-clear">Limpiar</span>
+        <span class="btn-apply">Aplicar</span>
+      </div>
+    </div>
+    <div class="sheet-note">En mobile: sube desde abajo. En desktop: panel lateral derecho.</div>
+
+    <table class="t">
+      <thead><tr><th>Jugador</th><th>Cat</th><th>Pos</th><th>Pts</th><th>Lado</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="td-pl"><div class="av">PR</div><div><div class="td-n">P. Rosselot</div><div class="td-s">Mixto ✓</div></div></div></td>
+          <td><span class="badge b-cat">4a</span></td>
+          <td><div class="pos g">1</div></td>
+          <td class="pts">180</td>
+          <td><span class="badge b-lado">Drive</span></td>
+        </tr>
+        <tr>
+          <td><div class="td-pl"><div class="av b">MG</div><div><div class="td-n">M. González</div><div class="td-s">Mixto ✓</div></div></div></td>
+          <td><span class="badge b-cat">4a</span></td>
+          <td><div class="pos s">2</div></td>
+          <td class="pts">165</td>
+          <td><span class="badge b-rev">Revés</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="verdict">
+      <div class="verdict-title">Evaluación</div>
+      <div class="vrow"><span>✓</span><span class="vt">La tabla nunca se mueve — UX más estable</span></div>
+      <div class="vrow"><span>✓</span><span class="vt">El sheet tiene espacio para mostrar todos los filtros cómodamente</span></div>
+      <div class="vrow"><span>✗</span><span class="vt">Overlay tapa parte del contenido — el usuario pierde de vista la tabla al filtrar</span></div>
+      <div class="vrow"><span>✗</span><span class="vt">Más complejidad de implementación (drawer + overlay)</span></div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

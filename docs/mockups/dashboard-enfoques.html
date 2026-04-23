@@ -1,0 +1,259 @@
+<h2>3 enfoques para el nuevo Dashboard</h2>
+<p class="subtitle">Todos incluyen: próximo partido · actividad reciente · stats competitivos · torneo activo · quick links</p>
+
+<div class="cards">
+
+  <!-- OPCIÓN A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f0f4f8;padding:12px;min-height:200px;">
+
+      <!-- Phone frame -->
+      <div style="max-width:220px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.15);font-family:sans-serif;">
+
+        <!-- Hero: próximo partido -->
+        <div style="background:linear-gradient(135deg,#0a1628 0%,#1a3a5c 100%);padding:12px;position:relative;">
+          <div style="color:#c9a84c;font-size:7px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Próximo partido</div>
+          <div style="color:#fff;font-size:11px;font-weight:700">Rosselot / Torres</div>
+          <div style="color:#8899aa;font-size:8px;margin-top:1px">vs Moreno / Pérez</div>
+          <div style="margin-top:6px;display:flex;gap:6px;align-items:center">
+            <div style="background:#c9a84c20;border:1px solid #c9a84c50;border-radius:20px;padding:2px 7px;color:#c9a84c;font-size:7px;font-weight:700">Sáb 26 abr · 09:00</div>
+            <div style="color:#8899aa;font-size:7px">Cancha 3</div>
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #f0f0f0;">
+          <div style="padding:8px;text-align:center;border-right:1px solid #f0f0f0">
+            <div style="color:#0a1628;font-size:13px;font-weight:700">#5</div>
+            <div style="color:#8899aa;font-size:7px;text-transform:uppercase;letter-spacing:1px">Ranking</div>
+          </div>
+          <div style="padding:8px;text-align:center;border-right:1px solid #f0f0f0">
+            <div style="color:#0a1628;font-size:13px;font-weight:700">58%</div>
+            <div style="color:#8899aa;font-size:7px;text-transform:uppercase;letter-spacing:1px">Win rate</div>
+          </div>
+          <div style="padding:8px;text-align:center">
+            <div style="color:#0a1628;font-size:13px;font-weight:700">24</div>
+            <div style="color:#8899aa;font-size:7px;text-transform:uppercase;letter-spacing:1px">Partidos</div>
+          </div>
+        </div>
+
+        <!-- Actividad reciente -->
+        <div style="padding:8px 10px;">
+          <div style="color:#8899aa;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Actividad reciente</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="display:flex;align-items:center;gap:5px;padding:4px;background:#f8f9fa;border-radius:5px">
+              <div style="width:4px;height:4px;border-radius:50%;background:#22c55e;flex-shrink:0"></div>
+              <div style="font-size:8px;color:#333;flex:1">Leal/Díaz ganaron 6-3 6-2</div>
+              <div style="font-size:7px;color:#aaa">ayer</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;padding:4px;background:#f8f9fa;border-radius:5px">
+              <div style="width:4px;height:4px;border-radius:50%;background:#ef4444;flex-shrink:0"></div>
+              <div style="font-size:8px;color:#333;flex:1">Rosselot/Torres 3-6 4-6</div>
+              <div style="font-size:7px;color:#aaa">lun</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick links -->
+        <div style="padding:8px 10px 10px;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+          <div style="background:#0a1628;border-radius:7px;padding:6px 8px;display:flex;align-items:center;gap:5px">
+            <span style="font-size:10px">🏆</span>
+            <span style="color:#fff;font-size:8px;font-weight:700">Torneos</span>
+          </div>
+          <div style="background:#0a1628;border-radius:7px;padding:6px 8px;display:flex;align-items:center;gap:5px">
+            <span style="font-size:10px">🤝</span>
+            <span style="color:#fff;font-size:8px;font-weight:700">Amistosos</span>
+          </div>
+          <div style="background:#0a1628;border-radius:7px;padding:6px 8px;display:flex;align-items:center;gap:5px">
+            <span style="font-size:10px">🏅</span>
+            <span style="color:#fff;font-size:8px;font-weight:700">Ranking</span>
+          </div>
+          <div style="background:#0a1628;border-radius:7px;padding:6px 8px;display:flex;align-items:center;gap:5px">
+            <span style="font-size:10px">📅</span>
+            <span style="color:#fff;font-size:8px;font-weight:700">Calendario</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Scroll vertical con hero partido</h3>
+      <p>El próximo partido ocupa el hero navy. Debajo: stats inline, feed de actividad, quick links. Todo en una columna, prioridad clara de arriba a abajo.</p>
+    </div>
+  </div>
+
+  <!-- OPCIÓN B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f0f4f8;padding:12px;min-height:200px;">
+
+      <div style="max-width:220px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.15);font-family:sans-serif;">
+
+        <!-- Header personalizado con avatar -->
+        <div style="background:#0a1628;padding:10px 12px;display:flex;align-items:center;gap:8px">
+          <div style="width:28px;height:28px;border-radius:50%;background:#c9a84c;display:flex;align-items:center;justify-content:center;color:#0a1628;font-weight:700;font-size:10px;flex-shrink:0">FR</div>
+          <div>
+            <div style="color:#fff;font-size:10px;font-weight:700">Hola, Pancho</div>
+            <div style="color:#8899aa;font-size:8px">4a · #5 en ranking</div>
+          </div>
+          <div style="margin-left:auto;text-align:right">
+            <div style="color:#c9a84c;font-size:10px;font-weight:700">↑3</div>
+            <div style="color:#8899aa;font-size:7px">racha</div>
+          </div>
+        </div>
+
+        <!-- Widget grid 2x2 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#e5e7eb;">
+
+          <!-- Próximo partido (full width) -->
+          <div style="grid-column:span 2;background:#fff;padding:8px 10px;">
+            <div style="color:#8899aa;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Próximo partido · Sáb 26 abr</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="flex:1">
+                <div style="color:#0a1628;font-size:9px;font-weight:700">Rosselot / Torres</div>
+                <div style="color:#8899aa;font-size:8px;margin-top:1px">vs Moreno / Pérez</div>
+              </div>
+              <div style="background:#c9a84c;border-radius:5px;padding:3px 8px;color:#0a1628;font-size:7px;font-weight:700">09:00 · C3</div>
+            </div>
+          </div>
+
+          <!-- Torneo activo -->
+          <div style="background:#fff;padding:8px 10px;">
+            <div style="color:#8899aa;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Torneo activo</div>
+            <div style="color:#0a1628;font-size:9px;font-weight:700">Americano Abr</div>
+            <div style="color:#8899aa;font-size:8px;margin-top:2px">Grupo 2</div>
+            <div style="margin-top:4px;display:flex;gap:3px">
+              <div style="width:8px;height:8px;border-radius:50%;background:#22c55e"></div>
+              <div style="width:8px;height:8px;border-radius:50%;background:#22c55e"></div>
+              <div style="width:8px;height:8px;border-radius:50%;background:#ef4444"></div>
+              <div style="width:8px;height:8px;border-radius:50%;background:#d1d5db"></div>
+            </div>
+          </div>
+
+          <!-- Stats widget -->
+          <div style="background:#fff;padding:8px 10px;">
+            <div style="color:#8899aa;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Mis stats</div>
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <div style="display:flex;justify-content:space-between">
+                <span style="color:#8899aa;font-size:8px">Win rate</span>
+                <span style="color:#0a1628;font-size:8px;font-weight:700">58%</span>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="color:#8899aa;font-size:8px">Partidos</span>
+                <span style="color:#0a1628;font-size:8px;font-weight:700">24</span>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="color:#8899aa;font-size:8px">ELO</span>
+                <span style="color:#0a1628;font-size:8px;font-weight:700">1284</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Quick links pill -->
+        <div style="padding:8px 10px;display:flex;gap:4px;flex-wrap:wrap">
+          <div style="background:#0a1628;border-radius:20px;padding:3px 9px;color:#fff;font-size:8px;font-weight:700">🏆 Torneos</div>
+          <div style="background:#0a1628;border-radius:20px;padding:3px 9px;color:#fff;font-size:8px;font-weight:700">🤝 Amistosos</div>
+          <div style="background:#0a1628;border-radius:20px;padding:3px 9px;color:#fff;font-size:8px;font-weight:700">🏅 Ranking</div>
+          <div style="background:#0a1628;border-radius:20px;padding:3px 9px;color:#fff;font-size:8px;font-weight:700">📅 Cal.</div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Header con avatar + widget grid</h3>
+      <p>Header personalizado navy (avatar, nombre, racha). Debajo, widgets en grilla: próximo partido full-width, torneo activo y stats lado a lado. Quick links como pills al final.</p>
+    </div>
+  </div>
+
+  <!-- OPCIÓN C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f0f4f8;padding:12px;min-height:200px;">
+
+      <div style="max-width:220px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.15);font-family:sans-serif;">
+
+        <!-- Hero grande con nombre + stats key -->
+        <div style="background:linear-gradient(160deg,#0a1628 0%,#0d2240 60%,#1a3a5c 100%);padding:14px 12px 10px;">
+          <div style="display:flex;align-items:start;gap:8px;margin-bottom:10px">
+            <div>
+              <div style="color:#8899aa;font-size:8px;margin-bottom:1px">Bienvenido</div>
+              <div style="color:#fff;font-size:14px;font-weight:700;line-height:1.1">Pancho</div>
+            </div>
+            <div style="margin-left:auto;width:30px;height:30px;border-radius:50%;background:#c9a84c;display:flex;align-items:center;justify-content:center;color:#0a1628;font-weight:700;font-size:11px">FR</div>
+          </div>
+          <!-- Stats destacados -->
+          <div style="display:flex;gap:12px">
+            <div>
+              <div style="color:#c9a84c;font-size:16px;font-weight:700">#5</div>
+              <div style="color:#8899aa;font-size:7px;text-transform:uppercase;letter-spacing:1px">Ranking 4a</div>
+            </div>
+            <div style="width:1px;background:#ffffff20"></div>
+            <div>
+              <div style="color:#fff;font-size:16px;font-weight:700">58%</div>
+              <div style="color:#8899aa;font-size:7px;text-transform:uppercase;letter-spacing:1px">Victorias</div>
+            </div>
+            <div style="width:1px;background:#ffffff20"></div>
+            <div>
+              <div style="color:#fff;font-size:16px;font-weight:700">1284</div>
+              <div style="color:#8899aa;font-size:7px;text-transform:uppercase;letter-spacing:1px">ELO</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta próximo partido -->
+        <div style="margin:8px 8px 0;border-radius:8px;border:1.5px solid #c9a84c40;padding:8px 10px;background:#fffdf5">
+          <div style="display:flex;justify-content:space-between;align-items:start">
+            <div>
+              <div style="color:#8899aa;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Próximo partido</div>
+              <div style="color:#0a1628;font-size:9px;font-weight:700;margin-top:2px">vs Moreno / Pérez</div>
+              <div style="color:#8899aa;font-size:8px;margin-top:1px">Sáb 26 abr · 09:00 · Cancha 3</div>
+            </div>
+            <div style="background:#c9a84c;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#0a1628;font-size:12px;flex-shrink:0">🏓</div>
+          </div>
+        </div>
+
+        <!-- Torneo activo mini -->
+        <div style="margin:5px 8px 0;border-radius:8px;background:#f8f9fa;padding:7px 10px;display:flex;align-items:center;gap:8px">
+          <div style="flex:1">
+            <div style="color:#8899aa;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Americano Abr · Grupo 2</div>
+            <div style="color:#0a1628;font-size:8px;font-weight:700;margin-top:1px">2G 1P · 2° lugar</div>
+          </div>
+          <div style="display:flex;gap:2px">
+            <div style="width:7px;height:7px;border-radius:50%;background:#22c55e"></div>
+            <div style="width:7px;height:7px;border-radius:50%;background:#22c55e"></div>
+            <div style="width:7px;height:7px;border-radius:50%;background:#ef4444"></div>
+            <div style="width:7px;height:7px;border-radius:50%;background:#d1d5db"></div>
+          </div>
+        </div>
+
+        <!-- Quick links -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:#e5e7eb;margin:5px 0 0;">
+          <div style="background:#fff;padding:7px 4px;text-align:center">
+            <div style="font-size:13px">🏆</div>
+            <div style="color:#0a1628;font-size:7px;font-weight:700;margin-top:2px">Torneos</div>
+          </div>
+          <div style="background:#fff;padding:7px 4px;text-align:center">
+            <div style="font-size:13px">🤝</div>
+            <div style="color:#0a1628;font-size:7px;font-weight:700;margin-top:2px">Amistosos</div>
+          </div>
+          <div style="background:#fff;padding:7px 4px;text-align:center">
+            <div style="font-size:13px">🏅</div>
+            <div style="color:#0a1628;font-size:7px;font-weight:700;margin-top:2px">Ranking</div>
+          </div>
+          <div style="background:#fff;padding:7px 4px;text-align:center">
+            <div style="font-size:13px">📅</div>
+            <div style="color:#0a1628;font-size:7px;font-weight:700;margin-top:2px">Calendario</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Hero grande + secciones compactas ⭐ Recomendado</h3>
+      <p>Header navy con nombre + 3 stats clave (ranking, win%, ELO). Tarjeta dorada para el próximo partido. Mini-card del torneo activo con racha. Quick links en fila de íconos. Identidad de app deportiva.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;text-align:center">⭐ Recomiendo C — da identidad de app deportiva y jerarquía clara. Pero A es la más segura si quieres algo más limpio.</p>

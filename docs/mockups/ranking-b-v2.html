@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ranking B v2 — 3 Tabs + Buscador</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f1f5f9; padding: 20px; }
+  h1 { text-align: center; color: #162844; font-size: 14px; margin-bottom: 4px; font-weight: 700; }
+  .sub { text-align: center; color: #94b0cc; font-size: 10px; margin-bottom: 20px; }
+
+  .wrap { display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start; }
+  .view-label { font-size: 9px; font-weight: 700; color: #94b0cc; text-align: center; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* shared */
+  .rk-pos { width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; flex-shrink: 0; }
+  .pos-g { background: #e8c547; color: #162844; }
+  .pos-s { background: #e2e8f0; color: #475569; }
+  .pos-b { background: #fed7aa; color: #9a3412; }
+  .pos-n { background: #f1f5f9; color: #94b0cc; }
+  .av { border-radius: 50%; background: linear-gradient(135deg,#25507f,#162844); display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; flex-shrink: 0; }
+  .pill { font-size: 7.5px; padding: 3px 8px; border-radius: 8px; border: 1px solid #dce6f0; color: #64748b; cursor: pointer; white-space: nowrap; }
+  .pill.on { background: #162844; color: #e8c547; border-color: #162844; font-weight: 700; }
+
+  /* ══════════ MOBILE ══════════ */
+  .mobile { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.10); overflow: hidden; width: 300px; }
+
+  .m-header { background: linear-gradient(135deg,#162844 0%,#25507f 100%); padding: 14px 16px 0; }
+  .m-title { font-size: 13px; font-weight: 700; color: white; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .trophy { color: #e8c547; font-size: 14px; }
+
+  /* tabs mobile */
+  .m-tabs { display: flex; }
+  .m-tab { flex: 1; text-align: center; padding: 8px 4px; font-size: 8px; font-weight: 700; color: rgba(255,255,255,0.5); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .m-tab.on { color: #e8c547; border-bottom-color: #e8c547; }
+
+  /* search */
+  .m-search { padding: 8px 14px 6px; }
+  .m-search input { width: 100%; border: 1px solid #dce6f0; border-radius: 8px; padding: 7px 10px; font-size: 9px; background: #f8fafc; color: #374151; }
+
+  /* sub-pills */
+  .m-subcats { padding: 0 14px 8px; display: flex; gap: 5px; overflow-x: auto; border-bottom: 1px solid #edf2f8; }
+
+  /* section header */
+  .m-cat-hdr { padding: 6px 14px; background: #f8fafc; border-bottom: 1px solid #edf2f8; display: flex; justify-content: space-between; }
+  .m-cat-name { font-size: 8px; font-weight: 700; color: #162844; }
+  .m-cat-count { font-size: 7px; color: #94b0cc; }
+
+  /* ranking row mobile */
+  .m-row { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid #f8fafc; }
+  .m-row.me { background: rgba(232,197,71,0.07); }
+  .m-row:hover { background: #f8fafc; }
+  .m-name { font-size: 8.5px; font-weight: 600; color: #162844; flex: 1; }
+  .m-name.me { color: #b45309; }
+  .m-pts { font-size: 9px; font-weight: 700; color: #162844; }
+  .m-pts.muted { color: #cbd5e1; }
+  .m-evts { font-size: 7px; color: #94b0cc; }
+
+  /* ver más */
+  .m-more { padding: 7px 14px; font-size: 7.5px; color: #94b0cc; text-align: center; cursor: pointer; border-bottom: 1px solid #f8fafc; }
+  .m-more:hover { background: #f8fafc; }
+
+  /* General tab compact grid */
+  .m-general { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px 14px; }
+  .m-gen-card { border: 1px solid #edf2f8; border-radius: 8px; padding: 8px; cursor: pointer; }
+  .m-gen-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+  .m-gen-title { font-size: 9px; font-weight: 700; color: #162844; margin-bottom: 5px; display: flex; justify-content: space-between; }
+  .m-gen-title span { font-size: 7px; color: #94b0cc; font-weight: 400; }
+
+  /* banner tú -->  */
+  .m-you-banner { margin: 8px 14px; background: linear-gradient(135deg,#162844,#25507f); border-radius: 9px; padding: 8px 12px; display: flex; align-items: center; gap: 8px; }
+  .m-you-av { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #e8c547; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; color: white; }
+  .m-you-name { font-size: 8px; font-weight: 700; color: white; flex: 1; }
+  .m-you-cat  { font-size: 7px; color: #94b0cc; }
+  .m-you-pos  { font-size: 16px; font-weight: 700; color: #e8c547; line-height: 1; }
+  .m-you-pts  { font-size: 7px; color: #94b0cc; }
+
+  /* ══════════ DESKTOP ══════════ */
+  .desktop { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.10); overflow: hidden; }
+
+  .d-header { background: linear-gradient(135deg,#162844 0%,#25507f 100%); padding: 14px 24px 0; }
+  .d-title { font-size: 16px; font-weight: 700; color: white; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+
+  /* tabs desktop */
+  .d-tabs { display: flex; }
+  .d-tab { padding: 10px 20px; font-size: 9.5px; font-weight: 700; color: rgba(255,255,255,0.5); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .d-tab.on { color: #e8c547; border-bottom-color: #e8c547; }
+
+  /* toolbar desktop */
+  .d-toolbar { padding: 10px 24px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #edf2f8; }
+  .d-search { flex: 1; }
+  .d-search input { width: 100%; border: 1px solid #dce6f0; border-radius: 8px; padding: 8px 12px; font-size: 10px; background: #f8fafc; }
+  .d-subcats { display: flex; gap: 5px; }
+  .d-subpill { font-size: 8.5px; padding: 5px 12px; border-radius: 7px; border: 1px solid #dce6f0; color: #64748b; cursor: pointer; white-space: nowrap; font-weight: 600; }
+  .d-subpill.on { background: #162844; color: #e8c547; border-color: #162844; }
+
+  /* you banner desktop */
+  .d-you { margin: 10px 24px; background: linear-gradient(135deg,#162844,#1d4f82); border-radius: 10px; padding: 10px 16px; display: flex; align-items: center; gap: 12px; }
+  .d-you-av { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #e8c547; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; }
+  .d-you-pos { font-size: 24px; font-weight: 700; color: #e8c547; line-height: 1; margin-left: auto; }
+  .d-you-pts { font-size: 8px; color: #94b0cc; }
+
+  /* table desktop */
+  table.dt { width: 100%; border-collapse: collapse; }
+  table.dt thead th { background: #f8fafc; color: #94b0cc; font-weight: 700; text-transform: uppercase; font-size: 7px; padding: 7px 16px; text-align: left; letter-spacing: 0.5px; border-bottom: 2px solid #edf2f8; }
+  table.dt tbody td { padding: 9px 16px; border-bottom: 1px solid #f8fafc; vertical-align: middle; }
+  table.dt tbody tr:hover td { background: #f8fafc; }
+  table.dt tbody tr.me td { background: rgba(232,197,71,0.06); }
+  .td-pl { display: flex; align-items: center; gap: 9px; }
+  .dt-name { font-size: 9.5px; font-weight: 600; color: #162844; }
+  .dt-name.me { color: #b45309; }
+  .dt-sub { font-size: 7.5px; color: #94b0cc; margin-top: 1px; }
+  .dt-pts { font-size: 11px; font-weight: 700; color: #162844; }
+  .dt-pts.muted { color: #cbd5e1; }
+  .dt-evts { font-size: 8px; color: #94b0cc; }
+
+  /* general grid desktop */
+  .d-general { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 16px 24px; }
+  .d-gen-card { border: 1px solid #edf2f8; border-radius: 10px; padding: 10px 12px; cursor: pointer; }
+  .d-gen-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+  .d-gen-sec { font-size: 7px; font-weight: 700; color: #94b0cc; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  .d-gen-title { font-size: 11px; font-weight: 700; color: #162844; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: baseline; }
+  .d-gen-count { font-size: 8px; color: #94b0cc; font-weight: 400; }
+  .d-gen-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
+</style>
+</head>
+<body><div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#162844,#25507f);padding:8px 16px;display:flex;align-items:center;gap:12px;font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.2)"><a href="index.html" style="color:#e8c547;font-size:11px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:5px">← Volver al índice</a></div><div style="height:36px"></div>
+<h1>Ranking B v2 — Tabs + Buscador + Clasificación General</h1>
+<p class="sub">3 tabs: Hombres · Damas · Clasificación General · Buscador en cada tab</p>
+
+<div class="wrap">
+
+  <!-- ── MOBILE ── -->
+  <div>
+    <div class="view-label">📱 Mobile — Tab "Hombres"</div>
+    <div class="mobile">
+      <div class="m-header">
+        <div class="m-title"><span class="trophy">🏆</span> Ranking</div>
+        <div class="m-tabs">
+          <div class="m-tab on">Hombres</div>
+          <div class="m-tab">Damas</div>
+          <div class="m-tab">Clasificación</div>
+        </div>
+      </div>
+
+      <!-- Banner personal -->
+      <div class="m-you-banner">
+        <div class="m-you-av">PR</div>
+        <div style="flex:1">
+          <div class="m-you-name">Pancho Rosselot</div>
+          <div class="m-you-cat">4a Hombres · Drive</div>
+        </div>
+        <div style="text-align:right">
+          <div class="m-you-pos">#2</div>
+          <div class="m-you-pts">165 pts</div>
+        </div>
+      </div>
+
+      <!-- Buscador -->
+      <div class="m-search">
+        <input type="text" placeholder="🔍 Buscar jugador…" readonly>
+      </div>
+
+      <!-- Sub-pills categoría -->
+      <div class="m-subcats">
+        <span class="pill on">4a</span>
+        <span class="pill">3a</span>
+        <span class="pill">5a</span>
+        <span class="pill">Open</span>
+      </div>
+
+      <!-- Categoría seleccionada: 4a Hombres -->
+      <div class="m-cat-hdr">
+        <span class="m-cat-name">4a Hombres</span>
+        <span class="m-cat-count">6 jugadores</span>
+      </div>
+      <div class="m-row">
+        <div class="rk-pos pos-g" style="width:16px;height:16px;font-size:6.5px">1</div>
+        <div class="av" style="width:22px;height:22px;font-size:7px;background:linear-gradient(135deg,#1a6b3a,#25507f)">PB</div>
+        <div class="m-name">P. Bello</div>
+        <div>
+          <div class="m-pts">180 pts</div>
+          <div class="m-evts">4 torneos</div>
+        </div>
+      </div>
+      <div class="m-row me">
+        <div class="rk-pos pos-s" style="width:16px;height:16px;font-size:6.5px">2</div>
+        <div class="av" style="width:22px;height:22px;font-size:7px">PR</div>
+        <div class="m-name me">Tú · Rosselot</div>
+        <div>
+          <div class="m-pts" style="color:#b45309">165 pts</div>
+          <div class="m-evts">3 torneos</div>
+        </div>
+      </div>
+      <div class="m-row">
+        <div class="rk-pos pos-b" style="width:16px;height:16px;font-size:6.5px">3</div>
+        <div class="av" style="width:22px;height:22px;font-size:7px;background:linear-gradient(135deg,#3d7abf,#25507f)">DT</div>
+        <div class="m-name">D. Torres</div>
+        <div>
+          <div class="m-pts">148 pts</div>
+          <div class="m-evts">3 torneos</div>
+        </div>
+      </div>
+      <div class="m-row">
+        <div class="rk-pos pos-n" style="width:16px;height:16px;font-size:6.5px">4</div>
+        <div class="av" style="width:22px;height:22px;font-size:7px;background:linear-gradient(135deg,#7c3aed,#25507f)">CA</div>
+        <div class="m-name">C. Aldunate</div>
+        <div>
+          <div class="m-pts">130 pts</div>
+          <div class="m-evts">2 torneos</div>
+        </div>
+      </div>
+      <div class="m-row">
+        <div class="rk-pos pos-n" style="width:16px;height:16px;font-size:6.5px">5</div>
+        <div class="av" style="width:22px;height:22px;font-size:7px;background:linear-gradient(135deg,#64748b,#475569)">MV</div>
+        <div class="m-name">M. Vásquez</div>
+        <div>
+          <div class="m-pts">95 pts</div>
+          <div class="m-evts">2 torneos</div>
+        </div>
+      </div>
+      <div class="m-row">
+        <div class="rk-pos pos-n" style="width:16px;height:16px;font-size:6.5px">6</div>
+        <div class="av" style="width:22px;height:22px;font-size:7px;background:linear-gradient(135deg,#64748b,#475569)">AF</div>
+        <div class="m-name">A. Fernández</div>
+        <div>
+          <div class="m-pts muted">0 pts</div>
+          <div class="m-evts">0 torneos</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px">
+      <div class="view-label">📱 Mobile — Tab "Clasificación"</div>
+      <div class="mobile">
+        <div class="m-header">
+          <div class="m-title"><span class="trophy">🏆</span> Ranking</div>
+          <div class="m-tabs">
+            <div class="m-tab">Hombres</div>
+            <div class="m-tab">Damas</div>
+            <div class="m-tab on">Clasificación</div>
+          </div>
+        </div>
+
+        <div class="m-search">
+          <input type="text" placeholder="🔍 Buscar en todas las categorías…" readonly>
+        </div>
+
+        <div class="m-general">
+          <!-- H -->
+          <div class="m-gen-card">
+            <div class="m-gen-title">3a H <span>4 jug.</span></div>
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div class="rk-pos pos-g" style="width:13px;height:13px;font-size:6px">1</div><div class="av" style="width:16px;height:16px;font-size:5.5px;background:linear-gradient(135deg,#1a6b3a,#25507f)">JL</div><div style="font-size:7px;color:#162844;font-weight:600;flex:1">J. López</div><div style="font-size:7px;font-weight:700;color:#162844">210</div></div>
+            <div style="display:flex;align-items:center;gap:5px"><div class="rk-pos pos-s" style="width:13px;height:13px;font-size:6px">2</div><div class="av" style="width:16px;height:16px;font-size:5.5px">RM</div><div style="font-size:7px;color:#162844;font-weight:600;flex:1">R. Muñoz</div><div style="font-size:7px;font-weight:700;color:#162844">185</div></div>
+            <div style="font-size:6.5px;color:#94b0cc;text-align:center;margin-top:3px">+ 2 más</div>
+          </div>
+          <div class="m-gen-card" style="border-color:#e8c547;background:#fefce8">
+            <div class="m-gen-title">4a H <span style="color:#b45309">← tú</span></div>
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div class="rk-pos pos-g" style="width:13px;height:13px;font-size:6px">1</div><div class="av" style="width:16px;height:16px;font-size:5.5px;background:linear-gradient(135deg,#1a6b3a,#25507f)">PB</div><div style="font-size:7px;color:#162844;font-weight:600;flex:1">P. Bello</div><div style="font-size:7px;font-weight:700;color:#162844">180</div></div>
+            <div style="display:flex;align-items:center;gap:5px;background:rgba(232,197,71,0.15);border-radius:3px;padding:1px 2px"><div class="rk-pos pos-s" style="width:13px;height:13px;font-size:6px">2</div><div class="av" style="width:16px;height:16px;font-size:5.5px">PR</div><div style="font-size:7px;color:#b45309;font-weight:700;flex:1">Tú</div><div style="font-size:7px;font-weight:700;color:#b45309">165</div></div>
+            <div style="font-size:6.5px;color:#94b0cc;text-align:center;margin-top:3px">+ 4 más</div>
+          </div>
+          <div class="m-gen-card">
+            <div class="m-gen-title">5a H <span>5 jug.</span></div>
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div class="rk-pos pos-g" style="width:13px;height:13px;font-size:6px">1</div><div class="av" style="width:16px;height:16px;font-size:5.5px;background:linear-gradient(135deg,#7c3aed,#25507f)">CS</div><div style="font-size:7px;color:#162844;font-weight:600;flex:1">C. Silva</div><div style="font-size:7px;font-weight:700;color:#162844">140</div></div>
+            <div style="display:flex;align-items:center;gap:5px"><div class="rk-pos pos-s" style="width:13px;height:13px;font-size:6px">2</div><div class="av" style="width:16px;height:16px;font-size:5.5px;background:linear-gradient(135deg,#3d7abf,#25507f)">PV</div><div style="font-size:7px;color:#162844;font-weight:600;flex:1">P. Vargas</div><div style="font-size:7px;font-weight:700;color:#162844">120</div></div>
+            <div style="font-size:6.5px;color:#94b0cc;text-align:center;margin-top:3px">+ 3 más</div>
+          </div>
+          <div class="m-gen-card">
+            <div class="m-gen-title">B D <span>4 jug.</span></div>
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div class="rk-pos pos-g" style="width:13px;height:13px;font-size:6px">1</div><div class="av" style="width:16px;height:16px;font-size:5.5px;background:linear-gradient(135deg,#db2777,#25507f)">AM</div><div style="font-size:7px;color:#162844;font-weight:600;flex:1">A. Mart.</div><div style="font-size:7px;font-weight:700;color:#162844">175</div></div>
+            <div style="display:flex;align-items:center;gap:5px"><div class="rk-pos pos-s" style="width:13px;height:13px;font-size:6px">2</div><div class="av" style="width:16px;height:16px;font-size:5.5px;background:linear-gradient(135deg,#0891b2,#25507f)">CR</div><div style="font-size:7px;color:#162844;font-weight:600;flex:1">C. Reyes</div><div style="font-size:7px;font-weight:700;color:#162844">155</div></div>
+            <div style="font-size:6.5px;color:#94b0cc;text-align:center;margin-top:3px">+ 2 más</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DESKTOP ── -->
+  <div>
+    <div class="view-label">🖥 Desktop — Tab "Hombres"</div>
+    <div class="desktop">
+      <div class="d-header">
+        <div class="d-title"><span class="trophy">🏆</span> Ranking</div>
+        <div class="d-tabs">
+          <div class="d-tab on">Hombres</div>
+          <div class="d-tab">Damas</div>
+          <div class="d-tab">Clasificación General</div>
+        </div>
+      </div>
+
+      <!-- Banner personal desktop -->
+      <div class="d-you">
+        <div class="d-you-av">PR</div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:white">Pancho Rosselot</div>
+          <div style="font-size:8px;color:#94b0cc">4a Hombres · Drive · 3 torneos jugados</div>
+        </div>
+        <div style="text-align:right;margin-left:auto">
+          <div class="d-you-pos">#2</div>
+          <div class="d-you-pts">165 pts en 4a</div>
+        </div>
+      </div>
+
+      <!-- Toolbar: search + sub-pills -->
+      <div class="d-toolbar">
+        <div class="d-search">
+          <input type="text" placeholder="🔍 Buscar jugador en Hombres…" readonly>
+        </div>
+        <div class="d-subcats">
+          <span class="d-subpill on">4a</span>
+          <span class="d-subpill">3a</span>
+          <span class="d-subpill">5a</span>
+          <span class="d-subpill">Open</span>
+        </div>
+      </div>
+
+      <!-- Tabla completa categoría -->
+      <table class="dt">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th>Jugador</th>
+            <th>Puntos</th>
+            <th>Torneos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="rk-pos pos-g" style="width:20px;height:20px;font-size:8px">1</div></td>
+            <td><div class="td-pl"><div class="av" style="width:30px;height:30px;font-size:9px;background:linear-gradient(135deg,#1a6b3a,#25507f)">PB</div><div><div class="dt-name">P. Bello</div><div class="dt-sub">Drive</div></div></div></td>
+            <td class="dt-pts">180</td>
+            <td class="dt-evts">4 torneos</td>
+          </tr>
+          <tr class="me">
+            <td><div class="rk-pos pos-s" style="width:20px;height:20px;font-size:8px">2</div></td>
+            <td><div class="td-pl"><div class="av" style="width:30px;height:30px;font-size:9px">PR</div><div><div class="dt-name me">Pancho Rosselot <span style="font-size:7.5px;font-weight:600;color:#b45309">← tú</span></div><div class="dt-sub">Drive · Mixto</div></div></div></td>
+            <td class="dt-pts" style="color:#b45309">165</td>
+            <td class="dt-evts">3 torneos</td>
+          </tr>
+          <tr>
+            <td><div class="rk-pos pos-b" style="width:20px;height:20px;font-size:8px">3</div></td>
+            <td><div class="td-pl"><div class="av" style="width:30px;height:30px;font-size:9px;background:linear-gradient(135deg,#3d7abf,#25507f)">DT</div><div><div class="dt-name">D. Torres</div><div class="dt-sub">Revés</div></div></div></td>
+            <td class="dt-pts">148</td>
+            <td class="dt-evts">3 torneos</td>
+          </tr>
+          <tr>
+            <td><div class="rk-pos pos-n" style="width:20px;height:20px;font-size:8px">4</div></td>
+            <td><div class="td-pl"><div class="av" style="width:30px;height:30px;font-size:9px;background:linear-gradient(135deg,#7c3aed,#25507f)">CA</div><div><div class="dt-name">C. Aldunate</div><div class="dt-sub">Drive</div></div></div></td>
+            <td class="dt-pts">130</td>
+            <td class="dt-evts">2 torneos</td>
+          </tr>
+          <tr>
+            <td><div class="rk-pos pos-n" style="width:20px;height:20px;font-size:8px">5</div></td>
+            <td><div class="td-pl"><div class="av" style="width:30px;height:30px;font-size:9px;background:linear-gradient(135deg,#64748b,#475569)">MV</div><div><div class="dt-name">M. Vásquez</div><div class="dt-sub">Revés · Mixto</div></div></div></td>
+            <td class="dt-pts">95</td>
+            <td class="dt-evts">2 torneos</td>
+          </tr>
+          <tr>
+            <td><div class="rk-pos pos-n" style="width:20px;height:20px;font-size:8px">6</div></td>
+            <td><div class="td-pl"><div class="av" style="width:30px;height:30px;font-size:9px;background:linear-gradient(135deg,#64748b,#475569)">AF</div><div><div class="dt-name">A. Fernández</div><div class="dt-sub">—</div></div></div></td>
+            <td class="dt-pts muted">0</td>
+            <td class="dt-evts">0 torneos</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:16px">
+      <div class="view-label">🖥 Desktop — Tab "Clasificación General"</div>
+      <div class="desktop">
+        <div class="d-header">
+          <div class="d-title"><span class="trophy">🏆</span> Ranking</div>
+          <div class="d-tabs">
+            <div class="d-tab">Hombres</div>
+            <div class="d-tab">Damas</div>
+            <div class="d-tab on">Clasificación General</div>
+          </div>
+        </div>
+
+        <!-- Search en clasificación -->
+        <div style="padding:10px 24px;border-bottom:1px solid #edf2f8">
+          <input type="text" placeholder="🔍 Buscar en todas las categorías…" readonly style="width:360px;border:1px solid #dce6f0;border-radius:8px;padding:8px 12px;font-size:10px;background:#f8fafc">
+        </div>
+
+        <!-- Grid 3 cols con secciones H y D -->
+        <div style="padding:12px 24px 4px;font-size:7.5px;font-weight:700;color:#162844;text-transform:uppercase;letter-spacing:1px;background:#f8fafc;border-bottom:1px solid #edf2f8">Hombres</div>
+        <div class="d-general">
+          <div class="d-gen-card">
+            <div class="d-gen-title">3a <div class="d-gen-count">4 jugadores</div></div>
+            <div class="d-gen-row"><div class="rk-pos pos-g" style="width:16px;height:16px;font-size:6.5px">1</div><div class="av" style="width:20px;height:20px;font-size:6.5px;background:linear-gradient(135deg,#1a6b3a,#25507f)">JL</div><div style="font-size:8px;color:#162844;font-weight:600;flex:1">J. López</div><div style="font-size:8px;font-weight:700;color:#162844">210</div></div>
+            <div class="d-gen-row"><div class="rk-pos pos-s" style="width:16px;height:16px;font-size:6.5px">2</div><div class="av" style="width:20px;height:20px;font-size:6.5px">RM</div><div style="font-size:8px;color:#162844;font-weight:600;flex:1">R. Muñoz</div><div style="font-size:8px;font-weight:700;color:#162844">185</div></div>
+            <div style="font-size:7px;color:#94b0cc;text-align:center;margin-top:4px">+ 2 más →</div>
+          </div>
+          <div class="d-gen-card" style="border-color:#e8c547;background:#fefce8">
+            <div class="d-gen-title">4a <span style="font-size:7.5px;color:#b45309;font-weight:600">← tú</span><div class="d-gen-count">6 jugadores</div></div>
+            <div class="d-gen-row"><div class="rk-pos pos-g" style="width:16px;height:16px;font-size:6.5px">1</div><div class="av" style="width:20px;height:20px;font-size:6.5px;background:linear-gradient(135deg,#1a6b3a,#25507f)">PB</div><div style="font-size:8px;color:#162844;font-weight:600;flex:1">P. Bello</div><div style="font-size:8px;font-weight:700;color:#162844">180</div></div>
+            <div class="d-gen-row" style="background:rgba(232,197,71,0.15);border-radius:4px;padding:2px 3px;margin:-2px -3px"><div class="rk-pos pos-s" style="width:16px;height:16px;font-size:6.5px">2</div><div class="av" style="width:20px;height:20px;font-size:6.5px">PR</div><div style="font-size:8px;color:#b45309;font-weight:700;flex:1">Tú · 165</div><div style="font-size:8px;font-weight:700;color:#b45309">165</div></div>
+            <div style="font-size:7px;color:#94b0cc;text-align:center;margin-top:4px">+ 4 más →</div>
+          </div>
+          <div class="d-gen-card">
+            <div class="d-gen-title">5a <div class="d-gen-count">5 jugadores</div></div>
+            <div class="d-gen-row"><div class="rk-pos pos-g" style="width:16px;height:16px;font-size:6.5px">1</div><div class="av" style="width:20px;height:20px;font-size:6.5px;background:linear-gradient(135deg,#7c3aed,#25507f)">CS</div><div style="font-size:8px;color:#162844;font-weight:600;flex:1">C. Silva</div><div style="font-size:8px;font-weight:700;color:#162844">140</div></div>
+            <div class="d-gen-row"><div class="rk-pos pos-s" style="width:16px;height:16px;font-size:6.5px">2</div><div class="av" style="width:20px;height:20px;font-size:6.5px;background:linear-gradient(135deg,#3d7abf,#25507f)">PV</div><div style="font-size:8px;color:#162844;font-weight:600;flex:1">P. Vargas</div><div style="font-size:8px;font-weight:700;color:#162844">120</div></div>
+            <div style="font-size:7px;color:#94b0cc;text-align:center;margin-top:4px">+ 3 más →</div>
+          </div>
+        </div>
+        <div style="padding:8px 24px 4px;font-size:7.5px;font-weight:700;color:#162844;text-transform:uppercase;letter-spacing:1px;background:#f8fafc;border-top:1px solid #edf2f8;border-bottom:1px solid #edf2f8">Damas</div>
+        <div class="d-general" style="padding-bottom:16px">
+          <div class="d-gen-card">
+            <div class="d-gen-title">B <div class="d-gen-count">4 jugadoras</div></div>
+            <div class="d-gen-row"><div class="rk-pos pos-g" style="width:16px;height:16px;font-size:6.5px">1</div><div class="av" style="width:20px;height:20px;font-size:6.5px;background:linear-gradient(135deg,#db2777,#25507f)">AM</div><div style="font-size:8px;color:#162844;font-weight:600;flex:1">A. Martínez</div><div style="font-size:8px;font-weight:700;color:#162844">175</div></div>
+            <div class="d-gen-row"><div class="rk-pos pos-s" style="width:16px;height:16px;font-size:6.5px">2</div><div class="av" style="width:20px;height:20px;font-size:6.5px;background:linear-gradient(135deg,#0891b2,#25507f)">CR</div><div style="font-size:8px;color:#162844;font-weight:600;flex:1">C. Reyes</div><div style="font-size:8px;font-weight:700;color:#162844">155</div></div>
+            <div style="font-size:7px;color:#94b0cc;text-align:center;margin-top:4px">+ 2 más →</div>
+          </div>
+          <div class="d-gen-card">
+            <div class="d-gen-title">C <div class="d-gen-count">5 jugadoras</div></div>
+            <div class="d-gen-row"><div class="rk-pos pos-g" style="width:16px;height:16px;font-size:6.5px">1</div><div class="av" style="width:20px;height:20px;font-size:6.5px;background:linear-gradient(135deg,#059669,#25507f)">VH</div><div style="font-size:8px;color:#162844;font-weight:600;flex:1">V. Herrera</div><div style="font-size:8px;font-weight:700;color:#162844">160</div></div>
+            <div class="d-gen-row"><div class="rk-pos pos-s" style="width:16px;height:16px;font-size:6.5px">2</div><div class="av" style="width:20px;height:20px;font-size:6.5px;background:linear-gradient(135deg,#0891b2,#25507f)">MF</div><div style="font-size:8px;color:#162844;font-weight:600;flex:1">M. Flores</div><div style="font-size:8px;font-weight:700;color:#162844">140</div></div>
+            <div style="font-size:7px;color:#94b0cc;text-align:center;margin-top:4px">+ 3 más →</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

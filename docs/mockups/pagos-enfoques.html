@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Pagos — 3 Enfoques</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f1f5f9; padding: 20px; }
+  h1 { text-align: center; color: #162844; font-size: 14px; margin-bottom: 4px; font-weight: 700; }
+  .sub { text-align: center; color: #94b0cc; font-size: 10px; margin-bottom: 20px; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .panel { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
+  .panel-header { background: linear-gradient(135deg,#162844 0%,#25507f 100%); padding: 12px 14px; }
+  .panel-label { font-size: 9px; font-weight: 800; color: #e8c547; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 2px; }
+  .panel-title { font-size: 13px; font-weight: 700; color: white; }
+  .panel-sub { font-size: 8px; color: #94b0cc; margin-top: 1px; }
+
+  /* verdict */
+  .verdict { padding: 8px 12px; background: #f8fafc; border-top: 1px solid #edf2f8; }
+  .verdict-title { font-size: 7.5px; font-weight: 700; color: #162844; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .vrow { display: flex; gap: 4px; margin-bottom: 2px; }
+  .vt { font-size: 7.5px; color: #475569; line-height: 1.3; }
+  .rec { background: #fef9ee; border-top: 2px solid #e8c547; }
+  .rec .verdict-title { color: #b45309; }
+
+  /* ── SHARED COBRO ROW ── */
+  .cobro { display: flex; align-items: flex-start; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #f8fafc; }
+  .cobro:last-child { border-bottom: none; }
+  .cobro-icon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; margin-top: 1px; }
+  .ci-paid  { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+  .ci-pend  { background: #f8fafc; color: #94b0cc; border: 1px solid #dce6f0; }
+  .ci-warn  { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+  .ci-overdue { background: #fff5f5; color: #dc2626; border: 1px solid #fecaca; }
+  .cobro-body { flex: 1; }
+  .cobro-name { font-size: 8.5px; font-weight: 600; color: #162844; }
+  .cobro-meta { font-size: 7px; color: #94b0cc; margin-top: 1px; }
+  .cobro-right { text-align: right; flex-shrink: 0; }
+  .amt { font-size: 9px; font-weight: 700; }
+  .amt-paid   { color: #16a34a; }
+  .amt-pend   { color: #162844; }
+  .amt-warn   { color: #d97706; }
+  .amt-overdue{ color: #dc2626; }
+  .amt-sub { font-size: 6.5px; color: #94b0cc; }
+
+  /* urgency tags */
+  .utag { display: inline-flex; align-items: center; gap: 2px; border-radius: 4px; padding: 1px 5px; font-size: 6.5px; font-weight: 700; }
+  .u-overdue { background: #fff5f5; color: #dc2626; border: 1px solid #fecaca; }
+  .u-warn    { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+  .u-ok      { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+  .u-paid    { background: #f8fafc; color: #94b0cc; border: 1px solid #dce6f0; }
+
+  /* section headers */
+  .sec-hdr { padding: 6px 12px 4px; font-size: 7px; font-weight: 700; color: #94b0cc; text-transform: uppercase; letter-spacing: 0.8px; background: #f8fafc; border-bottom: 1px solid #edf2f8; display: flex; justify-content: space-between; align-items: center; }
+  .sec-hdr span.total { font-size: 8px; font-weight: 700; color: #162844; }
+
+  /* ══════ A ══════ */
+  /* summary 2-col */
+  .summary-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px 12px; border-bottom: 1px solid #edf2f8; }
+  .stat { border-radius: 8px; padding: 8px 10px; }
+  .stat-lbl { font-size: 7.5px; color: #64748b; margin-bottom: 2px; }
+  .stat-amt { font-size: 14px; font-weight: 700; }
+  .stat.pend { background: #fff5f5; border: 1px solid #fecaca; }
+  .stat.pend .stat-amt { color: #dc2626; }
+  .stat.paid { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .stat.paid .stat-amt { color: #16a34a; }
+
+  /* ══════ B ══════ */
+  /* status card */
+  .status-card { margin: 10px 12px; border-radius: 10px; padding: 10px 12px; }
+  .status-card.alert { background: linear-gradient(135deg,#fff5f5,#fff); border: 1.5px solid #fecaca; }
+  .status-card.warn  { background: linear-gradient(135deg,#fffbeb,#fff); border: 1.5px solid #fde68a; }
+  .status-card.ok    { background: linear-gradient(135deg,#f0fdf4,#fff); border: 1.5px solid #bbf7d0; }
+  .sc-row { display: flex; align-items: center; gap: 8px; }
+  .sc-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .sc-dot.red   { background: #dc2626; }
+  .sc-dot.amber { background: #d97706; }
+  .sc-dot.green { background: #16a34a; }
+  .sc-title { font-size: 10px; font-weight: 700; color: #162844; }
+  .sc-sub   { font-size: 7.5px; color: #64748b; margin-top: 2px; }
+  .sc-right { margin-left: auto; text-align: right; }
+  .sc-amt { font-size: 13px; font-weight: 700; }
+  .sc-amt.red   { color: #dc2626; }
+  .sc-amt.amber { color: #d97706; }
+  .sc-amt.green { color: #16a34a; }
+  .sc-label { font-size: 7px; color: #94b0cc; }
+
+  /* ══════ C ══════ */
+  /* accordion sections */
+  .acc-hdr { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #edf2f8; background: white; }
+  .acc-hdr:hover { background: #f8fafc; }
+  .acc-left { display: flex; align-items: center; gap: 6px; }
+  .acc-icon { font-size: 10px; }
+  .acc-title { font-size: 8.5px; font-weight: 700; color: #162844; }
+  .acc-count { font-size: 7px; color: #94b0cc; }
+  .acc-right { display: flex; align-items: center; gap: 6px; }
+  .acc-total { font-size: 8.5px; font-weight: 700; }
+  .acc-chevron { font-size: 9px; color: #94b0cc; }
+  .acc-body { background: #fafcff; border-bottom: 1px solid #edf2f8; }
+</style>
+</head>
+<body><div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#162844,#25507f);padding:8px 16px;display:flex;align-items:center;font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.2)"><a href="index.html" style="color:#e8c547;font-size:11px;font-weight:700;text-decoration:none">← Volver al índice</a></div><div style="height:38px"></div>
+<h1>Mis Pagos — 3 Enfoques</h1>
+<p class="sub">Basado en <code>PagosJugador.tsx</code> · Tipos: Torneo · Mensual · Actividad · Indumentaria · Convivencia</p>
+
+<div class="grid">
+
+  <!-- ══════ ENFOQUE A: Urgencia primero ══════ -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-label">Enfoque A — Recomendado</div>
+      <div class="panel-title">Urgencia Primero</div>
+      <div class="panel-sub">Vencidos → Próximos → Pendientes → Pagados</div>
+    </div>
+
+    <!-- Resumen 2 cols -->
+    <div class="summary-2">
+      <div class="stat pend">
+        <div class="stat-lbl">Por pagar</div>
+        <div class="stat-amt">$35.000</div>
+      </div>
+      <div class="stat paid">
+        <div class="stat-lbl">Pagado año</div>
+        <div class="stat-amt">$85.000</div>
+      </div>
+    </div>
+
+    <!-- Sección: VENCIDOS -->
+    <div class="sec-hdr">
+      <span style="color:#dc2626">🔴 Vencidos</span>
+      <span class="total" style="color:#dc2626">$15.000</span>
+    </div>
+    <div class="cobro">
+      <div class="cobro-icon ci-overdue">○</div>
+      <div class="cobro-body">
+        <div class="cobro-name">Cuota mensual — Mar</div>
+        <div class="cobro-meta">Mensual · <span style="color:#dc2626;font-weight:600">Venció 25 mar</span></div>
+        <div style="margin-top:3px"><span class="utag u-overdue">● Vencido</span></div>
+      </div>
+      <div class="cobro-right">
+        <div class="amt amt-overdue">$15.000</div>
+      </div>
+    </div>
+
+    <!-- Sección: PRÓXIMOS A VENCER -->
+    <div class="sec-hdr">
+      <span style="color:#d97706">🟡 Vence esta semana</span>
+      <span class="total" style="color:#d97706">$20.000</span>
+    </div>
+    <div class="cobro">
+      <div class="cobro-icon ci-warn">○</div>
+      <div class="cobro-body">
+        <div class="cobro-name">Inscripción Liga Invierno</div>
+        <div class="cobro-meta">Torneo · Vence 25 abr</div>
+        <div style="margin-top:3px"><span class="utag u-warn">Vence en 2 días</span></div>
+      </div>
+      <div class="cobro-right">
+        <div class="amt amt-warn">$20.000</div>
+      </div>
+    </div>
+
+    <!-- Sección: PAGADOS -->
+    <div class="sec-hdr">
+      <span style="color:#94b0cc">✓ Pagados</span>
+      <span class="total" style="color:#16a34a">$85.000</span>
+    </div>
+    <div class="cobro">
+      <div class="cobro-icon ci-paid">✓</div>
+      <div class="cobro-body">
+        <div class="cobro-name">Inscripción Liga Verano</div>
+        <div class="cobro-meta">Torneo · Pagado 10 feb</div>
+      </div>
+      <div class="cobro-right">
+        <div class="amt amt-paid">$30.000</div>
+      </div>
+    </div>
+    <div class="cobro">
+      <div class="cobro-icon ci-paid">✓</div>
+      <div class="cobro-body">
+        <div class="cobro-name">Cuota mensual — Feb</div>
+        <div class="cobro-meta">Mensual · Pagado 21 feb</div>
+      </div>
+      <div class="cobro-right">
+        <div class="amt amt-paid">$15.000</div>
+      </div>
+    </div>
+
+    <div class="verdict rec">
+      <div class="verdict-title">⭐ Recomendado</div>
+      <div class="vrow"><span>✓</span><span class="vt">Lo más urgente siempre arriba — vencidos imposibles de ignorar</span></div>
+      <div class="vrow"><span>✓</span><span class="vt">Secciones con subtotales claros por estado</span></div>
+      <div class="vrow"><span>✓</span><span class="vt">Cambio mínimo sobre la estructura actual (reordena + agrega tags)</span></div>
+      <div class="vrow"><span>✗</span><span class="vt">No agrupa por tipo de cobro (torneos vs mensualidades)</span></div>
+    </div>
+  </div>
+
+  <!-- ══════ ENFOQUE B: Semáforo de estado ══════ -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-label">Enfoque B</div>
+      <div class="panel-title">Semáforo de Estado</div>
+      <div class="panel-sub">Tarjeta de resumen prominente · Lista secundaria</div>
+    </div>
+
+    <!-- Status card: alerta roja -->
+    <div class="status-card alert">
+      <div class="sc-row">
+        <div class="sc-dot red"></div>
+        <div>
+          <div class="sc-title">Tienes cobros vencidos</div>
+          <div class="sc-sub">1 vencido · 1 vence esta semana</div>
+        </div>
+        <div class="sc-right">
+          <div class="sc-amt red">$35.000</div>
+          <div class="sc-label">pendiente</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pendientes -->
+    <div class="sec-hdr">
+      <span>Pendientes (2)</span>
+    </div>
+    <div class="cobro">
+      <div class="cobro-icon ci-overdue">○</div>
+      <div class="cobro-body">
+        <div class="cobro-name">Cuota mensual — Mar</div>
+        <div class="cobro-meta">Mensual · <span style="color:#dc2626;font-weight:600">Venció 25 mar</span></div>
+      </div>
+      <div class="cobro-right">
+        <div class="amt amt-overdue">$15.000</div>
+        <div class="amt-sub"><span class="utag u-overdue">Vencido</span></div>
+      </div>
+    </div>
+    <div class="cobro">
+      <div class="cobro-icon ci-warn">○</div>
+      <div class="cobro-body">
+        <div class="cobro-name">Inscripción Liga Invierno</div>
+        <div class="cobro-meta">Torneo · Vence 25 abr</div>
+      </div>
+      <div class="cobro-right">
+        <div class="amt amt-warn">$20.000</div>
+        <div class="amt-sub"><span class="utag u-warn">2 días</span></div>
+      </div>
+    </div>
+
+    <!-- Pagados colapsados -->
+    <div class="sec-hdr" style="cursor:pointer">
+      <span style="color:#94b0cc">Pagados (4) ▾</span>
+      <span class="total" style="color:#16a34a">$85.000</span>
+    </div>
+    <div style="padding:8px 12px;font-size:7.5px;color:#94b0cc;text-align:center;font-style:italic">
+      Haz click para ver el historial de pagos
+    </div>
+
+    <!-- Variante con estado al día (referencia) -->
+    <div style="margin:0 12px 10px;border-radius:8px;overflow:hidden;border:1px dashed #dce6f0;">
+      <div style="padding:6px 10px;background:#f8fafc;font-size:7px;color:#94b0cc;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Variante — Al día</div>
+      <div class="status-card ok" style="margin:0;border-radius:0;border:none;border-top:1px solid #bbf7d0">
+        <div class="sc-row">
+          <div class="sc-dot green"></div>
+          <div>
+            <div class="sc-title">¡Al día con tus pagos!</div>
+            <div class="sc-sub">Sin cobros pendientes</div>
+          </div>
+          <div class="sc-right">
+            <div class="sc-amt green">$85.000</div>
+            <div class="sc-label">pagado</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="verdict">
+      <div class="verdict-title">Evaluación</div>
+      <div class="vrow"><span>✓</span><span class="vt">El semáforo da contexto inmediato del estado general</span></div>
+      <div class="vrow"><span>✓</span><span class="vt">Pagados colapsados reducen scroll en el caso normal</span></div>
+      <div class="vrow"><span>✗</span><span class="vt">La tarjeta grande ocupa espacio que podría ser la lista</span></div>
+      <div class="vrow"><span>✗</span><span class="vt">La variante "al día" queda visualmente inferior — header sin info</span></div>
+    </div>
+  </div>
+
+  <!-- ══════ ENFOQUE C: Acordeón por tipo ══════ -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-label">Enfoque C</div>
+      <div class="panel-title">Acordeón por Tipo</div>
+      <div class="panel-sub">Torneos · Mensualidades · Otros · agrupados</div>
+    </div>
+
+    <!-- Resumen 2 cols -->
+    <div class="summary-2">
+      <div class="stat pend">
+        <div class="stat-lbl">Por pagar</div>
+        <div class="stat-amt">$35.000</div>
+      </div>
+      <div class="stat paid">
+        <div class="stat-lbl">Pagado año</div>
+        <div class="stat-amt">$85.000</div>
+      </div>
+    </div>
+
+    <!-- Acordeón: Torneos (abierto) -->
+    <div class="acc-hdr">
+      <div class="acc-left">
+        <span class="acc-icon">🏆</span>
+        <div>
+          <div class="acc-title">Torneos</div>
+          <div class="acc-count">1 pendiente · 1 pagado</div>
+        </div>
+      </div>
+      <div class="acc-right">
+        <span class="acc-total" style="color:#dc2626">$20.000</span>
+        <span class="acc-chevron">▲</span>
+      </div>
+    </div>
+    <div class="acc-body">
+      <div class="cobro">
+        <div class="cobro-icon ci-warn">○</div>
+        <div class="cobro-body">
+          <div class="cobro-name">Inscripción Liga Invierno</div>
+          <div class="cobro-meta">Vence 25 abr · <span class="utag u-warn">2 días</span></div>
+        </div>
+        <div class="cobro-right"><div class="amt amt-warn">$20.000</div></div>
+      </div>
+      <div class="cobro">
+        <div class="cobro-icon ci-paid">✓</div>
+        <div class="cobro-body">
+          <div class="cobro-name">Inscripción Liga Verano</div>
+          <div class="cobro-meta">Pagado 10 feb</div>
+        </div>
+        <div class="cobro-right"><div class="amt amt-paid">$30.000</div></div>
+      </div>
+    </div>
+
+    <!-- Acordeón: Mensualidades (cerrado) -->
+    <div class="acc-hdr">
+      <div class="acc-left">
+        <span class="acc-icon">📅</span>
+        <div>
+          <div class="acc-title">Mensualidades</div>
+          <div class="acc-count">1 vencido · 3 pagadas</div>
+        </div>
+      </div>
+      <div class="acc-right">
+        <span class="acc-total" style="color:#dc2626">$15.000</span>
+        <span class="acc-chevron">▼</span>
+      </div>
+    </div>
+
+    <!-- Acordeón: Otros (cerrado) -->
+    <div class="acc-hdr">
+      <div class="acc-left">
+        <span class="acc-icon">⚡</span>
+        <div>
+          <div class="acc-title">Actividades</div>
+          <div class="acc-count">Todo pagado</div>
+        </div>
+      </div>
+      <div class="acc-right">
+        <span class="acc-total" style="color:#16a34a">$40.000</span>
+        <span class="acc-chevron">▼</span>
+      </div>
+    </div>
+
+    <div class="verdict">
+      <div class="verdict-title">Evaluación</div>
+      <div class="vrow"><span>✓</span><span class="vt">Bueno si el usuario tiene muchos cobros de tipos distintos</span></div>
+      <div class="vrow"><span>✓</span><span class="vt">Subtotales por tipo son útiles para tesorería</span></div>
+      <div class="vrow"><span>✗</span><span class="vt">Para el jugador promedio (3–6 cobros) el acordeón es sobredimensionado</span></div>
+      <div class="vrow"><span>✗</span><span class="vt">La urgencia queda enterrada dentro de cada categoría</span></div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Padel SG — Mockups v2</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f1f5f9; min-height: 100vh; }
+
+  header { background: linear-gradient(135deg, #162844, #25507f); padding: 20px 28px 0; }
+  header h1 { color: #e8c547; font-size: 18px; font-weight: 800; margin-bottom: 16px; }
+
+  .tabs-nav { display: flex; gap: 2px; overflow-x: auto; }
+  .tabs-nav button {
+    background: rgba(255,255,255,0.08);
+    border: none; cursor: pointer;
+    color: rgba(255,255,255,0.5);
+    font-size: 11px; font-weight: 600;
+    padding: 8px 16px; border-radius: 6px 6px 0 0;
+    white-space: nowrap; transition: all 0.15s;
+    font-family: inherit;
+  }
+  .tabs-nav button:hover { background: rgba(255,255,255,0.15); color: #fff; }
+  .tabs-nav button.active { background: #f1f5f9; color: #162844; }
+
+  .tab-panel { display: none; padding: 24px 28px; }
+  .tab-panel.active { display: block; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .card {
+    background: #fff; border-radius: 12px; border: 1px solid #edf2f8;
+    overflow: hidden; text-decoration: none; color: inherit;
+    transition: box-shadow 0.15s, transform 0.15s; display: flex; flex-direction: column;
+  }
+  .card:hover { box-shadow: 0 6px 20px rgba(22,40,68,0.1); transform: translateY(-2px); }
+  .card-header { background: linear-gradient(135deg, #162844, #25507f); padding: 14px 16px; }
+  .card-header h3 { color: #fff; font-size: 12px; font-weight: 700; }
+  .card-header p { color: rgba(255,255,255,0.45); font-size: 10px; margin-top: 2px; }
+  .card-body { padding: 12px 16px; flex: 1; }
+  .card-body p { color: #64748b; font-size: 11px; line-height: 1.5; }
+  .card-footer { padding: 8px 16px; border-top: 1px solid #f1f5f9; text-align: right; }
+  .card-footer span { font-size: 11px; color: #e8c547; font-weight: 700; }
+  .badge {
+    display: inline-block; font-size: 9px; font-weight: 700;
+    padding: 2px 8px; border-radius: 20px; margin-top: 6px; margin-right: 3px;
+  }
+  .badge-aprobado { background: #dcfce7; color: #16a34a; }
+  .badge-variante { background: #edf2f8; color: #162844; }
+  .badge-iteracion { background: #fef9c3; color: #92400e; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏓 Padel SG — Mockups v2</h1>
+  <nav class="tabs-nav">
+    <button class="active" onclick="showTab('dashboard')">Dashboard</button>
+    <button onclick="showTab('perfil')">Perfil</button>
+    <button onclick="showTab('torneo')">Torneo</button>
+    <button onclick="showTab('amistosos')">Amistosos</button>
+    <button onclick="showTab('jugadores')">Jugadores</button>
+    <button onclick="showTab('pagos')">Pagos</button>
+    <button onclick="showTab('ranking')">Ranking</button>
+    <button onclick="showTab('estado')">Estado actual</button>
+  </nav>
+</header>
+
+<!-- DASHBOARD -->
+<div id="tab-dashboard" class="tab-panel active">
+  <div class="grid">
+    <a class="card" href="dashboard-c-desktop.html">
+      <div class="card-header"><h3>Dashboard C — Mobile + Desktop</h3><p>Tono C navy/gold — diseño final</p></div>
+      <div class="card-body"><p>Hero gradient con avatar, ranking gold, próximo partido y quick links en grid.</p><span class="badge badge-aprobado">✓ Aprobado</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+    <a class="card" href="dashboard-c-tono-c.html">
+      <div class="card-header"><h3>Dashboard C — Tono C detalle</h3><p>Paleta navy/gold aplicada</p></div>
+      <div class="card-body"><p>Variante de color del diseño aprobado con tono C completo.</p><span class="badge badge-variante">Variante</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+    <a class="card" href="dashboard-enfoques.html">
+      <div class="card-header"><h3>Dashboard — Enfoques A/B/C</h3><p>Comparativa inicial</p></div>
+      <div class="card-body"><p>Los 3 enfoques propuestos antes de elegir el diseño final.</p><span class="badge badge-iteracion">Iteración</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+    <a class="card" href="dashboard-paletas.html">
+      <div class="card-header"><h3>Dashboard — Paletas</h3><p>Comparativa de paletas A/B/C</p></div>
+      <div class="card-body"><p>Exploración de tonos de color antes de decidir el tono C.</p><span class="badge badge-iteracion">Iteración</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+    <a class="card" href="dashboard-tonos.html">
+      <div class="card-header"><h3>Dashboard — Tonos</h3><p>Variantes de tono</p></div>
+      <div class="card-body"><p>Exploración de tonos aplicados al diseño seleccionado.</p><span class="badge badge-iteracion">Iteración</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+  </div>
+</div>
+
+<!-- PERFIL -->
+<div id="tab-perfil" class="tab-panel">
+  <div class="grid">
+    <a class="card" href="perfil-c-desktop.html">
+      <div class="card-header"><h3>Perfil C — Mobile + Desktop</h3><p>Carnet de jugador — diseño final</p></div>
+      <div class="card-body"><p>Carnet estilo credencial con stats bar, lado, categoría e inline edit.</p><span class="badge badge-aprobado">✓ Aprobado</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+    <a class="card" href="perfil-enfoques.html">
+      <div class="card-header"><h3>Perfil — Enfoques A/B/C</h3><p>Comparativa inicial</p></div>
+      <div class="card-body"><p>Los 3 enfoques propuestos antes de elegir el carnet.</p><span class="badge badge-iteracion">Iteración</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+  </div>
+</div>
+
+<!-- TORNEO -->
+<div id="tab-torneo" class="tab-panel">
+  <div class="grid">
+    <a class="card" href="torneo-a-desktop.html">
+      <div class="card-header"><h3>Torneo A — Mobile + Desktop</h3><p>Hero contextual + Tabs — diseño final</p></div>
+      <div class="card-body"><p>Hero con próximo partido, sidebar sticky desktop, tabs Fixture/Bracket/Parejas/Info.</p><span class="badge badge-aprobado">✓ Aprobado</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+    <a class="card" href="torneo-fixture.html">
+      <div class="card-header"><h3>Fixture — Americano Grupos</h3><p>Lista de grupos + eliminatoria</p></div>
+      <div class="card-body"><p>Grupos A/B con partidos jugados y pendientes, eliminatoria Copa Oro y Copa Plata.</p><span class="badge badge-aprobado">✓ Implementado</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+    <a class="card" href="torneo-bracket.html">
+      <div class="card-header"><h3>Bracket — Copa Oro y Plata</h3><p>Árbol visual con SVG</p></div>
+      <div class="card-body"><p>Árbol horizontal con conectores SVG, cards de partido y trofeo al final.</p><span class="badge badge-aprobado">✓ Implementado</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+    <a class="card" href="torneo-horario.html">
+      <div class="card-header"><h3>Horario — Grilla Canchas × Hora</h3><p>Timeline transpuesto</p></div>
+      <div class="card-body"><p>Grilla donde filas = canchas y columnas = horarios, con colores por categoría.</p><span class="badge badge-aprobado">✓ Implementado</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+    <a class="card" href="torneo-enfoques.html">
+      <div class="card-header"><h3>Torneo — Enfoques A/B/C</h3><p>Comparativa inicial</p></div>
+      <div class="card-body"><p>Los 3 enfoques propuestos antes de elegir el diseño final.</p><span class="badge badge-iteracion">Iteración</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+  </div>
+</div>
+
+<!-- AMISTOSOS -->
+<div id="tab-amistosos" class="tab-panel">
+  <div class="grid">
+    <a class="card" href="amistosos-a-desktop.html">
+      <div class="card-header"><h3>Amistosos A — Mobile + Desktop</h3><p>Tabs + filtros pills — diseño final</p></div>
+      <div class="card-body"><p>3 tabs (Disponibles / Mis partidas / Historial) con filtros de fecha, tipo y categoría.</p><span class="badge badge-aprobado">✓ Aprobado</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+    <a class="card" href="amistosos-enfoques.html">
+      <div class="card-header"><h3>Amistosos — Enfoques A/B/C</h3><p>Comparativa inicial</p></div>
+      <div class="card-body"><p>Los 3 enfoques propuestos antes de elegir el diseño final.</p><span class="badge badge-iteracion">Iteración</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+  </div>
+</div>
+
+<!-- JUGADORES -->
+<div id="tab-jugadores" class="tab-panel">
+  <div class="grid">
+    <a class="card" href="jugadores-b22-desktop.html">
+      <div class="card-header"><h3>Jugadores B2.2 — Mobile + Desktop</h3><p>Expand inline — diseño final</p></div>
+      <div class="card-body"><p>Chips activos, filtros expand inline, tabla 6 columnas desktop y lista mobile con pos badge.</p><span class="badge badge-aprobado">✓ Aprobado</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+    <a class="card" href="jugadores-b2-filtros.html">
+      <div class="card-header"><h3>Jugadores B2 — Filtros</h3><p>Iteración sobre mecanismo de filtros</p></div>
+      <div class="card-body"><p>Variantes del mecanismo de filtros antes de elegir el expand inline.</p><span class="badge badge-iteracion">Iteración</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+    <a class="card" href="jugadores-b-variantes.html">
+      <div class="card-header"><h3>Jugadores B — Variantes</h3><p>Sub-variantes de B</p></div>
+      <div class="card-body"><p>Las 3 sub-variantes del enfoque B antes de elegir B2.2.</p><span class="badge badge-iteracion">Iteración</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+    <a class="card" href="jugadores-enfoques.html">
+      <div class="card-header"><h3>Jugadores — Enfoques A/B/C</h3><p>Comparativa inicial</p></div>
+      <div class="card-body"><p>Los 3 enfoques propuestos antes de elegir el diseño final.</p><span class="badge badge-iteracion">Iteración</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+  </div>
+</div>
+
+<!-- PAGOS -->
+<div id="tab-pagos" class="tab-panel">
+  <div class="grid">
+    <a class="card" href="pagos-a-desktop.html">
+      <div class="card-header"><h3>Pagos A — Mobile + Desktop</h3><p>Urgencia primero — diseño final</p></div>
+      <div class="card-body"><p>Secciones Vencidos → Vence esta semana → Pagados. Resumen 4 tarjetas desktop.</p><span class="badge badge-aprobado">✓ Aprobado</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+    <a class="card" href="pagos-enfoques.html">
+      <div class="card-header"><h3>Pagos — Enfoques A/B/C</h3><p>Comparativa inicial</p></div>
+      <div class="card-body"><p>Los 3 enfoques propuestos antes de elegir el diseño final.</p><span class="badge badge-iteracion">Iteración</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+  </div>
+</div>
+
+<!-- RANKING -->
+<div id="tab-ranking" class="tab-panel">
+  <div class="grid">
+    <a class="card" href="ranking-b-v2.html">
+      <div class="card-header"><h3>Ranking B v2 — 3 Tabs + Buscador</h3><p>Diseño final</p></div>
+      <div class="card-body"><p>Tabs Hombres / Damas / Clasificación General, banner personal y buscador en cada tab.</p><span class="badge badge-aprobado">✓ Aprobado</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+    <a class="card" href="ranking-enfoques.html">
+      <div class="card-header"><h3>Ranking — Enfoques A/B/C</h3><p>Comparativa inicial</p></div>
+      <div class="card-body"><p>Los 3 enfoques propuestos antes de elegir el diseño final.</p><span class="badge badge-iteracion">Iteración</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+  </div>
+</div>
+
+<!-- ESTADO ACTUAL -->
+<div id="tab-estado" class="tab-panel">
+  <div class="grid">
+    <a class="card" href="estado-actual.html">
+      <div class="card-header"><h3>Estado actual</h3><p>UI antes del rediseño</p></div>
+      <div class="card-body"><p>Captura del estado de la plataforma antes de iniciar el rediseño v2.</p><span class="badge badge-variante">Referencia</span></div>
+      <div class="card-footer"><span>Ver →</span></div>
+    </a>
+  </div>
+</div>
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.tabs-nav button').forEach(b => b.classList.remove('active'))
+  document.getElementById('tab-' + name).classList.add('active')
+  event.target.classList.add('active')
+}
+</script>
+</body>
+</html>

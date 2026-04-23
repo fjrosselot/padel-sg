@@ -1,0 +1,183 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:sans-serif;padding:16px 24px;background:#f8fafc;color:#162844}</style></head><body><div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#162844,#25507f);padding:8px 16px;display:flex;align-items:center;font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.2)"><a href="index.html" style="color:#e8c547;font-size:11px;font-weight:700;text-decoration:none">← Volver al índice</a></div><div style="height:38px"></div><h2>Amistosos A — Mobile + Desktop (2 variantes)</h2>
+<p class="subtitle">Tabs + filtros · ¿Filtro de fecha como pills o mini-calendario lateral?</p>
+
+<div class="split">
+
+  <!-- MOBILE (referencia) -->
+  <div class="mockup" data-choice="amistosos-mobile" onclick="toggleSelect(this)" style="cursor:pointer">
+    <div class="mockup-header">Mobile (aprobado)</div>
+    <div class="mockup-body" style="background:#edf1f7;padding:16px;display:flex;justify-content:center;">
+      <div style="width:212px;font-family:sans-serif;background:#f8fafc;border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,0.13);">
+        <div style="background:linear-gradient(135deg,#162844 0%,#25507f 100%);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="color:#fff;font-size:13px;font-weight:700">Amistosos</div>
+            <div style="color:#94b0cc;font-size:7.5px;margin-top:1px">3 partidas disponibles</div>
+          </div>
+          <div style="background:#e8c547;border-radius:7px;padding:4px 9px;color:#162844;font-size:7.5px;font-weight:700">+ Nueva</div>
+        </div>
+        <div style="display:flex;border-bottom:2px solid #dce6f0;background:#fff;">
+          <div style="flex:1;padding:6px 4px;text-align:center;border-bottom:2px solid #162844;margin-bottom:-2px"><div style="color:#162844;font-size:7.5px;font-weight:700">Disponibles</div></div>
+          <div style="flex:1;padding:6px 4px;text-align:center"><div style="color:#94b0cc;font-size:7.5px">Mis partidas</div></div>
+          <div style="flex:1;padding:6px 4px;text-align:center"><div style="color:#94b0cc;font-size:7.5px">Historial</div></div>
+        </div>
+        <div style="padding:6px 8px;display:flex;gap:4px;flex-wrap:wrap;background:#fff;border-bottom:1px solid #edf2f8;">
+          <div style="background:#162844;border-radius:20px;padding:2px 8px;color:#fff;font-size:6.5px;font-weight:700">Todas</div>
+          <div style="border:1px solid #dce6f0;border-radius:20px;padding:2px 8px;color:#94b0cc;font-size:6.5px">Esta semana</div>
+          <div style="border:1px solid #dce6f0;border-radius:20px;padding:2px 8px;color:#94b0cc;font-size:6.5px">Compañero</div>
+          <div style="border:1px solid #dce6f0;border-radius:20px;padding:2px 8px;color:#94b0cc;font-size:6.5px">4a</div>
+          <div style="border:1px solid #dce6f0;border-radius:20px;padding:2px 8px;color:#94b0cc;font-size:6.5px">Mixto</div>
+        </div>
+        <div style="padding:7px 8px;display:flex;flex-direction:column;gap:5px;">
+          <div style="background:#fff;border-radius:10px;padding:9px 10px;box-shadow:0 1px 6px rgba(0,0,0,0.08);">
+            <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:5px">
+              <div>
+                <div style="color:#162844;font-size:9px;font-weight:700">Sáb 26 abr · 09:00</div>
+                <div style="color:#94b0cc;font-size:7.5px;margin-top:1px">Pancho · Cancha 3 · 4a</div>
+              </div>
+              <div style="background:#edf2f8;border-radius:20px;padding:2px 7px;color:#162844;font-size:6.5px;font-weight:700">Compañero</div>
+            </div>
+            <div style="background:#e8c547;border-radius:6px;padding:5px;text-align:center;color:#162844;font-size:7.5px;font-weight:700">Unirme</div>
+          </div>
+          <div style="background:#fff;border-radius:10px;padding:9px 10px;box-shadow:0 1px 6px rgba(0,0,0,0.08);">
+            <div style="display:flex;align-items:start;justify-content:space-between;">
+              <div>
+                <div style="color:#162844;font-size:9px;font-weight:700">Dom 27 abr · 11:00</div>
+                <div style="color:#94b0cc;font-size:7.5px;margin-top:1px">Matías · Open · Mixto ✓</div>
+              </div>
+              <div style="background:#edf2f8;border-radius:20px;padding:2px 7px;color:#162844;font-size:6.5px;font-weight:700">Rivales</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESKTOP: dos sub-variantes apiladas -->
+  <div class="mockup">
+    <div class="mockup-header">Desktop — elige variante de fecha</div>
+    <div class="mockup-body" style="background:#edf1f7;padding:12px;display:flex;flex-direction:column;gap:14px;">
+
+      <!-- D1: Pills de fecha integradas -->
+      <div data-choice="desktop-d1" onclick="toggleSelect(this)" style="cursor:pointer;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.1);border:2px solid transparent;" class="option-sub">
+        <div style="background:#162844;padding:3px 10px;display:flex;align-items:center;gap:6px;">
+          <div style="color:#e8c547;font-size:7px;font-weight:700">D1</div>
+          <div style="color:#94b0cc;font-size:7px">Filtro de fecha como pills — simple, sin sidebar extra</div>
+        </div>
+        <div style="font-family:sans-serif;">
+          <!-- Header -->
+          <div style="background:linear-gradient(135deg,#162844 0%,#25507f 100%);padding:11px 16px;display:flex;align-items:center;gap:12px;">
+            <div style="flex:1"><div style="color:#fff;font-size:13px;font-weight:700">Amistosos</div><div style="color:#94b0cc;font-size:7.5px;margin-top:1px">3 partidas disponibles esta semana</div></div>
+            <div style="background:#e8c547;border-radius:7px;padding:5px 12px;color:#162844;font-size:8px;font-weight:700">+ Publicar partida</div>
+          </div>
+          <!-- Tabs -->
+          <div style="display:flex;border-bottom:2px solid #dce6f0;background:#fff;">
+            <div style="padding:7px 14px;border-bottom:2px solid #162844;margin-bottom:-2px"><span style="color:#162844;font-size:8px;font-weight:700">Disponibles</span></div>
+            <div style="padding:7px 14px"><span style="color:#94b0cc;font-size:8px">Mis partidas</span></div>
+            <div style="padding:7px 14px"><span style="color:#94b0cc;font-size:8px">Historial</span></div>
+          </div>
+          <!-- Filtros en 2 filas -->
+          <div style="padding:8px 14px;background:#fff;border-bottom:1px solid #edf2f8;display:flex;gap:5px;flex-wrap:wrap;">
+            <div style="color:#94b0cc;font-size:6.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;width:100%;margin-bottom:2px">Fecha</div>
+            <div style="background:#162844;border-radius:20px;padding:3px 9px;color:#fff;font-size:7px;font-weight:700">Cualquier fecha</div>
+            <div style="border:1px solid #dce6f0;border-radius:20px;padding:3px 9px;color:#94b0cc;font-size:7px">Hoy</div>
+            <div style="border:1px solid #dce6f0;border-radius:20px;padding:3px 9px;color:#94b0cc;font-size:7px">Esta semana</div>
+            <div style="border:1px solid #dce6f0;border-radius:20px;padding:3px 9px;color:#94b0cc;font-size:7px">Próx. 7 días</div>
+            <div style="color:#94b0cc;font-size:6.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;width:100%;margin-bottom:2px;margin-top:4px">Tipo · Categoría</div>
+            <div style="border:1px solid #dce6f0;border-radius:20px;padding:3px 9px;color:#94b0cc;font-size:7px">Busca compañero</div>
+            <div style="border:1px solid #dce6f0;border-radius:20px;padding:3px 9px;color:#94b0cc;font-size:7px">Busca rivales</div>
+            <div style="border:1px solid #dce6f0;border-radius:20px;padding:3px 9px;color:#94b0cc;font-size:7px">4a</div>
+            <div style="border:1px solid #dce6f0;border-radius:20px;padding:3px 9px;color:#94b0cc;font-size:7px">Open</div>
+            <div style="border:1px solid #dce6f0;border-radius:20px;padding:3px 9px;color:#94b0cc;font-size:7px">Mixto ✓</div>
+          </div>
+          <!-- Cards en grid 2 cols -->
+          <div style="padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div style="background:#fff;border-radius:10px;padding:10px 11px;box-shadow:0 1px 8px rgba(0,0,0,0.08);">
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px"><div style="color:#162844;font-size:9px;font-weight:700">Sáb 26 abr · 09:00</div><div style="background:#edf2f8;border-radius:20px;padding:2px 7px;color:#162844;font-size:6.5px;font-weight:700">Compañero</div></div>
+              <div style="color:#94b0cc;font-size:7.5px;margin-bottom:6px">Pancho · Cancha 3 · 4a</div>
+              <div style="background:#e8c547;border-radius:6px;padding:5px;text-align:center;color:#162844;font-size:7.5px;font-weight:700">Unirme</div>
+            </div>
+            <div style="background:#fff;border-radius:10px;padding:10px 11px;box-shadow:0 1px 8px rgba(0,0,0,0.08);">
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px"><div style="color:#162844;font-size:9px;font-weight:700">Dom 27 abr · 11:00</div><div style="background:#edf2f8;border-radius:20px;padding:2px 7px;color:#162844;font-size:6.5px;font-weight:700">Rivales</div></div>
+              <div style="color:#94b0cc;font-size:7.5px;margin-bottom:6px">Matías · Open · Mixto ✓</div>
+              <div style="background:#edf2f8;border-radius:6px;padding:5px;text-align:center;color:#162844;font-size:7.5px;font-weight:600">Ver detalles</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- D2: Mini-calendario lateral -->
+      <div data-choice="desktop-d2" onclick="toggleSelect(this)" style="cursor:pointer;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.1);border:2px solid transparent;" class="option-sub">
+        <div style="background:#162844;padding:3px 10px;display:flex;align-items:center;gap:6px;">
+          <div style="color:#e8c547;font-size:7px;font-weight:700">D2</div>
+          <div style="color:#94b0cc;font-size:7px">Mini-calendario lateral — más visual, ocupa más espacio en desktop</div>
+        </div>
+        <div style="font-family:sans-serif;">
+          <div style="background:linear-gradient(135deg,#162844 0%,#25507f 100%);padding:11px 16px;display:flex;align-items:center;gap:12px;">
+            <div style="flex:1"><div style="color:#fff;font-size:13px;font-weight:700">Amistosos</div><div style="color:#94b0cc;font-size:7.5px;margin-top:1px">Semana del 22–28 abr</div></div>
+            <div style="background:#e8c547;border-radius:7px;padding:5px 12px;color:#162844;font-size:8px;font-weight:700">+ Publicar partida</div>
+          </div>
+          <div style="display:flex;border-bottom:2px solid #dce6f0;background:#fff;">
+            <div style="padding:7px 14px;border-bottom:2px solid #162844;margin-bottom:-2px"><span style="color:#162844;font-size:8px;font-weight:700">Disponibles</span></div>
+            <div style="padding:7px 14px"><span style="color:#94b0cc;font-size:8px">Mis partidas</span></div>
+            <div style="padding:7px 14px"><span style="color:#94b0cc;font-size:8px">Historial</span></div>
+          </div>
+          <!-- Body con mini-cal lateral -->
+          <div style="display:grid;grid-template-columns:130px 1fr;min-height:130px;">
+            <!-- Mini calendario -->
+            <div style="border-right:1px solid #dce6f0;padding:10px;background:#fafafa;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <div style="color:#162844;font-size:7px;font-weight:700">Abril 2026</div>
+                <div style="display:flex;gap:4px"><span style="color:#94b0cc;font-size:9px">‹</span><span style="color:#94b0cc;font-size:9px">›</span></div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:4px">
+                <div style="color:#94b0cc;font-size:5.5px;text-align:center">L</div><div style="color:#94b0cc;font-size:5.5px;text-align:center">M</div><div style="color:#94b0cc;font-size:5.5px;text-align:center">M</div><div style="color:#94b0cc;font-size:5.5px;text-align:center">J</div><div style="color:#94b0cc;font-size:5.5px;text-align:center">V</div><div style="color:#94b0cc;font-size:5.5px;text-align:center">S</div><div style="color:#94b0cc;font-size:5.5px;text-align:center">D</div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;">
+                <div style="color:#94b0cc;font-size:6px;text-align:center;padding:2px">21</div>
+                <div style="color:#94b0cc;font-size:6px;text-align:center;padding:2px">22</div>
+                <div style="color:#94b0cc;font-size:6px;text-align:center;padding:2px">23</div>
+                <div style="color:#94b0cc;font-size:6px;text-align:center;padding:2px">24</div>
+                <div style="color:#94b0cc;font-size:6px;text-align:center;padding:2px">25</div>
+                <div style="background:#162844;border-radius:4px;color:#e8c547;font-size:6px;text-align:center;padding:2px;font-weight:700">26</div>
+                <div style="background:#edf2f8;border-radius:4px;color:#162844;font-size:6px;text-align:center;padding:2px;font-weight:700">27</div>
+                <div style="color:#94b0cc;font-size:6px;text-align:center;padding:2px">28</div>
+                <div style="color:#94b0cc;font-size:6px;text-align:center;padding:2px">29</div>
+                <div style="color:#94b0cc;font-size:6px;text-align:center;padding:2px">30</div>
+              </div>
+              <div style="margin-top:8px;border-top:1px solid #dce6f0;padding-top:7px;">
+                <div style="color:#94b0cc;font-size:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Filtros</div>
+                <div style="display:flex;flex-direction:column;gap:3px">
+                  <div style="background:#162844;border-radius:5px;padding:3px 7px;color:#fff;font-size:6.5px;font-weight:700">Todas las categorías</div>
+                  <div style="border:1px solid #dce6f0;border-radius:5px;padding:3px 7px;color:#94b0cc;font-size:6.5px">Busca compañero</div>
+                  <div style="border:1px solid #dce6f0;border-radius:5px;padding:3px 7px;color:#94b0cc;font-size:6.5px">Mixto ✓</div>
+                </div>
+              </div>
+            </div>
+            <!-- Lista de partidas -->
+            <div style="padding:10px 12px;display:flex;flex-direction:column;gap:6px;">
+              <div style="color:#94b0cc;font-size:6.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Sáb 26 abr · 2 partidas</div>
+              <div style="background:#fff;border-radius:9px;padding:9px 10px;box-shadow:0 1px 6px rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="color:#162844;font-size:9px;font-weight:700">09:00 · Pancho · Cancha 3 · 4a</div><div style="color:#94b0cc;font-size:7.5px;margin-top:1px">Busca compañero</div></div>
+                <div style="background:#e8c547;border-radius:6px;padding:4px 10px;color:#162844;font-size:7px;font-weight:700">Unirme</div>
+              </div>
+              <div style="color:#94b0cc;font-size:6.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-top:4px;margin-bottom:2px">Dom 27 abr · 1 partida</div>
+              <div style="background:#fff;border-radius:9px;padding:9px 10px;box-shadow:0 1px 6px rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="color:#162844;font-size:9px;font-weight:700">11:00 · Matías · Open · Mixto</div><div style="color:#94b0cc;font-size:7.5px;margin-top:1px">Busca rivales</div></div>
+                <div style="background:#edf2f8;border-radius:6px;padding:4px 10px;color:#162844;font-size:7px;font-weight:600">Ver</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;text-align:center">Haz clic en D1 o D2 para elegir la variante de desktop. También puedes aprobar el mobile independientemente.</p>
+
+<style>
+  [data-choice="desktop-d1"]:hover, [data-choice="desktop-d2"]:hover { border-color: #162844 !important; }
+  [data-choice="desktop-d1"].selected, [data-choice="desktop-d2"].selected { border-color: #e8c547 !important; box-shadow: 0 0 0 3px #e8c54740 !important; }
+</style></body></html>
