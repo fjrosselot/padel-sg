@@ -17,7 +17,7 @@ import RosterAdmin from './RosterAdmin'
 import GenerarCobroModal from './GenerarCobroModal'
 import EditTorneoModal from './EditTorneoModal'
 import DeleteTorneoDialog from './DeleteTorneoDialog'
-import { buildFixture, buildDesafioFixture } from '../../lib/fixture/engine'
+import { buildFixture, buildDesafioFixture, buildDesafioSembradoFixture } from '../../lib/fixture/engine'
 import type { Database } from '../../lib/types/database.types'
 import type { CategoriaConfig, CategoriaFixture, PartidoFixture, ParejaFixture, ConfigFixture } from '../../lib/fixture/types'
 
@@ -62,15 +62,17 @@ export default function TorneoDetalle() {
   const generarFixture = useMutation({
     mutationFn: async () => {
       const inscritas: any[] = await padelGet(
-        `inscripciones?select=id,jugador1_id,jugador2_id,categoria_nombre,j1:jugadores!jugador1_id(id,nombre,elo),j2:jugadores!jugador2_id(id,nombre,elo)&torneo_id=eq.${id}&estado=eq.confirmada&lista_espera=eq.false`
+        `inscripciones?select=id,jugador1_id,jugador2_id,categoria_nombre,sembrado,j1:jugadores!jugador1_id(id,nombre,elo),j2:jugadores!jugador2_id(id,nombre,elo)&torneo_id=eq.${id}&estado=eq.confirmada&lista_espera=eq.false`
       )
       const configFixture = torneo!.config_fixture as unknown as ConfigFixture
       if (!configFixture) throw new Error('El torneo no tiene configuración de fixture guardada.')
 
       const categoriasFixture = categoriasConfig.map(cat => {
-        const parejas: ParejaFixture[] = inscritas
-          .filter((i: any) => i.categoria_nombre === cat.nombre)
-          .map((i: any) => ({
+        const catInscritas = inscritas.filter((i: any) => i.categoria_nombre === cat.nombre)
+
+        if (cat.formato === 'desafio_sembrado') {
+          const sorted = [...catInscritas].sort((a: any, b: any) => (a.sembrado ?? 999) - (b.sembrado ?? 999))
+          const sgParejas: ParejaFixture[] = sorted.map((i: any) => ({
             id: i.id,
             nombre: `${i.j1?.nombre ?? '?'} / ${i.j2?.nombre ?? '?'}`,
             jugador1_id: i.jugador1_id,
@@ -78,6 +80,17 @@ export default function TorneoDetalle() {
             elo1: i.j1?.elo ?? 1200,
             elo2: i.j2?.elo ?? 1200,
           }))
+          return buildDesafioSembradoFixture(cat, sgParejas, cat.rival_pairs ?? [], configFixture)
+        }
+
+        const parejas: ParejaFixture[] = catInscritas.map((i: any) => ({
+          id: i.id,
+          nombre: `${i.j1?.nombre ?? '?'} / ${i.j2?.nombre ?? '?'}`,
+          jugador1_id: i.jugador1_id,
+          jugador2_id: i.jugador2_id,
+          elo1: i.j1?.elo ?? 1200,
+          elo2: i.j2?.elo ?? 1200,
+        }))
         return cat.formato === 'desafio_puntos'
           ? buildDesafioFixture(cat, parejas, configFixture)
           : buildFixture(cat, parejas, configFixture)
@@ -105,7 +118,7 @@ export default function TorneoDetalle() {
   ) as CategoriaConfig[]
 
   const americanoCats = categorias.filter(c => !c.formato || c.formato === 'americano_grupos')
-  const desafioCats = categorias.filter(c => c.formato === 'desafio_puntos')
+  const desafioCats = categorias.filter(c => c.formato === 'desafio_puntos' || c.formato === 'desafio_sembrado')
   const hasAmericano = americanoCats.length > 0
   const hasDesafio = desafioCats.length > 0
 
@@ -237,7 +250,7 @@ export default function TorneoDetalle() {
             Inscripciones
           </p>
           {isAdmin
-            ? <RosterAdmin torneoId={torneo.id} categorias={categoriasConfig} />
+            ? <RosterAdmin torneoId={torneo.id} categorias={categoriasConfig} colegioRival={torneo.colegio_rival} />
             : <InscripcionesPanel torneoId={torneo.id} estado={torneo.estado} categorias={categoriasConfig} />
           }
         </div>
