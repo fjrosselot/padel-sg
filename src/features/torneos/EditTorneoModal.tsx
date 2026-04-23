@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { X } from 'lucide-react'
+import { Trash2, X } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { padelApi } from '../../lib/padelApi'
 import { SEXO_LABEL, SEXO_COLOR } from './TorneoWizard/constants'
+import DeleteTorneoDialog from './DeleteTorneoDialog'
 import type { Database } from '../../lib/types/database.types'
 import type { CategoriaConfig, ConfigFixture } from '../../lib/fixture/types'
 
@@ -45,6 +46,7 @@ function parseConfigFixture(raw: unknown): Partial<ConfigFixture> {
 export default function EditTorneoModal({ torneo, onClose }: Props) {
   const queryClient = useQueryClient()
   const isBorrador = torneo.estado === 'borrador'
+  const [showDelete, setShowDelete] = useState(false)
 
   const { categorias: initialCats, isCategoriaConfig } = parseRawCategorias(torneo.categorias)
   const initialConfig = parseConfigFixture(torneo.config_fixture)
@@ -307,8 +309,32 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
               {isPending ? 'Guardando...' : 'Guardar'}
             </Button>
           </div>
+
+          {/* Danger zone */}
+          <div className="border-t border-defeat/20 pt-4 mt-2">
+            <p className="font-inter text-[10px] font-bold uppercase tracking-widest text-defeat/60 mb-3">
+              Zona de peligro
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="text-xs rounded-lg border-defeat/30 text-defeat gap-1.5 hover:bg-defeat/10"
+              onClick={() => setShowDelete(true)}
+            >
+              <Trash2 className="h-3.5 w-3.5" /> Eliminar torneo
+            </Button>
+          </div>
         </div>
       </DialogContent>
+
+      <DeleteTorneoDialog
+        torneoId={torneo.id}
+        torneoNombre={torneo.nombre}
+        torneoEstado={torneo.estado}
+        open={showDelete}
+        onOpenChange={open => { if (!open) setShowDelete(false) }}
+      />
     </Dialog>
   )
 }

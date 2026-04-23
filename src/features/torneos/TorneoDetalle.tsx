@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Banknote, Pencil, Trash2 } from 'lucide-react'
+import { ArrowLeft, Banknote, Pencil } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { padelApi } from '../../lib/padelApi'
 import * as Tabs from '@radix-ui/react-tabs'
@@ -18,7 +18,6 @@ import RosterAdmin from './RosterAdmin'
 import SembradoPanel from './SembradoPanel'
 import GenerarCobroModal from './GenerarCobroModal'
 import EditTorneoModal from './EditTorneoModal'
-import DeleteTorneoDialog from './DeleteTorneoDialog'
 import { buildFixture, buildDesafioFixture, buildDesafioSembradoFixture } from '../../lib/fixture/engine'
 import type { Database } from '../../lib/types/database.types'
 import type { CategoriaConfig, CategoriaFixture, PartidoFixture, ParejaFixture, ConfigFixture } from '../../lib/fixture/types'
@@ -26,11 +25,6 @@ import type { InscripcionRow } from './RosterRow'
 
 type Torneo = Database['padel']['Tables']['torneos']['Row']
 
-function impactMessage(estado: string): string {
-  if (estado === 'borrador') return 'Se eliminará el torneo y su configuración.'
-  if (estado === 'inscripcion') return 'Se eliminará el torneo y todas las inscripciones asociadas.'
-  return 'Se eliminará el torneo, inscripciones, partidos y resultados registrados.'
-}
 
 const TAB_CLS = [
   'font-inter text-sm font-semibold px-4 py-2 rounded-lg transition-colors',
@@ -46,7 +40,6 @@ export default function TorneoDetalle() {
   const [showCobro, setShowCobro] = useState(false)
   const [activeTab, setActiveTab] = useState('fixture')
   const [showEdit, setShowEdit] = useState(false)
-  const [showDelete, setShowDelete] = useState(false)
 
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
   const isSuperAdmin = user?.rol === 'superadmin'
@@ -286,39 +279,9 @@ export default function TorneoDetalle() {
         />
       </div>
 
-      {/* Danger Zone */}
-      {isAdmin && (
-        <div className="rounded-xl border border-defeat/20 bg-defeat/5 p-4 space-y-3 mt-2">
-          <p className="font-inter text-[10px] font-bold uppercase tracking-widest text-defeat/60">
-            Zona de peligro
-          </p>
-          <div className="flex items-start justify-between gap-4">
-            <p className="font-inter text-sm text-defeat/80">
-              {impactMessage(torneo.estado)}
-            </p>
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-xs rounded-lg border-defeat/30 text-defeat gap-1.5 hover:bg-defeat/10 shrink-0"
-              onClick={() => setShowDelete(true)}
-            >
-              <Trash2 className="h-3.5 w-3.5" /> Eliminar torneo
-            </Button>
-          </div>
-        </div>
-      )}
-
       {showEdit && (
         <EditTorneoModal torneo={torneo} onClose={() => setShowEdit(false)} />
       )}
-
-      <DeleteTorneoDialog
-        torneoId={id!}
-        torneoNombre={torneo.nombre}
-        torneoEstado={torneo.estado}
-        open={showDelete}
-        onOpenChange={open => { if (!open) setShowDelete(false) }}
-      />
 
       {showCobro && (
         <GenerarCobroModal
