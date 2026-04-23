@@ -22,6 +22,7 @@ function DesafioCategoria({
   const sgPts = partidos.filter(p => p.ganador === 1).length
   const rivalPts = partidos.filter(p => p.ganador === 2).length
   const totalJugados = partidos.filter(p => p.ganador !== null).length
+  const isSembrado = categoria.formato === 'desafio_sembrado'
 
   return (
     <div className="space-y-4">
@@ -41,13 +42,19 @@ function DesafioCategoria({
       </div>
       <div className="space-y-1">
         {partidos.map(p => (
-          <PartidoRow
-            key={p.id}
-            partido={p}
-            torneoId={torneoId}
-            isAdmin={isAdmin}
-            onCargarResultado={onCargarResultado}
-          />
+          <div key={p.id}>
+            {isSembrado && (
+              <p className="font-inter text-[10px] font-bold uppercase tracking-widest text-muted px-2 pt-2">
+                Sembrado {p.numero}
+              </p>
+            )}
+            <PartidoRow
+              partido={p}
+              torneoId={torneoId}
+              isAdmin={isAdmin}
+              onCargarResultado={onCargarResultado}
+            />
+          </div>
         ))}
       </div>
     </div>
