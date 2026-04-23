@@ -103,6 +103,10 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
     setCategorias(prev => prev.filter((_, i) => i !== idx))
   }
 
+  function updateNumParejas(idx: number, val: number) {
+    setCategorias(prev => prev.map((c, i) => i === idx ? { ...c, num_parejas: Math.max(2, Math.min(64, val)) } : c))
+  }
+
   const horaOptions = Array.from({ length: (21 - 8) * 4 + 1 }, (_, i) => {
     const totalMin = 8 * 60 + i * 15
     const h = Math.floor(totalMin / 60)
@@ -205,7 +209,12 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
                             {SEXO_LABEL[sexo]}
                           </span>
                           <span className="text-sm font-medium text-navy flex-1">{cat.nombre}</span>
-                          <span className="text-xs text-muted">{cat.num_parejas} parejas</span>
+                          <div className="flex items-center gap-1">
+                            <button type="button" onClick={() => updateNumParejas(idx, cat.num_parejas - 1)} disabled={cat.num_parejas <= 2} className="w-5 h-5 rounded border border-navy/20 flex items-center justify-center text-navy disabled:opacity-30 hover:border-gold hover:text-gold transition-colors text-sm leading-none">−</button>
+                            <span className="w-5 text-center font-inter text-xs font-semibold text-navy tabular-nums">{cat.num_parejas}</span>
+                            <button type="button" onClick={() => updateNumParejas(idx, cat.num_parejas + 1)} disabled={cat.num_parejas >= 64} className="w-5 h-5 rounded border border-navy/20 flex items-center justify-center text-navy disabled:opacity-30 hover:border-gold hover:text-gold transition-colors text-sm leading-none">+</button>
+                          </div>
+                          <span className="text-xs text-muted">parejas</span>
                           <button
                             type="button"
                             onClick={() => removeCategoria(idx)}
