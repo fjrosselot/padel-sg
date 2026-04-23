@@ -11,7 +11,6 @@ import { Button } from '../../components/ui/button'
 import FixtureTab from './FixtureTab'
 import BracketTab from './BracketTab'
 import HorarioTab from './HorarioTab'
-import DesafioView from './DesafioView'
 import InscripcionesPanel from './InscripcionesPanel'
 import ResultadosModal from './ResultadosModal'
 import RosterAdmin from './RosterAdmin'
@@ -158,11 +157,16 @@ export default function TorneoDetalle() {
       !Array.isArray((c as CategoriaFixture).grupos) && !Array.isArray((c as CategoriaFixture).partidos)
   ) as CategoriaConfig[]
 
-  const americanoCats = categorias.filter(c => !c.formato || c.formato === 'americano_grupos')
-  const desafioCats = categorias.filter(c => c.formato === 'desafio_puntos' || c.formato === 'desafio_sembrado')
-  const hasAmericano = americanoCats.length > 0
-  const hasDesafio = desafioCats.length > 0
   const fixtureGenerado = categorias.length > 0
+  const hasBracket = categorias.some(c => c.faseEliminatoria.length > 0)
+  const hasTurnos = categorias.some(c =>
+    [
+      ...(c.grupos ?? []).flatMap(g => g.partidos),
+      ...c.faseEliminatoria,
+      ...c.consola,
+      ...(c.partidos ?? []),
+    ].some(p => p.turno != null)
+  )
 
   const rosterCats: CategoriaConfig[] = categoriasConfig.length > 0
     ? categoriasConfig
@@ -175,7 +179,6 @@ export default function TorneoDetalle() {
       }))
 
   const hasDesafioSembrado = rosterCats.some(c => c.formato === 'desafio_sembrado')
-  const fixtureLabelText = hasDesafio && !hasAmericano ? 'Partidos' : 'Fixture'
 
   return (
     <div className="space-y-3">
@@ -276,13 +279,11 @@ export default function TorneoDetalle() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           fixtureGenerado={fixtureGenerado}
-          fixtureLabelText={fixtureLabelText}
-          hasAmericano={hasAmericano}
-          hasDesafio={hasDesafio}
+          hasBracket={hasBracket}
+          hasTurnos={hasTurnos}
           isAdmin={isAdmin}
           hasDesafioSembrado={hasDesafioSembrado}
-          americanoCats={americanoCats}
-          desafioCats={desafioCats}
+          categorias={categorias}
           rosterCats={rosterCats}
           inscripciones={inscripciones}
           torneo={torneo}
@@ -317,13 +318,11 @@ interface TabsProps {
   activeTab: string
   setActiveTab: (v: string) => void
   fixtureGenerado: boolean
-  fixtureLabelText: string
-  hasAmericano: boolean
-  hasDesafio: boolean
+  hasBracket: boolean
+  hasTurnos: boolean
   isAdmin: boolean
   hasDesafioSembrado: boolean
-  americanoCats: CategoriaFixture[]
-  desafioCats: CategoriaFixture[]
+  categorias: CategoriaFixture[]
   rosterCats: CategoriaConfig[]
   inscripciones: InscripcionRow[] | undefined
   torneo: Torneo
@@ -331,9 +330,8 @@ interface TabsProps {
 }
 
 function TabsDetalle({
-  activeTab, setActiveTab, fixtureGenerado, fixtureLabelText,
-  hasAmericano, hasDesafio, isAdmin, hasDesafioSembrado,
-  americanoCats, desafioCats, rosterCats, inscripciones, torneo, onCargarResultado,
+  activeTab, setActiveTab, fixtureGenerado, hasBracket, hasTurnos,
+  isAdmin, hasDesafioSembrado, categorias, rosterCats, inscripciones, torneo, onCargarResultado,
 }: TabsProps) {
   useEffect(() => {
     if (!fixtureGenerado && activeTab === 'fixture') setActiveTab('parejas')
@@ -345,12 +343,12 @@ function TabsDetalle({
     <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
       <Tabs.List className="flex gap-1 bg-surface rounded-xl p-1 mb-6 flex-wrap">
         {fixtureGenerado && (
-          <Tabs.Trigger value="fixture" className={TAB_CLS}>{fixtureLabelText}</Tabs.Trigger>
+          <Tabs.Trigger value="fixture" className={TAB_CLS}>Fixture</Tabs.Trigger>
         )}
-        {hasAmericano && fixtureGenerado && (
+        {hasBracket && (
           <Tabs.Trigger value="bracket" className={TAB_CLS}>Bracket</Tabs.Trigger>
         )}
-        {hasAmericano && fixtureGenerado && (
+        {hasTurnos && (
           <Tabs.Trigger value="horario" className={TAB_CLS}>Horario</Tabs.Trigger>
         )}
         <Tabs.Trigger value="parejas" className={TAB_CLS}>Parejas</Tabs.Trigger>
@@ -360,31 +358,21 @@ function TabsDetalle({
       </Tabs.List>
 
       <Tabs.Content value="fixture">
-        {hasAmericano && (
-          <FixtureTab
-            categorias={americanoCats}
-            torneoId={torneo.id}
-            isAdmin={isAdmin}
-            onCargarResultado={onCargarResultado}
-          />
-        )}
-        {hasDesafio && (
-          <DesafioView
-            categorias={desafioCats}
-            torneoId={torneo.id}
-            isAdmin={isAdmin}
-            onCargarResultado={onCargarResultado}
-            colegioRival={torneo.colegio_rival ?? undefined}
-          />
-        )}
+        <FixtureTab
+          categorias={categorias}
+          torneoId={torneo.id}
+          isAdmin={isAdmin}
+          onCargarResultado={onCargarResultado}
+          colegioRival={torneo.colegio_rival ?? undefined}
+        />
       </Tabs.Content>
 
       <Tabs.Content value="bracket">
-        <BracketTab categorias={americanoCats} />
+        <BracketTab categorias={categorias} />
       </Tabs.Content>
 
       <Tabs.Content value="horario">
-        <HorarioTab categorias={americanoCats} />
+        <HorarioTab categorias={categorias} />
       </Tabs.Content>
 
       <Tabs.Content value="parejas">

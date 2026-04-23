@@ -20,6 +20,7 @@ interface Props {
   torneoId: string
   isAdmin: boolean
   onCargarResultado: (partido: PartidoFixture) => void
+  colegioRival?: string
 }
 
 function PillSelector({ vista, onChange }: { vista: Vista; onChange: (v: Vista) => void }) {
@@ -73,10 +74,66 @@ function PartidoRowWithBadge({ p, torneoId, isAdmin, onCargarResultado, badge }:
   )
 }
 
-function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado }: Props) {
+// Scoreboard + flat list for desafio_puntos / desafio_sembrado categories
+function DesafioSection({ categorias, torneoId, isAdmin, onCargarResultado, colegioRival }: Props) {
+  const allPartidos = categorias.flatMap(c => c.partidos ?? [])
+  const sgTotal = allPartidos.filter(p => p.ganador === 1).length
+  const rivalTotal = allPartidos.filter(p => p.ganador === 2).length
+  const jugados = allPartidos.filter(p => !!p.ganador).length
+  const rivalLabel = colegioRival ?? 'Rival'
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between gap-4">
+        <span className="font-inter text-xs text-muted tabular-nums">
+          {jugados}/{allPartidos.length} jugados
+        </span>
+        <div className="flex items-center gap-1.5 rounded-lg border border-navy/10 bg-navy/[0.04] px-2.5 py-1">
+          <span className="font-inter text-[10px] font-bold uppercase tracking-wider text-muted">Saint George</span>
+          <span className="font-manrope text-base font-bold text-gold tabular-nums leading-none">{sgTotal}</span>
+          <span className="text-navy/30 text-xs mx-0.5">–</span>
+          <span className="font-manrope text-base font-bold text-navy tabular-nums leading-none">{rivalTotal}</span>
+          <span className="font-inter text-[10px] font-bold uppercase tracking-wider text-muted">{rivalLabel}</span>
+        </div>
+      </div>
+
+      {categorias.map(cat => {
+        const partidos = cat.partidos ?? []
+        const isSembrado = cat.formato === 'desafio_sembrado'
+        return (
+          <div key={cat.nombre} className="space-y-1.5">
+            {categorias.length > 1 && (
+              <h3 className="font-manrope text-sm font-bold text-navy border-l-4 border-gold pl-3">{cat.nombre}</h3>
+            )}
+            <div className="rounded-xl border border-navy/5 overflow-hidden divide-y divide-navy/5">
+              {partidos.map(p => (
+                <PartidoRow
+                  key={p.id}
+                  partido={p}
+                  torneoId={torneoId}
+                  isAdmin={isAdmin}
+                  onCargarResultado={onCargarResultado}
+                  sembradoNum={isSembrado ? p.numero : undefined}
+                />
+              ))}
+              {partidos.length === 0 && (
+                <p className="px-3 py-2 text-xs text-muted font-inter">Sin partidos.</p>
+              )}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioRival }: Props) {
+  const americanoCats = categorias.filter(c => !c.formato || c.formato === 'americano_grupos')
+  const desafioCats = categorias.filter(c => c.formato === 'desafio_puntos' || c.formato === 'desafio_sembrado')
+
   return (
     <div className="space-y-8">
-      {categorias.map(cat => (
+      {americanoCats.map(cat => (
         <div key={cat.nombre}>
           <h3 className="font-manrope text-base font-bold text-navy border-l-4 border-gold pl-3 mb-4">{cat.nombre}</h3>
           {(cat.grupos ?? []).map(g => (
@@ -111,13 +168,22 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado }: Props)
           )}
         </div>
       ))}
+
+      {desafioCats.length > 0 && (
+        <DesafioSection
+          categorias={desafioCats}
+          torneoId={torneoId}
+          isAdmin={isAdmin}
+          onCargarResultado={onCargarResultado}
+          colegioRival={colegioRival}
+        />
+      )}
     </div>
   )
 }
 
-function VistaAgrupada({ grupos, labelKey, labelPrefix, torneoId, isAdmin, onCargarResultado, catPorPartido }: {
+function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResultado, catPorPartido }: {
   grupos: Map<string, PartidoFixture[]>
-  labelKey: 'cancha' | 'hora'
   labelPrefix: string
   torneoId: string
   isAdmin: boolean
@@ -146,7 +212,7 @@ function VistaAgrupada({ grupos, labelKey, labelPrefix, torneoId, isAdmin, onCar
   )
 }
 
-export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResultado }: Props) {
+export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResultado, colegioRival }: Props) {
   const [vista, setVista] = useState<Vista>('grupo')
 
   const { porCancha, porHora, catPorPartido } = useMemo(() => {
@@ -159,6 +225,7 @@ export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResu
         ...(cat.grupos ?? []).flatMap(g => g.partidos),
         ...cat.faseEliminatoria,
         ...cat.consola,
+        ...(cat.partidos ?? []),
       ]
       for (const p of todos) {
         catPorPartido.set(p.id, cat.nombre)
@@ -180,29 +247,36 @@ export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResu
     return <p className="font-inter text-sm text-muted py-4">Sin categorías con fixture generado.</p>
   }
 
+  const americanoCats = categorias.filter(c => !c.formato || c.formato === 'americano_grupos')
   const sinHorario = porCancha.size === 0 && porHora.size === 0
+  // Only show pill selector when multi-view is meaningful
+  const showPills = americanoCats.length > 0 || !sinHorario
 
   return (
     <div>
-      <PillSelector vista={vista} onChange={setVista} />
+      {showPills && <PillSelector vista={vista} onChange={setVista} />}
 
-      {vista === 'grupo' && (
-        <VistaGrupo categorias={categorias} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} />
+      {(vista === 'grupo' || !showPills) && (
+        <VistaGrupo
+          categorias={categorias}
+          torneoId={torneoId}
+          isAdmin={isAdmin}
+          onCargarResultado={onCargarResultado}
+          colegioRival={colegioRival}
+        />
       )}
 
-      {vista === 'cancha' && (
+      {showPills && vista === 'cancha' && (
         porCancha.size === 0
           ? <p className="font-inter text-sm text-muted py-2">Sin canchas asignadas en el fixture.</p>
-          : <VistaAgrupada grupos={porCancha} labelKey="cancha" labelPrefix="Cancha " torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catPorPartido={catPorPartido} />
+          : <VistaAgrupada grupos={porCancha} labelPrefix="Cancha " torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catPorPartido={catPorPartido} />
       )}
 
-      {vista === 'hora' && (
+      {showPills && vista === 'hora' && (
         porHora.size === 0
           ? <p className="font-inter text-sm text-muted py-2">Sin horarios asignados en el fixture.</p>
-          : <VistaAgrupada grupos={porHora} labelKey="hora" labelPrefix="" torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catPorPartido={catPorPartido} />
+          : <VistaAgrupada grupos={porHora} labelPrefix="" torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catPorPartido={catPorPartido} />
       )}
-
-      {sinHorario && vista !== 'grupo' && null}
     </div>
   )
 }

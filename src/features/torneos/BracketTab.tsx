@@ -199,7 +199,7 @@ interface Props {
 }
 
 export default function BracketTab({ categorias }: Props) {
-  const cats = categorias.filter(c => !c.formato || c.formato === 'americano_grupos')
+  const cats = categorias.filter(c => c.faseEliminatoria.length > 0)
 
   if (cats.length === 0) {
     return <p className="font-inter text-sm text-muted py-4">Sin categorías con bracket.</p>
