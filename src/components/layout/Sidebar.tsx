@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, Trophy, Medal,
-  BarChart3, Handshake, CalendarDays, Banknote, Settings,
+  Handshake, CalendarDays, Banknote, Settings,
   UserCog, CalendarRange, ChevronRight, LogOut, Wallet,
 } from 'lucide-react'
 import { BrandLogo } from '@/components/brand/BrandLogo'
@@ -14,7 +14,6 @@ const NAV_ITEMS = [
   { to: '/jugadores', icon: Users, label: 'Jugadores' },
   { to: '/rankings', icon: Medal, label: 'Rankings' },
   { to: '/torneos', icon: Trophy, label: 'Torneos' },
-  { to: '/ligas', icon: BarChart3, label: 'Ligas' },
   { to: '/amistosos', icon: Handshake, label: 'Amistosos' },
   { to: '/calendario', icon: CalendarDays, label: 'Calendario' },
   { to: '/finanzas', icon: Banknote, label: 'Pagos' },

@@ -14,6 +14,7 @@ import { Search, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown } from 'lu
 import { useNavigate } from 'react-router-dom'
 import { padelApi } from '../../lib/padelApi'
 import type { Jugador } from '../../lib/supabase'
+import { LadoBadge } from './LadoBadge'
 
 type JugadorItem = Pick<Jugador, 'id' | 'nombre' | 'apodo' | 'categoria' | 'elo' | 'foto_url' | 'lado_preferido' | 'sexo' | 'mixto' | 'telefono'> & { nombre_pila: string | null; apellido: string | null }
 
@@ -216,7 +217,7 @@ export default function JugadoresPage() {
       size: 75,
       enableColumnFilter: false,
       cell: info => info.getValue()
-        ? <span className="font-inter text-xs text-navy">{LADO_LABEL[info.getValue()!]}</span>
+        ? <LadoBadge lado={info.getValue()!} />
         : <span className="font-inter text-xs text-muted/50">—</span>,
     }),
     columnHelper.accessor('mixto', {
@@ -385,11 +386,6 @@ export default function JugadoresPage() {
           <div className="md:hidden rounded-xl bg-white shadow-card overflow-hidden">
             {rows.map((row, idx) => {
               const j = row.original
-              const tags = [
-                j.categoria ?? null,
-                j.lado_preferido ? LADO_LABEL[j.lado_preferido] : null,
-                j.mixto && j.mixto !== 'no' ? MIXTO_LABEL[j.mixto] : null,
-              ].filter(Boolean)
               return (
                 <button
                   key={j.id}
@@ -404,10 +400,14 @@ export default function JugadoresPage() {
                     <p className="font-manrope text-sm font-bold text-navy truncate">
                       {j.nombre}{j.apodo && <span className="font-normal text-muted"> "{j.apodo}"</span>}
                     </p>
-                    <div className="flex gap-1.5 mt-0.5 flex-wrap">
-                      {tags.map(tag => (
-                        <span key={tag} className="px-1.5 py-0.5 rounded-md bg-navy/8 text-navy font-inter text-[10px] font-semibold">{tag}</span>
-                      ))}
+                    <div className="flex gap-1.5 mt-0.5 flex-wrap items-center">
+                      {j.categoria && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-navy/8 text-navy font-inter text-[10px] font-semibold">{j.categoria}</span>
+                      )}
+                      {j.lado_preferido && <LadoBadge lado={j.lado_preferido} />}
+                      {j.mixto && j.mixto !== 'no' && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-navy/8 text-navy font-inter text-[10px] font-semibold">{MIXTO_LABEL[j.mixto]}</span>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-col items-end shrink-0">

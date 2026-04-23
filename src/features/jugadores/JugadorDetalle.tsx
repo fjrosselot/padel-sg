@@ -8,6 +8,7 @@ import { usePlayerRankings } from '../../hooks/usePlayerRankings'
 import { PuntosHistorial } from '../ranking/PuntosHistorial'
 import { useUser } from '../../hooks/useUser'
 import { PagosJugador } from '../tesoreria/PagosJugador'
+import { LadoBadge } from './LadoBadge'
 
 const LADO_LABEL: Record<string, string> = { drive: 'Drive', reves: 'Revés', ambos: 'Ambos' }
 const MIXTO_LABEL: Record<string, string> = { si: 'Sí', no: 'No', a_veces: 'A veces' }
@@ -240,14 +241,14 @@ export default function JugadorDetalle() {
           {/* Detalles */}
           <div className="rounded-xl bg-white shadow-card overflow-hidden">
             {[
-              { label: 'Lado preferido', value: jugador.lado_preferido ? LADO_LABEL[jugador.lado_preferido] : '—' },
+              { label: 'Lado preferido', value: jugador.lado_preferido ? LADO_LABEL[jugador.lado_preferido] : '—', node: jugador.lado_preferido ? <LadoBadge lado={jugador.lado_preferido} /> : null },
               { label: 'Juega mixto', value: (jugador as { mixto?: string | null }).mixto ? MIXTO_LABEL[(jugador as { mixto: string }).mixto] : '—' },
               ...((jugador as { frecuencia_semanal?: string | null }).frecuencia_semanal ? [{ label: 'Frecuencia', value: (jugador as { frecuencia_semanal: string }).frecuencia_semanal }] : []),
               ...((jugador as { rut?: string | null }).rut ? [{ label: 'RUT', value: (jugador as unknown as { rut: string }).rut }] : []),
-            ].map(({ label, value }, idx, arr) => (
+            ].map(({ label, value, node }, idx, arr) => (
               <div key={label} className={`flex items-center justify-between px-4 py-3 ${idx !== arr.length - 1 ? 'border-b border-surface-high' : ''}`}>
                 <span className="font-inter text-sm text-muted">{label}</span>
-                <span className="font-inter text-sm font-medium text-navy">{value}</span>
+                {node ?? <span className="font-inter text-sm font-medium text-navy">{value}</span>}
               </div>
             ))}
           </div>

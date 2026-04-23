@@ -13,8 +13,6 @@ const AdminTemporadas = lazy(() => import('./features/admin/AdminTemporadas'))
 const AdminJugadores = lazy(() => import('./features/admin/AdminJugadores'))
 const TorneosList = lazy(() => import('./features/torneos/TorneosList'))
 const TorneoDetalle = lazy(() => import('./features/torneos/TorneoDetalle'))
-const LigasList = lazy(() => import('./features/ligas/LigasList'))
-const LigaDetalle = lazy(() => import('./features/ligas/LigaDetalle'))
 const Dashboard = lazy(() => import('./features/dashboard/Dashboard').then(m => ({ default: m.Dashboard })))
 const AmistososPage = lazy(() => import('./features/amistosos/AmistososPage'))
 const JugadoresPage = lazy(() => import('./features/jugadores/JugadoresPage'))
@@ -54,8 +52,6 @@ export const router = createBrowserRouter([
       { path: 'admin/jugadores', element: <AdminJugadores /> },
       { path: 'torneos', element: <TorneosList /> },
       { path: 'torneos/:id', element: <TorneoDetalle /> },
-      { path: 'ligas', element: <LigasList /> },
-      { path: 'ligas/:id', element: <LigaDetalle /> },
       { path: 'jugadores', element: <JugadoresPage /> },
       { path: 'jugadores/:id', element: <JugadorDetalle /> },
       { path: 'rankings', element: <RankingPage /> },
