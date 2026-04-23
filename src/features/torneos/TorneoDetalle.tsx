@@ -107,6 +107,46 @@ export default function TorneoDetalle() {
     },
   })
 
+  const regenerarSembradoFixture = useMutation({
+    mutationFn: async () => {
+      const inscritas: any[] = await padelGet(
+        `inscripciones?select=id,jugador1_id,jugador2_id,categoria_nombre,sembrado,j1:jugadores!jugador1_id(id,nombre,elo),j2:jugadores!jugador2_id(id,nombre,elo)&torneo_id=eq.${id}&estado=eq.confirmada&lista_espera=eq.false`
+      )
+      const configFixture = torneo!.config_fixture as unknown as ConfigFixture
+      if (!configFixture) throw new Error('El torneo no tiene configuración de fixture guardada.')
+
+      const rawCats = (torneo!.categorias as unknown as CategoriaFixture[]) ?? []
+      let sembradoMatchOffset = 0
+      const categoriasFixture = rawCats.map(cat => {
+        const catInscritas = inscritas.filter((i: any) => i.categoria_nombre === cat.nombre)
+        const sorted = [...catInscritas].sort((a: any, b: any) => (a.sembrado ?? 999) - (b.sembrado ?? 999))
+        const sgParejas: ParejaFixture[] = sorted.map((i: any) => ({
+          id: i.id,
+          nombre: `${i.j1?.nombre ?? '?'} / ${i.j2?.nombre ?? '?'}`,
+          jugador1_id: i.jugador1_id,
+          jugador2_id: i.jugador2_id,
+          elo1: i.j1?.elo ?? 1200,
+          elo2: i.j2?.elo ?? 1200,
+        }))
+        const result = buildDesafioSembradoFixture(
+          cat as unknown as CategoriaConfig,
+          sgParejas,
+          cat.rival_pairs ?? [],
+          configFixture,
+          sembradoMatchOffset
+        )
+        sembradoMatchOffset += result.partidos.length
+        return result
+      })
+
+      await padelPatch('torneos', id!, { categorias: categoriasFixture })
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['torneo', id] })
+      qc.invalidateQueries({ queryKey: ['inscripciones', id] })
+    },
+  })
+
   if (isLoading) return <div className="p-6 text-muted font-inter text-sm">Cargando…</div>
   if (!torneo) return <div className="p-6 text-defeat font-inter text-sm">Torneo no encontrado</div>
 
@@ -124,6 +164,18 @@ export default function TorneoDetalle() {
   const desafioCats = categorias.filter(c => c.formato === 'desafio_puntos' || c.formato === 'desafio_sembrado')
   const hasAmericano = americanoCats.length > 0
   const hasDesafio = desafioCats.length > 0
+  const allSembrado = desafioCats.length > 0 && desafioCats.every(c => c.formato === 'desafio_sembrado')
+
+  // When en_curso with desafio_sembrado, project CategoriaFixture as CategoriaConfig so RosterAdmin/SembradoPanel stay editable
+  const rosterCats: CategoriaConfig[] = categoriasConfig.length > 0
+    ? categoriasConfig
+    : desafioCats.map(c => ({
+        nombre: c.nombre,
+        formato: c.formato,
+        rival_pairs: c.rival_pairs,
+        num_parejas: c.partidos.length,
+        sexo: 'M' as const,
+      }))
 
   return (
     <div className="space-y-4">
@@ -203,6 +255,25 @@ export default function TorneoDetalle() {
         </div>
       )}
 
+      {isAdmin && torneo.estado === 'en_curso' && allSembrado && (
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs rounded-lg border-navy/20 text-navy gap-1.5"
+            onClick={() => regenerarSembradoFixture.mutate()}
+            disabled={regenerarSembradoFixture.isPending}
+          >
+            {regenerarSembradoFixture.isPending ? 'Regenerando…' : 'Regenerar fixture'}
+          </Button>
+          {regenerarSembradoFixture.error && (
+            <p className="text-xs text-defeat w-full font-inter">
+              {regenerarSembradoFixture.error instanceof Error ? regenerarSembradoFixture.error.message : 'Error al regenerar fixture'}
+            </p>
+          )}
+        </div>
+      )}
+
       <div className="rounded-xl bg-white shadow-card p-4 space-y-6">
 
         {hasDesafio && (
@@ -253,8 +324,8 @@ export default function TorneoDetalle() {
             Inscripciones
           </p>
           {isAdmin
-            ? <RosterAdmin torneoId={torneo.id} categorias={categoriasConfig} colegioRival={torneo.colegio_rival} />
-            : <InscripcionesPanel torneoId={torneo.id} estado={torneo.estado} categorias={categoriasConfig} />
+            ? <RosterAdmin torneoId={torneo.id} categorias={rosterCats} colegioRival={torneo.colegio_rival} />
+            : <InscripcionesPanel torneoId={torneo.id} estado={torneo.estado} categorias={rosterCats} />
           }
         </div>
       </div>
