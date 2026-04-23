@@ -300,14 +300,18 @@ export default function RosterAdmin({ torneoId, categorias, colegioRival }: Prop
           </div>
         )
       })}
-      {editingPareja && (
-        <EditParejaModal
-          torneoId={torneoId}
-          inscripcionId={editingPareja.inscripcionId}
-          pareja={editingPareja.pareja}
-          onClose={() => setEditingPareja(null)}
-        />
-      )}
+      <Dialog open={!!editingPareja} onOpenChange={open => { if (!open) setEditingPareja(null) }}>
+        <DialogContent className="max-w-lg p-0">
+          {editingPareja && (
+            <EditParejaModal
+              torneoId={torneoId}
+              inscripcionId={editingPareja.inscripcionId}
+              pareja={editingPareja.pareja}
+              onClose={() => setEditingPareja(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

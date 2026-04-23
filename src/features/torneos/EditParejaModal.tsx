@@ -38,6 +38,7 @@ function updateParejaInCategorias(
 
   return categorias.map(cat => ({
     ...cat,
+    partidos: (cat.partidos ?? []).map(applyToPartido),
     grupos: (cat.grupos ?? []).map(g => ({
       ...g,
       parejas: g.parejas.map(applyToPareja),
