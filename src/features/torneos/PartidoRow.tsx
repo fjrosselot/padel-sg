@@ -28,44 +28,91 @@ export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResulta
     onError: () => toast.error('No se pudo cambiar el bloqueo'),
   })
 
+  const played = !!partido.ganador
+  const hasBothParejas = !!partido.pareja1 && !!partido.pareja2
   const puedeCargar = isAdmin && !partido.resultado_bloqueado && !partido.ganador
 
+  const dotColor = played ? '#16a34a' : hasBothParejas ? '#e8c547' : '#cbd5e1'
+  const borderClass = played
+    ? 'border-[#e2e8f0] opacity-[0.88]'
+    : !hasBothParejas
+    ? 'border-dashed border-[#dce6f0]'
+    : 'border-[#e2e8f0]'
+
   return (
-    <div className={`flex items-center gap-2 p-2 rounded-lg text-sm ${
-      partido.ganador ? 'bg-surface-high' : 'bg-surface'
-    }`}>
+    <div className={`flex items-center gap-2.5 bg-white rounded-lg px-3.5 py-2.5 min-h-[52px] border hover:border-[#94b0cc] transition-colors ${borderClass}`}>
+
       {sembradoNum !== undefined && (
-        <span className="text-gold font-inter text-xs font-bold w-4 shrink-0 text-center tabular-nums">
+        <span className="font-inter font-bold text-[#e8c547] text-xs w-4 shrink-0 text-center tabular-nums">
           {sembradoNum}
         </span>
       )}
-      <span className="text-muted w-14 shrink-0 font-inter text-xs">
-        {partido.turno ?? '--:--'} C{partido.cancha ?? '?'}
-      </span>
-      <span className={`flex-1 text-right font-inter text-sm ${
-        partido.ganador === 1 ? 'font-semibold text-navy' : 'text-slate'
-      }`}>
-        {partido.pareja1?.nombre ?? 'TBD'}
-      </span>
-      <span className="text-muted text-xs">vs</span>
-      <span className={`flex-1 font-inter text-sm ${
-        partido.ganador === 2 ? 'font-semibold text-navy' : 'text-slate'
-      }`}>
-        {partido.pareja2?.nombre ?? 'TBD'}
-      </span>
-      {partido.resultado && (
-        <span className="text-muted text-xs w-16 text-right font-inter">{partido.resultado}</span>
-      )}
+
+      {/* Hora + Cancha */}
+      <div className="min-w-[52px] text-center shrink-0 leading-tight">
+        <div className="font-inter font-bold text-[12px] text-[#162844]">
+          {partido.turno ?? '--:--'}
+        </div>
+        <div className="font-inter text-[10px] text-[#94b0cc]">
+          {partido.cancha != null ? `C${partido.cancha}` : '—'}
+        </div>
+      </div>
+
+      {/* Status dot */}
+      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: dotColor }} />
+
+      {/* Divider */}
+      <div className="w-px self-stretch bg-[#e2e8f0] shrink-0" />
+
+      {/* Parejas */}
+      <div className="flex-1 flex items-center gap-2 min-w-0">
+        <span className={`font-inter text-[13px] flex-1 truncate ${
+          !partido.pareja1 ? 'italic text-[#94a3b8]'
+          : played
+            ? partido.ganador === 1 ? 'font-bold text-[#162844]' : 'text-[#94a3b8]'
+            : 'text-[#334155]'
+        }`}>
+          {partido.pareja1?.nombre ?? 'Por definir'}
+        </span>
+
+        <span className="font-inter text-[10px] font-bold text-[#94b0cc] bg-[#f1f5f9] px-1.5 py-0.5 rounded shrink-0">
+          vs
+        </span>
+
+        <span className={`font-inter text-[13px] flex-1 truncate ${
+          !partido.pareja2 ? 'italic text-[#94a3b8]'
+          : played
+            ? partido.ganador === 2 ? 'font-bold text-[#162844]' : 'text-[#94a3b8]'
+            : 'text-[#334155]'
+        }`}>
+          {partido.pareja2?.nombre ?? 'Por definir'}
+        </span>
+      </div>
+
+      {/* Resultado / estado */}
+      {played && partido.resultado ? (
+        <span className="font-inter text-[12px] font-semibold text-[#16a34a] shrink-0 min-w-[72px] text-right">
+          {partido.resultado}
+        </span>
+      ) : !played ? (
+        <span className="font-inter text-[11px] text-[#94b0cc] italic shrink-0 min-w-[60px] text-right">
+          Pendiente
+        </span>
+      ) : null}
+
+      {/* Cargar */}
       {puedeCargar && (
         <button
           type="button"
           onClick={() => onCargarResultado(partido)}
-          className="text-xs text-gold hover:underline shrink-0 font-inter"
+          className="font-inter text-[11px] font-semibold text-[#e8c547] border border-[#e8c547] rounded px-2 py-1 shrink-0 whitespace-nowrap hover:bg-[#e8c547] hover:text-[#162844] transition-colors"
         >
           Cargar
         </button>
       )}
-      {isAdmin && partido.ganador && (
+
+      {/* Bloquear */}
+      {isAdmin && played && (
         <button
           type="button"
           aria-label={partido.resultado_bloqueado ? 'Desbloquear resultado' : 'Bloquear resultado'}
