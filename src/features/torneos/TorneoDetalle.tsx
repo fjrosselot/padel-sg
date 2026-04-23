@@ -46,6 +46,7 @@ export default function TorneoDetalle() {
   const [showDelete, setShowDelete] = useState(false)
 
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
+  const isSuperAdmin = user?.rol === 'superadmin'
   const qc = useQueryClient()
 
   const { data: torneo, isLoading } = useQuery({
@@ -67,39 +68,48 @@ export default function TorneoDetalle() {
       const configFixture = torneo!.config_fixture as unknown as ConfigFixture
       if (!configFixture) throw new Error('El torneo no tiene configuración de fixture guardada.')
 
+      // Derive effective cats from raw data — works for both inscripcion and en_curso states
+      const rawCats = (torneo!.categorias as unknown as (CategoriaFixture | CategoriaConfig)[]) ?? []
+      const isFixture = (c: any) => Array.isArray(c.grupos) || Array.isArray(c.partidos)
+      const effectiveCats: CategoriaConfig[] = rawCats.some(c => !isFixture(c))
+        ? (rawCats.filter(c => !isFixture(c)) as CategoriaConfig[])
+        : (rawCats as CategoriaFixture[]).map(c => ({
+            nombre: c.nombre,
+            formato: c.formato ?? 'americano_grupos',
+            rival_pairs: c.rival_pairs,
+            num_parejas: (c.partidos ?? []).length,
+            sexo: 'M' as const,
+          }))
+
       let sembradoMatchOffset = 0
-      const categoriasFixture = categoriasConfig.map(cat => {
+      const categoriasFixture = effectiveCats.map(cat => {
         const catInscritas = inscritas.filter((i: any) => i.categoria_nombre === cat.nombre)
 
         if (cat.formato === 'desafio_sembrado') {
           const sorted = [...catInscritas].sort((a: any, b: any) => (a.sembrado ?? 999) - (b.sembrado ?? 999))
           const sgParejas: ParejaFixture[] = sorted.map((i: any) => ({
-            id: i.id,
-            nombre: `${i.j1?.nombre ?? '?'} / ${i.j2?.nombre ?? '?'}`,
-            jugador1_id: i.jugador1_id,
-            jugador2_id: i.jugador2_id,
-            elo1: i.j1?.elo ?? 1200,
-            elo2: i.j2?.elo ?? 1200,
+            id: i.id, nombre: `${i.j1?.nombre ?? '?'} / ${i.j2?.nombre ?? '?'}`,
+            jugador1_id: i.jugador1_id, jugador2_id: i.jugador2_id,
+            elo1: i.j1?.elo ?? 1200, elo2: i.j2?.elo ?? 1200,
           }))
           const result = buildDesafioSembradoFixture(cat, sgParejas, cat.rival_pairs ?? [], configFixture, sembradoMatchOffset)
-          sembradoMatchOffset += result.partidos.length
+          sembradoMatchOffset += (result.partidos ?? []).length
           return result
         }
 
         const parejas: ParejaFixture[] = catInscritas.map((i: any) => ({
-          id: i.id,
-          nombre: `${i.j1?.nombre ?? '?'} / ${i.j2?.nombre ?? '?'}`,
-          jugador1_id: i.jugador1_id,
-          jugador2_id: i.jugador2_id,
-          elo1: i.j1?.elo ?? 1200,
-          elo2: i.j2?.elo ?? 1200,
+          id: i.id, nombre: `${i.j1?.nombre ?? '?'} / ${i.j2?.nombre ?? '?'}`,
+          jugador1_id: i.jugador1_id, jugador2_id: i.jugador2_id,
+          elo1: i.j1?.elo ?? 1200, elo2: i.j2?.elo ?? 1200,
         }))
         return cat.formato === 'desafio_puntos'
           ? buildDesafioFixture(cat, parejas, configFixture)
           : buildFixture(cat, parejas, configFixture)
       })
 
-      await padelPatch('torneos', id!, { categorias: categoriasFixture, estado: 'en_curso' })
+      const patch: Record<string, unknown> = { categorias: categoriasFixture }
+      if (torneo!.estado === 'inscripcion') patch.estado = 'en_curso'
+      await padelPatch('torneos', id!, patch)
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['torneo', id] })
@@ -107,44 +117,14 @@ export default function TorneoDetalle() {
     },
   })
 
-  const regenerarSembradoFixture = useMutation({
-    mutationFn: async () => {
-      const inscritas: any[] = await padelGet(
-        `inscripciones?select=id,jugador1_id,jugador2_id,categoria_nombre,sembrado,j1:jugadores!jugador1_id(id,nombre,elo),j2:jugadores!jugador2_id(id,nombre,elo)&torneo_id=eq.${id}&estado=eq.confirmada&lista_espera=eq.false`
-      )
-      const configFixture = torneo!.config_fixture as unknown as ConfigFixture
-      if (!configFixture) throw new Error('El torneo no tiene configuración de fixture guardada.')
+  const finalizarTorneo = useMutation({
+    mutationFn: () => padelPatch('torneos', id!, { estado: 'finalizado' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['torneo', id] }),
+  })
 
-      const rawCats = (torneo!.categorias as unknown as CategoriaFixture[]) ?? []
-      let sembradoMatchOffset = 0
-      const categoriasFixture = rawCats.map(cat => {
-        const catInscritas = inscritas.filter((i: any) => i.categoria_nombre === cat.nombre)
-        const sorted = [...catInscritas].sort((a: any, b: any) => (a.sembrado ?? 999) - (b.sembrado ?? 999))
-        const sgParejas: ParejaFixture[] = sorted.map((i: any) => ({
-          id: i.id,
-          nombre: `${i.j1?.nombre ?? '?'} / ${i.j2?.nombre ?? '?'}`,
-          jugador1_id: i.jugador1_id,
-          jugador2_id: i.jugador2_id,
-          elo1: i.j1?.elo ?? 1200,
-          elo2: i.j2?.elo ?? 1200,
-        }))
-        const result = buildDesafioSembradoFixture(
-          cat as unknown as CategoriaConfig,
-          sgParejas,
-          cat.rival_pairs ?? [],
-          configFixture,
-          sembradoMatchOffset
-        )
-        sembradoMatchOffset += result.partidos.length
-        return result
-      })
-
-      await padelPatch('torneos', id!, { categorias: categoriasFixture })
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['torneo', id] })
-      qc.invalidateQueries({ queryKey: ['inscripciones', id] })
-    },
+  const reabrirTorneo = useMutation({
+    mutationFn: () => padelPatch('torneos', id!, { estado: 'en_curso' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['torneo', id] }),
   })
 
   if (isLoading) return <div className="p-6 text-muted font-inter text-sm">Cargando…</div>
@@ -164,16 +144,16 @@ export default function TorneoDetalle() {
   const desafioCats = categorias.filter(c => c.formato === 'desafio_puntos' || c.formato === 'desafio_sembrado')
   const hasAmericano = americanoCats.length > 0
   const hasDesafio = desafioCats.length > 0
-  const allSembrado = desafioCats.length > 0 && desafioCats.every(c => c.formato === 'desafio_sembrado')
+  const fixtureGenerado = categorias.length > 0
 
-  // When en_curso with desafio_sembrado, project CategoriaFixture as CategoriaConfig so RosterAdmin/SembradoPanel stay editable
+  // Project CategoriaFixture → CategoriaConfig when fixture already generated, so RosterAdmin/SembradoPanel stay editable
   const rosterCats: CategoriaConfig[] = categoriasConfig.length > 0
     ? categoriasConfig
-    : desafioCats.map(c => ({
+    : categorias.map(c => ({
         nombre: c.nombre,
-        formato: c.formato,
+        formato: c.formato ?? 'americano_grupos',
         rival_pairs: c.rival_pairs,
-        num_parejas: c.partidos.length,
+        num_parejas: (c.partidos ?? []).length,
         sexo: 'M' as const,
       }))
 
@@ -207,8 +187,8 @@ export default function TorneoDetalle() {
         </div>
       </div>
 
-      {isAdmin && (torneo.estado === 'inscripcion' || torneo.estado === 'en_curso') && (
-        <div className="flex gap-2">
+      {isAdmin && torneo.estado !== 'borrador' && torneo.estado !== 'finalizado' && (
+        <div className="flex gap-2 flex-wrap">
           <Button
             size="sm"
             variant="outline"
@@ -220,7 +200,7 @@ export default function TorneoDetalle() {
         </div>
       )}
 
-      {isAdmin && (torneo.estado === 'borrador' || torneo.estado === 'inscripcion') && (
+      {isAdmin && torneo.estado !== 'finalizado' && (
         <div className="flex gap-2 flex-wrap">
           {torneo.estado === 'borrador' && (
             <Button
@@ -232,45 +212,46 @@ export default function TorneoDetalle() {
               {abrirInscripciones.isPending ? 'Abriendo…' : 'Abrir inscripciones'}
             </Button>
           )}
-          {torneo.estado === 'inscripcion' && (
+          {(torneo.estado === 'inscripcion' || torneo.estado === 'en_curso') && (
             <Button
               size="sm"
               className="bg-gold text-navy font-bold text-xs rounded-lg"
               onClick={() => generarFixture.mutate()}
               disabled={generarFixture.isPending}
             >
-              {generarFixture.isPending ? 'Generando fixture…' : 'Generar fixture y comenzar'}
+              {generarFixture.isPending
+                ? (fixtureGenerado ? 'Regenerando…' : 'Generando…')
+                : (fixtureGenerado ? 'Regenerar fixture' : 'Generar fixture y comenzar')}
             </Button>
           )}
-          {abrirInscripciones.error && (
-            <p className="text-xs text-defeat w-full font-inter">
-              {abrirInscripciones.error instanceof Error ? abrirInscripciones.error.message : 'Error al abrir inscripciones'}
-            </p>
+          {isSuperAdmin && torneo.estado === 'en_curso' && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs rounded-lg border-navy/20 text-navy gap-1.5"
+              onClick={() => finalizarTorneo.mutate()}
+              disabled={finalizarTorneo.isPending}
+            >
+              {finalizarTorneo.isPending ? 'Finalizando…' : 'Finalizar torneo'}
+            </Button>
           )}
-          {generarFixture.error && (
-            <p className="text-xs text-defeat w-full font-inter">
-              {generarFixture.error instanceof Error ? generarFixture.error.message : 'Error al generar fixture'}
-            </p>
+          {[abrirInscripciones.error, generarFixture.error, finalizarTorneo.error].map((err, i) =>
+            err ? <p key={i} className="text-xs text-defeat w-full font-inter">{(err as Error).message}</p> : null
           )}
         </div>
       )}
 
-      {isAdmin && torneo.estado === 'en_curso' && allSembrado && (
+      {isSuperAdmin && torneo.estado === 'finalizado' && (
         <div className="flex gap-2 flex-wrap">
           <Button
             size="sm"
             variant="outline"
             className="text-xs rounded-lg border-navy/20 text-navy gap-1.5"
-            onClick={() => regenerarSembradoFixture.mutate()}
-            disabled={regenerarSembradoFixture.isPending}
+            onClick={() => reabrirTorneo.mutate()}
+            disabled={reabrirTorneo.isPending}
           >
-            {regenerarSembradoFixture.isPending ? 'Regenerando…' : 'Regenerar fixture'}
+            {reabrirTorneo.isPending ? 'Reabriendo…' : 'Reabrir torneo'}
           </Button>
-          {regenerarSembradoFixture.error && (
-            <p className="text-xs text-defeat w-full font-inter">
-              {regenerarSembradoFixture.error instanceof Error ? regenerarSembradoFixture.error.message : 'Error al regenerar fixture'}
-            </p>
-          )}
         </div>
       )}
 
@@ -286,7 +267,7 @@ export default function TorneoDetalle() {
           />
         )}
 
-        {!hasAmericano && categoriasConfig.some(c => !c.formato || c.formato === 'americano_grupos') && (
+        {!hasAmericano && !hasDesafio && categoriasConfig.some(c => !c.formato || c.formato === 'americano_grupos') && (
           <p className="font-inter text-sm text-muted">
             El fixture se generará cuando el torneo pase a inscripción.
           </p>
