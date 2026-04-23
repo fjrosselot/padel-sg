@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { GripVertical } from 'lucide-react'
+import { GripVertical, Pencil } from 'lucide-react'
 import { padelApi } from '../../lib/padelApi'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
@@ -33,6 +33,8 @@ export default function SembradoPanel({ torneoId, cat, inscripciones, colegioRiv
   })
   const [dragIdx, setDragIdx] = useState<number | null>(null)
   const [dragOver, setDragOver] = useState<number | null>(null)
+  const [editingRivalIdx, setEditingRivalIdx] = useState<number | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const saveSembrado = useMutation({
     mutationFn: () =>
@@ -68,6 +70,11 @@ export default function SembradoPanel({ torneoId, cat, inscripciones, colegioRiv
     })
     setDragIdx(null)
     setDragOver(null)
+  }
+
+  function startEditRival(idx: number) {
+    setEditingRivalIdx(idx)
+    setTimeout(() => inputRef.current?.focus(), 0)
   }
 
   const slots = Math.max(sgOrder.length, rivalNames.length)
@@ -119,18 +126,39 @@ export default function SembradoPanel({ torneoId, cat, inscripciones, colegioRiv
         <div className="space-y-2">
           <p className="font-inter text-xs font-semibold text-navy">{colegioRival || 'Rival'}</p>
           {Array.from({ length: slots }, (_, idx) => (
-            <div key={idx} className="flex items-center gap-1.5 p-2 bg-surface rounded-lg">
-              <span className="font-inter text-xs font-bold text-muted w-5 text-center tabular-nums">{idx + 1}</span>
-              <Input
-                value={rivalNames[idx] ?? ''}
-                onChange={e => {
-                  const next = [...rivalNames]
-                  next[idx] = e.target.value
-                  setRivalNames(next)
-                }}
-                placeholder={`Jugador ${cat.nombre} #${idx + 1}`}
-                className="flex-1 h-7 text-xs"
-              />
+            <div key={idx} className="flex items-center gap-1.5 p-2 bg-surface rounded-lg min-h-[2rem]">
+              <span className="font-inter text-xs font-bold text-muted w-5 text-center tabular-nums shrink-0">{idx + 1}</span>
+              {editingRivalIdx === idx ? (
+                <Input
+                  ref={editingRivalIdx === idx ? inputRef : undefined}
+                  value={rivalNames[idx] ?? ''}
+                  onChange={e => {
+                    const next = [...rivalNames]
+                    next[idx] = e.target.value
+                    setRivalNames(next)
+                  }}
+                  onBlur={() => setEditingRivalIdx(null)}
+                  onKeyDown={e => { if (e.key === 'Enter') setEditingRivalIdx(null) }}
+                  placeholder={`Jugador ${cat.nombre} #${idx + 1}`}
+                  className="flex-1 h-6 text-xs px-1.5 py-0"
+                  autoFocus
+                />
+              ) : (
+                <>
+                  <span className="flex-1 font-inter text-xs text-navy truncate">
+                    {rivalNames[idx] || (
+                      <span className="text-muted">{`Jugador ${cat.nombre} #${idx + 1}`}</span>
+                    )}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => startEditRival(idx)}
+                    className="shrink-0 text-muted hover:text-navy transition-colors p-0.5 rounded"
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </button>
+                </>
+              )}
             </div>
           ))}
           {slots === 0 && (
