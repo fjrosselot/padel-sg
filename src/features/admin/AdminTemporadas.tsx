@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { formatFecha } from '../../lib/formatDate'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Pencil, Check, X } from 'lucide-react'
@@ -80,7 +81,7 @@ export default function AdminTemporadas() {
           >
             <div>
               <p className="font-manrope text-sm font-bold text-navy">{t.nombre}</p>
-              <p className="font-inter text-xs text-muted">{t.fecha_inicio} → {t.fecha_fin ?? '…'}</p>
+              <p className="font-inter text-xs text-muted">{formatFecha(t.fecha_inicio)} → {formatFecha(t.fecha_fin) ?? '…'}</p>
             </div>
 
             <label className="flex items-center gap-2 cursor-pointer">
@@ -135,7 +136,7 @@ export default function AdminTemporadas() {
               <>
                 <div className="flex-1">
                   <p className="font-inter text-sm font-medium text-navy">{ev.nombre}</p>
-                  <p className="font-inter text-[10px] text-muted">{ev.tipo} · {ev.fecha ?? '—'}</p>
+                  <p className="font-inter text-[10px] text-muted">{ev.tipo} · {formatFecha(ev.fecha)}</p>
                 </div>
                 <button type="button" onClick={() => { setEditingEvento(ev.id); setEditNombre(ev.nombre) }}
                   className="text-muted hover:text-navy transition-colors">

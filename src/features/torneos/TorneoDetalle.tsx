@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Banknote, Pencil } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { padelApi } from '../../lib/padelApi'
+import { formatFecha } from '../../lib/formatDate'
 import * as Tabs from '@radix-ui/react-tabs'
 import { useUser } from '../../hooks/useUser'
 import { padelGet, padelPatch, ESTADO_LABELS } from './torneoApi'
@@ -190,7 +191,7 @@ export default function TorneoDetalle() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold font-manrope text-navy">{torneo.nombre}</h1>
-          <p className="text-muted text-sm font-inter">{torneo.fecha_inicio}</p>
+          <p className="text-muted text-sm font-inter">{formatFecha(torneo.fecha_inicio, 'long')}</p>
         </div>
         <div className="flex items-center gap-2 shrink-0 pt-0.5">
           {isAdmin && (

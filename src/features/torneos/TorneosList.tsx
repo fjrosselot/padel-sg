@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { formatFecha } from '../../lib/formatDate'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { adminHeaders } from '../../lib/adminHeaders'
@@ -91,7 +92,7 @@ export default function TorneosList() {
               <div>
                 <p className="font-manrope font-semibold text-navy">{t.nombre}</p>
                 <p className="text-sm text-muted">
-                  {TIPO_LABELS[t.tipo]} · {t.fecha_inicio ?? 'Sin fecha'}
+                  {TIPO_LABELS[t.tipo]} · {formatFecha(t.fecha_inicio)}
                   {t.tipo === 'vs_colegio' && t.colegio_rival && ` · vs ${t.colegio_rival}`}
                 </p>
               </div>

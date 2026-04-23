@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { formatFecha } from '../../../lib/formatDate'
 import { useFormContext } from 'react-hook-form'
 import { SEXO_LABEL } from './constants'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -84,7 +85,7 @@ export default function StepConfirmar({ onCreated }: Props) {
     <div className="space-y-5">
       <div className="bg-surface rounded-xl p-4 space-y-2">
         <p className="font-semibold text-navy">{values.nombre}</p>
-        <p className="text-sm text-muted">{tipoLabel} · {values.fecha_inicio}</p>
+        <p className="text-sm text-muted">{tipoLabel} · {formatFecha(values.fecha_inicio)}</p>
         <div className="text-sm space-y-1">
           {values.categorias.map(c => (
             <p key={c.nombre}>

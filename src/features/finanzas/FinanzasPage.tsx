@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { formatFecha } from '@/lib/formatDate'
 import { Wallet, CheckCircle2, Circle, Trophy, CalendarDays, Zap, Shirt, PartyPopper } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import type { Pago } from '@/features/tesoreria/types'
@@ -153,7 +154,7 @@ export default function FinanzasPage() {
                             {TIPO_LABEL[c.cobro.tipo] ?? c.cobro.tipo}
                           </span>
                           {c.cobro.fecha_vencimiento && (
-                            <span className="font-inter text-[10px] text-muted">Vence {c.cobro.fecha_vencimiento}</span>
+                            <span className="font-inter text-[10px] text-muted">Vence {formatFecha(c.cobro.fecha_vencimiento)}</span>
                           )}
                         </div>
                       </div>
