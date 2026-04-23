@@ -11,13 +11,15 @@ import RosterRow from './RosterRow'
 import type { InscripcionRow } from './RosterRow'
 import { PlayerCombobox, usePastCompaneros } from './PlayerCombobox'
 import EditParejaModal from './EditParejaModal'
+import SembradoPanel from './SembradoPanel'
 
 interface Props {
   torneoId: string
   categorias: CategoriaConfig[]
+  colegioRival?: string | null
 }
 
-export default function RosterAdmin({ torneoId, categorias }: Props) {
+export default function RosterAdmin({ torneoId, categorias, colegioRival }: Props) {
   const { data: user } = useUser()
   const qc = useQueryClient()
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
@@ -31,7 +33,7 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
   const { data: inscripciones } = useQuery({
     queryKey: ['inscripciones', torneoId],
     queryFn: () => padelApi.get<InscripcionRow[]>(
-      `inscripciones?select=id,jugador1_id,jugador2_id,estado,categoria_nombre,lista_espera,posicion_espera,created_at,jugador1:jugadores!jugador1_id(nombre),jugador2:jugadores!jugador2_id(nombre)&torneo_id=eq.${torneoId}&order=lista_espera.asc,posicion_espera.asc,created_at.asc`
+      `inscripciones?select=id,jugador1_id,jugador2_id,estado,categoria_nombre,lista_espera,posicion_espera,sembrado,created_at,jugador1:jugadores!jugador1_id(nombre),jugador2:jugadores!jugador2_id(nombre)&torneo_id=eq.${torneoId}&order=lista_espera.asc,posicion_espera.asc,created_at.asc`
     ),
   })
 
@@ -213,6 +215,9 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
                 <span className="ml-2 text-xs text-muted">
                   {SEXO_LABEL[cat.sexo]} · {activas.length}/{cat.num_parejas}
                 </span>
+                {cat.formato === 'desafio_sembrado' && (
+                  <span className="ml-2 text-xs text-gold font-semibold">Sembrado</span>
+                )}
               </div>
               <Button
                 size="sm"
@@ -281,6 +286,17 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
                 <p className="px-4 py-3 text-sm text-muted">Sin inscritos aún.</p>
               )}
             </div>
+
+            {cat.formato === 'desafio_sembrado' && inscripciones && (
+              <div className="px-4 pb-4">
+                <SembradoPanel
+                  torneoId={torneoId}
+                  cat={cat}
+                  inscripciones={inscripciones.filter(i => i.categoria_nombre === cat.nombre)}
+                  colegioRival={colegioRival ?? 'Rival'}
+                />
+              </div>
+            )}
           </div>
         )
       })}
