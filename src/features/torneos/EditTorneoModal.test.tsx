@@ -48,13 +48,13 @@ describe('EditTorneoModal', () => {
 
   it('shows borrador-only sections when estado is borrador', () => {
     render(<EditTorneoModal torneo={baseTorneo} onClose={() => {}} />, { wrapper })
-    expect(screen.getByDisplayValue('interno')).toBeDefined()
+    expect(screen.getByText(/tipo de torneo/i)).toBeDefined()
   })
 
   it('does not show tipo radio when estado is inscripcion', () => {
     const torneo = { ...baseTorneo, estado: 'inscripcion' as const }
     render(<EditTorneoModal torneo={torneo} onClose={() => {}} />, { wrapper })
-    expect(screen.queryByDisplayValue('interno')).toBeNull()
+    expect(screen.queryByText(/tipo de torneo/i)).toBeNull()
   })
 
   it('shows colegio_rival field when tipo is vs_colegio', () => {
