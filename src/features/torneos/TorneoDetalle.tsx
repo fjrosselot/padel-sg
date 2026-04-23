@@ -2,8 +2,24 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Banknote } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import * as Tabs from '@radix-ui/react-tabs'
 import { adminHeaders } from '../../lib/adminHeaders'
 import { useUser } from '../../hooks/useUser'
+import { Badge } from '../../components/ui/badge'
+import { Button } from '../../components/ui/button'
+import FixtureTab from './FixtureTab'
+import BracketTab from './BracketTab'
+import HorarioTab from './HorarioTab'
+import DesafioView from './DesafioView'
+import InscripcionesPanel from './InscripcionesPanel'
+import ResultadosModal from './ResultadosModal'
+import RosterAdmin from './RosterAdmin'
+import GenerarCobroModal from './GenerarCobroModal'
+import { buildFixture, buildDesafioFixture } from '../../lib/fixture/engine'
+import type { Database } from '../../lib/types/database.types'
+import type { CategoriaConfig, CategoriaFixture, PartidoFixture, ParejaFixture, ConfigFixture } from '../../lib/fixture/types'
+
+type Torneo = Database['padel']['Tables']['torneos']['Row']
 
 const SB = import.meta.env.VITE_SUPABASE_URL as string
 
@@ -19,18 +35,6 @@ async function padelPatch(table: string, id: string, body: Record<string, unknow
   const res = await fetch(`${SB}/rest/v1/${table}?id=eq.${id}`, { method: 'PATCH', headers, body: JSON.stringify(body) })
   if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message ?? `Error ${res.status}`) }
 }
-import { Badge } from '../../components/ui/badge'
-import { Button } from '../../components/ui/button'
-import FixtureView from './FixtureView'
-import InscripcionesPanel from './InscripcionesPanel'
-import ResultadosModal from './ResultadosModal'
-import RosterAdmin from './RosterAdmin'
-import GenerarCobroModal from './GenerarCobroModal'
-import { buildFixture, buildDesafioFixture } from '../../lib/fixture/engine'
-import type { Database } from '../../lib/types/database.types'
-import type { CategoriaConfig, CategoriaFixture, PartidoFixture, ParejaFixture, ConfigFixture } from '../../lib/fixture/types'
-
-type Torneo = Database['padel']['Tables']['torneos']['Row']
 
 const ESTADO_LABELS: Record<string, string> = {
   borrador: 'Borrador',
@@ -39,15 +43,21 @@ const ESTADO_LABELS: Record<string, string> = {
   finalizado: 'Finalizado',
 }
 
+const TAB_CLS = [
+  'font-inter text-sm font-semibold px-4 py-2 rounded-lg transition-colors',
+  'data-[state=inactive]:text-muted data-[state=inactive]:hover:text-navy',
+  'data-[state=active]:bg-navy data-[state=active]:text-gold',
+].join(' ')
+
 export default function TorneoDetalle() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { data: user } = useUser()
   const [partidoModal, setPartidoModal] = useState<PartidoFixture | null>(null)
   const [showCobro, setShowCobro] = useState(false)
+  const [activeTab, setActiveTab] = useState('fixture')
 
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
-
   const qc = useQueryClient()
 
   const { data: torneo, isLoading } = useQuery({
@@ -66,7 +76,6 @@ export default function TorneoDetalle() {
       const inscritas: any[] = await padelGet(
         `inscripciones?select=id,jugador1_id,jugador2_id,categoria_nombre,j1:jugadores!jugador1_id(id,nombre,elo),j2:jugadores!jugador2_id(id,nombre,elo)&torneo_id=eq.${id}&estado=eq.confirmada&lista_espera=eq.false`
       )
-
       const configFixture = torneo!.config_fixture as unknown as ConfigFixture
       if (!configFixture) throw new Error('El torneo no tiene configuración de fixture guardada.')
 
@@ -94,11 +103,9 @@ export default function TorneoDetalle() {
     },
   })
 
-  if (isLoading) return <div className="p-6 text-muted">Cargando…</div>
-  if (!torneo) return <div className="p-6 text-[#BA1A1A]">Torneo no encontrado</div>
+  if (isLoading) return <div className="p-6 text-muted font-inter text-sm">Cargando…</div>
+  if (!torneo) return <div className="p-6 text-defeat font-inter text-sm">Torneo no encontrado</div>
 
-  // categorias puede ser CategoriaConfig[] (borrador) o CategoriaFixture[] (fixture generado)
-  // Solo renderizamos FixtureView si tiene la estructura completa (con grupos)
   const rawCategorias = (torneo.categorias as unknown as (CategoriaFixture | CategoriaConfig)[]) ?? []
   const categorias = rawCategorias.filter(
     (c): c is CategoriaFixture =>
@@ -108,6 +115,11 @@ export default function TorneoDetalle() {
     (c): c is CategoriaConfig =>
       !Array.isArray((c as CategoriaFixture).grupos) && !Array.isArray((c as CategoriaFixture).partidos)
   ) as CategoriaConfig[]
+
+  const americanoCats = categorias.filter(c => !c.formato || c.formato === 'americano_grupos')
+  const desafioCats = categorias.filter(c => c.formato === 'desafio_puntos')
+  const hasAmericano = americanoCats.length > 0
+  const hasDesafio = desafioCats.length > 0
 
   return (
     <div className="space-y-4">
@@ -122,13 +134,13 @@ export default function TorneoDetalle() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold font-manrope text-navy">{torneo.nombre}</h1>
-          <p className="text-muted text-sm">{torneo.fecha_inicio}</p>
+          <p className="text-muted text-sm font-inter">{torneo.fecha_inicio}</p>
         </div>
         <Badge>{ESTADO_LABELS[torneo.estado]}</Badge>
       </div>
 
       {isAdmin && (torneo.estado === 'inscripcion' || torneo.estado === 'en_curso') && (
-        <div className="flex gap-2 mt-2">
+        <div className="flex gap-2">
           <Button
             size="sm"
             variant="outline"
@@ -141,7 +153,7 @@ export default function TorneoDetalle() {
       )}
 
       {isAdmin && (torneo.estado === 'borrador' || torneo.estado === 'inscripcion') && (
-        <div className="flex gap-2 mt-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap">
           {torneo.estado === 'borrador' && (
             <Button
               size="sm"
@@ -163,41 +175,67 @@ export default function TorneoDetalle() {
             </Button>
           )}
           {abrirInscripciones.error && (
-            <p className="text-xs text-defeat w-full">
+            <p className="text-xs text-defeat w-full font-inter">
               {abrirInscripciones.error instanceof Error ? abrirInscripciones.error.message : 'Error al abrir inscripciones'}
             </p>
           )}
           {generarFixture.error && (
-            <p className="text-xs text-defeat w-full">
+            <p className="text-xs text-defeat w-full font-inter">
               {generarFixture.error instanceof Error ? generarFixture.error.message : 'Error al generar fixture'}
             </p>
           )}
         </div>
       )}
 
-      <div className="rounded-xl bg-white shadow-card space-y-4 p-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-4">Fixture</p>
-          {categorias.length === 0 ? (
-            <p className="text-muted">El fixture se generará cuando el torneo pase a inscripción.</p>
+      <div className="rounded-xl bg-white shadow-card p-4 space-y-6">
+
+        {hasDesafio && (
+          <DesafioView
+            categorias={desafioCats}
+            torneoId={torneo.id}
+            isAdmin={isAdmin}
+            onCargarResultado={setPartidoModal}
+            colegioRival={torneo.colegio_rival ?? undefined}
+          />
+        )}
+
+        {hasAmericano && (
+          categorias.length === 0 ? (
+            <p className="font-inter text-sm text-muted">
+              El fixture se generará cuando el torneo pase a inscripción.
+            </p>
           ) : (
-            <div className="space-y-8">
-              {categorias.map(cat => (
-                <FixtureView
-                  key={cat.nombre}
-                  categoria={cat}
+            <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
+              <Tabs.List className="flex gap-1 bg-surface rounded-xl p-1 mb-6">
+                <Tabs.Trigger value="fixture" className={TAB_CLS}>Fixture</Tabs.Trigger>
+                <Tabs.Trigger value="bracket" className={TAB_CLS}>Bracket</Tabs.Trigger>
+                <Tabs.Trigger value="horario" className={TAB_CLS}>Horario</Tabs.Trigger>
+              </Tabs.List>
+
+              <Tabs.Content value="fixture">
+                <FixtureTab
+                  categorias={americanoCats}
                   torneoId={torneo.id}
                   isAdmin={isAdmin}
                   onCargarResultado={setPartidoModal}
-                  colegioRival={torneo.colegio_rival ?? undefined}
                 />
-              ))}
-            </div>
-          )}
-        </div>
+              </Tabs.Content>
+
+              <Tabs.Content value="bracket">
+                <BracketTab categorias={americanoCats} />
+              </Tabs.Content>
+
+              <Tabs.Content value="horario">
+                <HorarioTab categorias={americanoCats} />
+              </Tabs.Content>
+            </Tabs.Root>
+          )
+        )}
 
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-4">Inscripciones</p>
+          <p className="font-inter text-[10px] font-bold uppercase tracking-widest text-muted mb-4">
+            Inscripciones
+          </p>
           {isAdmin
             ? <RosterAdmin torneoId={torneo.id} categorias={categoriasConfig} />
             : <InscripcionesPanel torneoId={torneo.id} estado={torneo.estado} categorias={categoriasConfig} />
