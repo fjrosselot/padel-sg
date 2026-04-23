@@ -6,7 +6,6 @@ import { padelApi } from '../../lib/padelApi'
 import * as Tabs from '@radix-ui/react-tabs'
 import { useUser } from '../../hooks/useUser'
 import { padelGet, padelPatch, ESTADO_LABELS } from './torneoApi'
-import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import FixtureTab from './FixtureTab'
 import BracketTab from './BracketTab'
@@ -25,6 +24,21 @@ import type { InscripcionRow } from './RosterRow'
 
 type Torneo = Database['padel']['Tables']['torneos']['Row']
 
+
+const ESTADO_PILL: Record<string, string> = {
+  borrador:    'bg-slate-100 text-slate-600 border border-slate-200',
+  inscripcion: 'bg-sky-50 text-sky-700 border border-sky-200',
+  en_curso:    'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  finalizado:  'bg-navy/10 text-navy border border-navy/20',
+}
+
+function EstadoPill({ estado }: { estado: string }) {
+  return (
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold font-inter ${ESTADO_PILL[estado] ?? 'bg-surface text-muted'}`}>
+      {ESTADO_LABELS[estado] ?? estado}
+    </span>
+  )
+}
 
 const TAB_CLS = [
   'font-inter text-sm font-semibold px-4 py-2 rounded-lg transition-colors',
@@ -163,7 +177,7 @@ export default function TorneoDetalle() {
   const fixtureLabelText = hasDesafio && !hasAmericano ? 'Partidos' : 'Fixture'
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <button
         type="button"
         onClick={() => navigate(-1)}
@@ -172,12 +186,13 @@ export default function TorneoDetalle() {
         <ArrowLeft className="h-4 w-4" /> Torneos
       </button>
 
-      <div className="flex items-center justify-between">
+      {/* Title row + status + edit */}
+      <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold font-manrope text-navy">{torneo.nombre}</h1>
           <p className="text-muted text-sm font-inter">{torneo.fecha_inicio}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0 pt-0.5">
           {isAdmin && (
             <Button
               size="sm"
@@ -188,25 +203,13 @@ export default function TorneoDetalle() {
               <Pencil className="h-3.5 w-3.5" /> Editar
             </Button>
           )}
-          <Badge>{ESTADO_LABELS[torneo.estado]}</Badge>
+          <EstadoPill estado={torneo.estado} />
         </div>
       </div>
 
-      {isAdmin && torneo.estado !== 'borrador' && torneo.estado !== 'finalizado' && (
-        <div className="flex gap-2 flex-wrap">
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-xs rounded-lg border-navy/20 text-navy gap-1.5"
-            onClick={() => setShowCobro(true)}
-          >
-            <Banknote className="h-3.5 w-3.5" /> Cobro inscripción
-          </Button>
-        </div>
-      )}
-
-      {isAdmin && torneo.estado !== 'finalizado' && (
-        <div className="flex gap-2 flex-wrap">
+      {/* All admin actions in one row */}
+      {isAdmin && (
+        <div className="flex gap-2 flex-wrap items-center">
           {torneo.estado === 'borrador' && (
             <Button
               size="sm"
@@ -229,6 +232,16 @@ export default function TorneoDetalle() {
                 : (fixtureGenerado ? 'Regenerar fixture' : 'Generar fixture y comenzar')}
             </Button>
           )}
+          {torneo.estado !== 'borrador' && torneo.estado !== 'finalizado' && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs rounded-lg border-navy/20 text-navy gap-1.5"
+              onClick={() => setShowCobro(true)}
+            >
+              <Banknote className="h-3.5 w-3.5" /> Cobro inscripción
+            </Button>
+          )}
           {isSuperAdmin && torneo.estado === 'en_curso' && (
             <Button
               size="sm"
@@ -240,23 +253,20 @@ export default function TorneoDetalle() {
               {finalizarTorneo.isPending ? 'Finalizando…' : 'Finalizar torneo'}
             </Button>
           )}
+          {isSuperAdmin && torneo.estado === 'finalizado' && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs rounded-lg border-navy/20 text-navy gap-1.5"
+              onClick={() => reabrirTorneo.mutate()}
+              disabled={reabrirTorneo.isPending}
+            >
+              {reabrirTorneo.isPending ? 'Reabriendo…' : 'Reabrir torneo'}
+            </Button>
+          )}
           {[abrirInscripciones.error, generarFixture.error, finalizarTorneo.error].map((err, i) =>
             err ? <p key={i} className="text-xs text-defeat w-full font-inter">{(err as Error).message}</p> : null
           )}
-        </div>
-      )}
-
-      {isSuperAdmin && torneo.estado === 'finalizado' && (
-        <div className="flex gap-2 flex-wrap">
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-xs rounded-lg border-navy/20 text-navy gap-1.5"
-            onClick={() => reabrirTorneo.mutate()}
-            disabled={reabrirTorneo.isPending}
-          >
-            {reabrirTorneo.isPending ? 'Reabriendo…' : 'Reabrir torneo'}
-          </Button>
         </div>
       )}
 
