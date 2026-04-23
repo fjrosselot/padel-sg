@@ -19,7 +19,16 @@ function Stepper({
           disabled={value <= min}
           className="w-8 h-8 rounded-lg border border-navy/20 bg-surface flex items-center justify-center font-mono text-lg text-navy disabled:opacity-30 hover:border-gold hover:text-gold transition-colors"
         >−</button>
-        <span className="w-10 text-center font-manrope text-xl font-bold text-navy tabular-nums">{value}</span>
+        <input
+          type="number"
+          min={min} max={max}
+          value={value}
+          onChange={e => {
+            const v = parseInt(e.target.value, 10)
+            if (!isNaN(v)) onChange(Math.max(min, Math.min(max, v)))
+          }}
+          className="w-12 text-center font-manrope text-xl font-bold text-navy tabular-nums bg-transparent border-b border-navy/20 focus:border-gold focus:outline-none"
+        />
         <button
           type="button"
           onClick={() => onChange(Math.min(max, value + 1))}
@@ -336,16 +345,18 @@ export default function StepFixture(_props: Props) {
         </div>
 
         {/* Sliders */}
-        <SliderField
-          label="Duración partido"
-          value={duracion} onChange={v => setValue('duracion_partido', v)}
-          min={30} max={120} step={5} unit="min"
-        />
-        <SliderField
-          label="Pausa entre partidos"
-          value={pausa} onChange={v => setValue('pausa_entre_partidos', v)}
-          min={0} max={30} step={5} unit="min"
-        />
+        <div className="grid grid-cols-2 gap-6">
+          <SliderField
+            label="Duración partido"
+            value={duracion} onChange={v => setValue('duracion_partido', v)}
+            min={30} max={120} step={5} unit="min"
+          />
+          <SliderField
+            label="Pausa entre partidos"
+            value={pausa} onChange={v => setValue('pausa_entre_partidos', v)}
+            min={0} max={30} step={5} unit="min"
+          />
+        </div>
       </TabsContent>
 
       <TabsContent value="sim" className="space-y-4 mt-0">
