@@ -11,6 +11,7 @@ export interface InscripcionRow {
   lista_espera: boolean
   posicion_espera: number | null
   created_at: string
+  sembrado: number | null
   jugador1: { nombre: string; sexo?: 'M' | 'F' | null } | null
   jugador2: { nombre: string; sexo?: 'M' | 'F' | null } | null
 }

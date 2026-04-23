@@ -27,13 +27,16 @@ export interface GrupoFixture {
   partidos: PartidoFixture[]
 }
 
+export type FormatoCategoria = 'americano_grupos' | 'desafio_puntos' | 'desafio_sembrado'
+
 export interface CategoriaFixture {
   nombre: string
-  formato?: 'americano_grupos' | 'desafio_puntos'
+  formato?: FormatoCategoria
   grupos: GrupoFixture[]
   faseEliminatoria: PartidoFixture[]
   consola: PartidoFixture[]
   partidos?: PartidoFixture[]
+  rival_pairs?: string[]
 }
 
 export interface ConfigFixture {
@@ -53,7 +56,8 @@ export interface CategoriaConfig {
   nombre: string
   num_parejas: number
   sexo: 'M' | 'F' | 'Mixto'
-  formato?: 'americano_grupos' | 'desafio_puntos'
+  formato?: FormatoCategoria
+  rival_pairs?: string[]
 }
 
 export interface FixtureResult {
