@@ -13,7 +13,7 @@ interface LinkItem {
 
 const LINKS: LinkItem[] = [
   { icon: User, label: 'Mi perfil', desc: 'Datos personales y contraseña', to: '/perfil' },
-  { icon: Medal, label: 'Ranking', desc: 'Tabla de posiciones por categoría', to: '/ranking' },
+  { icon: Medal, label: 'Ranking', desc: 'Tabla de posiciones por categoría', to: '/rankings' },
   { icon: Calendar, label: 'Calendario', desc: 'Torneos y ligas programados', to: '/calendario' },
   { icon: Banknote, label: 'Tesorería', desc: 'Cobros e historial de pagos', to: '/admin/tesoreria', adminOnly: true },
   { icon: Shield, label: 'Admin usuarios', desc: 'Aprobar y gestionar cuentas', to: '/admin/usuarios', adminOnly: true },
