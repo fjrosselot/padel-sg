@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { generateRoundRobin, buildGroups, buildPlayoffs, buildFixture, buildDesafioFixture } from './engine'
+import { generateRoundRobin, buildGroups, buildPlayoffs, buildFixture, buildDesafioFixture, buildDesafioSembradoFixture } from './engine'
 import type { ParejaFixture, CategoriaConfig, ConfigFixture } from './types'
 
 const defaultConfig: ConfigFixture = {
@@ -218,5 +218,58 @@ describe('buildDesafioFixture', () => {
     const result = buildDesafioFixture(cat, parejas, baseConfig)
     expect(result.partidos?.every(p => p.cancha !== null)).toBe(true)
     expect(result.partidos?.every(p => p.turno !== null)).toBe(true)
+  })
+})
+
+describe('buildDesafioSembradoFixture', () => {
+  const cat: CategoriaConfig = { nombre: '4a', num_parejas: 3, sexo: 'M', formato: 'desafio_sembrado' }
+  const sgParejas = makeParejas(3)
+  const rivalNames = ['García / López', 'Pérez / Martín', 'Silva / Cruz']
+  const cfg: ConfigFixture = { ...baseConfig, num_canchas: 2, hora_inicio: '09:00', duracion_partido: 60, pausa_entre_partidos: 15 }
+
+  it('generates N matches for N pairs', () => {
+    const result = buildDesafioSembradoFixture(cat, sgParejas, rivalNames, cfg)
+    expect(result.partidos).toHaveLength(3)
+  })
+
+  it('pairs each SG pair with same-seed rival', () => {
+    const result = buildDesafioSembradoFixture(cat, sgParejas, rivalNames, cfg)
+    expect(result.partidos![0].pareja1!.id).toBe('p1')
+    expect(result.partidos![0].pareja2!.nombre).toBe('García / López')
+    expect(result.partidos![1].pareja1!.id).toBe('p2')
+    expect(result.partidos![1].pareja2!.nombre).toBe('Pérez / Martín')
+  })
+
+  it('rival pareja2 has null jugador IDs and zero ELO', () => {
+    const result = buildDesafioSembradoFixture(cat, sgParejas, rivalNames, cfg)
+    const p2 = result.partidos![0].pareja2!
+    expect(p2.jugador1_id).toBeNull()
+    expect(p2.jugador2_id).toBeNull()
+    expect(p2.elo1).toBe(0)
+    expect(p2.elo2).toBe(0)
+  })
+
+  it('distributes matches across canchas', () => {
+    const result = buildDesafioSembradoFixture(cat, sgParejas, rivalNames, cfg)
+    const canchas = result.partidos!.map(p => p.cancha)
+    expect(canchas).toEqual([1, 2, 1])
+  })
+
+  it('assigns turno based on slot and hora_inicio', () => {
+    const result = buildDesafioSembradoFixture(cat, sgParejas, rivalNames, cfg)
+    expect(result.partidos![0].turno).toBe('09:00')
+    expect(result.partidos![1].turno).toBe('09:00')
+    expect(result.partidos![2].turno).toBe('10:15') // slot 2: 60+15=75 min later
+  })
+
+  it('sets formato to desafio_sembrado and preserves rival_pairs', () => {
+    const result = buildDesafioSembradoFixture(cat, sgParejas, rivalNames, cfg)
+    expect(result.formato).toBe('desafio_sembrado')
+    expect(result.rival_pairs).toEqual(rivalNames)
+  })
+
+  it('handles fewer rival names than SG pairs — clips to min', () => {
+    const result = buildDesafioSembradoFixture(cat, sgParejas, ['Only one'], cfg)
+    expect(result.partidos).toHaveLength(1)
   })
 })

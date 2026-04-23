@@ -276,3 +276,54 @@ export function buildDesafioFixture(
     partidos,
   }
 }
+
+export function buildDesafioSembradoFixture(
+  cat: CategoriaConfig,
+  sgParejas: ParejaFixture[],
+  rivalNames: string[],
+  config: ConfigFixture
+): CategoriaFixture {
+  _matchCounter = 0
+  const n = Math.min(sgParejas.length, rivalNames.length)
+  const [h, m] = config.hora_inicio.split(':').map(Number)
+  const slot = config.duracion_partido + config.pausa_entre_partidos
+
+  const partidos: PartidoFixture[] = Array.from({ length: n }, (_, idx) => {
+    const cancha = (idx % config.num_canchas) + 1
+    const ronda = Math.floor(idx / config.num_canchas)
+    const totalMinutes = h * 60 + m + ronda * slot
+    const hh = String(Math.floor(totalMinutes / 60)).padStart(2, '0')
+    const mm = String(totalMinutes % 60).padStart(2, '0')
+
+    return {
+      id: nextId(),
+      fase: 'desafio',
+      grupo: null,
+      numero: idx + 1,
+      pareja1: sgParejas[idx],
+      pareja2: {
+        id: `rival_${idx + 1}`,
+        nombre: rivalNames[idx],
+        jugador1_id: null,
+        jugador2_id: null,
+        elo1: 0,
+        elo2: 0,
+      },
+      cancha,
+      turno: `${hh}:${mm}`,
+      ganador: null,
+      resultado: null,
+      resultado_bloqueado: false,
+    }
+  })
+
+  return {
+    nombre: cat.nombre,
+    formato: 'desafio_sembrado',
+    grupos: [],
+    faseEliminatoria: [],
+    consola: [],
+    partidos,
+    rival_pairs: rivalNames,
+  }
+}
