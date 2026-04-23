@@ -11,15 +11,13 @@ import RosterRow from './RosterRow'
 import type { InscripcionRow } from './RosterRow'
 import { PlayerCombobox, usePastCompaneros } from './PlayerCombobox'
 import EditParejaModal from './EditParejaModal'
-import SembradoPanel from './SembradoPanel'
 
 interface Props {
   torneoId: string
   categorias: CategoriaConfig[]
-  colegioRival?: string | null
 }
 
-export default function RosterAdmin({ torneoId, categorias, colegioRival }: Props) {
+export default function RosterAdmin({ torneoId, categorias }: Props) {
   const { data: user } = useUser()
   const qc = useQueryClient()
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
@@ -287,16 +285,6 @@ export default function RosterAdmin({ torneoId, categorias, colegioRival }: Prop
               )}
             </div>
 
-            {cat.formato === 'desafio_sembrado' && inscripciones && (
-              <div className="px-4 pb-4">
-                <SembradoPanel
-                  torneoId={torneoId}
-                  cat={cat}
-                  inscripciones={inscripciones.filter(i => i.categoria_nombre === cat.nombre)}
-                  colegioRival={colegioRival ?? 'Rival'}
-                />
-              </div>
-            )}
           </div>
         )
       })}

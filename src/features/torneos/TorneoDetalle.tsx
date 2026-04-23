@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Banknote, Pencil, Trash2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -14,12 +14,14 @@ import DesafioView from './DesafioView'
 import InscripcionesPanel from './InscripcionesPanel'
 import ResultadosModal from './ResultadosModal'
 import RosterAdmin from './RosterAdmin'
+import SembradoPanel from './SembradoPanel'
 import GenerarCobroModal from './GenerarCobroModal'
 import EditTorneoModal from './EditTorneoModal'
 import DeleteTorneoDialog from './DeleteTorneoDialog'
 import { buildFixture, buildDesafioFixture, buildDesafioSembradoFixture } from '../../lib/fixture/engine'
 import type { Database } from '../../lib/types/database.types'
 import type { CategoriaConfig, CategoriaFixture, PartidoFixture, ParejaFixture, ConfigFixture } from '../../lib/fixture/types'
+import type { InscripcionRow } from './RosterRow'
 
 type Torneo = Database['padel']['Tables']['torneos']['Row']
 
@@ -55,6 +57,14 @@ export default function TorneoDetalle() {
     enabled: !!id,
   })
 
+  const { data: inscripciones } = useQuery({
+    queryKey: ['inscripciones', id],
+    queryFn: () => padelGet(
+      `inscripciones?select=id,jugador1_id,jugador2_id,estado,categoria_nombre,lista_espera,posicion_espera,sembrado,created_at,jugador1:jugadores!jugador1_id(nombre),jugador2:jugadores!jugador2_id(nombre)&torneo_id=eq.${id}&order=lista_espera.asc,posicion_espera.asc,created_at.asc`
+    ).then((rows: unknown) => rows as InscripcionRow[]),
+    enabled: !!id && isAdmin,
+  })
+
   const abrirInscripciones = useMutation({
     mutationFn: () => padelPatch('torneos', id!, { estado: 'inscripcion' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['torneo', id] }),
@@ -68,7 +78,6 @@ export default function TorneoDetalle() {
       const configFixture = torneo!.config_fixture as unknown as ConfigFixture
       if (!configFixture) throw new Error('El torneo no tiene configuración de fixture guardada.')
 
-      // Derive effective cats from raw data — works for both inscripcion and en_curso states
       const rawCats = (torneo!.categorias as unknown as (CategoriaFixture | CategoriaConfig)[]) ?? []
       const isFixture = (c: any) => Array.isArray(c.grupos) || Array.isArray(c.partidos)
       const effectiveCats: CategoriaConfig[] = rawCats.some(c => !isFixture(c))
@@ -146,7 +155,6 @@ export default function TorneoDetalle() {
   const hasDesafio = desafioCats.length > 0
   const fixtureGenerado = categorias.length > 0
 
-  // Project CategoriaFixture → CategoriaConfig when fixture already generated, so RosterAdmin/SembradoPanel stay editable
   const rosterCats: CategoriaConfig[] = categoriasConfig.length > 0
     ? categoriasConfig
     : categorias.map(c => ({
@@ -156,6 +164,9 @@ export default function TorneoDetalle() {
         num_parejas: (c.partidos ?? []).length,
         sexo: 'M' as const,
       }))
+
+  const hasDesafioSembrado = rosterCats.some(c => c.formato === 'desafio_sembrado')
+  const fixtureLabelText = hasDesafio && !hasAmericano ? 'Partidos' : 'Fixture'
 
   return (
     <div className="space-y-4">
@@ -255,60 +266,23 @@ export default function TorneoDetalle() {
         </div>
       )}
 
-      <div className="rounded-xl bg-white shadow-card p-4 space-y-6">
-
-        {hasDesafio && (
-          <DesafioView
-            categorias={desafioCats}
-            torneoId={torneo.id}
-            isAdmin={isAdmin}
-            onCargarResultado={setPartidoModal}
-            colegioRival={torneo.colegio_rival ?? undefined}
-          />
-        )}
-
-        {!hasAmericano && !hasDesafio && categoriasConfig.some(c => !c.formato || c.formato === 'americano_grupos') && (
-          <p className="font-inter text-sm text-muted">
-            El fixture se generará cuando el torneo pase a inscripción.
-          </p>
-        )}
-
-        {hasAmericano && (
-          <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
-            <Tabs.List className="flex gap-1 bg-surface rounded-xl p-1 mb-6">
-              <Tabs.Trigger value="fixture" className={TAB_CLS}>Fixture</Tabs.Trigger>
-              <Tabs.Trigger value="bracket" className={TAB_CLS}>Bracket</Tabs.Trigger>
-              <Tabs.Trigger value="horario" className={TAB_CLS}>Horario</Tabs.Trigger>
-            </Tabs.List>
-
-            <Tabs.Content value="fixture">
-              <FixtureTab
-                categorias={americanoCats}
-                torneoId={torneo.id}
-                isAdmin={isAdmin}
-                onCargarResultado={setPartidoModal}
-              />
-            </Tabs.Content>
-
-            <Tabs.Content value="bracket">
-              <BracketTab categorias={americanoCats} />
-            </Tabs.Content>
-
-            <Tabs.Content value="horario">
-              <HorarioTab categorias={americanoCats} />
-            </Tabs.Content>
-          </Tabs.Root>
-        )}
-
-        <div>
-          <p className="font-inter text-[10px] font-bold uppercase tracking-widest text-muted mb-4">
-            Inscripciones
-          </p>
-          {isAdmin
-            ? <RosterAdmin torneoId={torneo.id} categorias={rosterCats} colegioRival={torneo.colegio_rival} />
-            : <InscripcionesPanel torneoId={torneo.id} estado={torneo.estado} categorias={rosterCats} />
-          }
-        </div>
+      <div className="rounded-xl bg-white shadow-card p-4">
+        <TabsDetalle
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          fixtureGenerado={fixtureGenerado}
+          fixtureLabelText={fixtureLabelText}
+          hasAmericano={hasAmericano}
+          hasDesafio={hasDesafio}
+          isAdmin={isAdmin}
+          hasDesafioSembrado={hasDesafioSembrado}
+          americanoCats={americanoCats}
+          desafioCats={desafioCats}
+          rosterCats={rosterCats}
+          inscripciones={inscripciones}
+          torneo={torneo}
+          onCargarResultado={setPartidoModal}
+        />
       </div>
 
       {/* Danger Zone */}
@@ -333,12 +307,10 @@ export default function TorneoDetalle() {
         </div>
       )}
 
-      {/* Edit modal */}
       {showEdit && (
         <EditTorneoModal torneo={torneo} onClose={() => setShowEdit(false)} />
       )}
 
-      {/* Delete confirmation dialog */}
       <DeleteTorneoDialog
         torneoId={id!}
         torneoNombre={torneo.nombre}
@@ -363,5 +335,109 @@ export default function TorneoDetalle() {
         />
       )}
     </div>
+  )
+}
+
+interface TabsProps {
+  activeTab: string
+  setActiveTab: (v: string) => void
+  fixtureGenerado: boolean
+  fixtureLabelText: string
+  hasAmericano: boolean
+  hasDesafio: boolean
+  isAdmin: boolean
+  hasDesafioSembrado: boolean
+  americanoCats: CategoriaFixture[]
+  desafioCats: CategoriaFixture[]
+  rosterCats: CategoriaConfig[]
+  inscripciones: InscripcionRow[] | undefined
+  torneo: Torneo
+  onCargarResultado: (p: PartidoFixture) => void
+}
+
+function TabsDetalle({
+  activeTab, setActiveTab, fixtureGenerado, fixtureLabelText,
+  hasAmericano, hasDesafio, isAdmin, hasDesafioSembrado,
+  americanoCats, desafioCats, rosterCats, inscripciones, torneo, onCargarResultado,
+}: TabsProps) {
+  useEffect(() => {
+    if (!fixtureGenerado && activeTab === 'fixture') setActiveTab('parejas')
+  }, [fixtureGenerado])
+
+  const sembradoCats = rosterCats.filter(c => c.formato === 'desafio_sembrado')
+
+  return (
+    <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
+      <Tabs.List className="flex gap-1 bg-surface rounded-xl p-1 mb-6 flex-wrap">
+        {fixtureGenerado && (
+          <Tabs.Trigger value="fixture" className={TAB_CLS}>{fixtureLabelText}</Tabs.Trigger>
+        )}
+        {hasAmericano && fixtureGenerado && (
+          <Tabs.Trigger value="bracket" className={TAB_CLS}>Bracket</Tabs.Trigger>
+        )}
+        {hasAmericano && fixtureGenerado && (
+          <Tabs.Trigger value="horario" className={TAB_CLS}>Horario</Tabs.Trigger>
+        )}
+        <Tabs.Trigger value="parejas" className={TAB_CLS}>Parejas</Tabs.Trigger>
+        {isAdmin && hasDesafioSembrado && (
+          <Tabs.Trigger value="sembrado" className={TAB_CLS}>Sembrado</Tabs.Trigger>
+        )}
+      </Tabs.List>
+
+      <Tabs.Content value="fixture">
+        {hasAmericano && (
+          <FixtureTab
+            categorias={americanoCats}
+            torneoId={torneo.id}
+            isAdmin={isAdmin}
+            onCargarResultado={onCargarResultado}
+          />
+        )}
+        {hasDesafio && (
+          <DesafioView
+            categorias={desafioCats}
+            torneoId={torneo.id}
+            isAdmin={isAdmin}
+            onCargarResultado={onCargarResultado}
+            colegioRival={torneo.colegio_rival ?? undefined}
+          />
+        )}
+      </Tabs.Content>
+
+      <Tabs.Content value="bracket">
+        <BracketTab categorias={americanoCats} />
+      </Tabs.Content>
+
+      <Tabs.Content value="horario">
+        <HorarioTab categorias={americanoCats} />
+      </Tabs.Content>
+
+      <Tabs.Content value="parejas">
+        {isAdmin
+          ? <RosterAdmin torneoId={torneo.id} categorias={rosterCats} />
+          : <InscripcionesPanel torneoId={torneo.id} estado={torneo.estado} categorias={rosterCats} />
+        }
+      </Tabs.Content>
+
+      {isAdmin && hasDesafioSembrado && (
+        <Tabs.Content value="sembrado">
+          <div className="space-y-8">
+            {sembradoCats.map(cat => (
+              <div key={cat.nombre}>
+                {sembradoCats.length > 1 && (
+                  <p className="font-inter text-sm font-semibold text-navy mb-3">{cat.nombre}</p>
+                )}
+                <SembradoPanel
+                  torneoId={torneo.id}
+                  cat={cat}
+                  inscripciones={(inscripciones ?? []).filter(i => i.categoria_nombre === cat.nombre)}
+                  colegioRival={torneo.colegio_rival ?? 'Rival'}
+                />
+              </div>
+            ))}
+          </div>
+        </Tabs.Content>
+      )}
+    </Tabs.Root>
   )
 }
