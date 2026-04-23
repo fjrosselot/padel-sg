@@ -199,37 +199,37 @@ export default function TorneoDetalle() {
           />
         )}
 
+        {!hasAmericano && categoriasConfig.some(c => !c.formato || c.formato === 'americano_grupos') && (
+          <p className="font-inter text-sm text-muted">
+            El fixture se generará cuando el torneo pase a inscripción.
+          </p>
+        )}
+
         {hasAmericano && (
-          categorias.length === 0 ? (
-            <p className="font-inter text-sm text-muted">
-              El fixture se generará cuando el torneo pase a inscripción.
-            </p>
-          ) : (
-            <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
-              <Tabs.List className="flex gap-1 bg-surface rounded-xl p-1 mb-6">
-                <Tabs.Trigger value="fixture" className={TAB_CLS}>Fixture</Tabs.Trigger>
-                <Tabs.Trigger value="bracket" className={TAB_CLS}>Bracket</Tabs.Trigger>
-                <Tabs.Trigger value="horario" className={TAB_CLS}>Horario</Tabs.Trigger>
-              </Tabs.List>
+          <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
+            <Tabs.List className="flex gap-1 bg-surface rounded-xl p-1 mb-6">
+              <Tabs.Trigger value="fixture" className={TAB_CLS}>Fixture</Tabs.Trigger>
+              <Tabs.Trigger value="bracket" className={TAB_CLS}>Bracket</Tabs.Trigger>
+              <Tabs.Trigger value="horario" className={TAB_CLS}>Horario</Tabs.Trigger>
+            </Tabs.List>
 
-              <Tabs.Content value="fixture">
-                <FixtureTab
-                  categorias={americanoCats}
-                  torneoId={torneo.id}
-                  isAdmin={isAdmin}
-                  onCargarResultado={setPartidoModal}
-                />
-              </Tabs.Content>
+            <Tabs.Content value="fixture">
+              <FixtureTab
+                categorias={americanoCats}
+                torneoId={torneo.id}
+                isAdmin={isAdmin}
+                onCargarResultado={setPartidoModal}
+              />
+            </Tabs.Content>
 
-              <Tabs.Content value="bracket">
-                <BracketTab categorias={americanoCats} />
-              </Tabs.Content>
+            <Tabs.Content value="bracket">
+              <BracketTab categorias={americanoCats} />
+            </Tabs.Content>
 
-              <Tabs.Content value="horario">
-                <HorarioTab categorias={americanoCats} />
-              </Tabs.Content>
-            </Tabs.Root>
-          )
+            <Tabs.Content value="horario">
+              <HorarioTab categorias={americanoCats} />
+            </Tabs.Content>
+          </Tabs.Root>
         )}
 
         <div>

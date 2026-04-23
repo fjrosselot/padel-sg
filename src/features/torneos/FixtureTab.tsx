@@ -31,7 +31,7 @@ function CategoriaFixtureSection({
     <div className="space-y-4">
       <h3 className="font-manrope text-base font-bold text-navy">{categoria.nombre}</h3>
 
-      {categoria.grupos.map(g => (
+      {(categoria.grupos ?? []).map(g => (
         <div key={g.letra}>
           <p className="font-inter text-[10px] font-bold uppercase tracking-widest text-muted mb-2">
             Grupo {g.letra}
