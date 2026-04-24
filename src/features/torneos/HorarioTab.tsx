@@ -1,5 +1,3 @@
-import { useState } from 'react'
-import { User } from 'lucide-react'
 import PartidoRow from './PartidoRow'
 import { buildCatColorMap } from './catColors'
 import { useUser } from '../../hooks/useUser'
@@ -42,10 +40,10 @@ interface Props {
   torneoId: string
   isAdmin: boolean
   onCargarResultado: (partido: PartidoFixture) => void
+  soloMis?: boolean
 }
 
-export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResultado }: Props) {
-  const [soloMis, setSoloMis] = useState(false)
+export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResultado, soloMis = false }: Props) {
   const { data: user } = useUser()
 
   const allEntries: MatchEntry[] = []
@@ -88,20 +86,6 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
 
   return (
     <div>
-      {user && (
-        <div className="flex gap-2 overflow-x-auto pb-0.5 no-scrollbar mb-3">
-          <button
-            type="button"
-            onClick={() => setSoloMis(v => !v)}
-            className={`whitespace-nowrap flex items-center gap-1 px-4 py-1.5 rounded-full font-inter text-xs font-semibold transition-colors focus:outline-none ${
-              soloMis ? 'bg-navy text-gold' : 'bg-white border border-navy/20 text-slate hover:border-navy/40 hover:text-navy'
-            }`}
-          >
-            <User className="h-3 w-3 shrink-0" />
-            Solo mis partidos
-          </button>
-        </div>
-      )}
       <Legend catNames={catNames} catColorMap={catColorMap} />
 
       {entries.length === 0 ? (

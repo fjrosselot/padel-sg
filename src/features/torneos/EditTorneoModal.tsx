@@ -6,6 +6,8 @@ import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { padelApi } from '../../lib/padelApi'
+import { padelPatch } from './torneoApi'
+import { useUser } from '../../hooks/useUser'
 import { SEXO_LABEL, SEXO_COLOR } from './TorneoWizard/constants'
 import DeleteTorneoDialog from './DeleteTorneoDialog'
 import type { Database } from '../../lib/types/database.types'
@@ -45,8 +47,19 @@ function parseConfigFixture(raw: unknown): Partial<ConfigFixture> {
 
 export default function EditTorneoModal({ torneo, onClose }: Props) {
   const queryClient = useQueryClient()
+  const { data: user } = useUser()
   const isBorrador = torneo.estado === 'borrador'
+  const isSuperAdmin = user?.rol === 'superadmin'
   const [showDelete, setShowDelete] = useState(false)
+
+  const reabrirTorneo = useMutation({
+    mutationFn: () => padelPatch('torneos', torneo.id, { estado: 'en_curso' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['torneo', torneo.id] })
+      queryClient.invalidateQueries({ queryKey: ['torneos'] })
+      onClose()
+    },
+  })
 
   const { categorias: initialCats, isCategoriaConfig } = parseRawCategorias(torneo.categorias)
   const initialConfig = parseConfigFixture(torneo.config_fixture)
@@ -320,15 +333,29 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
             <p className="font-inter text-[10px] font-bold uppercase tracking-widest text-defeat/60 mb-3">
               Zona de peligro
             </p>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="text-xs rounded-lg border-defeat/30 text-defeat gap-1.5 hover:bg-defeat/10"
-              onClick={() => setShowDelete(true)}
-            >
-              <Trash2 className="h-3.5 w-3.5" /> Eliminar torneo
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              {isSuperAdmin && torneo.estado === 'finalizado' && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="text-xs rounded-lg border-navy/20 text-navy gap-1.5"
+                  onClick={() => reabrirTorneo.mutate()}
+                  disabled={reabrirTorneo.isPending}
+                >
+                  {reabrirTorneo.isPending ? 'Reabriendo…' : 'Reabrir torneo'}
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-xs rounded-lg border-defeat/30 text-defeat gap-1.5 hover:bg-defeat/10"
+                onClick={() => setShowDelete(true)}
+              >
+                <Trash2 className="h-3.5 w-3.5" /> Eliminar torneo
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>

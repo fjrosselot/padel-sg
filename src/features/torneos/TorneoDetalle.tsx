@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Banknote, Pencil } from 'lucide-react'
+import { ArrowLeft, Banknote, Pencil, User } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { padelApi } from '../../lib/padelApi'
 import { formatFecha } from '../../lib/formatDate'
@@ -139,11 +139,6 @@ export default function TorneoDetalle() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['torneo', id] }),
   })
 
-  const reabrirTorneo = useMutation({
-    mutationFn: () => padelPatch('torneos', id!, { estado: 'en_curso' }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['torneo', id] }),
-  })
-
   if (isLoading) return <div className="p-6 text-muted font-inter text-sm">Cargando…</div>
   if (!torneo) return <div className="p-6 text-defeat font-inter text-sm">Torneo no encontrado</div>
 
@@ -257,17 +252,6 @@ export default function TorneoDetalle() {
               {finalizarTorneo.isPending ? 'Finalizando…' : 'Finalizar torneo'}
             </Button>
           )}
-          {isSuperAdmin && torneo.estado === 'finalizado' && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-xs rounded-lg border-navy/20 text-navy gap-1.5"
-              onClick={() => reabrirTorneo.mutate()}
-              disabled={reabrirTorneo.isPending}
-            >
-              {reabrirTorneo.isPending ? 'Reabriendo…' : 'Reabrir torneo'}
-            </Button>
-          )}
           {[abrirInscripciones.error, generarFixture.error, finalizarTorneo.error].map((err, i) =>
             err ? <p key={i} className="text-xs text-defeat w-full font-inter">{(err as Error).message}</p> : null
           )}
@@ -337,25 +321,42 @@ function TabsDetalle({
     if (!fixtureGenerado && activeTab === 'fixture') setActiveTab('parejas')
   }, [fixtureGenerado])
 
+  const [soloMis, setSoloMis] = useState(false)
+  const { data: user } = useUser()
+  const showMisPill = !!user && (activeTab === 'fixture' || activeTab === 'horario')
   const sembradoCats = rosterCats.filter(c => c.formato === 'desafio_sembrado')
 
   return (
     <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
-      <Tabs.List className="flex border-b border-navy/10 -mx-4 px-4 mb-4 overflow-x-auto">
-        {fixtureGenerado && (
-          <Tabs.Trigger value="fixture" className={TAB_CLS}>Fixture</Tabs.Trigger>
+      <div className="flex items-center border-b border-navy/10 -mx-4 px-4 mb-4">
+        <Tabs.List className="flex overflow-x-auto no-scrollbar flex-1 min-w-0">
+          {fixtureGenerado && (
+            <Tabs.Trigger value="fixture" className={TAB_CLS}>Fixture</Tabs.Trigger>
+          )}
+          {hasBracket && (
+            <Tabs.Trigger value="bracket" className={TAB_CLS}>Bracket</Tabs.Trigger>
+          )}
+          {hasTurnos && (
+            <Tabs.Trigger value="horario" className={TAB_CLS}>Horario</Tabs.Trigger>
+          )}
+          <Tabs.Trigger value="parejas" className={TAB_CLS}>Parejas</Tabs.Trigger>
+          {isAdmin && hasDesafioSembrado && (
+            <Tabs.Trigger value="sembrado" className={TAB_CLS}>Sembrado</Tabs.Trigger>
+          )}
+        </Tabs.List>
+        {showMisPill && (
+          <button
+            type="button"
+            onClick={() => setSoloMis(v => !v)}
+            className={`shrink-0 ml-3 flex items-center gap-1 px-3 py-1 rounded-full font-inter text-xs font-semibold transition-colors focus:outline-none ${
+              soloMis ? 'bg-navy text-gold' : 'bg-white border border-navy/20 text-slate hover:border-navy/40 hover:text-navy'
+            }`}
+          >
+            <User className="h-3 w-3 shrink-0" />
+            Mis partidos
+          </button>
         )}
-        {hasBracket && (
-          <Tabs.Trigger value="bracket" className={TAB_CLS}>Bracket</Tabs.Trigger>
-        )}
-        {hasTurnos && (
-          <Tabs.Trigger value="horario" className={TAB_CLS}>Horario</Tabs.Trigger>
-        )}
-        <Tabs.Trigger value="parejas" className={TAB_CLS}>Parejas</Tabs.Trigger>
-        {isAdmin && hasDesafioSembrado && (
-          <Tabs.Trigger value="sembrado" className={TAB_CLS}>Sembrado</Tabs.Trigger>
-        )}
-      </Tabs.List>
+      </div>
 
       <Tabs.Content value="fixture">
         <FixtureTab
@@ -364,6 +365,7 @@ function TabsDetalle({
           isAdmin={isAdmin}
           onCargarResultado={onCargarResultado}
           colegioRival={torneo.colegio_rival ?? undefined}
+          soloMis={soloMis}
         />
       </Tabs.Content>
 
@@ -372,7 +374,7 @@ function TabsDetalle({
       </Tabs.Content>
 
       <Tabs.Content value="horario">
-        <HorarioTab categorias={categorias} torneoId={torneo.id} isAdmin={isAdmin} onCargarResultado={onCargarResultado} />
+        <HorarioTab categorias={categorias} torneoId={torneo.id} isAdmin={isAdmin} onCargarResultado={onCargarResultado} soloMis={soloMis} />
       </Tabs.Content>
 
       <Tabs.Content value="parejas">

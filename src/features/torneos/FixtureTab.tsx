@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react'
-import { User } from 'lucide-react'
 import PartidoRow from './PartidoRow'
 import { buildCatColorMap } from './catColors'
 import { useUser } from '../../hooks/useUser'
@@ -13,6 +12,7 @@ interface Props {
   isAdmin: boolean
   onCargarResultado: (partido: PartidoFixture) => void
   colegioRival?: string
+  soloMis?: boolean
 }
 
 function isMiPartido(p: PartidoFixture, uid: string): boolean {
@@ -222,9 +222,8 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
   )
 }
 
-export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResultado, colegioRival }: Props) {
+export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResultado, colegioRival, soloMis = false }: Props) {
   const [vista, setVista] = useState<Vista>('grupo')
-  const [soloMis, setSoloMis] = useState(false)
   const { data: user } = useUser()
 
   const catColorMap = useMemo(() => buildCatColorMap(categorias.map(c => c.nombre)), [categorias])
@@ -276,17 +275,11 @@ export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResu
 
   return (
     <div>
-      <div className="flex gap-2 overflow-x-auto pb-0.5 no-scrollbar mb-4">
-        {showPills && <PillSelector vista={vista} onChange={setVista} />}
-        {user && (
-          <FilterPill
-            label="Solo mis partidos"
-            active={soloMis}
-            onClick={() => setSoloMis(v => !v)}
-            icon={<User className="h-3 w-3 shrink-0" />}
-          />
-        )}
-      </div>
+      {showPills && (
+        <div className="flex gap-2 overflow-x-auto pb-0.5 no-scrollbar mb-4">
+          <PillSelector vista={vista} onChange={setVista} />
+        </div>
+      )}
 
       {(vista === 'grupo' || !showPills) && (
         <VistaGrupo
