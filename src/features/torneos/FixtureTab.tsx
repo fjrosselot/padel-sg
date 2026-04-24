@@ -131,7 +131,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
           <h3 className="font-manrope text-base font-bold text-navy border-l-4 border-gold pl-3 mb-4">{cat.nombre}</h3>
 
           {/* Groups: 2-column grid on desktop, capped at ~360px per column */}
-          <div className="grid grid-cols-1 sm:grid-cols-[repeat(2,minmax(0,360px))] gap-x-6">
+          <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(240px,360px))] gap-x-6">
             {(cat.grupos ?? []).map(g => (
               <div key={g.letra}>
                 <SectionLabel>Grupo {g.letra}</SectionLabel>
@@ -190,7 +190,7 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
 }) {
   const keys = [...grupos.keys()].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-[repeat(2,minmax(0,360px))] gap-x-6">
+    <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(240px,360px))] gap-x-6">
       {keys.map(k => (
         <div key={k}>
           <SectionLabel>{labelPrefix}{k}</SectionLabel>
