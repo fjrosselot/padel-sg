@@ -115,7 +115,7 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
             <tr>
               <th
                 className="text-left px-3 py-2"
-                style={{ background: '#f8fafc', width: 72, borderBottom: '2px solid #162844', borderRight: '1px solid #e2e8f0' }}
+                style={{ background: '#f8fafc', width: 72, borderBottom: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}
               >
                 <span className="font-inter text-[10px] font-bold uppercase tracking-[0.1em] text-[#94b0cc]">Cancha</span>
               </th>
@@ -123,7 +123,7 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
                 <th
                   key={t}
                   className="text-center px-3 py-2 whitespace-nowrap"
-                  style={{ background: '#f8fafc', width: 200, borderBottom: '2px solid #162844', borderRight: '1px solid #e2e8f0' }}
+                  style={{ background: '#f8fafc', width: 200, borderBottom: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}
                 >
                   <span className="font-manrope text-[13px] font-bold text-[#162844]">{t}</span>
                 </th>
@@ -131,14 +131,13 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
             </tr>
           </thead>
           <tbody>
-            {courts.map((court, ci) => (
-              <tr key={court} style={{ background: ci % 2 === 0 ? 'white' : '#fafbfc' }}>
+            {courts.map((court) => (
+              <tr key={court}>
                 <td
                   className="text-center align-middle font-manrope text-[12px] font-bold text-[#162844] whitespace-nowrap"
                   style={{
                     background: '#f8fafc',
-                    border: '1px solid #e8eef4',
-                    borderLeft: '3px solid #e8c547',
+                    border: '1px solid #e2e8f0',
                     padding: '0 10px',
                     letterSpacing: '0.05em',
                   }}
