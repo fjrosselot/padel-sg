@@ -130,8 +130,8 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
         <div key={cat.nombre}>
           <h3 className="font-manrope text-base font-bold text-navy border-l-4 border-gold pl-3 mb-4">{cat.nombre}</h3>
 
-          {/* Groups: 2-column grid on desktop */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+          {/* Groups: 2-column grid on desktop, capped at ~360px per column */}
+          <div className="grid grid-cols-1 sm:grid-cols-[repeat(2,minmax(0,360px))] gap-x-6">
             {(cat.grupos ?? []).map(g => (
               <div key={g.letra}>
                 <SectionLabel>Grupo {g.letra}</SectionLabel>
@@ -149,7 +149,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
               <SectionLabel>Eliminatoria</SectionLabel>
               <div className="space-y-1">
                 {cat.faseEliminatoria.map(p => (
-                  <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} />
+                  <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} />
                 ))}
               </div>
             </>
@@ -159,7 +159,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
               <SectionLabel>🥈 Copa Plata</SectionLabel>
               <div className="space-y-1">
                 {cat.consola.map(p => (
-                  <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} />
+                  <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} />
                 ))}
               </div>
             </>
