@@ -212,7 +212,7 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
           <div className="space-y-1">
             {grupos.get(k)!.map(p => (
               <div key={p.id} className="flex items-center gap-2">
-                <Badge variant="outline" className="text-[10px] shrink-0 text-muted whitespace-nowrap" title={catPorPartido.get(p.id) ?? ''}>
+                <Badge variant="outline" className="text-[10px] shrink-0 text-muted whitespace-nowrap min-w-[34px] justify-center" title={catPorPartido.get(p.id) ?? ''}>
                   {abbrevCat(catPorPartido.get(p.id) ?? '')}
                 </Badge>
                 <div className="flex-1 min-w-0">
