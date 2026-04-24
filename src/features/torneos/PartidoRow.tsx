@@ -10,9 +10,10 @@ interface Props {
   isAdmin: boolean
   onCargarResultado: (partido: PartidoFixture) => void
   sembradoNum?: number
+  label?: string
 }
 
-export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResultado, sembradoNum }: Props) {
+export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResultado, sembradoNum, label }: Props) {
   const qc = useQueryClient()
 
   const toggleBloqueo = useMutation({
@@ -119,6 +120,9 @@ export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResulta
           <span className="font-inter font-bold text-[11px] text-[#162844]">{partido.turno ?? '--:--'}</span>
           {partido.cancha != null && (
             <span className="font-inter text-[10px] text-[#94b0cc]">· C{partido.cancha}</span>
+          )}
+          {label && (
+            <span className="font-inter text-[10px] text-[#94b0cc]">· {label}</span>
           )}
           {isAdmin && played && <div className="ml-auto">{LockBtn}</div>}
         </div>
