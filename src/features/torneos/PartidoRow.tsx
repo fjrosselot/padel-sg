@@ -4,18 +4,43 @@ import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
 import type { PartidoFixture } from '../../lib/fixture/types'
 
+function fasLabel(p: PartidoFixture): string {
+  switch (p.fase) {
+    case 'grupo':               return `P-${p.numero}`
+    case 'cuartos':             return `🏆 C-${p.numero}`
+    case 'semifinal':           return `🏆 SF-${p.numero}`
+    case 'tercer_lugar':        return '🏆 3P'
+    case 'final':               return '🏆 Final'
+    case 'consolacion_cuartos': return `🥈 C-${p.numero}`
+    case 'consolacion_sf':      return `🥈 SF-${p.numero}`
+    case 'consolacion_final':   return '🥈 Final'
+    default:                    return String(p.numero)
+  }
+}
+
+function abbrevCat(nombre: string): string {
+  if (nombre.length <= 4) return nombre
+  const parts = nombre.trim().split(/\s+/)
+  let result = ''
+  for (const p of parts) {
+    if (/^\d+$/.test(p)) result += p
+    else result += p[0].toUpperCase()
+  }
+  return result
+}
+
 interface Props {
   partido: PartidoFixture
   torneoId: string
   isAdmin: boolean
   onCargarResultado: (partido: PartidoFixture) => void
+  catNombre?: string
   sembradoNum?: number
-  label?: string
   className?: string
   headerBg?: string
 }
 
-export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResultado, sembradoNum, label, className, headerBg }: Props) {
+export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResultado, catNombre, sembradoNum, className, headerBg }: Props) {
   const qc = useQueryClient()
 
   const toggleBloqueo = useMutation({
@@ -66,8 +91,9 @@ export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResulta
       {partido.cancha != null && (
         <span className="font-inter text-[10px] text-[#94b0cc]">· C{partido.cancha}</span>
       )}
-      {label && (
-        <span className="font-inter text-[10px] text-[#94b0cc]">· {label}</span>
+      <span className="font-inter text-[10px] text-[#94b0cc]">· {fasLabel(partido)}</span>
+      {catNombre && (
+        <span className="font-inter text-[10px] text-[#94b0cc]">· {abbrevCat(catNombre)}</span>
       )}
       {isAdmin && played && <div className="ml-auto">{LockBtn}</div>}
     </div>

@@ -2,20 +2,6 @@ import PartidoRow from './PartidoRow'
 import { buildCatColorMap } from './catColors'
 import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
-function partidoLabel(p: PartidoFixture): string {
-  switch (p.fase) {
-    case 'grupo':               return `P-${p.numero}`
-    case 'cuartos':             return `🏆 C-${p.numero}`
-    case 'semifinal':           return `🏆 SF-${p.numero}`
-    case 'tercer_lugar':        return '🏆 3P'
-    case 'final':               return '🏆 Final'
-    case 'consolacion_cuartos': return `🥈 C-${p.numero}`
-    case 'consolacion_sf':      return `🥈 SF-${p.numero}`
-    case 'consolacion_final':   return '🥈 Final'
-    default:                    return String(p.numero)
-  }
-}
-
 interface MatchEntry {
   partido: PartidoFixture
   catNombre: string
@@ -135,7 +121,7 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
                           torneoId={torneoId}
                           isAdmin={isAdmin}
                           onCargarResultado={onCargarResultado}
-                          label={`${partidoLabel(entry.partido)} · ${entry.catNombre}`}
+                          catNombre={entry.catNombre}
                           className="h-full"
                           headerBg={catColorMap.get(entry.catNombre)?.bg}
                         />

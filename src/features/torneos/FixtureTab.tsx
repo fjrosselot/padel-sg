@@ -5,16 +5,6 @@ import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
 type Vista = 'grupo' | 'cancha' | 'hora'
 
-const FASE_LABEL: Record<string, string> = {
-  cuartos: '🏆 Cuartos',
-  semifinal: '🏆 Semifinal',
-  tercer_lugar: '🏆 3er lugar',
-  final: '🏆 Final',
-  consolacion_cuartos: '🥈 Cuartos',
-  consolacion_sf: '🥈 Semifinal',
-  consolacion_final: '🥈 Final',
-}
-
 interface Props {
   categorias: CategoriaFixture[]
   torneoId: string
@@ -49,17 +39,6 @@ function PillSelector({ vista, onChange }: { vista: Vista; onChange: (v: Vista) 
   )
 }
 
-function abbrevCat(nombre: string): string {
-  if (nombre.length <= 4) return nombre
-  const parts = nombre.trim().split(/\s+/)
-  let result = ''
-  for (const p of parts) {
-    if (/^\d+$/.test(p)) result += p
-    else result += p[0].toUpperCase()
-  }
-  return result
-}
-
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-2 mb-3">
@@ -71,8 +50,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
-// Scoreboard + flat list for desafio_puntos / desafio_sembrado categories
-function DesafioSection({ categorias, torneoId, isAdmin, onCargarResultado, colegioRival }: Props) {
+function DesafioSection({ categorias, torneoId, isAdmin, onCargarResultado, colegioRival, catColorMap }: Props & { catColorMap: Map<string, { bg: string; dot: string }> }) {
   const allPartidos = categorias.flatMap(c => c.partidos ?? [])
   const sgTotal = allPartidos.filter(p => p.ganador === 1).length
   const rivalTotal = allPartidos.filter(p => p.ganador === 2).length
@@ -110,7 +88,9 @@ function DesafioSection({ categorias, torneoId, isAdmin, onCargarResultado, cole
                   torneoId={torneoId}
                   isAdmin={isAdmin}
                   onCargarResultado={onCargarResultado}
+                  catNombre={cat.nombre}
                   sembradoNum={isSembrado ? p.numero : undefined}
+                  headerBg={catColorMap.get(cat.nombre)?.bg}
                 />
               ))}
               {partidos.length === 0 && (
@@ -142,7 +122,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
                   <SectionLabel>Grupo {g.letra}</SectionLabel>
                   <div className="space-y-1">
                     {g.partidos.map(p => (
-                      <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} headerBg={headerBg} />
+                      <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catNombre={cat.nombre} headerBg={headerBg} />
                     ))}
                   </div>
                 </div>
@@ -153,7 +133,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
                   <SectionLabel>🏆 Copa Oro</SectionLabel>
                   <div className="space-y-1">
                     {cat.faseEliminatoria.map(p => (
-                      <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} headerBg={headerBg} />
+                      <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catNombre={cat.nombre} headerBg={headerBg} />
                     ))}
                   </div>
                 </div>
@@ -164,7 +144,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
                   <SectionLabel>🥈 Copa Plata</SectionLabel>
                   <div className="space-y-1">
                     {cat.consola.map(p => (
-                      <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} headerBg={headerBg} />
+                      <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catNombre={cat.nombre} headerBg={headerBg} />
                     ))}
                   </div>
                 </div>
@@ -181,6 +161,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
           isAdmin={isAdmin}
           onCargarResultado={onCargarResultado}
           colegioRival={colegioRival}
+          catColorMap={catColorMap}
         />
       )}
     </div>
@@ -205,11 +186,8 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
           <div className="space-y-1">
             {grupos.get(k)!.map(p => {
               const catNombre = catPorPartido.get(p.id) ?? ''
-              const catAbbrev = abbrevCat(catNombre)
-              const faseNombre = p.fase !== 'grupo' ? (FASE_LABEL[p.fase] ?? '') : ''
-              const label = faseNombre ? `${catAbbrev} · ${faseNombre}` : catAbbrev
               return (
-                <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={label} headerBg={catColorMap.get(catNombre)?.bg} />
+                <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catNombre={catNombre} headerBg={catColorMap.get(catNombre)?.bg} />
               )
             })}
           </div>
