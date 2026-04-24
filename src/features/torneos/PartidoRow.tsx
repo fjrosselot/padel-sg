@@ -108,37 +108,61 @@ export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResulta
         {LockBtn}
       </div>
 
-      {/* Mobile layout */}
-      <div className="sm:hidden px-3 py-2">
+      {/* Mobile layout — 2 lines per team, score badge in center */}
+      <div className="sm:hidden px-3 py-2.5">
         <div className="flex items-center gap-2">
-          <div className="shrink-0 text-center leading-tight min-w-[40px]">
+          {sembradoNum !== undefined && (
+            <span className="font-inter font-bold text-[#e8c547] text-xs w-4 shrink-0 text-center tabular-nums">
+              {sembradoNum}
+            </span>
+          )}
+          <div className="shrink-0 text-center leading-tight min-w-[36px]">
             <div className="font-inter font-bold text-[11px] text-[#162844]">{partido.turno ?? '--:--'}</div>
             <div className="font-inter text-[9px] text-[#94b0cc]">{partido.cancha != null ? `C${partido.cancha}` : '—'}</div>
           </div>
           <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dotColor }} />
-          <div className="flex-1 flex items-center gap-1.5 min-w-0">
-            <span className={`font-inter text-[12px] flex-1 truncate min-w-0 ${
-              !partido.pareja1 ? 'italic text-[#94a3b8]'
-              : played
-                ? partido.ganador === 1 ? 'font-bold text-[#162844]' : 'text-[#94a3b8]'
+
+          {/* Team 1 */}
+          <div className="flex-1 min-w-0">
+            {(partido.pareja1?.nombre ?? 'Por definir').split(' / ').map((n, i) => (
+              <p key={i} className={`font-inter text-[12px] truncate leading-snug ${
+                !partido.pareja1 ? 'italic text-[#94a3b8]'
+                : played ? partido.ganador === 1 ? 'font-semibold text-[#162844]' : 'text-[#94a3b8]'
                 : 'text-[#334155]'
-            }`}>
-              {partido.pareja1?.nombre ?? 'Por definir'}
-            </span>
-            <span className="font-inter text-[9px] font-bold text-[#94b0cc] bg-[#f1f5f9] px-1 py-0.5 rounded shrink-0">vs</span>
-            <span className={`font-inter text-[12px] flex-1 truncate min-w-0 ${
-              !partido.pareja2 ? 'italic text-[#94a3b8]'
-              : played
-                ? partido.ganador === 2 ? 'font-bold text-[#162844]' : 'text-[#94a3b8]'
-                : 'text-[#334155]'
-            }`}>
-              {partido.pareja2?.nombre ?? 'Por definir'}
-            </span>
+              }`}>{n}</p>
+            ))}
           </div>
-          {played && partido.resultado ? (
-            <span className="font-inter text-[11px] font-semibold text-[#16a34a] shrink-0">{partido.resultado}</span>
-          ) : null}
-          {CargarBtn}
+
+          {/* Center badge: score / cargar / vs */}
+          <div className="shrink-0 flex items-center justify-center">
+            {played && partido.resultado ? (
+              <span className="font-inter text-[10px] font-bold text-white bg-[#162844] px-1.5 py-0.5 rounded whitespace-nowrap">
+                {partido.resultado}
+              </span>
+            ) : puedeCargar ? (
+              <button
+                type="button"
+                onClick={() => onCargarResultado(partido)}
+                className="font-inter text-[10px] font-semibold text-[#e8c547] border border-[#e8c547] rounded px-1.5 py-0.5 whitespace-nowrap"
+              >
+                Cargar
+              </button>
+            ) : (
+              <span className="font-inter text-[9px] font-bold text-[#94b0cc]">vs</span>
+            )}
+          </div>
+
+          {/* Team 2 */}
+          <div className="flex-1 min-w-0">
+            {(partido.pareja2?.nombre ?? 'Por definir').split(' / ').map((n, i) => (
+              <p key={i} className={`font-inter text-[12px] truncate leading-snug ${
+                !partido.pareja2 ? 'italic text-[#94a3b8]'
+                : played ? partido.ganador === 2 ? 'font-semibold text-[#162844]' : 'text-[#94a3b8]'
+                : 'text-[#334155]'
+              }`}>{n}</p>
+            ))}
+          </div>
+
           {LockBtn}
         </div>
       </div>
