@@ -264,6 +264,13 @@ export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResu
         }
       }
     }
+    for (const arr of porCancha.values()) {
+      arr.sort((a, b) => (a.turno ?? '').localeCompare(b.turno ?? ''))
+    }
+    for (const arr of porHora.values()) {
+      arr.sort((a, b) => (a.cancha ?? 0) - (b.cancha ?? 0))
+    }
+
     return { porCancha, porHora, catPorPartido }
   }, [categorias])
 
