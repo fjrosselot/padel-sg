@@ -1,15 +1,28 @@
 import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
-const CARD_H = 92
+const CARD_HEADER_H = 20
+const HALF_H = 36
+const CARD_H = CARD_HEADER_H + HALF_H * 2   // 92
+const CARD_CONN = CARD_HEADER_H + HALF_H     // 56 — where connectors attach
 const CARD_GAP = 32
-const SLOT = CARD_H + CARD_GAP
+const SLOT = CARD_H + CARD_GAP              // 124
+
+const FASE_LABEL: Record<string, string> = {
+  cuartos: 'Cuartos',
+  semifinal: 'Semifinal',
+  tercer_lugar: '3er lugar',
+  final: 'Final',
+  consolacion_cuartos: '🥈 Cuartos',
+  consolacion_sf: '🥈 Semifinal',
+  consolacion_final: '🥈 Final',
+}
 
 function connectorPaths(leftCount: number) {
   const rightCount = leftCount / 2
   const paths: string[] = []
   for (let i = 0; i < rightCount; i++) {
-    const topY = i * 2 * SLOT + CARD_H / 2
-    const botY = (i * 2 + 1) * SLOT + CARD_H / 2
+    const topY = i * 2 * SLOT + CARD_CONN
+    const botY = (i * 2 + 1) * SLOT + CARD_CONN
     const midY = (topY + botY) / 2
     paths.push(`M0,${topY} H22 V${midY} H44`)
     paths.push(`M0,${botY} H22 V${midY}`)
@@ -25,13 +38,7 @@ function BracketConnector({ leftCount, isPlata = false }: { leftCount: number; i
   return (
     <svg width="44" height={svgH} viewBox={`0 0 44 ${svgH}`} fill="none" className="shrink-0">
       {paths.map((d, i) => (
-        <path
-          key={i}
-          d={d}
-          stroke={stroke}
-          strokeWidth="1.5"
-          strokeDasharray={isPlata ? '4 3' : undefined}
-        />
+        <path key={i} d={d} stroke={stroke} strokeWidth="1.5" strokeDasharray={isPlata ? '4 3' : undefined} />
       ))}
     </svg>
   )
@@ -51,7 +58,6 @@ function TeamHalf({ names, isWinner, pending, score, border }: {
   score: string
   border?: boolean
 }) {
-  const HALF = CARD_H / 2
   const textCls = pending
     ? 'text-[#94a3b8] italic'
     : isWinner
@@ -66,7 +72,7 @@ function TeamHalf({ names, isWinner, pending, score, border }: {
   return (
     <div
       className={`flex items-center gap-2 px-2.5 ${isWinner && !pending ? 'bg-[rgba(232,197,71,0.06)]' : 'bg-white'}`}
-      style={{ height: HALF, ...(border ? { borderBottom: '1px solid #f1f5f9' } : {}) }}
+      style={{ height: HALF_H, ...(border ? { borderBottom: '1px solid #f1f5f9' } : {}) }}
     >
       <div className="flex-1 min-w-0">
         <p className={`font-inter text-[11px] truncate leading-snug ${textCls}`}>{names[0]}</p>
@@ -74,7 +80,7 @@ function TeamHalf({ names, isWinner, pending, score, border }: {
           <p className={`font-inter text-[11px] truncate leading-snug ${textCls}`}>{names[1]}</p>
         )}
       </div>
-      <span className={`font-manrope text-[15px] font-bold shrink-0 w-5 text-right tabular-nums ${scoreCls}`}>
+      <span className={`font-manrope text-[14px] font-bold shrink-0 w-5 text-right tabular-nums ${scoreCls}`}>
         {score}
       </span>
     </div>
@@ -100,8 +106,23 @@ function BracketCard({ partido, isFinal = false, isPlataFinal = false }: {
     ? 'border-2 border-[#94b0cc] shadow-[0_0_0_3px_rgba(148,176,204,0.2)]'
     : 'border-[1.5px] border-navy/[0.12] shadow-[0_1px_4px_rgba(0,0,0,0.06)]'
 
+  const faseLabel = FASE_LABEL[partido.fase] ?? partido.fase
+
   return (
     <div className={`w-[220px] rounded-lg overflow-hidden bg-white ${cardClass}`} style={{ height: CARD_H }}>
+      {/* Metadata header */}
+      <div
+        className="flex items-center gap-1 px-2.5 bg-[#f8fafc] border-b border-[#f1f5f9]"
+        style={{ height: CARD_HEADER_H }}
+      >
+        <span className="font-inter text-[10px] font-bold text-[#162844]">
+          {partido.turno ?? '--:--'}
+        </span>
+        {partido.cancha != null && (
+          <span className="font-inter text-[10px] text-[#94b0cc]">· C{partido.cancha}</span>
+        )}
+        <span className="font-inter text-[10px] text-[#94b0cc]">· {faseLabel}</span>
+      </div>
       <TeamHalf names={names1} isWinner={win1} pending={pending} score={s1} border />
       <TeamHalf names={names2} isWinner={win2} pending={pending} score={s2} />
     </div>
@@ -111,26 +132,12 @@ function BracketCard({ partido, isFinal = false, isPlataFinal = false }: {
 const ELIM_PHASES = ['cuartos', 'semifinal', 'tercer_lugar', 'final'] as const
 const CONSOLA_PHASES = ['consolacion_cuartos', 'consolacion_sf', 'consolacion_final'] as const
 
-const FASE_LABEL: Record<string, string> = {
-  cuartos: 'Cuartos',
-  semifinal: 'Semifinal',
-  tercer_lugar: '3er lugar',
-  final: 'Final',
-  consolacion_cuartos: 'Cuartos Plata',
-  consolacion_sf: 'SF Plata',
-  consolacion_final: 'Final Plata',
-}
-
 function BracketTree({ rounds, isPlata = false }: {
   rounds: { label: string; partidos: PartidoFixture[] }[]
   isPlata?: boolean
 }) {
   if (rounds.length === 0) return null
 
-  // Per-round vertical offset so each card centers on its connector endpoint.
-  // paddingTop(ri) = (2^ri - 1) * SLOT/2
-  // cardGap(ri)    = 2^ri * SLOT - CARD_H  (doubles each round)
-  // trophyMarginTop aligns the icon center with the final card center.
   const lastRoundOffset = ((2 ** (rounds.length - 1)) - 1) * SLOT / 2
   const trophyMarginTop = Math.max(0, 28 + lastRoundOffset - (SLOT - CARD_H) / 2)
 
