@@ -117,6 +117,13 @@ function BracketTree({ rounds, isPlata = false }: {
 }) {
   if (rounds.length === 0) return null
 
+  // Per-round vertical offset so each card centers on its connector endpoint.
+  // paddingTop(ri) = (2^ri - 1) * SLOT/2
+  // cardGap(ri)    = 2^ri * SLOT - CARD_H  (doubles each round)
+  // trophyMarginTop aligns the icon center with the final card center.
+  const lastRoundOffset = ((2 ** (rounds.length - 1)) - 1) * SLOT / 2
+  const trophyMarginTop = Math.max(0, 28 + lastRoundOffset - (SLOT - CARD_H) / 2)
+
   return (
     <div className="overflow-x-auto pb-4">
       <div className="flex items-start gap-0 min-w-max">
@@ -124,6 +131,8 @@ function BracketTree({ rounds, isPlata = false }: {
           const isLast = ri === rounds.length - 1
           const nextRound = rounds[ri + 1]
           const hasConnector = !isLast && nextRound && round.partidos.length > nextRound.partidos.length
+          const cardTopOffset = ((2 ** ri) - 1) * SLOT / 2
+          const cardGap = (2 ** ri) * SLOT - CARD_H
 
           return (
             <div key={round.label} className="flex items-start shrink-0">
@@ -131,7 +140,7 @@ function BracketTree({ rounds, isPlata = false }: {
                 <p className="font-inter text-[9px] font-bold uppercase tracking-[0.12em] text-[#94b0cc] mb-3 text-center w-[200px]" style={{ height: 16 }}>
                   {round.label}
                 </p>
-                <div className="flex flex-col" style={{ gap: CARD_GAP }}>
+                <div className="flex flex-col" style={{ gap: cardGap, paddingTop: cardTopOffset }}>
                   {round.partidos.map(p => (
                     <BracketCard
                       key={p.id}
@@ -143,7 +152,7 @@ function BracketTree({ rounds, isPlata = false }: {
                 </div>
               </div>
               {hasConnector && (
-                <div style={{ marginTop: 28 }}>
+                <div style={{ marginTop: 28 + cardTopOffset }}>
                   <BracketConnector leftCount={round.partidos.length} isPlata={isPlata} />
                 </div>
               )}
@@ -151,7 +160,7 @@ function BracketTree({ rounds, isPlata = false }: {
           )
         })}
 
-        <div className="flex flex-col items-center justify-center px-4 mt-7" style={{ height: SLOT }}>
+        <div className="flex flex-col items-center justify-center px-4" style={{ height: SLOT, marginTop: trophyMarginTop }}>
           <span className="text-[28px]">{isPlata ? '🥈' : '🏆'}</span>
           <p className={`text-[9px] font-bold uppercase tracking-[0.1em] mt-1 text-center leading-tight ${isPlata ? 'text-[#94b0cc]' : 'text-[#e8c547]'}`}>
             Copa<br />{isPlata ? 'Plata' : 'Oro'}
