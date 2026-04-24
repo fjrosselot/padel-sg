@@ -61,9 +61,12 @@ function abbrevCat(nombre: string): string {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="font-inter text-[10px] font-bold uppercase tracking-widest text-muted mb-2 mt-4 first:mt-0 pb-1 border-b border-surface-high">
-      {children}
-    </p>
+    <div className="flex items-center gap-2 mb-3">
+      <span className="w-2.5 h-2.5 rounded-sm bg-[#e8c547] shrink-0" />
+      <p className="font-inter text-[12px] font-bold uppercase tracking-[0.09em] text-[#162844]">
+        {children}
+      </p>
+    </div>
   )
 }
 
@@ -131,7 +134,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
           <h3 className="font-manrope text-base font-bold text-navy border-l-4 border-gold pl-3 mb-4">{cat.nombre}</h3>
 
           {/* Groups: 2-column grid on desktop, capped at ~360px per column */}
-          <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(240px,360px))] gap-x-6">
+          <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(240px,360px))] gap-x-6 gap-y-6">
             {(cat.grupos ?? []).map(g => (
               <div key={g.letra}>
                 <SectionLabel>Grupo {g.letra}</SectionLabel>
@@ -190,7 +193,7 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
 }) {
   const keys = [...grupos.keys()].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(240px,360px))] gap-x-6">
+    <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(240px,360px))] gap-x-6 gap-y-6">
       {keys.map(k => (
         <div key={k}>
           <SectionLabel>{labelPrefix}{k}</SectionLabel>
