@@ -372,7 +372,7 @@ function TabsDetalle({
       </Tabs.Content>
 
       <Tabs.Content value="horario">
-        <HorarioTab categorias={categorias} />
+        <HorarioTab categorias={categorias} torneoId={torneo.id} isAdmin={isAdmin} onCargarResultado={onCargarResultado} />
       </Tabs.Content>
 
       <Tabs.Content value="parejas">

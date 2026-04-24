@@ -1,3 +1,4 @@
+import PartidoRow from './PartidoRow'
 import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
 const CAT_COLORS: [string, string][] = [
@@ -18,105 +19,26 @@ function catColor(nombre: string): string {
   return '#64748b'
 }
 
-function catBg(nombre: string): string {
-  const c = catColor(nombre)
-  return c + '22'
-}
-
 const ELIM_ORO = new Set(['cuartos', 'semifinal', 'tercer_lugar', 'final'])
 const ELIM_PLATA = new Set(['consolacion_cuartos', 'consolacion_sf', 'consolacion_final'])
 
-const FASE_LABEL: Record<string, string> = {
-  grupo: 'Grupo',
-  cuartos: 'Cuartos',
-  semifinal: 'Semifinal',
-  tercer_lugar: '3er lugar',
-  final: 'Final',
-  consolacion_cuartos: 'QF Plata',
-  consolacion_sf: 'SF Plata',
-  consolacion_final: '🥈 Final',
-  desafio: 'Desafío',
-}
-
 function partidoLabel(p: PartidoFixture): string {
   switch (p.fase) {
-    case 'grupo':              return `P·${p.numero}`
-    case 'cuartos':            return `C·${p.numero}`
-    case 'semifinal':          return `SF·${p.numero}`
-    case 'tercer_lugar':       return '3P'
-    case 'final':              return `F·${p.numero}`
-    case 'consolacion_cuartos':return `CP·${p.numero}`
-    case 'consolacion_sf':     return `SF·P${p.numero}`
-    case 'consolacion_final':  return `F·P${p.numero}`
-    default:                   return String(p.numero)
+    case 'grupo':               return `P-${p.numero}`
+    case 'cuartos':             return `🏆 C-${p.numero}`
+    case 'semifinal':           return `🏆 SF-${p.numero}`
+    case 'tercer_lugar':        return '🏆 3P'
+    case 'final':               return '🏆 Final'
+    case 'consolacion_cuartos': return `🥈 C-${p.numero}`
+    case 'consolacion_sf':      return `🥈 SF-${p.numero}`
+    case 'consolacion_final':   return '🥈 Final'
+    default:                    return String(p.numero)
   }
-}
-
-function parseScores(resultado: string | null): [string, string] {
-  if (!resultado) return ['—', '—']
-  const parts = resultado.split('-')
-  if (parts.length !== 2) return [resultado, '']
-  return [parts[0].trim(), parts[1].trim()]
 }
 
 interface MatchEntry {
   partido: PartidoFixture
   catNombre: string
-  isPlata: boolean
-}
-
-function MatchCell({ entry }: { entry: MatchEntry }) {
-  const { partido, catNombre, isPlata } = entry
-  const [s1, s2] = parseScores(partido.resultado)
-  const win1 = partido.ganador === 1
-  const win2 = partido.ganador === 2
-  const pending = !partido.ganador
-
-  const stripeColor = isPlata ? '#94b0cc'
-    : ELIM_ORO.has(partido.fase) ? '#e8c547'
-    : catColor(catNombre)
-
-  const borderClass = partido.fase === 'final'
-    ? 'border-2 border-[#e8c547]'
-    : partido.fase === 'consolacion_final'
-    ? 'border-2 border-[#94b0cc]'
-    : 'border border-[#e2e8f0]'
-
-  return (
-    <div className={`rounded-lg overflow-hidden bg-white ${borderClass}`} style={{ minHeight: 58 }}>
-      <div style={{ height: 3, background: stripeColor }} />
-      {/* Header */}
-      <div className="flex items-center justify-between gap-1 px-2 py-[3px] bg-[#f8fafc] border-b border-[#f1f5f9]">
-        <span className="font-inter text-[9px] font-bold text-[#162844]">{partidoLabel(partido)}</span>
-        <span className="font-inter text-[9px] truncate" style={{ color: catColor(catNombre) }}>
-          {catNombre}
-        </span>
-      </div>
-      {/* Team 1 */}
-      <div className={`flex items-center gap-1 px-2 min-h-[17px] ${win1 && !pending ? 'bg-[rgba(232,197,71,0.05)]' : ''}`}>
-        <span className={`font-inter text-[10px] flex-1 truncate leading-snug ${
-          pending ? 'text-[#94a3b8] italic' : win1 ? 'font-bold text-[#162844]' : 'text-[#94a3b8]'
-        }`}>
-          {partido.pareja1?.nombre ?? 'Por definir'}
-        </span>
-        <span className={`font-manrope text-[11px] font-bold shrink-0 min-w-[18px] text-right tabular-nums ${
-          pending ? 'text-[#cbd5e1]' : win1 ? 'text-[#e8c547]' : 'text-[#94b0cc]'
-        }`}>{s1}</span>
-      </div>
-      <div className="h-px mx-2 bg-[#f1f5f9]" />
-      {/* Team 2 */}
-      <div className={`flex items-center gap-1 px-2 min-h-[17px] ${win2 && !pending ? 'bg-[rgba(232,197,71,0.05)]' : ''}`}>
-        <span className={`font-inter text-[10px] flex-1 truncate leading-snug ${
-          pending ? 'text-[#94a3b8] italic' : win2 ? 'font-bold text-[#162844]' : 'text-[#94a3b8]'
-        }`}>
-          {partido.pareja2?.nombre ?? 'Por definir'}
-        </span>
-        <span className={`font-manrope text-[11px] font-bold shrink-0 min-w-[18px] text-right tabular-nums ${
-          pending ? 'text-[#cbd5e1]' : win2 ? 'text-[#e8c547]' : 'text-[#94b0cc]'
-        }`}>{s2}</span>
-      </div>
-    </div>
-  )
 }
 
 function Legend({ catNames }: { catNames: string[] }) {
@@ -143,13 +65,15 @@ function Legend({ catNames }: { catNames: string[] }) {
 
 interface Props {
   categorias: CategoriaFixture[]
+  torneoId: string
+  isAdmin: boolean
+  onCargarResultado: (partido: PartidoFixture) => void
 }
 
-export default function HorarioTab({ categorias }: Props) {
+export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResultado }: Props) {
   const entries: MatchEntry[] = []
 
   for (const cat of categorias) {
-    const plataIds = new Set(cat.consola.map(p => p.id))
     const allPartidos: PartidoFixture[] = [
       ...(cat.grupos ?? []).flatMap(g => g.partidos),
       ...cat.faseEliminatoria,
@@ -158,7 +82,7 @@ export default function HorarioTab({ categorias }: Props) {
     ]
     for (const p of allPartidos) {
       if (p.turno != null && p.cancha != null) {
-        entries.push({ partido: p, catNombre: cat.nombre, isPlata: plataIds.has(p.id) })
+        entries.push({ partido: p, catNombre: cat.nombre })
       }
     }
   }
@@ -193,15 +117,13 @@ export default function HorarioTab({ categorias }: Props) {
                 className="text-left px-3 py-2.5"
                 style={{ background: '#0f1e35', width: 80, borderBottom: '2px solid #25507f' }}
               >
-                <span className="font-inter text-[10px] font-bold uppercase tracking-[0.1em] text-white">
-                  Cancha
-                </span>
+                <span className="font-inter text-[10px] font-bold uppercase tracking-[0.1em] text-white">Cancha</span>
               </th>
               {times.map(t => (
                 <th
                   key={t}
                   className="text-center px-3 py-2.5 whitespace-nowrap"
-                  style={{ background: '#162844', minWidth: 148, borderBottom: '2px solid #25507f' }}
+                  style={{ background: '#162844', minWidth: 200, borderBottom: '2px solid #25507f' }}
                 >
                   <span className="font-manrope text-[11px] font-bold tracking-[0.05em] text-[#e8c547]">{t}</span>
                 </th>
@@ -226,9 +148,15 @@ export default function HorarioTab({ categorias }: Props) {
                 {times.map(t => {
                   const entry = lookup.get(`${court}|${t}`)
                   return (
-                    <td key={t} className="align-top" style={{ padding: 3, border: '1px solid #e8eef4', minWidth: 128 }}>
+                    <td key={t} className="align-top" style={{ padding: 4, border: '1px solid #e8eef4', minWidth: 200 }}>
                       {entry ? (
-                        <MatchCell entry={entry} />
+                        <PartidoRow
+                          partido={entry.partido}
+                          torneoId={torneoId}
+                          isAdmin={isAdmin}
+                          onCargarResultado={onCargarResultado}
+                          label={`${partidoLabel(entry.partido)} · ${entry.catNombre}`}
+                        />
                       ) : (
                         <div
                           className="rounded-md flex items-center justify-center text-[#cbd5e1] text-[11px]"
