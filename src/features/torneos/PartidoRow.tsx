@@ -12,9 +12,10 @@ interface Props {
   sembradoNum?: number
   label?: string
   className?: string
+  headerBg?: string
 }
 
-export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResultado, sembradoNum, label, className }: Props) {
+export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResultado, sembradoNum, label, className, headerBg }: Props) {
   const qc = useQueryClient()
 
   const toggleBloqueo = useMutation({
@@ -55,74 +56,82 @@ export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResulta
     </button>
   ) : null
 
-  return (
-    <div className={`bg-white rounded-lg border hover:border-[#94b0cc] transition-colors ${borderClass}${className ? ` ${className}` : ''}`}>
+  const metaLine = (
+    <div className="flex items-center gap-1.5 mb-1.5">
+      {sembradoNum !== undefined && (
+        <span className="font-inter font-bold text-[#e8c547] text-[10px] tabular-nums"># {sembradoNum}</span>
+      )}
+      <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dotColor }} />
+      <span className="font-inter font-bold text-[11px] text-[#162844]">{partido.turno ?? '--:--'}</span>
+      {partido.cancha != null && (
+        <span className="font-inter text-[10px] text-[#94b0cc]">· C{partido.cancha}</span>
+      )}
+      {label && (
+        <span className="font-inter text-[10px] text-[#94b0cc]">· {label}</span>
+      )}
+      {isAdmin && played && <div className="ml-auto">{LockBtn}</div>}
+    </div>
+  )
 
-      {/* Line 1: metadata / Lines 2-3: players + score */}
-      <div className="px-3 pt-2 pb-2.5">
-        {/* Line 1: dot · hora · cancha */}
-        <div className="flex items-center gap-1.5 mb-1.5">
-          {sembradoNum !== undefined && (
-            <span className="font-inter font-bold text-[#e8c547] text-[10px] tabular-nums"># {sembradoNum}</span>
-          )}
-          <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dotColor }} />
-          <span className="font-inter font-bold text-[11px] text-[#162844]">{partido.turno ?? '--:--'}</span>
-          {partido.cancha != null && (
-            <span className="font-inter text-[10px] text-[#94b0cc]">· C{partido.cancha}</span>
-          )}
-          {label && (
-            <span className="font-inter text-[10px] text-[#94b0cc]">· {label}</span>
-          )}
-          {isAdmin && played && <div className="ml-auto">{LockBtn}</div>}
-        </div>
-
-        {/* Lines 2-3: team1 | marcador | team2 */}
-        <div className="flex items-center gap-2">
-          {/* Team 1 */}
-          <div className="flex-1 min-w-0">
-            {(partido.pareja1?.nombre ?? 'Por definir').split(' / ').map((n, i) => (
-              <p key={i} className={`font-inter text-[12px] truncate leading-snug ${
-                !partido.pareja1 ? 'italic text-[#94a3b8]'
-                : played ? partido.ganador === 1 ? 'font-semibold text-[#162844]' : 'text-[#94a3b8]'
-                : 'text-[#334155]'
-              }`}>{n}</p>
-            ))}
-          </div>
-
-          {/* Marcador / vs / cargar */}
-          <div className="shrink-0 flex flex-col items-center gap-0.5">
-            {played && partido.resultado ? (
-              partido.resultado.trim().split(/\s+/).map((set, i) => (
-                <span key={i} className="font-inter text-[10px] font-bold text-white bg-[#162844] px-1.5 py-px rounded whitespace-nowrap">
-                  {set}
-                </span>
-              ))
-            ) : puedeCargar ? (
-              <button
-                type="button"
-                onClick={() => onCargarResultado(partido)}
-                className="font-inter text-[10px] font-semibold text-[#e8c547] border border-[#e8c547] rounded px-1.5 py-0.5"
-              >
-                Cargar
-              </button>
-            ) : (
-              <span className="font-inter text-[9px] font-bold text-[#94b0cc]">vs</span>
-            )}
-          </div>
-
-          {/* Team 2 */}
-          <div className="flex-1 min-w-0">
-            {(partido.pareja2?.nombre ?? 'Por definir').split(' / ').map((n, i) => (
-              <p key={i} className={`font-inter text-[12px] truncate leading-snug ${
-                !partido.pareja2 ? 'italic text-[#94a3b8]'
-                : played ? partido.ganador === 2 ? 'font-semibold text-[#162844]' : 'text-[#94a3b8]'
-                : 'text-[#334155]'
-              }`}>{n}</p>
-            ))}
-          </div>
-        </div>
+  const playersLine = (
+    <div className="flex items-center gap-2">
+      <div className="flex-1 min-w-0">
+        {(partido.pareja1?.nombre ?? 'Por definir').split(' / ').map((n, i) => (
+          <p key={i} className={`font-inter text-[12px] truncate leading-snug ${
+            !partido.pareja1 ? 'italic text-[#94a3b8]'
+            : played ? partido.ganador === 1 ? 'font-semibold text-[#162844]' : 'text-[#94a3b8]'
+            : 'text-[#334155]'
+          }`}>{n}</p>
+        ))}
       </div>
+      <div className="shrink-0 flex flex-col items-center gap-0.5">
+        {played && partido.resultado ? (
+          partido.resultado.trim().split(/\s+/).map((set, i) => (
+            <span key={i} className="font-inter text-[10px] font-bold text-white bg-[#162844] px-1.5 py-px rounded whitespace-nowrap">
+              {set}
+            </span>
+          ))
+        ) : puedeCargar ? (
+          <button
+            type="button"
+            onClick={() => onCargarResultado(partido)}
+            className="font-inter text-[10px] font-semibold text-[#e8c547] border border-[#e8c547] rounded px-1.5 py-0.5"
+          >
+            Cargar
+          </button>
+        ) : (
+          <span className="font-inter text-[9px] font-bold text-[#94b0cc]">vs</span>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        {(partido.pareja2?.nombre ?? 'Por definir').split(' / ').map((n, i) => (
+          <p key={i} className={`font-inter text-[12px] truncate leading-snug ${
+            !partido.pareja2 ? 'italic text-[#94a3b8]'
+            : played ? partido.ganador === 2 ? 'font-semibold text-[#162844]' : 'text-[#94a3b8]'
+            : 'text-[#334155]'
+          }`}>{n}</p>
+        ))}
+      </div>
+    </div>
+  )
 
+  return (
+    <div className={`bg-white rounded-lg border hover:border-[#94b0cc] transition-colors overflow-hidden ${borderClass}${className ? ` ${className}` : ''}`}>
+      {headerBg ? (
+        <>
+          <div className="px-3 pt-2 pb-1.5" style={{ background: headerBg }}>
+            {metaLine}
+          </div>
+          <div className="px-3 pt-1.5 pb-2.5 border-t border-[#f1f5f9]">
+            {playersLine}
+          </div>
+        </>
+      ) : (
+        <div className="px-3 pt-2 pb-2.5">
+          {metaLine}
+          {playersLine}
+        </div>
+      )}
     </div>
   )
 }

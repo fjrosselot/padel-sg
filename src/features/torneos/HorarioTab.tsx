@@ -1,23 +1,6 @@
 import PartidoRow from './PartidoRow'
+import { catDotColor, catBgColor } from './catColors'
 import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
-
-const CAT_COLORS: [string, string][] = [
-  ['open', '#f59e0b'],
-  ['4a',   '#3b82f6'],
-  ['3a',   '#8b5cf6'],
-  [' d',   '#ec4899'],
-  [' c',   '#a855f7'],
-  ['d ',   '#ec4899'],
-  ['c ',   '#a855f7'],
-]
-
-function catColor(nombre: string): string {
-  const lower = nombre.toLowerCase()
-  for (const [key, color] of CAT_COLORS) {
-    if (lower.includes(key)) return color
-  }
-  return '#64748b'
-}
 
 const ELIM_ORO = new Set(['cuartos', 'semifinal', 'tercer_lugar', 'final'])
 const ELIM_PLATA = new Set(['consolacion_cuartos', 'consolacion_sf', 'consolacion_final'])
@@ -46,7 +29,7 @@ function Legend({ catNames }: { catNames: string[] }) {
     <div className="flex flex-wrap gap-3 items-center mb-4 font-inter text-[12px] text-muted">
       {catNames.map(name => (
         <div key={name} className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: catColor(name) }} />
+          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: catDotColor(name) }} />
           {name}
         </div>
       ))}
@@ -156,6 +139,7 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
                           onCargarResultado={onCargarResultado}
                           label={`${partidoLabel(entry.partido)} · ${entry.catNombre}`}
                           className="h-full"
+                          headerBg={catBgColor(entry.catNombre) || undefined}
                         />
                       ) : (
                         <div

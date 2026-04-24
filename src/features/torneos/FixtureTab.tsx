@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import PartidoRow from './PartidoRow'
+import { catBgColor } from './catColors'
 import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
 type Vista = 'grupo' | 'cancha' | 'hora'
@@ -140,7 +141,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
                 <SectionLabel>Grupo {g.letra}</SectionLabel>
                 <div className="space-y-1">
                   {g.partidos.map(p => (
-                    <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} />
+                    <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} headerBg={catBgColor(cat.nombre) || undefined} />
                   ))}
                 </div>
               </div>
@@ -151,7 +152,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
                 <SectionLabel>🏆 Copa Oro</SectionLabel>
                 <div className="space-y-1">
                   {cat.faseEliminatoria.map(p => (
-                    <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} />
+                    <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} headerBg={catBgColor(cat.nombre) || undefined} />
                   ))}
                 </div>
               </div>
@@ -162,7 +163,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
                 <SectionLabel>🥈 Copa Plata</SectionLabel>
                 <div className="space-y-1">
                   {cat.consola.map(p => (
-                    <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} />
+                    <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} headerBg={catBgColor(cat.nombre) || undefined} />
                   ))}
                 </div>
               </div>
@@ -200,11 +201,12 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
           <SectionLabel>{labelPrefix}{k}</SectionLabel>
           <div className="space-y-1">
             {grupos.get(k)!.map(p => {
-              const catAbbrev = abbrevCat(catPorPartido.get(p.id) ?? '')
+              const catNombre = catPorPartido.get(p.id) ?? ''
+              const catAbbrev = abbrevCat(catNombre)
               const faseNombre = p.fase !== 'grupo' ? (FASE_LABEL[p.fase] ?? '') : ''
               const label = faseNombre ? `${catAbbrev} · ${faseNombre}` : catAbbrev
               return (
-                <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={label} />
+                <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={label} headerBg={catBgColor(catNombre) || undefined} />
               )
             })}
           </div>

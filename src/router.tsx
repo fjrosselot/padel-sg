@@ -24,11 +24,14 @@ const RankingPage = lazy(() => import('./features/ranking/RankingPage'))
 const PerfilPage = lazy(() => import('./features/perfil/PerfilPage'))
 const TesoreriaAdmin = lazy(() => import('./features/tesoreria/TesoreriaAdmin'))
 
+const ColorCodingMockup = lazy(() => import('./features/mockups/ColorCodingMockup'))
+
 const fallback = (
   <div className="flex h-full items-center justify-center text-muted">Cargando…</div>
 )
 
 export const router = createBrowserRouter([
+  { path: '/mockup/color-coding', element: <Suspense fallback={fallback}><ColorCodingMockup /></Suspense> },
   { path: '/login', element: <LoginForm /> },
   { path: '/registro', element: <RegisterForm /> },
   { path: '/pendiente', element: <PendingApproval /> },
