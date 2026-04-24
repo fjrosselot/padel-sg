@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react'
-import { Badge } from '../../components/ui/badge'
 import PartidoRow from './PartidoRow'
 import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
@@ -68,27 +67,6 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
-function PartidoRowWithBadge({ p, torneoId, isAdmin, onCargarResultado, badge }: {
-  p: PartidoFixture
-  torneoId: string
-  isAdmin: boolean
-  onCargarResultado: (p: PartidoFixture) => void
-  badge?: string
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      {badge && (
-        <div className="hidden sm:block shrink-0">
-          <Badge variant="outline" className="text-[10px] capitalize">{badge}</Badge>
-        </div>
-      )}
-      <div className="flex-1 min-w-0">
-        <PartidoRow partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={badge} />
-      </div>
-    </div>
-  )
-}
-
 // Scoreboard + flat list for desafio_puntos / desafio_sembrado categories
 function DesafioSection({ categorias, torneoId, isAdmin, onCargarResultado, colegioRival }: Props) {
   const allPartidos = categorias.flatMap(c => c.partidos ?? [])
@@ -151,22 +129,27 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
       {americanoCats.map(cat => (
         <div key={cat.nombre}>
           <h3 className="font-manrope text-base font-bold text-navy border-l-4 border-gold pl-3 mb-4">{cat.nombre}</h3>
-          {(cat.grupos ?? []).map(g => (
-            <div key={g.letra}>
-              <SectionLabel>Grupo {g.letra}</SectionLabel>
-              <div className="space-y-1">
-                {g.partidos.map(p => (
-                  <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} />
-                ))}
+
+          {/* Groups: 2-column grid on desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+            {(cat.grupos ?? []).map(g => (
+              <div key={g.letra}>
+                <SectionLabel>Grupo {g.letra}</SectionLabel>
+                <div className="space-y-1">
+                  {g.partidos.map(p => (
+                    <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
           {cat.faseEliminatoria.length > 0 && (
             <>
               <SectionLabel>Eliminatoria</SectionLabel>
               <div className="space-y-1">
                 {cat.faseEliminatoria.map(p => (
-                  <PartidoRowWithBadge key={p.id} p={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} badge={FASE_LABEL[p.fase] ?? p.fase} />
+                  <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} />
                 ))}
               </div>
             </>
@@ -176,7 +159,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
               <SectionLabel>🥈 Copa Plata</SectionLabel>
               <div className="space-y-1">
                 {cat.consola.map(p => (
-                  <PartidoRowWithBadge key={p.id} p={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} badge={FASE_LABEL[p.fase] ?? p.fase} />
+                  <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} />
                 ))}
               </div>
             </>
@@ -215,20 +198,11 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
             {grupos.get(k)!.map(p => {
               const catAbbrev = abbrevCat(catPorPartido.get(p.id) ?? '')
               const faseNombre = p.fase !== 'grupo' ? (FASE_LABEL[p.fase] ?? '') : ''
-              const mobileLabel = faseNombre ? `${catAbbrev} · ${faseNombre}` : catAbbrev
+              const label = faseNombre ? `${catAbbrev} · ${faseNombre}` : catAbbrev
               return (
-              <div key={p.id} className="flex items-center gap-2">
-                <div className="hidden sm:block shrink-0">
-                  <Badge variant="outline" className="text-[10px] text-muted whitespace-nowrap min-w-[34px] justify-center" title={catPorPartido.get(p.id) ?? ''}>
-                    {catAbbrev}
-                  </Badge>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <PartidoRow partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={mobileLabel} />
-                </div>
-              </div>
-            )
-          })}
+                <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={label} />
+              )
+            })}
           </div>
         </div>
       ))}
@@ -280,7 +254,6 @@ export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResu
 
   const americanoCats = categorias.filter(c => !c.formato || c.formato === 'americano_grupos')
   const sinHorario = porCancha.size === 0 && porHora.size === 0
-  // Only show pill selector when multi-view is meaningful
   const showPills = americanoCats.length > 0 || !sinHorario
 
   return (
