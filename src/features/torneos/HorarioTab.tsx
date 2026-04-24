@@ -110,7 +110,7 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
       <Legend catNames={catNames} />
 
       <div className="overflow-x-auto rounded-xl border border-[#e2e8f0] shadow-[0_1px_4px_rgba(0,0,0,0.05)]">
-        <table className="border-collapse bg-white w-full" style={{ minWidth: courts.length * 204 + 72 }}>
+        <table className="border-collapse bg-white w-full" style={{ minWidth: times.length * 200 + 72, tableLayout: 'fixed' }}>
           <thead>
             <tr>
               <th
@@ -123,7 +123,7 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
                 <th
                   key={t}
                   className="text-center px-3 py-2 whitespace-nowrap"
-                  style={{ background: '#f8fafc', minWidth: 200, borderBottom: '2px solid #162844', borderRight: '1px solid #e2e8f0' }}
+                  style={{ background: '#f8fafc', width: 200, borderBottom: '2px solid #162844', borderRight: '1px solid #e2e8f0' }}
                 >
                   <span className="font-manrope text-[13px] font-bold text-[#162844]">{t}</span>
                 </th>
@@ -148,7 +148,7 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
                 {times.map(t => {
                   const entry = lookup.get(`${court}|${t}`)
                   return (
-                    <td key={t} style={{ padding: 4, border: '1px solid #e8eef4', minWidth: 200, height: 1 }}>
+                    <td key={t} style={{ padding: 4, border: '1px solid #e8eef4', height: 1 }}>
                       {entry ? (
                         <PartidoRow
                           partido={entry.partido}
