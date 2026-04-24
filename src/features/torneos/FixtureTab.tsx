@@ -133,7 +133,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
         <div key={cat.nombre}>
           <h3 className="font-manrope text-base font-bold text-navy border-l-4 border-gold pl-3 mb-4">{cat.nombre}</h3>
 
-          {/* Groups: 2-column grid on desktop, capped at ~360px per column */}
+          {/* All sections in one auto-fill grid */}
           <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(240px,360px))] gap-x-6 gap-y-6">
             {(cat.grupos ?? []).map(g => (
               <div key={g.letra}>
@@ -145,28 +145,29 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
                 </div>
               </div>
             ))}
-          </div>
 
-          {cat.faseEliminatoria.length > 0 && (
-            <>
-              <SectionLabel>Eliminatoria</SectionLabel>
-              <div className="space-y-1 max-w-[360px]">
-                {cat.faseEliminatoria.map(p => (
-                  <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} />
-                ))}
+            {cat.faseEliminatoria.length > 0 && (
+              <div>
+                <SectionLabel>🏆 Copa Oro</SectionLabel>
+                <div className="space-y-1">
+                  {cat.faseEliminatoria.map(p => (
+                    <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} />
+                  ))}
+                </div>
               </div>
-            </>
-          )}
-          {cat.consola.length > 0 && (
-            <>
-              <SectionLabel>🥈 Copa Plata</SectionLabel>
-              <div className="space-y-1 max-w-[360px]">
-                {cat.consola.map(p => (
-                  <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} />
-                ))}
+            )}
+
+            {cat.consola.length > 0 && (
+              <div>
+                <SectionLabel>🥈 Copa Plata</SectionLabel>
+                <div className="space-y-1">
+                  {cat.consola.map(p => (
+                    <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} />
+                  ))}
+                </div>
               </div>
-            </>
-          )}
+            )}
+          </div>
         </div>
       ))}
 
