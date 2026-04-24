@@ -190,11 +190,11 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
 }) {
   const keys = [...grupos.keys()].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
   return (
-    <div className="space-y-6">
+    <div className="grid grid-cols-1 sm:grid-cols-[repeat(2,minmax(0,360px))] gap-x-6">
       {keys.map(k => (
         <div key={k}>
           <SectionLabel>{labelPrefix}{k}</SectionLabel>
-          <div className="space-y-1 max-w-[360px]">
+          <div className="space-y-1">
             {grupos.get(k)!.map(p => {
               const catAbbrev = abbrevCat(catPorPartido.get(p.id) ?? '')
               const faseNombre = p.fase !== 'grupo' ? (FASE_LABEL[p.fase] ?? '') : ''
