@@ -147,7 +147,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
           {cat.faseEliminatoria.length > 0 && (
             <>
               <SectionLabel>Eliminatoria</SectionLabel>
-              <div className="space-y-1">
+              <div className="space-y-1 max-w-[360px]">
                 {cat.faseEliminatoria.map(p => (
                   <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} />
                 ))}
@@ -157,7 +157,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
           {cat.consola.length > 0 && (
             <>
               <SectionLabel>🥈 Copa Plata</SectionLabel>
-              <div className="space-y-1">
+              <div className="space-y-1 max-w-[360px]">
                 {cat.consola.map(p => (
                   <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} />
                 ))}
