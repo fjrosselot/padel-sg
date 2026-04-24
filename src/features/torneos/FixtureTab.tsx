@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import PartidoRow from './PartidoRow'
-import { catBgColor } from './catColors'
+import { buildCatColorMap } from './catColors'
 import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
 type Vista = 'grupo' | 'cancha' | 'hora'
@@ -124,53 +124,55 @@ function DesafioSection({ categorias, torneoId, isAdmin, onCargarResultado, cole
   )
 }
 
-function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioRival }: Props) {
+function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioRival, catColorMap }: Props & { catColorMap: Map<string, { bg: string; dot: string }> }) {
   const americanoCats = categorias.filter(c => !c.formato || c.formato === 'americano_grupos')
   const desafioCats = categorias.filter(c => c.formato === 'desafio_puntos' || c.formato === 'desafio_sembrado')
 
   return (
     <div className="space-y-8">
-      {americanoCats.map(cat => (
-        <div key={cat.nombre}>
-          <h3 className="font-manrope text-base font-bold text-navy border-l-4 border-gold pl-3 mb-4">{cat.nombre}</h3>
+      {americanoCats.map(cat => {
+        const headerBg = catColorMap.get(cat.nombre)?.bg
+        return (
+          <div key={cat.nombre}>
+            <h3 className="font-manrope text-base font-bold text-navy border-l-4 border-gold pl-3 mb-4">{cat.nombre}</h3>
 
-          {/* All sections in one auto-fill grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(240px,360px))] gap-x-6 gap-y-6">
-            {(cat.grupos ?? []).map(g => (
-              <div key={g.letra}>
-                <SectionLabel>Grupo {g.letra}</SectionLabel>
-                <div className="space-y-1">
-                  {g.partidos.map(p => (
-                    <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} headerBg={catBgColor(cat.nombre) || undefined} />
-                  ))}
+            <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(240px,360px))] gap-x-6 gap-y-6">
+              {(cat.grupos ?? []).map(g => (
+                <div key={g.letra}>
+                  <SectionLabel>Grupo {g.letra}</SectionLabel>
+                  <div className="space-y-1">
+                    {g.partidos.map(p => (
+                      <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} headerBg={headerBg} />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
 
-            {cat.faseEliminatoria.length > 0 && (
-              <div>
-                <SectionLabel>🏆 Copa Oro</SectionLabel>
-                <div className="space-y-1">
-                  {cat.faseEliminatoria.map(p => (
-                    <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} headerBg={catBgColor(cat.nombre) || undefined} />
-                  ))}
+              {cat.faseEliminatoria.length > 0 && (
+                <div>
+                  <SectionLabel>🏆 Copa Oro</SectionLabel>
+                  <div className="space-y-1">
+                    {cat.faseEliminatoria.map(p => (
+                      <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} headerBg={headerBg} />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {cat.consola.length > 0 && (
-              <div>
-                <SectionLabel>🥈 Copa Plata</SectionLabel>
-                <div className="space-y-1">
-                  {cat.consola.map(p => (
-                    <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} headerBg={catBgColor(cat.nombre) || undefined} />
-                  ))}
+              {cat.consola.length > 0 && (
+                <div>
+                  <SectionLabel>🥈 Copa Plata</SectionLabel>
+                  <div className="space-y-1">
+                    {cat.consola.map(p => (
+                      <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={FASE_LABEL[p.fase] ?? p.fase} headerBg={headerBg} />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
 
       {desafioCats.length > 0 && (
         <DesafioSection
@@ -185,13 +187,14 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
   )
 }
 
-function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResultado, catPorPartido }: {
+function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResultado, catPorPartido, catColorMap }: {
   grupos: Map<string, PartidoFixture[]>
   labelPrefix: string
   torneoId: string
   isAdmin: boolean
   onCargarResultado: (p: PartidoFixture) => void
   catPorPartido: Map<string, string>
+  catColorMap: Map<string, { bg: string; dot: string }>
 }) {
   const keys = [...grupos.keys()].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
   return (
@@ -206,7 +209,7 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
               const faseNombre = p.fase !== 'grupo' ? (FASE_LABEL[p.fase] ?? '') : ''
               const label = faseNombre ? `${catAbbrev} · ${faseNombre}` : catAbbrev
               return (
-                <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={label} headerBg={catBgColor(catNombre) || undefined} />
+                <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={label} headerBg={catColorMap.get(catNombre)?.bg} />
               )
             })}
           </div>
@@ -218,6 +221,8 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
 
 export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResultado, colegioRival }: Props) {
   const [vista, setVista] = useState<Vista>('grupo')
+
+  const catColorMap = useMemo(() => buildCatColorMap(categorias.map(c => c.nombre)), [categorias])
 
   const { porCancha, porHora, catPorPartido } = useMemo(() => {
     const porCancha = new Map<string, PartidoFixture[]>()
@@ -273,19 +278,20 @@ export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResu
           isAdmin={isAdmin}
           onCargarResultado={onCargarResultado}
           colegioRival={colegioRival}
+          catColorMap={catColorMap}
         />
       )}
 
       {showPills && vista === 'cancha' && (
         porCancha.size === 0
           ? <p className="font-inter text-sm text-muted py-2">Sin canchas asignadas en el fixture.</p>
-          : <VistaAgrupada grupos={porCancha} labelPrefix="Cancha " torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catPorPartido={catPorPartido} />
+          : <VistaAgrupada grupos={porCancha} labelPrefix="Cancha " torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catPorPartido={catPorPartido} catColorMap={catColorMap} />
       )}
 
       {showPills && vista === 'hora' && (
         porHora.size === 0
           ? <p className="font-inter text-sm text-muted py-2">Sin horarios asignados en el fixture.</p>
-          : <VistaAgrupada grupos={porHora} labelPrefix="" torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catPorPartido={catPorPartido} />
+          : <VistaAgrupada grupos={porHora} labelPrefix="" torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catPorPartido={catPorPartido} catColorMap={catColorMap} />
       )}
     </div>
   )

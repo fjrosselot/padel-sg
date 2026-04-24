@@ -1,25 +1,30 @@
-const CAT_MAP = [
-  { key: 'open', dot: '#f59e0b', bg: '#fef3c7' },
-  { key: '4a',   dot: '#3b82f6', bg: '#dbeafe' },
-  { key: '3a',   dot: '#8b5cf6', bg: '#ede9fe' },
-  { key: ' d',   dot: '#ec4899', bg: '#fce7f3' },
-  { key: ' c',   dot: '#a855f7', bg: '#f5f3ff' },
-  { key: 'd ',   dot: '#ec4899', bg: '#fce7f3' },
-  { key: 'c ',   dot: '#a855f7', bg: '#f5f3ff' },
+export const CAT_BG_PALETTE = [
+  '#dbeafe', // blue
+  '#ede9fe', // purple
+  '#fef3c7', // amber
+  '#fce7f3', // pink
+  '#f0fdf4', // green
+  '#fff7ed', // orange
+  '#f1f5f9', // slate
 ]
 
-export function catDotColor(nombre: string): string {
-  const lower = nombre.toLowerCase()
-  for (const { key, dot } of CAT_MAP) {
-    if (lower.includes(key)) return dot
-  }
-  return '#64748b'
-}
+export const CAT_DOT_PALETTE = [
+  '#3b82f6',
+  '#8b5cf6',
+  '#f59e0b',
+  '#ec4899',
+  '#22c55e',
+  '#f97316',
+  '#64748b',
+]
 
-export function catBgColor(nombre: string): string {
-  const lower = nombre.toLowerCase()
-  for (const { key, bg } of CAT_MAP) {
-    if (lower.includes(key)) return bg
-  }
-  return ''
+export function buildCatColorMap(catNames: string[]): Map<string, { bg: string; dot: string }> {
+  const map = new Map<string, { bg: string; dot: string }>()
+  catNames.forEach((name, i) => {
+    map.set(name, {
+      bg: CAT_BG_PALETTE[i % CAT_BG_PALETTE.length],
+      dot: CAT_DOT_PALETTE[i % CAT_DOT_PALETTE.length],
+    })
+  })
+  return map
 }

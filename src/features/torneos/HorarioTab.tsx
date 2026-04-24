@@ -1,9 +1,6 @@
 import PartidoRow from './PartidoRow'
-import { catDotColor, catBgColor } from './catColors'
+import { buildCatColorMap } from './catColors'
 import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
-
-const ELIM_ORO = new Set(['cuartos', 'semifinal', 'tercer_lugar', 'final'])
-const ELIM_PLATA = new Set(['consolacion_cuartos', 'consolacion_sf', 'consolacion_final'])
 
 function partidoLabel(p: PartidoFixture): string {
   switch (p.fase) {
@@ -24,12 +21,12 @@ interface MatchEntry {
   catNombre: string
 }
 
-function Legend({ catNames }: { catNames: string[] }) {
+function Legend({ catNames, catColorMap }: { catNames: string[]; catColorMap: Map<string, { bg: string; dot: string }> }) {
   return (
     <div className="flex flex-wrap gap-3 items-center mb-4 font-inter text-[12px] text-muted">
       {catNames.map(name => (
         <div key={name} className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: catDotColor(name) }} />
+          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: catColorMap.get(name)?.dot ?? '#64748b' }} />
           {name}
         </div>
       ))}
@@ -87,10 +84,11 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
   }
 
   const catNames = [...new Set(categorias.map(c => c.nombre))]
+  const catColorMap = buildCatColorMap(catNames)
 
   return (
     <div>
-      <Legend catNames={catNames} />
+      <Legend catNames={catNames} catColorMap={catColorMap} />
 
       <div className="overflow-x-auto rounded-xl border border-[#e2e8f0] shadow-[0_1px_4px_rgba(0,0,0,0.05)]">
         <table className="border-collapse bg-white w-full" style={{ minWidth: times.length * 200 + 72, tableLayout: 'fixed' }}>
@@ -139,7 +137,7 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
                           onCargarResultado={onCargarResultado}
                           label={`${partidoLabel(entry.partido)} · ${entry.catNombre}`}
                           className="h-full"
-                          headerBg={catBgColor(entry.catNombre) || undefined}
+                          headerBg={catColorMap.get(entry.catNombre)?.bg}
                         />
                       ) : (
                         <div
