@@ -109,36 +109,36 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
     <div>
       <Legend catNames={catNames} />
 
-      <div className="overflow-x-auto rounded-xl border border-[#e2e8f0] shadow-[0_1px_8px_rgba(0,0,0,0.06)]">
-        <table className="border-collapse bg-white w-full" style={{ minWidth: courts.length * 134 + 72 }}>
+      <div className="overflow-x-auto rounded-xl border border-[#e2e8f0] shadow-[0_1px_4px_rgba(0,0,0,0.05)]">
+        <table className="border-collapse bg-white w-full" style={{ minWidth: courts.length * 204 + 72 }}>
           <thead>
             <tr>
               <th
-                className="text-left px-3 py-2.5"
-                style={{ background: '#0f1e35', width: 80, borderBottom: '2px solid #25507f' }}
+                className="text-left px-3 py-2"
+                style={{ background: '#f8fafc', width: 72, borderBottom: '2px solid #162844', borderRight: '1px solid #e2e8f0' }}
               >
-                <span className="font-inter text-[10px] font-bold uppercase tracking-[0.1em] text-white">Cancha</span>
+                <span className="font-inter text-[10px] font-bold uppercase tracking-[0.1em] text-[#94b0cc]">Cancha</span>
               </th>
               {times.map(t => (
                 <th
                   key={t}
-                  className="text-center px-3 py-2.5 whitespace-nowrap"
-                  style={{ background: '#162844', minWidth: 200, borderBottom: '2px solid #25507f' }}
+                  className="text-center px-3 py-2 whitespace-nowrap"
+                  style={{ background: '#f8fafc', minWidth: 200, borderBottom: '2px solid #162844', borderRight: '1px solid #e2e8f0' }}
                 >
-                  <span className="font-manrope text-[11px] font-bold tracking-[0.05em] text-[#e8c547]">{t}</span>
+                  <span className="font-manrope text-[13px] font-bold text-[#162844]">{t}</span>
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {courts.map((court, ci) => (
-              <tr key={court} style={{ background: ci % 2 === 0 ? 'white' : '#f8fafc' }}>
+              <tr key={court} style={{ background: ci % 2 === 0 ? 'white' : '#fafbfc' }}>
                 <td
-                  className="text-center align-middle font-manrope text-[13px] font-bold text-[#162844] whitespace-nowrap"
+                  className="text-center align-middle font-manrope text-[12px] font-bold text-[#162844] whitespace-nowrap"
                   style={{
                     background: '#f8fafc',
                     border: '1px solid #e8eef4',
-                    borderLeft: '4px solid #162844',
+                    borderLeft: '3px solid #e8c547',
                     padding: '0 10px',
                     letterSpacing: '0.05em',
                   }}
