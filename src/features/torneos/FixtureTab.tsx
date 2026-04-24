@@ -212,18 +212,23 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
         <div key={k}>
           <SectionLabel>{labelPrefix}{k}</SectionLabel>
           <div className="space-y-1">
-            {grupos.get(k)!.map(p => (
+            {grupos.get(k)!.map(p => {
+              const catAbbrev = abbrevCat(catPorPartido.get(p.id) ?? '')
+              const faseNombre = p.fase !== 'grupo' ? (FASE_LABEL[p.fase] ?? '') : ''
+              const mobileLabel = faseNombre ? `${catAbbrev} · ${faseNombre}` : catAbbrev
+              return (
               <div key={p.id} className="flex items-center gap-2">
                 <div className="hidden sm:block shrink-0">
                   <Badge variant="outline" className="text-[10px] text-muted whitespace-nowrap min-w-[34px] justify-center" title={catPorPartido.get(p.id) ?? ''}>
-                    {abbrevCat(catPorPartido.get(p.id) ?? '')}
+                    {catAbbrev}
                   </Badge>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <PartidoRow partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={abbrevCat(catPorPartido.get(p.id) ?? '')} />
+                  <PartidoRow partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} label={mobileLabel} />
                 </div>
               </div>
-            ))}
+            )
+          })}
           </div>
         </div>
       ))}
