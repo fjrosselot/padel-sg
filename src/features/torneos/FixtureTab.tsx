@@ -5,13 +5,13 @@ import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 type Vista = 'grupo' | 'cancha' | 'hora'
 
 const FASE_LABEL: Record<string, string> = {
-  cuartos: 'Cuartos',
-  semifinal: 'Semifinal',
-  tercer_lugar: '3er lugar',
-  final: 'Final',
-  consolacion_cuartos: 'Cuartos Plata',
-  consolacion_sf: 'SF Plata',
-  consolacion_final: 'Final Plata',
+  cuartos: '🏆 Cuartos',
+  semifinal: '🏆 Semifinal',
+  tercer_lugar: '🏆 3er lugar',
+  final: '🏆 Final',
+  consolacion_cuartos: '🥈 Cuartos',
+  consolacion_sf: '🥈 Semifinal',
+  consolacion_final: '🥈 Final',
 }
 
 interface Props {
