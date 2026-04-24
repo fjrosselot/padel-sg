@@ -69,7 +69,9 @@ function PartidoRowWithBadge({ p, torneoId, isAdmin, onCargarResultado, badge }:
       {badge && (
         <Badge variant="outline" className="text-[10px] shrink-0 capitalize">{badge}</Badge>
       )}
-      <PartidoRow partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} />
+      <div className="flex-1 min-w-0">
+        <PartidoRow partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} />
+      </div>
     </div>
   )
 }
@@ -202,7 +204,9 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
                 <Badge variant="outline" className="text-[10px] shrink-0 text-muted">
                   {catPorPartido.get(p.id) ?? ''}
                 </Badge>
-                <PartidoRow partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} />
+                <div className="flex-1 min-w-0">
+                  <PartidoRow partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} />
+                </div>
               </div>
             ))}
           </div>
