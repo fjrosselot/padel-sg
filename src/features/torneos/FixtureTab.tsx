@@ -194,7 +194,7 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
       {keys.map(k => (
         <div key={k}>
           <SectionLabel>{labelPrefix}{k}</SectionLabel>
-          <div className="space-y-1">
+          <div className="space-y-1 max-w-[360px]">
             {grupos.get(k)!.map(p => {
               const catAbbrev = abbrevCat(catPorPartido.get(p.id) ?? '')
               const faseNombre = p.fase !== 'grupo' ? (FASE_LABEL[p.fase] ?? '') : ''
