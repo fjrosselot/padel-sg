@@ -1,5 +1,23 @@
 # DEVLOG — padel-sg
 
+## [2026-04-23 11:00] — Compactar HorarioTab + fix badges VistaAgrupada + torneo Americano Abril 2026 en DB
+
+**Resumen:** Se compactó el grid del HorarioTab (minHeight 90→58px, padding reducido, columnas más angostas, color de score perdedor más legible). En FixtureTab se agregó `abbrevCat()` para que los badges de categoría muestren "MI1"/"MA"/"HA" en lugar del nombre completo, evitando quiebres de línea. Además se insertó el torneo histórico "Americano SG Abril 2026" (ID `76564dcd`) con fixture completo (4 categorías, 24 partidos de grupo, 8 semis, 8 finales) y 24 inscripciones en Supabase; los `puntos_ranking` existentes no se tocaron.
+
+**Archivos:** `src/features/torneos/HorarioTab.tsx`, `src/features/torneos/FixtureTab.tsx`, `package.json`
+
+**Decisiones:**
+- `abbrevCat()`: toma inicial de cada palabra no-numérica + número al final → "Mujeres Introducción 1" → "MI1". Nombres ≤4 chars se devuelven tal cual ("5a", "Open")
+- Score perdedor en HorarioTab: `#94b0cc` → `#64748b` (slate-500) para mejor contraste con fondo blanco
+- Torneo histórico insertado con `formato='grupos_eliminatoria'` en columna (constraint DB); `CategoriaFixture.formato='americano_grupos'` vive en JSONB sin restricción
+- `puntos_ranking` ya apuntaba correctamente a `eventos_ranking` — no se requirió UPDATE
+
+**Pendientes:**
+- [ ] Verificar visualmente HorarioTab en producción (SG vs SSCC 2026)
+- [ ] Verificar que badges "MI1"/"HA" se ven bien en Americano Por cancha / Por hora
+
+---
+
 ## [2026-04-22 17:00] — Módulo Tesorería: bugs fixes y gestión de cobros
 
 **Resumen:** Se corrigieron varios bugs en el módulo de Tesorería recién lanzado: el join inválido `torneo:torneos(nombre)` que rompía la query de cobros con un `.map is not a function`, y el `order=jugador.apellido.asc` en PostgREST que impedía cargar los jugadores del cobro (retornaba error → guard → `[]`). Se agregaron acciones de gestión de cobros (editar, eliminar, agregar/quitar jugadores). El sidebar desktop ahora se abre expandido por defecto. `PagosJugador` integrado en `JugadorDetalle` para admins.
