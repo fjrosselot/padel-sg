@@ -1,5 +1,45 @@
 # DEVLOG — padel-sg
 
+## [2026-04-24 17:30] — Dashboard widgets + UX tab bar mis partidos + reabrir en modal
+
+**Resumen:** Se reemplazó la sección "Accesos rápidos" del Dashboard por 3 widgets funcionales: sparkline de evolución de ranking (últimos 60 días, SVG puro), resumen de pagos pendientes con link a /finanzas, y lista de novedades admin desde nueva tabla `padel.novedades`. Se movió el pill "Mis partidos" al nivel del tab bar (fuera del contenido) y "Reabrir torneo" se trasladó al modal de edición.
+
+**Archivos:** `src/features/dashboard/Dashboard.tsx`, `src/features/dashboard/DashboardWidgets.tsx` (nuevo), `src/features/torneos/FixtureTab.tsx`, `src/features/torneos/HorarioTab.tsx`, `src/features/torneos/TorneoDetalle.tsx`, `src/features/torneos/EditTorneoModal.tsx`, `package.json`
+
+**Decisiones:**
+- Sparkline SVG puro (sin librería externa) — polyline con valores acumulados por categoría, color `#e8c547`
+- `soloMis` lifted de FixtureTab/HorarioTab a TabsDetalle — pill en tab bar visible solo en tabs fixture/horario
+- `reabrirTorneo` mutation movida a EditTorneoModal (inline, cierra modal al éxito) — elimina botón standalone de acciones admin
+- `padel.novedades`: tabla simple con RLS `activo=true`, sin UI admin aún (carga desde Supabase Studio)
+- PagosSummary reutiliza patrón fetch+session token de FinanzasPage
+- v0.4.55 → v0.4.57
+
+**Pendientes:**
+- [ ] UI admin para gestionar novedades (crear/editar/desactivar desde la app)
+- [ ] Verificar sparkline ranking con datos reales (la mayoría de jugadores puede no tener eventos en 60 días)
+- [ ] Probar PagosSummary con jugadores que tengan cobros activos
+
+---
+
+## [2026-04-24 09:00] — Rediseño unificado fixture/horario + mockups + ProximosPartidos dashboard
+
+**Resumen:** Se reimplementó PartidoRow con formato BracketCard (cabecera tintada por categoría, nombres apilados, score por equipo) para todas las vistas. Se unificaron los pills de filtro de FixtureTab al estilo de JugadoresPage (`overflow-x-auto no-scrollbar`). Se implementaron 3 mockups responsivos (Dashboard, Calendario "Mis partidos", TorneoDetalle "Solo mis partidos"). Se agregó widget ProximosPartidos al Dashboard y modo "Mis partidos" en CalendarioPage.
+
+**Archivos:** `src/features/torneos/PartidoRow.tsx`, `src/features/torneos/FixtureTab.tsx`, `src/features/torneos/HorarioTab.tsx`, `src/features/torneos/BracketTab.tsx`, `src/features/dashboard/Dashboard.tsx`, `src/features/calendario/CalendarioPage.tsx`, `src/features/mockups/DashboardMockup.tsx`, `src/features/mockups/CalendarioMockup.tsx`, `src/features/mockups/TorneoDetalleMockup.tsx`, `src/router.tsx`, `package.json`
+
+**Decisiones:**
+- `parseTeamScores()`: 1 set → "6-4" separado por guión; múltiples sets → "6·5·6" / "4·7·4" (punto medio)
+- `buildCatColorMap()` index-based produce paleta pastel consistente; header con fondo tintado + color de cabecera
+- CalendarioPage usa `fecha_inicio` del torneo como agrupador de fecha (los partidos no tienen fecha individual)
+- Rival en ProximosPartidos: pareja cuya ninguna jugador_id coincide con el user
+- Mockups en `/mockup/dashboard`, `/mockup/calendario`, `/mockup/torneo-detalle` (lazy-loaded, sin auth)
+
+**Pendientes:**
+- [ ] Limpiar archivos mockup antes de release final (son temporales)
+- [ ] CalendarioPage: mostrar fecha individual por partido cuando esté disponible en los datos
+
+---
+
 ## [2026-04-23 11:00] — Compactar HorarioTab + fix badges VistaAgrupada + torneo Americano Abril 2026 en DB
 
 **Resumen:** Se compactó el grid del HorarioTab (minHeight 90→58px, padding reducido, columnas más angostas, color de score perdedor más legible). En FixtureTab se agregó `abbrevCat()` para que los badges de categoría muestren "MI1"/"MA"/"HA" en lugar del nombre completo, evitando quiebres de línea. Además se insertó el torneo histórico "Americano SG Abril 2026" (ID `76564dcd`) con fixture completo (4 categorías, 24 partidos de grupo, 8 semis, 8 finales) y 24 inscripciones en Supabase; los `puntos_ranking` existentes no se tocaron.
