@@ -1,10 +1,18 @@
+import { useState } from 'react'
+import { User } from 'lucide-react'
 import PartidoRow from './PartidoRow'
 import { buildCatColorMap } from './catColors'
+import { useUser } from '../../hooks/useUser'
 import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
 interface MatchEntry {
   partido: PartidoFixture
   catNombre: string
+}
+
+function isMiPartido(p: PartidoFixture, uid: string): boolean {
+  return [p.pareja1?.jugador1_id, p.pareja1?.jugador2_id, p.pareja2?.jugador1_id, p.pareja2?.jugador2_id]
+    .includes(uid)
 }
 
 function Legend({ catNames, catColorMap }: { catNames: string[]; catColorMap: Map<string, { bg: string; dot: string }> }) {
@@ -37,8 +45,10 @@ interface Props {
 }
 
 export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResultado }: Props) {
-  const entries: MatchEntry[] = []
+  const [soloMis, setSoloMis] = useState(false)
+  const { data: user } = useUser()
 
+  const allEntries: MatchEntry[] = []
   for (const cat of categorias) {
     const allPartidos: PartidoFixture[] = [
       ...(cat.grupos ?? []).flatMap(g => g.partidos),
@@ -48,12 +58,16 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
     ]
     for (const p of allPartidos) {
       if (p.turno != null && p.cancha != null) {
-        entries.push({ partido: p, catNombre: cat.nombre })
+        allEntries.push({ partido: p, catNombre: cat.nombre })
       }
     }
   }
 
-  if (entries.length === 0) {
+  const entries = soloMis && user?.id
+    ? allEntries.filter(e => isMiPartido(e.partido, user.id))
+    : allEntries
+
+  if (allEntries.length === 0) {
     return (
       <p className="font-inter text-sm text-muted py-4">
         No hay horarios asignados. Se generan al crear el fixture con hora de inicio configurada.
@@ -74,74 +88,94 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
 
   return (
     <div>
-      <Legend catNames={catNames} catColorMap={catColorMap} />
-
-      <div className="overflow-x-auto rounded-xl border border-[#e2e8f0] shadow-[0_1px_4px_rgba(0,0,0,0.05)]">
-        <table className="border-collapse bg-white w-full" style={{ minWidth: times.length * 200 + 72, tableLayout: 'fixed' }}>
-          <thead>
-            <tr>
-              <th
-                className="text-left px-3 py-2"
-                style={{ background: '#f8fafc', width: 72, borderBottom: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}
-              >
-                <span className="font-inter text-[10px] font-bold uppercase tracking-[0.1em] text-[#94b0cc]">Cancha</span>
-              </th>
-              {times.map(t => (
-                <th
-                  key={t}
-                  className="text-center px-3 py-2 whitespace-nowrap"
-                  style={{ background: '#f8fafc', width: 200, borderBottom: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}
-                >
-                  <span className="font-manrope text-[13px] font-bold text-[#162844]">{t}</span>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {courts.map((court) => (
-              <tr key={court}>
-                <td
-                  className="text-center align-middle font-manrope text-[12px] font-bold text-[#162844] whitespace-nowrap"
-                  style={{
-                    background: '#f8fafc',
-                    border: '1px solid #e2e8f0',
-                    padding: '0 10px',
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  C{court}
-                </td>
-                {times.map(t => {
-                  const entry = lookup.get(`${court}|${t}`)
-                  return (
-                    <td key={t} style={{ padding: 4, border: '1px solid #e8eef4', height: 1 }}>
-                      {entry ? (
-                        <PartidoRow
-                          partido={entry.partido}
-                          torneoId={torneoId}
-                          isAdmin={isAdmin}
-                          onCargarResultado={onCargarResultado}
-                          catNombre={entry.catNombre}
-                          className="h-full"
-                          headerBg={catColorMap.get(entry.catNombre)?.bg}
-                        />
-                      ) : (
-                        <div
-                          className="rounded-md flex items-center justify-center text-[#cbd5e1] text-[11px]"
-                          style={{ minHeight: 58, background: '#f8fafc' }}
-                        >
-                          —
-                        </div>
-                      )}
-                    </td>
-                  )
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="flex items-center justify-between mb-4">
+        <Legend catNames={catNames} catColorMap={catColorMap} />
+        {user && (
+          <button
+            type="button"
+            onClick={() => setSoloMis(v => !v)}
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-inter text-[11px] font-semibold transition-all shrink-0 ml-3 ${
+              soloMis ? 'border-[#162844] bg-[#162844] text-white' : 'border-[#dce6f0] bg-white text-[#94b0cc] hover:border-[#94b0cc]'
+            }`}
+          >
+            <User className="h-3 w-3" />
+            Solo mis partidos
+          </button>
+        )}
       </div>
-      <p className="font-inter text-[10px] text-muted mt-2 text-right">← desliza para ver más →</p>
+
+      {entries.length === 0 ? (
+        <p className="font-inter text-sm text-muted py-2">No tienes partidos con horario asignado.</p>
+      ) : (
+        <>
+          <div className="overflow-x-auto rounded-xl border border-[#e2e8f0] shadow-[0_1px_4px_rgba(0,0,0,0.05)]">
+            <table className="border-collapse bg-white w-full" style={{ minWidth: times.length * 200 + 72, tableLayout: 'fixed' }}>
+              <thead>
+                <tr>
+                  <th
+                    className="text-left px-3 py-2"
+                    style={{ background: '#f8fafc', width: 72, borderBottom: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}
+                  >
+                    <span className="font-inter text-[10px] font-bold uppercase tracking-[0.1em] text-[#94b0cc]">Cancha</span>
+                  </th>
+                  {times.map(t => (
+                    <th
+                      key={t}
+                      className="text-center px-3 py-2 whitespace-nowrap"
+                      style={{ background: '#f8fafc', width: 200, borderBottom: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}
+                    >
+                      <span className="font-manrope text-[13px] font-bold text-[#162844]">{t}</span>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {courts.map((court) => (
+                  <tr key={court}>
+                    <td
+                      className="text-center align-middle font-manrope text-[12px] font-bold text-[#162844] whitespace-nowrap"
+                      style={{
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        padding: '0 10px',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      C{court}
+                    </td>
+                    {times.map(t => {
+                      const entry = lookup.get(`${court}|${t}`)
+                      return (
+                        <td key={t} style={{ padding: 4, border: '1px solid #e8eef4', height: 1 }}>
+                          {entry ? (
+                            <PartidoRow
+                              partido={entry.partido}
+                              torneoId={torneoId}
+                              isAdmin={isAdmin}
+                              onCargarResultado={onCargarResultado}
+                              catNombre={entry.catNombre}
+                              className="h-full"
+                              headerBg={catColorMap.get(entry.catNombre)?.bg}
+                            />
+                          ) : (
+                            <div
+                              className="rounded-md flex items-center justify-center text-[#cbd5e1] text-[11px]"
+                              style={{ minHeight: 58, background: '#f8fafc' }}
+                            >
+                              —
+                            </div>
+                          )}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="font-inter text-[10px] text-muted mt-2 text-right">← desliza para ver más →</p>
+        </>
+      )}
     </div>
   )
 }

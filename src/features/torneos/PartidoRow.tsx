@@ -19,6 +19,37 @@ function fasLabel(p: PartidoFixture): string {
   }
 }
 
+function parseTeamScores(resultado: string | null): [string, string] {
+  if (!resultado) return ['', '']
+  const sets = resultado.trim().split(/\s+/)
+  if (sets.length === 1) {
+    const parts = sets[0].split('-')
+    return [parts[0] ?? '', parts[1] ?? '']
+  }
+  return [
+    sets.map(s => s.split('-')[0] ?? '').join('·'),
+    sets.map(s => s.split('-')[1] ?? '').join('·'),
+  ]
+}
+
+function TeamSection({ names, score, isWinner, pending, border }: {
+  names: string[]; score: string; isWinner: boolean; pending: boolean; border?: boolean
+}) {
+  const textCls = pending ? 'italic text-[#94a3b8]' : isWinner ? 'font-semibold text-[#162844]' : 'text-[#94a3b8]'
+  const bg = isWinner && !pending ? 'bg-[rgba(232,197,71,0.06)]' : ''
+  const scoreCls = !score ? 'text-[#d1d9e0]' : isWinner ? 'text-[#e8c547] font-bold' : 'text-[#94b0cc]'
+  return (
+    <div className={`flex items-center gap-2 px-2.5 h-9 ${bg} ${border ? 'border-b border-[#f1f5f9]' : ''}`}>
+      <div className="flex-1 min-w-0">
+        {names.map((n, i) => <p key={i} className={`font-inter text-[11px] truncate leading-[1.2] ${textCls}`}>{n}</p>)}
+      </div>
+      <span className={`font-manrope text-[13px] font-bold shrink-0 min-w-[20px] text-right tabular-nums ${scoreCls}`}>
+        {score || '—'}
+      </span>
+    </div>
+  )
+}
+
 interface Props {
   partido: PartidoFixture
   torneoId: string
@@ -28,9 +59,10 @@ interface Props {
   sembradoNum?: number
   className?: string
   headerBg?: string
+  highlight?: boolean
 }
 
-export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResultado, catNombre, sembradoNum, className, headerBg }: Props) {
+export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResultado, catNombre, sembradoNum, className, headerBg, highlight }: Props) {
   const qc = useQueryClient()
 
   const toggleBloqueo = useMutation({
@@ -50,102 +82,74 @@ export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResulta
   const hasBothParejas = !!partido.pareja1 && !!partido.pareja2
   const puedeCargar = isAdmin && !partido.resultado_bloqueado && !partido.ganador
 
-  const dotColor = played ? '#16a34a' : hasBothParejas ? '#e8c547' : '#cbd5e1'
   const borderClass = played
     ? 'border-[#e2e8f0] opacity-[0.88]'
     : !hasBothParejas
     ? 'border-dashed border-[#dce6f0]'
     : 'border-[#e2e8f0]'
 
-  const LockBtn = isAdmin && played ? (
-    <button
-      type="button"
-      aria-label={partido.resultado_bloqueado ? 'Desbloquear resultado' : 'Bloquear resultado'}
-      onClick={() => toggleBloqueo.mutate()}
-      disabled={toggleBloqueo.isPending}
-      className="shrink-0 text-muted hover:text-navy transition-colors disabled:opacity-50"
-    >
-      {partido.resultado_bloqueado
-        ? <Lock className="h-3.5 w-3.5 text-defeat" />
-        : <Unlock className="h-3.5 w-3.5" />}
-    </button>
-  ) : null
+  const [score1, score2] = parseTeamScores(partido.resultado)
 
-  const metaLine = (
-    <div className="flex items-center gap-1.5 mb-1.5">
-      {sembradoNum !== undefined && (
-        <span className="font-inter font-bold text-[#e8c547] text-[10px] tabular-nums"># {sembradoNum}</span>
-      )}
-      <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dotColor }} />
-      <span className="font-inter font-bold text-[11px] text-[#162844]">{partido.turno ?? '--:--'}</span>
-      {partido.cancha != null && (
-        <span className="font-inter text-[10px] text-[#94b0cc]">· C{partido.cancha}</span>
-      )}
-      <span className="font-inter text-[10px] text-[#94b0cc]">· {fasLabel(partido)}</span>
-      {catNombre && (
-        <span className="font-inter text-[10px] text-[#94b0cc]">· {abbrevCat(catNombre)}</span>
-      )}
-      {isAdmin && played && <div className="ml-auto">{LockBtn}</div>}
-    </div>
-  )
+  const names1 = partido.pareja1
+    ? partido.pareja1.nombre.split(' / ')
+    : ['Por definir']
+  const names2 = partido.pareja2
+    ? partido.pareja2.nombre.split(' / ')
+    : ['Por definir']
 
-  const playersLine = (
-    <div className="flex items-center gap-2">
-      <div className="flex-1 min-w-0">
-        {(partido.pareja1?.nombre ?? 'Por definir').split(' / ').map((n, i) => (
-          <p key={i} className={`font-inter text-[12px] truncate leading-snug ${
-            !partido.pareja1 ? 'italic text-[#94a3b8]'
-            : played ? partido.ganador === 1 ? 'font-semibold text-[#162844]' : 'text-[#94a3b8]'
-            : 'text-[#334155]'
-          }`}>{n}</p>
-        ))}
+  const pending1 = !partido.pareja1
+  const pending2 = !partido.pareja2
+  const isWinner1 = played && partido.ganador === 1
+  const isWinner2 = played && partido.ganador === 2
+
+  const headerBgStyle = headerBg ? { background: headerBg } : { background: '#f8fafc' }
+
+  return (
+    <div className={`bg-white rounded-lg border overflow-hidden hover:border-[#94b0cc] transition-colors ${borderClass}${highlight ? ' ring-1 ring-[#3b82f6]/30' : ''}${className ? ` ${className}` : ''}`}>
+      {/* Header */}
+      <div className="flex items-center justify-between px-2.5 h-[22px]" style={headerBgStyle}>
+        <div className="flex items-center gap-1 min-w-0">
+          {sembradoNum !== undefined && (
+            <span className="font-inter font-bold text-[#e8c547] text-[10px] tabular-nums shrink-0">#{sembradoNum} ·</span>
+          )}
+          <span className="font-inter font-bold text-[11px] text-[#162844] shrink-0">{partido.turno ?? '--:--'}</span>
+          {partido.cancha != null && (
+            <span className="font-inter text-[10px] text-[#94b0cc] shrink-0"> · C{partido.cancha}</span>
+          )}
+          <span className="font-inter text-[10px] text-[#94b0cc] shrink-0"> · {fasLabel(partido)}</span>
+          {catNombre && (
+            <span className="font-inter text-[10px] text-[#94b0cc] truncate"> · {abbrevCat(catNombre)}</span>
+          )}
+        </div>
+        {isAdmin && played && (
+          <button
+            type="button"
+            aria-label={partido.resultado_bloqueado ? 'Desbloquear resultado' : 'Bloquear resultado'}
+            onClick={() => toggleBloqueo.mutate()}
+            disabled={toggleBloqueo.isPending}
+            className="shrink-0 text-muted hover:text-navy transition-colors disabled:opacity-50 ml-1"
+          >
+            {partido.resultado_bloqueado
+              ? <Lock className="h-3.5 w-3.5 text-defeat" />
+              : <Unlock className="h-3.5 w-3.5" />}
+          </button>
+        )}
       </div>
-      <div className="shrink-0 flex flex-col items-center gap-0.5">
-        {played && partido.resultado ? (
-          partido.resultado.trim().split(/\s+/).map((set, i) => (
-            <span key={i} className="font-inter text-[10px] font-bold text-white bg-[#162844] px-1.5 py-px rounded whitespace-nowrap">
-              {set}
-            </span>
-          ))
-        ) : puedeCargar ? (
+
+      {/* Teams */}
+      <TeamSection names={names1} score={score1} isWinner={isWinner1} pending={pending1} border />
+      <TeamSection names={names2} score={score2} isWinner={isWinner2} pending={pending2} />
+
+      {/* Cargar button */}
+      {puedeCargar && (
+        <div className="flex justify-end px-2.5 py-1 border-t border-[#f1f5f9] h-7">
           <button
             type="button"
             onClick={() => onCargarResultado(partido)}
-            className="font-inter text-[10px] font-semibold text-[#e8c547] border border-[#e8c547] rounded px-1.5 py-0.5"
+            className="font-inter text-[10px] font-semibold text-[#e8c547] border border-[#e8c547] rounded px-1.5 py-0.5 leading-none"
           >
             Cargar
           </button>
-        ) : (
-          <span className="font-inter text-[9px] font-bold text-[#94b0cc]">vs</span>
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        {(partido.pareja2?.nombre ?? 'Por definir').split(' / ').map((n, i) => (
-          <p key={i} className={`font-inter text-[12px] truncate leading-snug ${
-            !partido.pareja2 ? 'italic text-[#94a3b8]'
-            : played ? partido.ganador === 2 ? 'font-semibold text-[#162844]' : 'text-[#94a3b8]'
-            : 'text-[#334155]'
-          }`}>{n}</p>
-        ))}
-      </div>
-    </div>
-  )
-
-  return (
-    <div className={`bg-white rounded-lg border hover:border-[#94b0cc] transition-colors overflow-hidden ${borderClass}${className ? ` ${className}` : ''}`}>
-      {headerBg ? (
-        <>
-          <div className="px-3 pt-2 pb-1.5" style={{ background: headerBg }}>
-            {metaLine}
-          </div>
-          <div className="px-3 pt-1.5 pb-2.5 border-t border-[#f1f5f9]">
-            {playersLine}
-          </div>
-        </>
-      ) : (
-        <div className="px-3 pt-2 pb-2.5">
-          {metaLine}
-          {playersLine}
         </div>
       )}
     </div>

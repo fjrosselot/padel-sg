@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react'
+import { User } from 'lucide-react'
 import PartidoRow from './PartidoRow'
 import { buildCatColorMap } from './catColors'
+import { useUser } from '../../hooks/useUser'
 import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
 type Vista = 'grupo' | 'cancha' | 'hora'
@@ -13,6 +15,26 @@ interface Props {
   colegioRival?: string
 }
 
+function isMiPartido(p: PartidoFixture, uid: string): boolean {
+  return [p.pareja1?.jugador1_id, p.pareja1?.jugador2_id, p.pareja2?.jugador1_id, p.pareja2?.jugador2_id]
+    .includes(uid)
+}
+
+function filterMisPartidos(cats: CategoriaFixture[], uid: string): CategoriaFixture[] {
+  return cats.map(cat => ({
+    ...cat,
+    grupos: (cat.grupos ?? []).map(g => ({ ...g, partidos: g.partidos.filter(p => isMiPartido(p, uid)) })).filter(g => g.partidos.length > 0),
+    faseEliminatoria: cat.faseEliminatoria.filter(p => isMiPartido(p, uid)),
+    consola: cat.consola.filter(p => isMiPartido(p, uid)),
+    partidos: (cat.partidos ?? []).filter(p => isMiPartido(p, uid)),
+  })).filter(cat =>
+    (cat.grupos?.some(g => g.partidos.length > 0)) ||
+    cat.faseEliminatoria.length > 0 ||
+    cat.consola.length > 0 ||
+    (cat.partidos ?? []).length > 0
+  )
+}
+
 function PillSelector({ vista, onChange }: { vista: Vista; onChange: (v: Vista) => void }) {
   const options: { value: Vista; label: string }[] = [
     { value: 'grupo', label: 'Por grupo' },
@@ -20,7 +42,7 @@ function PillSelector({ vista, onChange }: { vista: Vista; onChange: (v: Vista) 
     { value: 'hora', label: 'Por hora' },
   ]
   return (
-    <div className="flex gap-1.5 mb-5">
+    <div className="flex gap-1.5">
       {options.map(o => (
         <button
           key={o.value}
@@ -199,15 +221,19 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
 
 export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResultado, colegioRival }: Props) {
   const [vista, setVista] = useState<Vista>('grupo')
+  const [soloMis, setSoloMis] = useState(false)
+  const { data: user } = useUser()
 
   const catColorMap = useMemo(() => buildCatColorMap(categorias.map(c => c.nombre)), [categorias])
+
+  const categoriasFiltradas = soloMis && user?.id ? filterMisPartidos(categorias, user.id) : categorias
 
   const { porCancha, porHora, catPorPartido } = useMemo(() => {
     const porCancha = new Map<string, PartidoFixture[]>()
     const porHora = new Map<string, PartidoFixture[]>()
     const catPorPartido = new Map<string, string>()
 
-    for (const cat of categorias) {
+    for (const cat of categoriasFiltradas) {
       const todos: PartidoFixture[] = [
         ...(cat.grupos ?? []).flatMap(g => g.partidos),
         ...cat.faseEliminatoria,
@@ -235,23 +261,37 @@ export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResu
     }
 
     return { porCancha, porHora, catPorPartido }
-  }, [categorias])
+  }, [categoriasFiltradas])
 
   if (categorias.length === 0) {
     return <p className="font-inter text-sm text-muted py-4">Sin categorías con fixture generado.</p>
   }
 
-  const americanoCats = categorias.filter(c => !c.formato || c.formato === 'americano_grupos')
+  const americanoCats = categoriasFiltradas.filter(c => !c.formato || c.formato === 'americano_grupos')
   const sinHorario = porCancha.size === 0 && porHora.size === 0
   const showPills = americanoCats.length > 0 || !sinHorario
 
   return (
     <div>
-      {showPills && <PillSelector vista={vista} onChange={setVista} />}
+      <div className="flex items-center justify-between mb-4">
+        {showPills ? <PillSelector vista={vista} onChange={setVista} /> : <div />}
+        {user && (
+          <button
+            type="button"
+            onClick={() => setSoloMis(v => !v)}
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-inter text-[11px] font-semibold transition-all ${
+              soloMis ? 'border-[#162844] bg-[#162844] text-white' : 'border-[#dce6f0] bg-white text-[#94b0cc] hover:border-[#94b0cc]'
+            }`}
+          >
+            <User className="h-3 w-3" />
+            Solo mis partidos
+          </button>
+        )}
+      </div>
 
       {(vista === 'grupo' || !showPills) && (
         <VistaGrupo
-          categorias={categorias}
+          categorias={categoriasFiltradas}
           torneoId={torneoId}
           isAdmin={isAdmin}
           onCargarResultado={onCargarResultado}

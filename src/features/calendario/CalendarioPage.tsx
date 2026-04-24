@@ -1,9 +1,13 @@
 import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, CalendarDays, List, Trophy, Swords } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CalendarDays, List, Trophy, Swords, User } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useUser } from '../../hooks/useUser'
+import { padelApi } from '../../lib/padelApi'
+import { buildCatColorMap } from '../torneos/catColors'
 import type { Database } from '../../lib/types/database.types'
+import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
 type TorneoRow = Database['padel']['Tables']['torneos']['Row']
 type LigaRow = Database['padel']['Tables']['ligas']['Row']
@@ -43,6 +47,11 @@ const TIPO_LABEL: Record<string, string> = {
 }
 
 const DIAS = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do']
+
+function isMiPartido(p: PartidoFixture, uid: string): boolean {
+  return [p.pareja1?.jugador1_id, p.pareja1?.jugador2_id, p.pareja2?.jugador1_id, p.pareja2?.jugador2_id]
+    .includes(uid)
+}
 
 function categoriasCount(categorias: unknown): number {
   if (!Array.isArray(categorias)) return 0
@@ -272,8 +281,83 @@ function VistaLista({ eventos }: { eventos: Evento[] }) {
   )
 }
 
+type MisPartidosGrupo = {
+  torneoId: string
+  torneoNombre: string
+  fechaLabel: string
+  dateKey: string
+  catNombre: string
+  catBg: string
+  catDot: string
+  partidos: PartidoFixture[]
+}
+
+function MisPartidosView({ grupos }: { grupos: MisPartidosGrupo[] }) {
+  const navigate = useNavigate()
+
+  if (grupos.length === 0) return (
+    <div className="rounded-xl bg-white shadow-card p-6 text-center">
+      <p className="font-inter text-sm text-muted">No tienes partidos programados en torneos activos.</p>
+    </div>
+  )
+
+  const byDate = new Map<string, MisPartidosGrupo[]>()
+  for (const g of grupos) {
+    if (!byDate.has(g.dateKey)) byDate.set(g.dateKey, [])
+    byDate.get(g.dateKey)!.push(g)
+  }
+  const sortedDates = [...byDate.keys()].sort()
+
+  return (
+    <div className="space-y-5">
+      {sortedDates.map(date => (
+        <div key={date} className="space-y-2">
+          <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted">
+            {byDate.get(date)![0].fechaLabel}
+          </p>
+          {byDate.get(date)!.map((g, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => navigate(`/torneos/${g.torneoId}`)}
+              className="w-full text-left rounded-xl bg-white shadow-card overflow-hidden hover:shadow-card-hover transition-shadow"
+            >
+              <div className="flex items-center gap-2 px-4 py-2.5" style={{ background: g.catBg }}>
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: g.catDot }} />
+                <div className="flex-1 min-w-0">
+                  <p className="font-inter text-[11px] font-semibold text-navy truncate">{g.torneoNombre}</p>
+                  <p className="font-inter text-[10px] text-muted">{g.catNombre}</p>
+                </div>
+              </div>
+              <div className="px-4">
+                {g.partidos.slice(0, 3).map((p, pi) => (
+                  <div key={pi} className="flex items-center gap-3 py-2 border-b border-surface-high last:border-0">
+                    <div className="shrink-0 text-center" style={{ minWidth: 40 }}>
+                      <p className="font-manrope text-[13px] font-bold text-navy">{p.turno ?? '--:--'}</p>
+                      {p.cancha != null && <p className="font-inter text-[10px] text-muted">C{p.cancha}</p>}
+                    </div>
+                    <div className="w-px h-7 bg-navy/10 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-inter text-[10px] text-muted mb-0.5">{p.fase === 'grupo' ? `P-${p.numero}` : p.fase}</p>
+                      <p className="font-inter text-[12px] truncate text-slate">
+                        {[p.pareja1, p.pareja2].map(pr => pr?.nombre).filter(Boolean).join(' vs ')}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </button>
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function CalendarioPage() {
   const [vista, setVista] = useState<'calendario' | 'lista'>('lista')
+  const [modo, setModo] = useState<'todos' | 'mis'>('todos')
+  const { data: user } = useUser()
 
   const { data: torneos = [] } = useQuery({
     queryKey: ['calendario-torneos'],
@@ -300,6 +384,50 @@ export default function CalendarioPage() {
         .order('fecha_inicio', { ascending: true })
       if (error) throw error
       return data as LigaItem[]
+    },
+  })
+
+  const { data: misPartidosGrupos = [] } = useQuery({
+    queryKey: ['mis-partidos-cal', user?.id],
+    enabled: !!user?.id && modo === 'mis',
+    queryFn: async () => {
+      const fetchedTorneos = await padelApi.get<{ id: string; nombre: string; fecha_inicio: string | null; categorias: unknown }[]>(
+        'torneos?estado=in.(en_curso,inscripcion)&select=id,nombre,fecha_inicio,categorias&order=fecha_inicio.asc'
+      )
+      const result: MisPartidosGrupo[] = []
+      for (const torneo of fetchedTorneos) {
+        const cats = (torneo.categorias as unknown as CategoriaFixture[]).filter(
+          (c): c is CategoriaFixture => Array.isArray((c as CategoriaFixture).grupos) || Array.isArray((c as CategoriaFixture).partidos)
+        )
+        if (cats.length === 0) continue
+        const colorMap = buildCatColorMap(cats.map(c => c.nombre))
+        const dateKey = torneo.fecha_inicio ?? ''
+        const fechaLabel = dateKey ? new Date(dateKey + 'T00:00:00').toLocaleDateString('es-CL', {
+          weekday: 'short', day: 'numeric', month: 'long', timeZone: 'America/Santiago',
+        }) : 'Sin fecha'
+        for (const cat of cats) {
+          const todos: PartidoFixture[] = [
+            ...(cat.grupos ?? []).flatMap(g => g.partidos),
+            ...cat.faseEliminatoria,
+            ...cat.consola,
+            ...(cat.partidos ?? []),
+          ]
+          const misPartidos = todos.filter(p => !p.ganador && isMiPartido(p, user!.id))
+          if (misPartidos.length > 0) {
+            result.push({
+              torneoId: torneo.id,
+              torneoNombre: torneo.nombre,
+              fechaLabel,
+              dateKey,
+              catNombre: cat.nombre,
+              catBg: colorMap.get(cat.nombre)?.bg ?? '#f1f5f9',
+              catDot: colorMap.get(cat.nombre)?.dot ?? '#94b0cc',
+              partidos: misPartidos,
+            })
+          }
+        }
+      }
+      return result
     },
   })
 
@@ -334,45 +462,74 @@ export default function CalendarioPage() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <h1 className="font-manrope text-2xl font-bold text-navy">Calendario</h1>
-        <div className="flex md:hidden rounded-lg border border-navy/15 bg-white overflow-hidden shadow-card">
-          <button
-            type="button"
-            onClick={() => setVista('lista')}
-            className={`flex items-center gap-1.5 px-3 py-2 transition-colors ${
-              vista === 'lista' ? 'bg-navy text-white' : 'text-muted hover:text-navy'
-            }`}
-          >
-            <List className="h-4 w-4" />
-            <span className="font-inter text-xs font-semibold">Lista</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setVista('calendario')}
-            className={`flex items-center gap-1.5 px-3 py-2 transition-colors ${
-              vista === 'calendario' ? 'bg-navy text-white' : 'text-muted hover:text-navy'
-            }`}
-          >
-            <CalendarDays className="h-4 w-4" />
-            <span className="font-inter text-xs font-semibold">Mes</span>
-          </button>
+        <div className="flex items-center gap-2">
+          {user && (
+            <div className="flex rounded-lg border border-navy/15 bg-white overflow-hidden shadow-card">
+              <button
+                type="button"
+                onClick={() => setModo('todos')}
+                className={`flex items-center gap-1.5 px-3 py-2 transition-colors font-inter text-xs font-semibold ${modo === 'todos' ? 'bg-navy text-white' : 'text-muted hover:text-navy'}`}
+              >
+                Todos
+              </button>
+              <button
+                type="button"
+                onClick={() => setModo('mis')}
+                className={`flex items-center gap-1.5 px-3 py-2 transition-colors font-inter text-xs font-semibold ${modo === 'mis' ? 'bg-navy text-white' : 'text-muted hover:text-navy'}`}
+              >
+                <User className="h-3.5 w-3.5" />
+                Mis partidos
+              </button>
+            </div>
+          )}
+          {modo === 'todos' && (
+            <div className="flex md:hidden rounded-lg border border-navy/15 bg-white overflow-hidden shadow-card">
+              <button
+                type="button"
+                onClick={() => setVista('lista')}
+                className={`flex items-center gap-1.5 px-3 py-2 transition-colors ${
+                  vista === 'lista' ? 'bg-navy text-white' : 'text-muted hover:text-navy'
+                }`}
+              >
+                <List className="h-4 w-4" />
+                <span className="font-inter text-xs font-semibold">Lista</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setVista('calendario')}
+                className={`flex items-center gap-1.5 px-3 py-2 transition-colors ${
+                  vista === 'calendario' ? 'bg-navy text-white' : 'text-muted hover:text-navy'
+                }`}
+              >
+                <CalendarDays className="h-4 w-4" />
+                <span className="font-inter text-xs font-semibold">Mes</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Desktop: ambas vistas lado a lado */}
-      <div className="hidden md:grid md:grid-cols-[1fr_360px] md:gap-6 md:items-start">
-        <VistaCalendario eventos={eventos} />
-        <VistaLista eventos={eventos} />
-      </div>
+      {modo === 'mis' ? (
+        <MisPartidosView grupos={misPartidosGrupos} />
+      ) : (
+        <>
+          {/* Desktop: ambas vistas lado a lado */}
+          <div className="hidden md:grid md:grid-cols-[1fr_360px] md:gap-6 md:items-start">
+            <VistaCalendario eventos={eventos} />
+            <VistaLista eventos={eventos} />
+          </div>
 
-      {/* Mobile: una vista a la vez */}
-      <div className="md:hidden">
-        {vista === 'lista'
-          ? <VistaLista eventos={eventos} />
-          : <VistaCalendario eventos={eventos} />
-        }
-      </div>
+          {/* Mobile: una vista a la vez */}
+          <div className="md:hidden">
+            {vista === 'lista'
+              ? <VistaLista eventos={eventos} />
+              : <VistaCalendario eventos={eventos} />
+            }
+          </div>
+        </>
+      )}
     </div>
   )
 }

@@ -25,6 +25,9 @@ const PerfilPage = lazy(() => import('./features/perfil/PerfilPage'))
 const TesoreriaAdmin = lazy(() => import('./features/tesoreria/TesoreriaAdmin'))
 
 const ColorCodingMockup = lazy(() => import('./features/mockups/ColorCodingMockup'))
+const DashboardMockup = lazy(() => import('./features/mockups/DashboardMockup'))
+const CalendarioMockup = lazy(() => import('./features/mockups/CalendarioMockup'))
+const TorneoDetalleMockup = lazy(() => import('./features/mockups/TorneoDetalleMockup'))
 
 const fallback = (
   <div className="flex h-full items-center justify-center text-muted">Cargando…</div>
@@ -32,6 +35,9 @@ const fallback = (
 
 export const router = createBrowserRouter([
   { path: '/mockup/color-coding', element: <Suspense fallback={fallback}><ColorCodingMockup /></Suspense> },
+  { path: '/mockup/dashboard', element: <Suspense fallback={fallback}><DashboardMockup /></Suspense> },
+  { path: '/mockup/calendario', element: <Suspense fallback={fallback}><CalendarioMockup /></Suspense> },
+  { path: '/mockup/torneo-detalle', element: <Suspense fallback={fallback}><TorneoDetalleMockup /></Suspense> },
   { path: '/login', element: <LoginForm /> },
   { path: '/registro', element: <RegisterForm /> },
   { path: '/pendiente', element: <PendingApproval /> },
