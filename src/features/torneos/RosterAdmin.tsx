@@ -1,12 +1,13 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Pencil } from 'lucide-react'
+import { Plus, UserCheck } from 'lucide-react'
 import { padelApi } from '../../lib/padelApi'
 import { Button } from '../../components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog'
 import { useUser } from '../../hooks/useUser'
 import type { CategoriaConfig, ParejaFixture } from '../../lib/fixture/types'
 import { SEXO_LABEL } from './TorneoWizard/constants'
+import { buildCatColorMap } from './catColors'
 import RosterRow from './RosterRow'
 import type { InscripcionRow } from './RosterRow'
 import { PlayerCombobox, usePastCompaneros } from './PlayerCombobox'
@@ -113,10 +114,12 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
 
   const closeModal = () => { setAddingCat(null); setJ1Id(''); setJ2Id(''); setCategoriaFiltro(null) }
 
+  const catColorMap = useMemo(() => buildCatColorMap(categorias.map(c => c.nombre)), [categorias])
+
   if (!isAdmin) return null
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
 
       {/* Modal agregar pareja */}
       <Dialog open={!!addingCat} onOpenChange={open => { if (!open) closeModal() }}>
@@ -204,74 +207,77 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
       {categorias.map(cat => {
         const activas = inscripciones?.filter(i => i.categoria_nombre === cat.nombre && !i.lista_espera) ?? []
         const espera = inscripciones?.filter(i => i.categoria_nombre === cat.nombre && i.lista_espera) ?? []
+        const colors = catColorMap.get(cat.nombre) ?? { bg: '#f1f5f9', dot: '#64748b' }
+        const pct = cat.num_parejas > 0 ? Math.round((activas.length / cat.num_parejas) * 100) : 0
 
         return (
-          <div key={cat.nombre} className="rounded-xl border border-navy/10 overflow-hidden">
-            <div className="flex items-center justify-between bg-surface px-4 py-3">
-              <div>
-                <span className="font-semibold text-sm text-navy">{cat.nombre}</span>
-                <span className="ml-2 text-xs text-muted">
-                  {SEXO_LABEL[cat.sexo]} · {activas.length}/{cat.num_parejas}
-                </span>
-                {cat.formato === 'desafio_sembrado' && (
-                  <span className="ml-2 text-xs text-gold font-semibold">Sembrado</span>
-                )}
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-7 px-2"
-                onClick={() => {
-                  setAddingCat(cat.nombre)
-                  setJ1Id('')
-                  setJ2Id('')
-                }}
-              >
-                + Agregar pareja
-              </Button>
-            </div>
-
-            <div className="divide-y divide-navy/5">
-              {activas.map(ins => (
-                <div key={ins.id} className="relative flex items-center">
-                  <div className="flex-1">
-                    <RosterRow
-                      ins={ins}
-                      onEliminar={() => eliminarInscripcion.mutate(ins.id)}
-                      eliminating={deletingId === ins.id}
-                      onConfirmar={ins.estado === 'pendiente' ? () => updateEstado.mutate({ inscripcionId: ins.id, nuevoEstado: 'confirmada' }) : undefined}
-                      onRechazar={ins.estado === 'pendiente' ? () => updateEstado.mutate({ inscripcionId: ins.id, nuevoEstado: 'rechazada' }) : undefined}
-                    />
-                  </div>
-                  {ins.estado !== 'rechazada' && (
-                    <button
-                      type="button"
-                      aria-label="Editar pareja"
-                      onClick={() => setEditingPareja({
-                        inscripcionId: ins.id,
-                        pareja: {
-                          id: ins.id,
-                          nombre: `${ins.jugador1?.nombre ?? '?'} / ${ins.jugador2?.nombre ?? '?'}`,
-                          jugador1_id: ins.jugador1_id,
-                          jugador2_id: ins.jugador2_id,
-                          elo1: 0,
-                          elo2: 0,
-                        },
-                      })}
-                      className="shrink-0 mr-3 text-muted hover:text-navy transition-colors p-1 rounded"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
+          <div key={cat.nombre} className="rounded-xl bg-white shadow-card overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center gap-2.5 px-4 py-3" style={{ background: colors.bg }}>
+              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: colors.dot }} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <p className="font-manrope text-sm font-bold text-navy leading-tight">{cat.nombre}</p>
+                  {cat.formato === 'desafio_sembrado' && (
+                    <span className="font-inter text-[10px] font-bold text-gold">Sembrado</span>
                   )}
                 </div>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="font-inter text-[10px] text-muted">{SEXO_LABEL[cat.sexo]}</span>
+                  <span className="font-inter text-[10px] text-muted">·</span>
+                  <span className="font-inter text-[10px] font-semibold text-navy">{activas.length}/{cat.num_parejas}</span>
+                  <div className="flex-1 max-w-[56px] h-1 rounded-full bg-navy/10 overflow-hidden">
+                    <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: colors.dot }} />
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setAddingCat(cat.nombre); setJ1Id(''); setJ2Id('') }}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-inter text-[11px] font-semibold text-navy bg-white/70 hover:bg-white border border-navy/15 transition-colors shrink-0"
+              >
+                <Plus className="h-3 w-3" /> Agregar
+              </button>
+            </div>
+
+            {/* Parejas activas */}
+            <div>
+              {activas.map((ins, i) => (
+                <RosterRow
+                  key={ins.id}
+                  ins={ins}
+                  num={i + 1}
+                  dot={colors.dot}
+                  onEliminar={() => eliminarInscripcion.mutate(ins.id)}
+                  eliminating={deletingId === ins.id}
+                  onEdit={() => setEditingPareja({
+                    inscripcionId: ins.id,
+                    pareja: {
+                      id: ins.id,
+                      nombre: `${ins.jugador1?.nombre ?? '?'} / ${ins.jugador2?.nombre ?? '?'}`,
+                      jugador1_id: ins.jugador1_id,
+                      jugador2_id: ins.jugador2_id,
+                      elo1: 0,
+                      elo2: 0,
+                    },
+                  })}
+                  onConfirmar={ins.estado === 'pendiente' ? () => updateEstado.mutate({ inscripcionId: ins.id, nuevoEstado: 'confirmada' }) : undefined}
+                  onRechazar={ins.estado === 'pendiente' ? () => updateEstado.mutate({ inscripcionId: ins.id, nuevoEstado: 'rechazada' }) : undefined}
+                />
               ))}
+
+              {/* Lista de espera */}
               {espera.length > 0 && (
-                <div className="px-4 py-2 bg-navy/[0.02]">
-                  <p className="text-xs text-muted font-semibold mb-1">Lista de espera</p>
+                <div className="border-t border-dashed border-navy/15">
+                  <div className="px-4 pt-2.5 pb-1 flex items-center gap-1.5">
+                    <UserCheck className="h-3 w-3 text-muted" />
+                    <span className="font-inter text-[10px] font-bold uppercase tracking-wider text-muted">Lista de espera</span>
+                  </div>
                   {espera.map((ins, i) => (
                     <RosterRow
                       key={ins.id}
                       ins={ins}
+                      dot={colors.dot}
                       waitPos={i + 1}
                       onPromover={() => promoverEspera.mutate(ins.id)}
                       onEliminar={() => eliminarInscripcion.mutate(ins.id)}
@@ -280,11 +286,13 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
                   ))}
                 </div>
               )}
+
               {activas.length === 0 && espera.length === 0 && (
-                <p className="px-4 py-3 text-sm text-muted">Sin inscritos aún.</p>
+                <div className="px-4 py-6 text-center">
+                  <p className="font-inter text-sm text-muted">Sin inscritos aún.</p>
+                </div>
               )}
             </div>
-
           </div>
         )
       })}

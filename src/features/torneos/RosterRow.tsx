@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { Button } from '../../components/ui/button'
-import { Badge } from '../../components/ui/badge'
+import { Pencil, Clock } from 'lucide-react'
 
 export interface InscripcionRow {
   id: string
@@ -16,68 +15,93 @@ export interface InscripcionRow {
   jugador2: { nombre: string; sexo?: 'M' | 'F' | null } | null
 }
 
+function initials(nombre: string) {
+  const parts = nombre.trim().split(' ')
+  return (parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')
+}
+
+function AvatarPair({ j1, j2, dot }: { j1: string; j2: string; dot: string }) {
+  return (
+    <div className="relative shrink-0" style={{ width: 44, height: 28 }}>
+      <span className="absolute left-0 top-0 flex items-center justify-center w-7 h-7 rounded-full text-white font-inter text-[10px] font-bold ring-2 ring-white" style={{ background: dot, zIndex: 2 }}>
+        {initials(j1)}
+      </span>
+      <span className="absolute left-4 top-0 flex items-center justify-center w-7 h-7 rounded-full text-white font-inter text-[10px] font-bold ring-2 ring-white" style={{ background: dot + 'bb', zIndex: 1 }}>
+        {initials(j2)}
+      </span>
+    </div>
+  )
+}
+
 export default function RosterRow({
-  ins, waitPos, onPromover, onEliminar, onConfirmar, onRechazar, eliminating,
+  ins, num, dot = '#94b0cc', waitPos, onPromover, onEliminar, onEdit, onConfirmar, onRechazar, eliminating,
 }: {
   ins: InscripcionRow
+  num?: number
+  dot?: string
   waitPos?: number
   onPromover?: () => void
   onEliminar: () => void
+  onEdit?: () => void
   onConfirmar?: () => void
   onRechazar?: () => void
   eliminating: boolean
 }) {
   const [confirming, setConfirming] = useState(false)
+  const j1 = ins.jugador1?.nombre ?? ins.jugador1_id
+  const j2 = ins.jugador2?.nombre ?? ins.jugador2_id
+  const isEspera = waitPos != null
   const isPending = ins.estado === 'pendiente'
 
   return (
-    <div className="flex items-center justify-between px-4 py-2.5 gap-2">
-      <div className="flex items-center gap-2 min-w-0">
-        <p className="text-sm font-medium text-navy truncate">
-          {ins.jugador1?.nombre ?? ins.jugador1_id} / {ins.jugador2?.nombre ?? ins.jugador2_id}
-        </p>
-        {ins.estado !== 'confirmada' && (
-          <Badge
-            variant={ins.estado === 'rechazada' ? 'destructive' : 'outline'}
-            className="text-[10px] h-4 shrink-0"
-          >
-            {ins.estado}
-          </Badge>
-        )}
-        {waitPos != null && (
-          <span className="text-[10px] text-gold font-semibold shrink-0">Espera #{waitPos}</span>
-        )}
+    <div className="flex items-center gap-3 px-4 py-3 border-b border-[#f1f5f9] last:border-0">
+      {isEspera
+        ? <Clock className="h-3.5 w-3.5 text-muted shrink-0" />
+        : num != null && <span className="font-inter text-[11px] text-muted font-semibold tabular-nums w-4 shrink-0 text-right">{num}</span>
+      }
+
+      <AvatarPair j1={j1} j2={j2} dot={dot} />
+
+      <div className="flex-1 min-w-0">
+        <p className={`font-inter text-[12px] leading-snug truncate ${isEspera ? 'text-slate' : 'font-semibold text-navy'}`}>{j1}</p>
+        <p className="font-inter text-[12px] text-muted leading-snug truncate">{j2}</p>
       </div>
-      <div className="flex items-center gap-1.5">
-        {onPromover && (
-          <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 bg-[#D1FAE5] text-[#065F46] border-transparent" onClick={onPromover}>
-            Promover
-          </Button>
-        )}
-        {isPending && onConfirmar && onRechazar ? (
-          <>
-            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 bg-[#D1FAE5] text-[#065F46] border-transparent" onClick={onConfirmar} disabled={eliminating}>
-              Confirmar
-            </Button>
-            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 bg-[#FEE8E8] text-[#BA1A1A] border-transparent" onClick={onRechazar} disabled={eliminating}>
-              Rechazar
-            </Button>
-          </>
-        ) : confirming ? (
-          <div className="flex gap-1">
-            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 bg-[#FEE8E8] text-[#BA1A1A] border-transparent" onClick={() => { onEliminar(); setConfirming(false) }} disabled={eliminating}>
-              Confirmar
-            </Button>
-            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2" onClick={() => setConfirming(false)}>
-              No
-            </Button>
-          </div>
-        ) : (
-          <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 text-[#BA1A1A]/70 hover:text-[#BA1A1A]" onClick={() => setConfirming(true)}>
+
+      {isPending && onConfirmar && onRechazar ? (
+        <div className="flex gap-1 shrink-0">
+          <button type="button" onClick={onConfirmar} disabled={eliminating} className="px-2 py-1 rounded-md font-inter text-[10px] font-bold bg-emerald-50 text-emerald-700">Confirmar</button>
+          <button type="button" onClick={onRechazar} disabled={eliminating} className="px-2 py-1 rounded-md font-inter text-[10px] font-bold bg-[#FEE8E8] text-[#BA1A1A]">Rechazar</button>
+        </div>
+      ) : isEspera ? (
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="font-inter text-[10px] text-muted">#{waitPos}</span>
+          {onPromover && (
+            <button type="button" onClick={onPromover} className="px-2.5 py-1 rounded-lg font-inter text-[10px] font-semibold text-emerald-700 border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 transition-colors">
+              Promover
+            </button>
+          )}
+        </div>
+      ) : confirming ? (
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button type="button" onClick={() => { onEliminar(); setConfirming(false) }} disabled={eliminating} className="px-2 py-1 rounded-md font-inter text-[10px] font-bold bg-[#FEE8E8] text-[#BA1A1A]">
+            Confirmar
+          </button>
+          <button type="button" onClick={() => setConfirming(false)} className="px-2 py-1 rounded-md font-inter text-[10px] font-semibold bg-surface text-muted">
+            No
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-1 shrink-0">
+          {onEdit && ins.estado !== 'rechazada' && (
+            <button type="button" onClick={onEdit} className="p-1.5 rounded-lg text-muted hover:text-navy hover:bg-surface transition-colors">
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          )}
+          <button type="button" onClick={() => setConfirming(true)} className="px-2.5 py-1 rounded-lg font-inter text-[10px] font-semibold text-muted border border-navy/15 hover:border-[#BA1A1A]/30 hover:text-[#BA1A1A] transition-colors">
             Quitar
-          </Button>
-        )}
-      </div>
+          </button>
+        </div>
+      )}
     </div>
   )
 }
