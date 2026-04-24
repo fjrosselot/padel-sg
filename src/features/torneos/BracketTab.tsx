@@ -1,7 +1,7 @@
 import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
-const CARD_H = 72
-const CARD_GAP = 36
+const CARD_H = 92
+const CARD_GAP = 32
 const SLOT = CARD_H + CARD_GAP
 
 function connectorPaths(leftCount: number) {
@@ -44,6 +44,43 @@ function parseScores(resultado: string | null): [string, string] {
   return [parts[0].trim(), parts[1].trim()]
 }
 
+function TeamHalf({ names, isWinner, pending, score, border }: {
+  names: string[]
+  isWinner: boolean
+  pending: boolean
+  score: string
+  border?: boolean
+}) {
+  const HALF = CARD_H / 2
+  const textCls = pending
+    ? 'text-[#94a3b8] italic'
+    : isWinner
+    ? 'font-semibold text-[#162844]'
+    : 'text-[#94a3b8]'
+  const scoreCls = pending
+    ? 'text-[#cbd5e1]'
+    : isWinner
+    ? 'text-[#e8c547]'
+    : 'text-[#94b0cc]'
+
+  return (
+    <div
+      className={`flex items-center gap-2 px-2.5 ${isWinner && !pending ? 'bg-[rgba(232,197,71,0.06)]' : 'bg-white'}`}
+      style={{ height: HALF, ...(border ? { borderBottom: '1px solid #f1f5f9' } : {}) }}
+    >
+      <div className="flex-1 min-w-0">
+        <p className={`font-inter text-[11px] truncate leading-snug ${textCls}`}>{names[0]}</p>
+        {names[1] && (
+          <p className={`font-inter text-[11px] truncate leading-snug ${textCls}`}>{names[1]}</p>
+        )}
+      </div>
+      <span className={`font-manrope text-[15px] font-bold shrink-0 w-5 text-right tabular-nums ${scoreCls}`}>
+        {score}
+      </span>
+    </div>
+  )
+}
+
 function BracketCard({ partido, isFinal = false, isPlataFinal = false }: {
   partido: PartidoFixture
   isFinal?: boolean
@@ -54,46 +91,19 @@ function BracketCard({ partido, isFinal = false, isPlataFinal = false }: {
   const win2 = partido.ganador === 2
   const pending = !partido.ganador
 
+  const names1 = (partido.pareja1?.nombre ?? 'Por definir').split(' / ')
+  const names2 = (partido.pareja2?.nombre ?? 'Por definir').split(' / ')
+
   const cardClass = isFinal
     ? 'border-2 border-[#e8c547] shadow-[0_0_0_3px_rgba(232,197,71,0.2),0_2px_8px_rgba(0,0,0,0.1)]'
     : isPlataFinal
     ? 'border-2 border-[#94b0cc] shadow-[0_0_0_3px_rgba(148,176,204,0.2)]'
     : 'border-[1.5px] border-navy/[0.12] shadow-[0_1px_4px_rgba(0,0,0,0.06)]'
 
-  const ROW_H = 35
-
   return (
-    <div className={`w-[200px] rounded-lg overflow-hidden bg-white ${cardClass}`} style={{ height: CARD_H }}>
-      <div
-        className={`flex items-center px-2.5 gap-1.5 ${win1 ? 'bg-[rgba(232,197,71,0.06)]' : 'bg-white'}`}
-        style={{ height: ROW_H, borderBottom: '1px solid #f1f5f9' }}
-      >
-        <span className={`font-inter text-[12px] flex-1 truncate ${
-          pending ? 'text-[#94a3b8] italic' : win1 ? 'font-bold text-[#162844]' : 'text-[#334155]'
-        }`}>
-          {partido.pareja1?.nombre ?? 'Por definir'}
-        </span>
-        <span className={`text-[12px] font-bold shrink-0 min-w-[38px] text-right tracking-[0.12em] ${
-          pending ? 'text-[#cbd5e1]' : win1 ? 'text-[#e8c547]' : 'text-[#94b0cc]'
-        }`}>
-          {s1}
-        </span>
-      </div>
-      <div
-        className={`flex items-center px-2.5 gap-1.5 ${win2 ? 'bg-[rgba(232,197,71,0.06)]' : 'bg-white'}`}
-        style={{ height: ROW_H }}
-      >
-        <span className={`font-inter text-[12px] flex-1 truncate ${
-          pending ? 'text-[#94a3b8] italic' : win2 ? 'font-bold text-[#162844]' : 'text-[#334155]'
-        }`}>
-          {partido.pareja2?.nombre ?? 'Por definir'}
-        </span>
-        <span className={`text-[12px] font-bold shrink-0 min-w-[38px] text-right tracking-[0.12em] ${
-          pending ? 'text-[#cbd5e1]' : win2 ? 'text-[#e8c547]' : 'text-[#94b0cc]'
-        }`}>
-          {s2}
-        </span>
-      </div>
+    <div className={`w-[220px] rounded-lg overflow-hidden bg-white ${cardClass}`} style={{ height: CARD_H }}>
+      <TeamHalf names={names1} isWinner={win1} pending={pending} score={s1} border />
+      <TeamHalf names={names2} isWinner={win2} pending={pending} score={s2} />
     </div>
   )
 }
