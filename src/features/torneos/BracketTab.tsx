@@ -1,9 +1,11 @@
+import { useMemo } from 'react'
+import { buildCatColorMap, abbrevCat } from './catColors'
 import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
 const CARD_HEADER_H = 20
 const HALF_H = 36
 const CARD_H = CARD_HEADER_H + HALF_H * 2   // 92
-const CARD_CONN = CARD_HEADER_H + HALF_H     // 56 — where connectors attach
+const CARD_CONN = CARD_HEADER_H + HALF_H     // 56
 const CARD_GAP = 32
 const SLOT = CARD_H + CARD_GAP              // 124
 
@@ -87,10 +89,12 @@ function TeamHalf({ names, isWinner, pending, score, border }: {
   )
 }
 
-function BracketCard({ partido, isFinal = false, isPlataFinal = false }: {
+function BracketCard({ partido, isFinal = false, isPlataFinal = false, headerBg, catAbbrev }: {
   partido: PartidoFixture
   isFinal?: boolean
   isPlataFinal?: boolean
+  headerBg?: string
+  catAbbrev?: string
 }) {
   const [s1, s2] = parseScores(partido.resultado)
   const win1 = partido.ganador === 1
@@ -110,10 +114,9 @@ function BracketCard({ partido, isFinal = false, isPlataFinal = false }: {
 
   return (
     <div className={`w-[220px] rounded-lg overflow-hidden bg-white ${cardClass}`} style={{ height: CARD_H }}>
-      {/* Metadata header */}
       <div
-        className="flex items-center gap-1 px-2.5 bg-[#f8fafc] border-b border-[#f1f5f9]"
-        style={{ height: CARD_HEADER_H }}
+        className="flex items-center gap-1 px-2.5 border-b border-[#f1f5f9]"
+        style={{ height: CARD_HEADER_H, background: headerBg ?? '#f8fafc' }}
       >
         <span className="font-inter text-[10px] font-bold text-[#162844]">
           {partido.turno ?? '--:--'}
@@ -122,6 +125,9 @@ function BracketCard({ partido, isFinal = false, isPlataFinal = false }: {
           <span className="font-inter text-[10px] text-[#94b0cc]">· C{partido.cancha}</span>
         )}
         <span className="font-inter text-[10px] text-[#94b0cc]">· {faseLabel}</span>
+        {catAbbrev && (
+          <span className="font-inter text-[10px] text-[#94b0cc]">· {catAbbrev}</span>
+        )}
       </div>
       <TeamHalf names={names1} isWinner={win1} pending={pending} score={s1} border />
       <TeamHalf names={names2} isWinner={win2} pending={pending} score={s2} />
@@ -132,9 +138,11 @@ function BracketCard({ partido, isFinal = false, isPlataFinal = false }: {
 const ELIM_PHASES = ['cuartos', 'semifinal', 'tercer_lugar', 'final'] as const
 const CONSOLA_PHASES = ['consolacion_cuartos', 'consolacion_sf', 'consolacion_final'] as const
 
-function BracketTree({ rounds, isPlata = false }: {
+function BracketTree({ rounds, isPlata = false, headerBg, catAbbrev }: {
   rounds: { label: string; partidos: PartidoFixture[] }[]
   isPlata?: boolean
+  headerBg?: string
+  catAbbrev?: string
 }) {
   if (rounds.length === 0) return null
 
@@ -164,6 +172,8 @@ function BracketTree({ rounds, isPlata = false }: {
                       partido={p}
                       isFinal={isLast && !isPlata}
                       isPlataFinal={isLast && isPlata}
+                      headerBg={headerBg}
+                      catAbbrev={catAbbrev}
                     />
                   ))}
                 </div>
@@ -188,7 +198,9 @@ function BracketTree({ rounds, isPlata = false }: {
   )
 }
 
-function CategoriaBracket({ categoria }: { categoria: CategoriaFixture }) {
+function CategoriaBracket({ categoria, headerBg }: { categoria: CategoriaFixture; headerBg?: string }) {
+  const catAbbrev = abbrevCat(categoria.nombre)
+
   const byPhase = (phases: readonly string[], partidos: PartidoFixture[]) =>
     phases
       .map(phase => ({ label: FASE_LABEL[phase] ?? phase, partidos: partidos.filter(p => p.fase === phase) }))
@@ -204,7 +216,7 @@ function CategoriaBracket({ categoria }: { categoria: CategoriaFixture }) {
       {oroRounds.length > 0 ? (
         <div>
           <p className="font-manrope text-sm font-bold text-navy border-l-4 border-gold pl-3 mb-4">Copa Oro 🏆</p>
-          <BracketTree rounds={oroRounds} isPlata={false} />
+          <BracketTree rounds={oroRounds} isPlata={false} headerBg={headerBg} catAbbrev={catAbbrev} />
         </div>
       ) : (
         <p className="font-inter text-sm text-muted">Fase eliminatoria pendiente.</p>
@@ -213,7 +225,7 @@ function CategoriaBracket({ categoria }: { categoria: CategoriaFixture }) {
       {plataRounds.length > 0 && (
         <div className="mt-2">
           <p className="font-manrope text-sm font-bold text-navy border-l-4 border-[#94b0cc] pl-3 mb-4">Copa Plata 🥈</p>
-          <BracketTree rounds={plataRounds} isPlata={true} />
+          <BracketTree rounds={plataRounds} isPlata={true} headerBg={headerBg} catAbbrev={catAbbrev} />
         </div>
       )}
     </div>
@@ -226,6 +238,7 @@ interface Props {
 
 export default function BracketTab({ categorias }: Props) {
   const cats = categorias.filter(c => c.faseEliminatoria.length > 0)
+  const catColorMap = useMemo(() => buildCatColorMap(categorias.map(c => c.nombre)), [categorias])
 
   if (cats.length === 0) {
     return <p className="font-inter text-sm text-muted py-4">Sin categorías con bracket.</p>
@@ -234,7 +247,11 @@ export default function BracketTab({ categorias }: Props) {
   return (
     <div className="space-y-10">
       {cats.map(cat => (
-        <CategoriaBracket key={cat.nombre} categoria={cat} />
+        <CategoriaBracket
+          key={cat.nombre}
+          categoria={cat}
+          headerBg={catColorMap.get(cat.nombre)?.bg}
+        />
       ))}
     </div>
   )

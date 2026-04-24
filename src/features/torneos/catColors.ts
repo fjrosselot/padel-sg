@@ -18,6 +18,17 @@ export const CAT_DOT_PALETTE = [
   '#64748b',
 ]
 
+export function abbrevCat(nombre: string): string {
+  if (nombre.length <= 4) return nombre
+  const parts = nombre.trim().split(/\s+/)
+  let result = ''
+  for (const p of parts) {
+    if (/^\d+$/.test(p)) result += p
+    else result += p[0].toUpperCase()
+  }
+  return result
+}
+
 export function buildCatColorMap(catNames: string[]): Map<string, { bg: string; dot: string }> {
   const map = new Map<string, { bg: string; dot: string }>()
   catNames.forEach((name, i) => {

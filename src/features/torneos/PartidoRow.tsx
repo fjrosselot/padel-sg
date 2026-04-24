@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Lock, Unlock } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
+import { abbrevCat } from './catColors'
 import type { PartidoFixture } from '../../lib/fixture/types'
 
 function fasLabel(p: PartidoFixture): string {
@@ -16,17 +17,6 @@ function fasLabel(p: PartidoFixture): string {
     case 'consolacion_final':   return '🥈 Final'
     default:                    return String(p.numero)
   }
-}
-
-function abbrevCat(nombre: string): string {
-  if (nombre.length <= 4) return nombre
-  const parts = nombre.trim().split(/\s+/)
-  let result = ''
-  for (const p of parts) {
-    if (/^\d+$/.test(p)) result += p
-    else result += p[0].toUpperCase()
-  }
-  return result
 }
 
 interface Props {
