@@ -108,20 +108,23 @@ export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResulta
         {LockBtn}
       </div>
 
-      {/* Mobile layout — 2 lines per team, score badge in center */}
-      <div className="sm:hidden px-3 py-2.5">
-        <div className="flex items-center gap-2">
+      {/* Mobile layout — line 1: metadata / lines 2-3: players + score */}
+      <div className="sm:hidden px-3 pt-2 pb-2.5">
+        {/* Line 1: dot · hora · cancha */}
+        <div className="flex items-center gap-1.5 mb-1.5">
           {sembradoNum !== undefined && (
-            <span className="font-inter font-bold text-[#e8c547] text-xs w-4 shrink-0 text-center tabular-nums">
-              {sembradoNum}
-            </span>
+            <span className="font-inter font-bold text-[#e8c547] text-[10px] tabular-nums"># {sembradoNum}</span>
           )}
-          <div className="shrink-0 text-center leading-tight min-w-[36px]">
-            <div className="font-inter font-bold text-[11px] text-[#162844]">{partido.turno ?? '--:--'}</div>
-            <div className="font-inter text-[9px] text-[#94b0cc]">{partido.cancha != null ? `C${partido.cancha}` : '—'}</div>
-          </div>
           <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dotColor }} />
+          <span className="font-inter font-bold text-[11px] text-[#162844]">{partido.turno ?? '--:--'}</span>
+          {partido.cancha != null && (
+            <span className="font-inter text-[10px] text-[#94b0cc]">· C{partido.cancha}</span>
+          )}
+          {isAdmin && played && <div className="ml-auto">{LockBtn}</div>}
+        </div>
 
+        {/* Lines 2-3: team1 | marcador | team2 */}
+        <div className="flex items-center gap-2">
           {/* Team 1 */}
           <div className="flex-1 min-w-0">
             {(partido.pareja1?.nombre ?? 'Por definir').split(' / ').map((n, i) => (
@@ -133,17 +136,19 @@ export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResulta
             ))}
           </div>
 
-          {/* Center badge: score / cargar / vs */}
-          <div className="shrink-0 flex items-center justify-center">
+          {/* Marcador / vs / cargar */}
+          <div className="shrink-0 flex flex-col items-center gap-0.5">
             {played && partido.resultado ? (
-              <span className="font-inter text-[10px] font-bold text-white bg-[#162844] px-1.5 py-0.5 rounded whitespace-nowrap">
-                {partido.resultado}
-              </span>
+              partido.resultado.trim().split(/\s+/).map((set, i) => (
+                <span key={i} className="font-inter text-[10px] font-bold text-white bg-[#162844] px-1.5 py-px rounded whitespace-nowrap">
+                  {set}
+                </span>
+              ))
             ) : puedeCargar ? (
               <button
                 type="button"
                 onClick={() => onCargarResultado(partido)}
-                className="font-inter text-[10px] font-semibold text-[#e8c547] border border-[#e8c547] rounded px-1.5 py-0.5 whitespace-nowrap"
+                className="font-inter text-[10px] font-semibold text-[#e8c547] border border-[#e8c547] rounded px-1.5 py-0.5"
               >
                 Cargar
               </button>
@@ -162,8 +167,6 @@ export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResulta
               }`}>{n}</p>
             ))}
           </div>
-
-          {LockBtn}
         </div>
       </div>
 
