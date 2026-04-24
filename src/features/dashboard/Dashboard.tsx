@@ -1,18 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Trophy, BarChart3, Handshake, Medal } from 'lucide-react'
 import { useUser } from '@/hooks/useUser'
 import { padelApi } from '@/lib/padelApi'
 import { usePlayerRankings } from '@/hooks/usePlayerRankings'
 import { buildCatColorMap } from '@/features/torneos/catColors'
 import type { CategoriaFixture, PartidoFixture } from '@/lib/fixture/types'
-
-const QUICK_LINKS = [
-  { to: '/torneos', icon: Trophy, label: 'Torneos', desc: 'Inscripciones y resultados' },
-  { to: '/ligas', icon: BarChart3, label: 'Ligas', desc: 'Round robin y escalerilla' },
-  { to: '/amistosos', icon: Handshake, label: 'Amistosos', desc: 'Partidos libres' },
-  { to: '/rankings', icon: Medal, label: 'Ranking', desc: 'Rankings por categoría' },
-]
+import { RankingEvolucion, PagosSummary, Novedades } from './DashboardWidgets'
 
 function isMiPartido(p: PartidoFixture, uid: string): boolean {
   return [p.pareja1?.jugador1_id, p.pareja1?.jugador2_id, p.pareja2?.jugador1_id, p.pareja2?.jugador2_id]
@@ -101,29 +94,14 @@ export function Dashboard() {
         </div>
       )}
 
-      <div>
-        <h2 className="mb-3 font-manrope text-sm font-bold uppercase tracking-widest text-slate">
-          Accesos rápidos
-        </h2>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {QUICK_LINKS.map(({ to, icon: Icon, label, desc }) => (
-            <button
-              key={to}
-              type="button"
-              onClick={() => navigate(to)}
-              className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-card transition-shadow hover:shadow-card-hover"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-navy">
-                <Icon className="h-5 w-5 text-gold" />
-              </div>
-              <div className="min-w-0 flex-1 text-left">
-                <p className="font-manrope text-sm font-bold text-navy">{label}</p>
-                <p className="font-inter text-xs text-muted">{desc}</p>
-              </div>
-            </button>
-          ))}
+      {user?.id && (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <RankingEvolucion userId={user.id} />
+          <PagosSummary userId={user.id} />
         </div>
-      </div>
+      )}
+
+      <Novedades />
     </div>
   )
 }
