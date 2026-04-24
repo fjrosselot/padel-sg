@@ -91,42 +91,42 @@ function MatchCell({ entry }: { entry: MatchEntry }) {
   return (
     <div
       className={`rounded-lg overflow-hidden flex flex-col ${pending ? '' : 'opacity-[0.88]'}`}
-      style={{ ...finalBorder, minHeight: 90 }}
+      style={{ ...finalBorder, minHeight: 58 }}
     >
       <div style={{ height: 3, background: stripeColor, flexShrink: 0 }} />
-      <div className="flex flex-col gap-0 p-1.5 bg-white flex-1">
-        <div className="flex items-center justify-between gap-1 mb-1">
+      <div className="flex flex-col gap-0 p-1 bg-white flex-1">
+        <div className="flex items-center justify-between gap-1 mb-0.5">
           <span className="font-inter text-[9px] font-bold rounded px-1 py-px" style={roundBadgeStyle}>
             {partidoLabel(partido)}
           </span>
           <span
-            className="font-inter text-[9px] font-bold rounded px-1 py-px shrink-0"
+            className="font-inter text-[9px] font-bold rounded px-1 py-px whitespace-nowrap"
             style={{ background: catBg(catNombre), color: catColor(catNombre) }}
           >
             {catNombre}
           </span>
         </div>
-        <div className="flex items-center gap-1 min-h-[22px]">
-          <span className={`font-inter text-[11px] flex-1 truncate ${
+        <div className="flex items-center gap-1 min-h-[18px]">
+          <span className={`font-inter text-[10px] flex-1 truncate ${
             pending ? 'text-[#94a3b8] italic' : win1 ? 'font-bold text-[#162844]' : 'text-[#1e293b]'
           }`}>
             {partido.pareja1?.nombre ?? 'Por definir'}
           </span>
-          <span className={`font-bold text-[10px] shrink-0 min-w-[28px] text-right tracking-[0.1em] ${
-            pending ? 'text-[#94a3b8]' : win1 ? 'text-[#16a34a]' : 'text-[#94b0cc]'
+          <span className={`font-bold text-[11px] shrink-0 min-w-[26px] text-right tabular-nums ${
+            pending ? 'text-[#94a3b8]' : win1 ? 'text-[#16a34a]' : 'text-[#64748b]'
           }`}>
             {s1}
           </span>
         </div>
-        <div className="h-px my-0.5" style={{ background: '#f1f5f9' }} />
-        <div className="flex items-center gap-1 min-h-[22px]">
-          <span className={`font-inter text-[11px] flex-1 truncate ${
+        <div className="h-px" style={{ background: '#f1f5f9' }} />
+        <div className="flex items-center gap-1 min-h-[18px]">
+          <span className={`font-inter text-[10px] flex-1 truncate ${
             pending ? 'text-[#94a3b8] italic' : win2 ? 'font-bold text-[#162844]' : 'text-[#1e293b]'
           }`}>
             {partido.pareja2?.nombre ?? 'Por definir'}
           </span>
-          <span className={`font-bold text-[10px] shrink-0 min-w-[28px] text-right tracking-[0.1em] ${
-            pending ? 'text-[#94a3b8]' : win2 ? 'text-[#16a34a]' : 'text-[#94b0cc]'
+          <span className={`font-bold text-[11px] shrink-0 min-w-[26px] text-right tabular-nums ${
+            pending ? 'text-[#94a3b8]' : win2 ? 'text-[#16a34a]' : 'text-[#64748b]'
           }`}>
             {s2}
           </span>
@@ -203,7 +203,7 @@ export default function HorarioTab({ categorias }: Props) {
       <Legend catNames={catNames} />
 
       <div className="overflow-x-auto rounded-xl border border-[#e2e8f0] shadow-[0_1px_8px_rgba(0,0,0,0.06)]">
-        <table className="border-collapse bg-white w-full" style={{ minWidth: courts.length * 156 + 80 }}>
+        <table className="border-collapse bg-white w-full" style={{ minWidth: courts.length * 134 + 72 }}>
           <thead>
             <tr>
               <th
@@ -234,7 +234,7 @@ export default function HorarioTab({ categorias }: Props) {
                     background: '#f8fafc',
                     border: '1px solid #e8eef4',
                     borderLeft: '4px solid #162844',
-                    padding: '0 16px',
+                    padding: '0 10px',
                     letterSpacing: '0.05em',
                   }}
                 >
@@ -243,13 +243,13 @@ export default function HorarioTab({ categorias }: Props) {
                 {times.map(t => {
                   const entry = lookup.get(`${court}|${t}`)
                   return (
-                    <td key={t} className="align-top" style={{ padding: 6, border: '1px solid #e8eef4', minWidth: 148 }}>
+                    <td key={t} className="align-top" style={{ padding: 3, border: '1px solid #e8eef4', minWidth: 128 }}>
                       {entry ? (
                         <MatchCell entry={entry} />
                       ) : (
                         <div
                           className="rounded-md flex items-center justify-center text-[#cbd5e1] text-[11px]"
-                          style={{ minHeight: 90, background: '#f8fafc' }}
+                          style={{ minHeight: 58, background: '#f8fafc' }}
                         >
                           —
                         </div>

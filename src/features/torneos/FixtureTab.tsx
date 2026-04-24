@@ -49,6 +49,17 @@ function PillSelector({ vista, onChange }: { vista: Vista; onChange: (v: Vista) 
   )
 }
 
+function abbrevCat(nombre: string): string {
+  if (nombre.length <= 4) return nombre
+  const parts = nombre.trim().split(/\s+/)
+  let result = ''
+  for (const p of parts) {
+    if (/^\d+$/.test(p)) result += p
+    else result += p[0].toUpperCase()
+  }
+  return result
+}
+
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <p className="font-inter text-[10px] font-bold uppercase tracking-widest text-muted mb-2 mt-4 first:mt-0 pb-1 border-b border-surface-high">
@@ -201,8 +212,8 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
           <div className="space-y-1">
             {grupos.get(k)!.map(p => (
               <div key={p.id} className="flex items-center gap-2">
-                <Badge variant="outline" className="text-[10px] shrink-0 text-muted">
-                  {catPorPartido.get(p.id) ?? ''}
+                <Badge variant="outline" className="text-[10px] shrink-0 text-muted whitespace-nowrap" title={catPorPartido.get(p.id) ?? ''}>
+                  {abbrevCat(catPorPartido.get(p.id) ?? '')}
                 </Badge>
                 <div className="flex-1 min-w-0">
                   <PartidoRow partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} />
