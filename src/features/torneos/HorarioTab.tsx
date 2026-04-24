@@ -76,61 +76,44 @@ function MatchCell({ entry }: { entry: MatchEntry }) {
     : ELIM_ORO.has(partido.fase) ? '#e8c547'
     : catColor(catNombre)
 
-  const roundBadgeStyle = ELIM_PLATA.has(partido.fase)
-    ? { background: '#e0f2fe', color: '#0369a1' }
-    : ELIM_ORO.has(partido.fase)
-    ? { background: '#fef9e7', color: '#92400e' }
-    : { background: '#f1f5f9', color: '#64748b' }
-
-  const finalBorder = partido.fase === 'final'
-    ? { border: '1.5px solid #e8c547' }
+  const borderClass = partido.fase === 'final'
+    ? 'border-2 border-[#e8c547]'
     : partido.fase === 'consolacion_final'
-    ? { border: '1.5px solid #94b0cc' }
-    : { border: '1px solid rgba(0,0,0,0.08)' }
+    ? 'border-2 border-[#94b0cc]'
+    : 'border border-[#e2e8f0]'
 
   return (
-    <div
-      className={`rounded-lg overflow-hidden flex flex-col ${pending ? '' : 'opacity-[0.88]'}`}
-      style={{ ...finalBorder, minHeight: 58 }}
-    >
-      <div style={{ height: 3, background: stripeColor, flexShrink: 0 }} />
-      <div className="flex flex-col gap-0 p-1 bg-white flex-1">
-        <div className="flex items-center justify-between gap-1 mb-0.5">
-          <span className="font-inter text-[9px] font-bold rounded px-1 py-px" style={roundBadgeStyle}>
-            {partidoLabel(partido)}
-          </span>
-          <span
-            className="font-inter text-[9px] font-bold rounded px-1 py-px whitespace-nowrap"
-            style={{ background: catBg(catNombre), color: catColor(catNombre) }}
-          >
-            {catNombre}
-          </span>
-        </div>
-        <div className="flex items-center gap-1 min-h-[18px]">
-          <span className={`font-inter text-[10px] flex-1 truncate ${
-            pending ? 'text-[#94a3b8] italic' : win1 ? 'font-bold text-[#162844]' : 'text-[#1e293b]'
-          }`}>
-            {partido.pareja1?.nombre ?? 'Por definir'}
-          </span>
-          <span className={`font-bold text-[11px] shrink-0 min-w-[26px] text-right tabular-nums ${
-            pending ? 'text-[#94a3b8]' : win1 ? 'text-[#16a34a]' : 'text-[#64748b]'
-          }`}>
-            {s1}
-          </span>
-        </div>
-        <div className="h-px" style={{ background: '#f1f5f9' }} />
-        <div className="flex items-center gap-1 min-h-[18px]">
-          <span className={`font-inter text-[10px] flex-1 truncate ${
-            pending ? 'text-[#94a3b8] italic' : win2 ? 'font-bold text-[#162844]' : 'text-[#1e293b]'
-          }`}>
-            {partido.pareja2?.nombre ?? 'Por definir'}
-          </span>
-          <span className={`font-bold text-[11px] shrink-0 min-w-[26px] text-right tabular-nums ${
-            pending ? 'text-[#94a3b8]' : win2 ? 'text-[#16a34a]' : 'text-[#64748b]'
-          }`}>
-            {s2}
-          </span>
-        </div>
+    <div className={`rounded-lg overflow-hidden bg-white ${borderClass}`} style={{ minHeight: 58 }}>
+      <div style={{ height: 3, background: stripeColor }} />
+      {/* Header */}
+      <div className="flex items-center justify-between gap-1 px-2 py-[3px] bg-[#f8fafc] border-b border-[#f1f5f9]">
+        <span className="font-inter text-[9px] font-bold text-[#162844]">{partidoLabel(partido)}</span>
+        <span className="font-inter text-[9px] truncate" style={{ color: catColor(catNombre) }}>
+          {catNombre}
+        </span>
+      </div>
+      {/* Team 1 */}
+      <div className={`flex items-center gap-1 px-2 min-h-[17px] ${win1 && !pending ? 'bg-[rgba(232,197,71,0.05)]' : ''}`}>
+        <span className={`font-inter text-[10px] flex-1 truncate leading-snug ${
+          pending ? 'text-[#94a3b8] italic' : win1 ? 'font-bold text-[#162844]' : 'text-[#94a3b8]'
+        }`}>
+          {partido.pareja1?.nombre ?? 'Por definir'}
+        </span>
+        <span className={`font-manrope text-[11px] font-bold shrink-0 min-w-[18px] text-right tabular-nums ${
+          pending ? 'text-[#cbd5e1]' : win1 ? 'text-[#e8c547]' : 'text-[#94b0cc]'
+        }`}>{s1}</span>
+      </div>
+      <div className="h-px mx-2 bg-[#f1f5f9]" />
+      {/* Team 2 */}
+      <div className={`flex items-center gap-1 px-2 min-h-[17px] ${win2 && !pending ? 'bg-[rgba(232,197,71,0.05)]' : ''}`}>
+        <span className={`font-inter text-[10px] flex-1 truncate leading-snug ${
+          pending ? 'text-[#94a3b8] italic' : win2 ? 'font-bold text-[#162844]' : 'text-[#94a3b8]'
+        }`}>
+          {partido.pareja2?.nombre ?? 'Por definir'}
+        </span>
+        <span className={`font-manrope text-[11px] font-bold shrink-0 min-w-[18px] text-right tabular-nums ${
+          pending ? 'text-[#cbd5e1]' : win2 ? 'text-[#e8c547]' : 'text-[#94b0cc]'
+        }`}>{s2}</span>
       </div>
     </div>
   )
