@@ -11,9 +11,10 @@ interface Props {
   onCargarResultado: (partido: PartidoFixture) => void
   sembradoNum?: number
   label?: string
+  className?: string
 }
 
-export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResultado, sembradoNum, label }: Props) {
+export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResultado, sembradoNum, label, className }: Props) {
   const qc = useQueryClient()
 
   const toggleBloqueo = useMutation({
@@ -55,7 +56,7 @@ export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResulta
   ) : null
 
   return (
-    <div className={`bg-white rounded-lg border hover:border-[#94b0cc] transition-colors ${borderClass}`}>
+    <div className={`bg-white rounded-lg border hover:border-[#94b0cc] transition-colors ${borderClass}${className ? ` ${className}` : ''}`}>
 
       {/* Line 1: metadata / Lines 2-3: players + score */}
       <div className="px-3 pt-2 pb-2.5">

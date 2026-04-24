@@ -148,7 +148,7 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
                 {times.map(t => {
                   const entry = lookup.get(`${court}|${t}`)
                   return (
-                    <td key={t} className="align-top" style={{ padding: 4, border: '1px solid #e8eef4', minWidth: 200 }}>
+                    <td key={t} style={{ padding: 4, border: '1px solid #e8eef4', minWidth: 200, height: 1 }}>
                       {entry ? (
                         <PartidoRow
                           partido={entry.partido}
@@ -156,6 +156,7 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
                           isAdmin={isAdmin}
                           onCargarResultado={onCargarResultado}
                           label={`${partidoLabel(entry.partido)} · ${entry.catNombre}`}
+                          className="h-full"
                         />
                       ) : (
                         <div
