@@ -88,21 +88,21 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <Legend catNames={catNames} catColorMap={catColorMap} />
-        {user && (
+      {user && (
+        <div className="flex gap-2 overflow-x-auto pb-0.5 no-scrollbar mb-3">
           <button
             type="button"
             onClick={() => setSoloMis(v => !v)}
-            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-inter text-[11px] font-semibold transition-all shrink-0 ml-3 ${
-              soloMis ? 'border-[#162844] bg-[#162844] text-white' : 'border-[#dce6f0] bg-white text-[#94b0cc] hover:border-[#94b0cc]'
+            className={`whitespace-nowrap flex items-center gap-1 px-4 py-1.5 rounded-full font-inter text-xs font-semibold transition-colors focus:outline-none ${
+              soloMis ? 'bg-navy text-gold' : 'bg-white border border-navy/20 text-slate hover:border-navy/40 hover:text-navy'
             }`}
           >
-            <User className="h-3 w-3" />
+            <User className="h-3 w-3 shrink-0" />
             Solo mis partidos
           </button>
-        )}
-      </div>
+        </div>
+      )}
+      <Legend catNames={catNames} catColorMap={catColorMap} />
 
       {entries.length === 0 ? (
         <p className="font-inter text-sm text-muted py-2">No tienes partidos con horario asignado.</p>

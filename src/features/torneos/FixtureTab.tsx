@@ -35,6 +35,20 @@ function filterMisPartidos(cats: CategoriaFixture[], uid: string): CategoriaFixt
   )
 }
 
+function FilterPill({ label, active, onClick, icon }: { label: string; active: boolean; onClick: () => void; icon?: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`whitespace-nowrap flex items-center gap-1 px-4 py-1.5 rounded-full font-inter text-xs font-semibold transition-colors focus:outline-none ${
+        active ? 'bg-navy text-gold' : 'bg-white border border-navy/20 text-slate hover:border-navy/40 hover:text-navy'
+      }`}
+    >
+      {icon}{label}
+    </button>
+  )
+}
+
 function PillSelector({ vista, onChange }: { vista: Vista; onChange: (v: Vista) => void }) {
   const options: { value: Vista; label: string }[] = [
     { value: 'grupo', label: 'Por grupo' },
@@ -42,22 +56,11 @@ function PillSelector({ vista, onChange }: { vista: Vista; onChange: (v: Vista) 
     { value: 'hora', label: 'Por hora' },
   ]
   return (
-    <div className="flex gap-1.5">
+    <>
       {options.map(o => (
-        <button
-          key={o.value}
-          type="button"
-          onClick={() => onChange(o.value)}
-          className={`text-[11px] font-semibold px-3.5 py-1 rounded-full border transition-colors ${
-            vista === o.value
-              ? 'bg-[#162844] text-[#e8c547] border-[#162844]'
-              : 'bg-white border-[#dce6f0] text-[#94b0cc] hover:border-[#94b0cc] hover:text-navy'
-          }`}
-        >
-          {o.label}
-        </button>
+        <FilterPill key={o.value} label={o.label} active={vista === o.value} onClick={() => onChange(o.value)} />
       ))}
-    </div>
+    </>
   )
 }
 
@@ -273,19 +276,15 @@ export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResu
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        {showPills ? <PillSelector vista={vista} onChange={setVista} /> : <div />}
+      <div className="flex gap-2 overflow-x-auto pb-0.5 no-scrollbar mb-4">
+        {showPills && <PillSelector vista={vista} onChange={setVista} />}
         {user && (
-          <button
-            type="button"
+          <FilterPill
+            label="Solo mis partidos"
+            active={soloMis}
             onClick={() => setSoloMis(v => !v)}
-            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-inter text-[11px] font-semibold transition-all ${
-              soloMis ? 'border-[#162844] bg-[#162844] text-white' : 'border-[#dce6f0] bg-white text-[#94b0cc] hover:border-[#94b0cc]'
-            }`}
-          >
-            <User className="h-3 w-3" />
-            Solo mis partidos
-          </button>
+            icon={<User className="h-3 w-3 shrink-0" />}
+          />
         )}
       </div>
 
