@@ -41,9 +41,9 @@ function EstadoPill({ estado }: { estado: string }) {
 }
 
 const TAB_CLS = [
-  'font-inter text-sm font-semibold px-4 py-2 rounded-lg transition-colors',
-  'data-[state=inactive]:text-muted data-[state=inactive]:hover:text-navy',
-  'data-[state=active]:bg-navy data-[state=active]:text-gold',
+  'font-inter text-sm font-medium px-3 py-2.5 border-b-2 transition-colors whitespace-nowrap shrink-0',
+  'data-[state=inactive]:border-transparent data-[state=inactive]:text-muted data-[state=inactive]:hover:text-navy',
+  'data-[state=active]:border-[#e8c547] data-[state=active]:text-navy data-[state=active]:font-semibold',
 ].join(' ')
 
 export default function TorneoDetalle() {
@@ -274,7 +274,7 @@ export default function TorneoDetalle() {
         </div>
       )}
 
-      <div className="rounded-xl bg-white shadow-card p-4">
+      <div className="rounded-xl bg-white shadow-card px-4 pb-4 pt-0">
         <TabsDetalle
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -341,7 +341,7 @@ function TabsDetalle({
 
   return (
     <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
-      <Tabs.List className="flex gap-1 bg-surface rounded-xl p-1 mb-6 flex-wrap">
+      <Tabs.List className="flex border-b border-navy/10 -mx-4 px-4 mb-4 overflow-x-auto">
         {fixtureGenerado && (
           <Tabs.Trigger value="fixture" className={TAB_CLS}>Fixture</Tabs.Trigger>
         )}

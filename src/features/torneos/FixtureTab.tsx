@@ -105,7 +105,7 @@ function DesafioSection({ categorias, torneoId, isAdmin, onCargarResultado, cole
             {categorias.length > 1 && (
               <h3 className="font-manrope text-sm font-bold text-navy border-l-4 border-gold pl-3">{cat.nombre}</h3>
             )}
-            <div className="rounded-xl border border-navy/5 overflow-hidden divide-y divide-navy/5">
+            <div className="space-y-1.5">
               {partidos.map(p => (
                 <PartidoRow
                   key={p.id}
