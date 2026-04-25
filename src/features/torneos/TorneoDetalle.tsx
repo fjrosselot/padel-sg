@@ -334,35 +334,35 @@ function TabsDetalle({
 
   return (
     <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
-      <div className="flex items-center border-b border-navy/10 -mx-4 px-4 mb-4">
-        <Tabs.List className="flex overflow-x-auto no-scrollbar flex-1 min-w-0">
-          {fixtureGenerado && (
-            <Tabs.Trigger value="fixture" className={TAB_CLS}>Fixture</Tabs.Trigger>
-          )}
-          {hasBracket && (
-            <Tabs.Trigger value="bracket" className={TAB_CLS}>Bracket</Tabs.Trigger>
-          )}
-          {hasTurnos && (
-            <Tabs.Trigger value="horario" className={TAB_CLS}>Horario</Tabs.Trigger>
-          )}
-          <Tabs.Trigger value="parejas" className={TAB_CLS}>Parejas</Tabs.Trigger>
-          {isAdmin && hasDesafioSembrado && (
-            <Tabs.Trigger value="sembrado" className={TAB_CLS}>Sembrado</Tabs.Trigger>
-          )}
-        </Tabs.List>
-        {showMisPill && (
+      <Tabs.List className="flex overflow-x-auto no-scrollbar border-b border-navy/10 -mx-4 px-4">
+        {fixtureGenerado && (
+          <Tabs.Trigger value="fixture" className={TAB_CLS}>Fixture</Tabs.Trigger>
+        )}
+        {hasBracket && (
+          <Tabs.Trigger value="bracket" className={TAB_CLS}>Bracket</Tabs.Trigger>
+        )}
+        {hasTurnos && (
+          <Tabs.Trigger value="horario" className={TAB_CLS}>Horario</Tabs.Trigger>
+        )}
+        <Tabs.Trigger value="parejas" className={TAB_CLS}>Parejas</Tabs.Trigger>
+        {isAdmin && hasDesafioSembrado && (
+          <Tabs.Trigger value="sembrado" className={TAB_CLS}>Sembrado</Tabs.Trigger>
+        )}
+      </Tabs.List>
+      {showMisPill && (
+        <div className="flex justify-end -mx-4 px-4 py-2 mb-2">
           <button
             type="button"
             onClick={() => setSoloMis(v => !v)}
-            className={`shrink-0 ml-3 flex items-center gap-1 px-3 py-1 rounded-full font-inter text-xs font-semibold transition-colors focus:outline-none ${
+            className={`flex items-center gap-1 px-3 py-1 rounded-full font-inter text-xs font-semibold transition-colors focus:outline-none ${
               soloMis ? 'bg-navy text-gold' : 'bg-white border border-navy/20 text-slate hover:border-navy/40 hover:text-navy'
             }`}
           >
             <User className="h-3 w-3 shrink-0" />
             Mis partidos
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       <Tabs.Content value="fixture">
         <FixtureTab
