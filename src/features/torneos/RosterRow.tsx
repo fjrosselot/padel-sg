@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Pencil, Clock } from 'lucide-react'
+import { Pencil, Clock, Trash2 } from 'lucide-react'
 
 export interface InscripcionRow {
   id: string
@@ -57,7 +57,7 @@ export default function RosterRow({
     <div className="flex items-center gap-3 px-4 py-3 border-b border-[#f1f5f9] last:border-0">
       {isEspera
         ? <Clock className="h-3.5 w-3.5 text-muted shrink-0" />
-        : num != null && <span className="font-inter text-[11px] text-muted font-semibold tabular-nums w-4 shrink-0 text-right">{num}</span>
+        : num != null && <span className="font-inter text-[11px] text-muted font-semibold tabular-nums w-3 shrink-0 text-right">{num}</span>
       }
 
       <AvatarPair j1={j1} j2={j2} dot={dot} />
@@ -97,8 +97,8 @@ export default function RosterRow({
               <Pencil className="h-3.5 w-3.5" />
             </button>
           )}
-          <button type="button" onClick={() => setConfirming(true)} className="px-2.5 py-1 rounded-lg font-inter text-[10px] font-semibold text-muted border border-navy/15 hover:border-[#BA1A1A]/30 hover:text-[#BA1A1A] transition-colors">
-            Quitar
+          <button type="button" onClick={() => setConfirming(true)} className="p-1.5 rounded-lg text-muted hover:text-[#BA1A1A] hover:bg-[#FEE8E8] transition-colors">
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
       )}

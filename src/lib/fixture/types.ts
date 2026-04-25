@@ -32,6 +32,7 @@ export type FormatoCategoria = 'americano_grupos' | 'desafio_puntos' | 'desafio_
 export interface CategoriaFixture {
   nombre: string
   formato?: FormatoCategoria
+  sexo?: 'M' | 'F' | 'Mixto'
   grupos: GrupoFixture[]
   faseEliminatoria: PartidoFixture[]
   consola: PartidoFixture[]

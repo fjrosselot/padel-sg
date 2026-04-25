@@ -24,6 +24,12 @@ import type { InscripcionRow } from './RosterRow'
 
 type Torneo = Database['padel']['Tables']['torneos']['Row']
 
+function inferSexo(nombre: string): 'M' | 'F' | 'Mixto' {
+  const n = nombre.toLowerCase()
+  if (n.includes('mixto')) return 'Mixto'
+  if (n.includes('mujeres') || n.includes('damas') || n.includes('femenino')) return 'F'
+  return 'M'
+}
 
 const ESTADO_PILL: Record<string, string> = {
   borrador:    'bg-slate-100 text-slate-600 border border-slate-200',
@@ -95,7 +101,7 @@ export default function TorneoDetalle() {
             formato: c.formato ?? 'americano_grupos',
             rival_pairs: c.rival_pairs,
             num_parejas: (c.partidos ?? []).length,
-            sexo: 'M' as const,
+            sexo: c.sexo ?? inferSexo(c.nombre),
           }))
 
       let sembradoMatchOffset = 0
@@ -170,7 +176,7 @@ export default function TorneoDetalle() {
         formato: c.formato ?? 'americano_grupos',
         rival_pairs: c.rival_pairs,
         num_parejas: (c.partidos ?? []).length,
-        sexo: 'M' as const,
+        sexo: c.sexo ?? inferSexo(c.nombre),
       }))
 
   const hasDesafioSembrado = rosterCats.some(c => c.formato === 'desafio_sembrado')

@@ -228,6 +228,7 @@ export function buildFixture(
   return {
     nombre: categoriaConfig.nombre,
     formato: categoriaConfig.formato ?? 'americano_grupos',
+    sexo: categoriaConfig.sexo,
     grupos: gruposConTurnos,
     faseEliminatoria: bracket,
     consola,
@@ -270,6 +271,7 @@ export function buildDesafioFixture(
   return {
     nombre: cat.nombre,
     formato: 'desafio_puntos',
+    sexo: cat.sexo,
     grupos: [],
     faseEliminatoria: [],
     consola: [],
@@ -322,6 +324,7 @@ export function buildDesafioSembradoFixture(
   return {
     nombre: cat.nombre,
     formato: 'desafio_sembrado',
+    sexo: cat.sexo,
     grupos: [],
     faseEliminatoria: [],
     consola: [],
