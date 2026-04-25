@@ -30,18 +30,23 @@ const CalendarioMockup = lazy(() => import('./features/mockups/CalendarioMockup'
 const TorneoDetalleMockup = lazy(() => import('./features/mockups/TorneoDetalleMockup'))
 const ParejasMockup = lazy(() => import('./features/mockups/ParejasMockup'))
 const LandingsMockup = lazy(() => import('./features/mockups/LandingsMockup'))
+const MockupsIndex = lazy(() => import('./features/mockups/MockupsIndex'))
+
+const isMockupHub = import.meta.env.VITE_MOCKUP_HUB === 'true'
 
 const fallback = (
   <div className="flex h-full items-center justify-center text-muted">Cargando…</div>
 )
 
 export const router = createBrowserRouter([
+  { path: '/mockup', element: <Suspense fallback={fallback}><MockupsIndex /></Suspense> },
   { path: '/mockup/color-coding', element: <Suspense fallback={fallback}><ColorCodingMockup /></Suspense> },
   { path: '/mockup/dashboard', element: <Suspense fallback={fallback}><DashboardMockup /></Suspense> },
   { path: '/mockup/calendario', element: <Suspense fallback={fallback}><CalendarioMockup /></Suspense> },
   { path: '/mockup/torneo-detalle', element: <Suspense fallback={fallback}><TorneoDetalleMockup /></Suspense> },
   { path: '/mockup/parejas', element: <Suspense fallback={fallback}><ParejasMockup /></Suspense> },
   { path: '/mockup/landings', element: <Suspense fallback={fallback}><LandingsMockup /></Suspense> },
+  ...(isMockupHub ? [{ path: '/', element: <Navigate to="/mockup" replace /> }] : []),
   { path: '/login', element: <LoginForm /> },
   { path: '/registro', element: <RegisterForm /> },
   { path: '/pendiente', element: <PendingApproval /> },
