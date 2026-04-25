@@ -168,16 +168,77 @@ function TorneosB() {
 }
 
 // C: Grid — poster cards con cabecera de color, categorías, cupos y lugar
-function TorneosC() {
-  const isDesktop = useContext(DesktopCtx)
+function TorneoGridCard({ t, bannerH, abbrevSize, featured = false }: {
+  t: typeof TORNEOS[number]; bannerH: string; abbrevSize: string; featured?: boolean
+}) {
   const TIPO_GRAD: Record<string, [string, string]> = {
     interno:    [N, '#1e3a5f'],
     vs_colegio: ['#a07808', G],
     externo:    [S, '#6a8faa'],
   }
-  const cols = isDesktop ? 'grid-cols-3' : 'grid-cols-2'
-  const bannerH = isDesktop ? 'h-[110px]' : 'h-[88px]'
-  const abbrevSize = isDesktop ? 'text-7xl' : 'text-6xl'
+  const cfg = ESTADO_CFG[t.estado]
+  const [c1, c2] = TIPO_GRAD[t.tipo] ?? TIPO_GRAD.interno
+  const abbrev = t.nombre.split(' ').filter(w => w.length > 3).slice(0, 2).map(w => w[0]).join('')
+  const disponibles = t.cupos - t.inscritos
+  const cuposBajo = disponibles <= 6 && t.estado === 'inscripcion'
+  return (
+    <div className="rounded-2xl overflow-hidden bg-white shadow-[0_4px_16px_rgba(13,27,42,0.08)] cursor-pointer">
+      {/* Banner / Poster area */}
+      <div className={`relative ${bannerH} flex items-end`}
+        style={{ background: `linear-gradient(145deg, ${c1}, ${c2})` }}>
+        {/* Poster placeholder hint */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 opacity-10">
+          <div className="w-10 h-10 rounded border-2 border-white flex items-center justify-center">
+            <div className="w-4 h-3 rounded-sm border border-white" />
+          </div>
+          <span className="font-inter text-[9px] text-white font-semibold tracking-widest uppercase">POSTER</span>
+        </div>
+        {/* Abbrev watermark */}
+        <span className={`absolute inset-0 flex items-center justify-center font-manrope ${abbrevSize} font-black select-none pointer-events-none`}
+          style={{ color: 'rgba(255,255,255,0.13)' }}>{abbrev}</span>
+        {/* Badges */}
+        <span className="absolute top-2 right-2 font-inter text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+          style={{ background: cfg.bg, color: cfg.color }}>{cfg.label}</span>
+        {featured && (
+          <div className="relative p-4 w-full">
+            <p className="font-manrope text-xl font-bold text-white leading-tight drop-shadow">{t.nombre}</p>
+          </div>
+        )}
+      </div>
+      {/* Content */}
+      <div className="px-3 py-2.5 space-y-1.5">
+        {!featured && <p className="font-manrope text-[12px] font-bold leading-snug" style={{ color: N }}>{t.nombre}</p>}
+        <div className="flex items-center gap-1">
+          <MapPin className="h-3 w-3 shrink-0" style={{ color: S }} />
+          <p className="font-inter text-[10px]" style={{ color: S }}>{t.lugar} · {t.fecha}</p>
+        </div>
+        <div className="flex flex-wrap gap-1">
+          {t.categorias.map(c => (
+            <span key={c} className="font-inter text-[9px] font-semibold px-1.5 py-0.5 rounded-md"
+              style={{ background: '#EEF2FF', color: '#4338CA' }}>{c}</span>
+          ))}
+        </div>
+        {t.estado !== 'finalizado' && t.estado !== 'borrador' && (
+          <p className="font-inter text-[10px] font-semibold"
+            style={{ color: cuposBajo ? '#DC2626' : S }}>
+            {cuposBajo ? `⚠ ${disponibles} cupos disponibles` : `${disponibles}/${t.cupos} cupos`}
+          </p>
+        )}
+        {t.diasRestantes != null && (
+          <p className="font-inter text-[10px] font-semibold" style={{ color: '#a07808' }}>
+            Cierra en {t.diasRestantes} días
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function TorneosC() {
+  const isDesktop = useContext(DesktopCtx)
+  const featured = TORNEOS.find(t => t.estado === 'en_curso') ?? null
+  const rest = TORNEOS.filter(t => t !== featured)
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -186,56 +247,31 @@ function TorneosC() {
           <Plus className="h-3 w-3" /> Nuevo
         </button>
       </div>
-      <div className={`grid ${cols} gap-3`}>
-        {TORNEOS.map(t => {
-          const cfg = ESTADO_CFG[t.estado]
-          const [c1, c2] = TIPO_GRAD[t.tipo] ?? TIPO_GRAD.interno
-          const abbrev = t.nombre.split(' ').filter(w => w.length > 3).slice(0, 2).map(w => w[0]).join('')
-          const disponibles = t.cupos - t.inscritos
-          const cuposBajo = disponibles <= 6 && t.estado === 'inscripcion'
-          return (
-            <div key={t.id} className="rounded-2xl overflow-hidden bg-white shadow-[0_4px_16px_rgba(13,27,42,0.08)] cursor-pointer">
-              {/* Banner */}
-              <div className={`relative ${bannerH} flex items-center justify-center`}
-                style={{ background: `linear-gradient(145deg, ${c1}, ${c2})` }}>
-                <span className={`font-manrope ${abbrevSize} font-black select-none pointer-events-none`}
-                  style={{ color: 'rgba(255,255,255,0.14)' }}>{abbrev}</span>
-                <span className="absolute top-2 right-2 font-inter text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-                  style={{ background: cfg.bg, color: cfg.color }}>{cfg.label}</span>
-              </div>
-              {/* Content */}
-              <div className="px-3 py-2.5 space-y-1.5">
-                <p className="font-manrope text-[12px] font-bold leading-snug" style={{ color: N }}>{t.nombre}</p>
-                {/* fecha + lugar */}
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3 shrink-0" style={{ color: S }} />
-                  <p className="font-inter text-[10px]" style={{ color: S }}>{t.lugar} · {t.fecha}</p>
-                </div>
-                {/* categorías */}
-                <div className="flex flex-wrap gap-1">
-                  {t.categorias.map(c => (
-                    <span key={c} className="font-inter text-[9px] font-semibold px-1.5 py-0.5 rounded-md"
-                      style={{ background: '#EEF2FF', color: '#4338CA' }}>{c}</span>
-                  ))}
-                </div>
-                {/* cupos */}
-                {t.estado !== 'finalizado' && t.estado !== 'borrador' && (
-                  <p className={`font-inter text-[10px] font-semibold`}
-                    style={{ color: cuposBajo ? '#DC2626' : S }}>
-                    {cuposBajo ? `⚠ ${disponibles} cupos disponibles` : `${disponibles}/${t.cupos} cupos`}
-                  </p>
-                )}
-                {/* dias restantes */}
-                {t.diasRestantes != null && (
-                  <p className="font-inter text-[10px] font-semibold" style={{ color: '#a07808' }}>
-                    Cierra en {t.diasRestantes} días
-                  </p>
-                )}
-              </div>
-            </div>
-          )
-        })}
+
+      {/* Featured card — full width always */}
+      {featured && (
+        <TorneoGridCard t={featured}
+          bannerH={isDesktop ? 'h-[200px]' : 'h-[120px]'}
+          abbrevSize={isDesktop ? 'text-9xl' : 'text-7xl'}
+          featured={isDesktop}
+        />
+      )}
+
+      {/* Grid */}
+      <div className={`grid ${isDesktop ? 'grid-cols-3' : 'grid-cols-2'} gap-3`}>
+        {rest.map(t => (
+          <TorneoGridCard key={t.id} t={t}
+            bannerH={isDesktop ? 'h-[110px]' : 'h-[88px]'}
+            abbrevSize={isDesktop ? 'text-7xl' : 'text-6xl'}
+          />
+        ))}
       </div>
+
+      {isDesktop && (
+        <p className="font-inter text-[11px] text-center" style={{ color: S }}>
+          El banner puede ser un poster diseñado por torneo · El gradiente es el fallback
+        </p>
+      )}
     </div>
   )
 }
