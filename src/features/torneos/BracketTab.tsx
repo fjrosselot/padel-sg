@@ -150,7 +150,7 @@ function BracketTree({ rounds, isPlata = false, headerBg, catAbbrev }: {
   const trophyMarginTop = Math.max(0, 28 + lastRoundOffset - (SLOT - CARD_H) / 2)
 
   return (
-    <div className="overflow-x-auto pb-4">
+    <div className="overflow-x-auto pb-4 no-scrollbar">
       <div className="flex items-start gap-0 min-w-max">
         {rounds.map((round, ri) => {
           const isLast = ri === rounds.length - 1
