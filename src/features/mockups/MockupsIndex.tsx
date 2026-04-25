@@ -13,12 +13,12 @@ const PROJECTS = [
     icon: Trophy,
     color: N,
     mockups: [
-      { label: 'Landings (Torneos · Amistosos · Ranking · Jugadores)', path: '/mockup/landings' },
-      { label: 'Dashboard', path: '/mockup/dashboard' },
-      { label: 'Calendario', path: '/mockup/calendario' },
-      { label: 'Torneo detalle', path: '/mockup/torneo-detalle' },
-      { label: 'Parejas', path: '/mockup/parejas' },
-      { label: 'Color coding', path: '/mockup/color-coding' },
+      { label: 'Landings (Torneos · Amistosos · Ranking · Jugadores)', path: '/mockup/padel-sg/landings' },
+      { label: 'Dashboard', path: '/mockup/padel-sg/dashboard' },
+      { label: 'Calendario', path: '/mockup/padel-sg/calendario' },
+      { label: 'Torneo detalle', path: '/mockup/padel-sg/torneo-detalle' },
+      { label: 'Parejas', path: '/mockup/padel-sg/parejas' },
+      { label: 'Color coding', path: '/mockup/padel-sg/color-coding' },
     ],
   },
   {

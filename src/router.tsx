@@ -40,12 +40,12 @@ const fallback = (
 
 export const router = createBrowserRouter([
   { path: '/mockup', element: <Suspense fallback={fallback}><MockupsIndex /></Suspense> },
-  { path: '/mockup/color-coding', element: <Suspense fallback={fallback}><ColorCodingMockup /></Suspense> },
-  { path: '/mockup/dashboard', element: <Suspense fallback={fallback}><DashboardMockup /></Suspense> },
-  { path: '/mockup/calendario', element: <Suspense fallback={fallback}><CalendarioMockup /></Suspense> },
-  { path: '/mockup/torneo-detalle', element: <Suspense fallback={fallback}><TorneoDetalleMockup /></Suspense> },
-  { path: '/mockup/parejas', element: <Suspense fallback={fallback}><ParejasMockup /></Suspense> },
-  { path: '/mockup/landings', element: <Suspense fallback={fallback}><LandingsMockup /></Suspense> },
+  { path: '/mockup/padel-sg/color-coding', element: <Suspense fallback={fallback}><ColorCodingMockup /></Suspense> },
+  { path: '/mockup/padel-sg/dashboard', element: <Suspense fallback={fallback}><DashboardMockup /></Suspense> },
+  { path: '/mockup/padel-sg/calendario', element: <Suspense fallback={fallback}><CalendarioMockup /></Suspense> },
+  { path: '/mockup/padel-sg/torneo-detalle', element: <Suspense fallback={fallback}><TorneoDetalleMockup /></Suspense> },
+  { path: '/mockup/padel-sg/parejas', element: <Suspense fallback={fallback}><ParejasMockup /></Suspense> },
+  { path: '/mockup/padel-sg/landings', element: <Suspense fallback={fallback}><LandingsMockup /></Suspense> },
   ...(isMockupHub ? [{ path: '/', element: <Navigate to="/mockup" replace /> }] : []),
   { path: '/login', element: <LoginForm /> },
   { path: '/registro', element: <RegisterForm /> },
