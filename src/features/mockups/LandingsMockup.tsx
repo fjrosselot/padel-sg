@@ -186,16 +186,9 @@ function TorneoGridCard({ t, bannerH, abbrevSize, featured = false }: {
       {/* Banner / Poster area */}
       <div className={`relative ${bannerH} flex items-end`}
         style={{ background: `linear-gradient(145deg, ${c1}, ${c2})` }}>
-        {/* Poster placeholder hint */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 opacity-10">
-          <div className="w-10 h-10 rounded border-2 border-white flex items-center justify-center">
-            <div className="w-4 h-3 rounded-sm border border-white" />
-          </div>
-          <span className="font-inter text-[9px] text-white font-semibold tracking-widest uppercase">POSTER</span>
-        </div>
-        {/* Abbrev watermark */}
-        <span className={`absolute inset-0 flex items-center justify-center font-manrope ${abbrevSize} font-black select-none pointer-events-none`}
-          style={{ color: 'rgba(255,255,255,0.13)' }}>{abbrev}</span>
+        {/* Toda esta área = poster del torneo */}
+        <span className="absolute inset-0 flex items-center justify-center font-inter text-[10px] font-semibold tracking-widest uppercase select-none pointer-events-none"
+          style={{ color: 'rgba(255,255,255,0.25)' }}>imagen del torneo</span>
         {/* Badges */}
         <span className="absolute top-2 right-2 font-inter text-[9px] font-bold px-1.5 py-0.5 rounded-full"
           style={{ background: cfg.bg, color: cfg.color }}>{cfg.label}</span>
