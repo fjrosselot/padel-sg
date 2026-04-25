@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Trophy, BarChart2, DollarSign, Layers, ChevronRight, ExternalLink } from 'lucide-react'
 
 const N = '#162844'
@@ -40,6 +41,7 @@ const PROJECTS = [
 ]
 
 export default function MockupsIndex() {
+  useEffect(() => { document.title = 'Mockups Hub — Backbone IA' }, [])
   return (
     <div className="min-h-screen" style={{ background: SRF }}>
       {/* Header */}

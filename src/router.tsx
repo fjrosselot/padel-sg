@@ -46,7 +46,6 @@ export const router = createBrowserRouter([
   { path: '/mockup/padel-sg/torneo-detalle', element: <Suspense fallback={fallback}><TorneoDetalleMockup /></Suspense> },
   { path: '/mockup/padel-sg/parejas', element: <Suspense fallback={fallback}><ParejasMockup /></Suspense> },
   { path: '/mockup/padel-sg/landings', element: <Suspense fallback={fallback}><LandingsMockup /></Suspense> },
-  ...(isMockupHub ? [{ path: '/', element: <Navigate to="/mockup" replace /> }] : []),
   { path: '/login', element: <LoginForm /> },
   { path: '/registro', element: <RegisterForm /> },
   { path: '/pendiente', element: <PendingApproval /> },
@@ -54,7 +53,9 @@ export const router = createBrowserRouter([
   { path: '/emergencia', element: <EmergencyLogin /> },
   {
     path: '/',
-    element: (
+    element: isMockupHub ? (
+      <Navigate to="/mockup" replace />
+    ) : (
       <AuthGuard>
         <Suspense fallback={fallback}>
           <AppShell />
