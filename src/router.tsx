@@ -29,6 +29,7 @@ const DashboardMockup = lazy(() => import('./features/mockups/DashboardMockup'))
 const CalendarioMockup = lazy(() => import('./features/mockups/CalendarioMockup'))
 const TorneoDetalleMockup = lazy(() => import('./features/mockups/TorneoDetalleMockup'))
 const ParejasMockup = lazy(() => import('./features/mockups/ParejasMockup'))
+const LandingsMockup = lazy(() => import('./features/mockups/LandingsMockup'))
 
 const fallback = (
   <div className="flex h-full items-center justify-center text-muted">Cargando…</div>
@@ -40,6 +41,7 @@ export const router = createBrowserRouter([
   { path: '/mockup/calendario', element: <Suspense fallback={fallback}><CalendarioMockup /></Suspense> },
   { path: '/mockup/torneo-detalle', element: <Suspense fallback={fallback}><TorneoDetalleMockup /></Suspense> },
   { path: '/mockup/parejas', element: <Suspense fallback={fallback}><ParejasMockup /></Suspense> },
+  { path: '/mockup/landings', element: <Suspense fallback={fallback}><LandingsMockup /></Suspense> },
   { path: '/login', element: <LoginForm /> },
   { path: '/registro', element: <RegisterForm /> },
   { path: '/pendiente', element: <PendingApproval /> },
