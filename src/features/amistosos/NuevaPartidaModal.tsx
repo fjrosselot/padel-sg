@@ -8,8 +8,12 @@ import { Label } from '../../components/ui/label'
 import type { Database } from '../../lib/types/database.types'
 
 type RolBuscado = Database['padel']['Tables']['partidas_abiertas']['Row']['rol_buscado']
+type PartidaRow = Database['padel']['Tables']['partidas_abiertas']['Row']
 
-interface Props { onClose: () => void }
+interface Props {
+  onClose: () => void
+  partida?: PartidaRow
+}
 
 const ROLES: { value: RolBuscado; label: string }[] = [
   { value: 'busco_companero', label: 'Busco compañero' },
@@ -17,33 +21,55 @@ const ROLES: { value: RolBuscado; label: string }[] = [
   { value: 'abierto', label: 'Abierto (ambos)' },
 ]
 
-export default function NuevaPartidaModal({ onClose }: Props) {
+function toDatetimeLocal(iso: string): string {
+  return new Date(iso).toLocaleString('sv-SE', { timeZone: 'America/Santiago' }).slice(0, 16)
+}
+
+export default function NuevaPartidaModal({ onClose, partida }: Props) {
   const { data: user } = useUser()
   const qc = useQueryClient()
+  const isEdit = !!partida
 
-  const [fecha, setFecha] = useState('')
-  const [cancha, setCancha] = useState('')
-  const [categoria, setCategoria] = useState('')
-  const [rol, setRol] = useState<RolBuscado>('abierto')
-  const [admiteMixto, setAdmiteMixto] = useState(false)
+  const [fecha, setFecha] = useState(partida ? toDatetimeLocal(partida.fecha) : '')
+  const [cancha, setCancha] = useState(partida?.cancha ?? '')
+  const [categoria, setCategoria] = useState(partida?.categoria ?? '')
+  const [rol, setRol] = useState<RolBuscado>(partida?.rol_buscado ?? 'abierto')
+  const [admiteMixto, setAdmiteMixto] = useState(partida?.admite_mixto ?? false)
   const [error, setError] = useState<string | null>(null)
 
   const mutation = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error('No autenticado')
       if (!fecha) throw new Error('La fecha es obligatoria')
-      const { error: err } = await supabase
-        .schema('padel')
-        .from('partidas_abiertas')
-        .insert({
-          creador_id: user.id,
-          fecha,
-          cancha: cancha || null,
-          categoria: categoria || null,
-          rol_buscado: rol,
-          admite_mixto: admiteMixto,
-        })
-      if (err) throw err
+
+      if (isEdit) {
+        const { error: err } = await supabase
+          .schema('padel')
+          .from('partidas_abiertas')
+          .update({
+            fecha,
+            cancha: cancha || null,
+            categoria: categoria || null,
+            rol_buscado: rol,
+            admite_mixto: admiteMixto,
+          })
+          .eq('id', partida.id)
+          .eq('creador_id', user.id)
+        if (err) throw err
+      } else {
+        const { error: err } = await supabase
+          .schema('padel')
+          .from('partidas_abiertas')
+          .insert({
+            creador_id: user.id,
+            fecha,
+            cancha: cancha || null,
+            categoria: categoria || null,
+            rol_buscado: rol,
+            admite_mixto: admiteMixto,
+          })
+        if (err) throw err
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['partidas-abiertas'] })
@@ -61,7 +87,9 @@ export default function NuevaPartidaModal({ onClose }: Props) {
         className="bg-white rounded-2xl shadow-[0_20px_40px_rgba(13,27,42,0.14)] w-full max-w-sm mx-4 p-6 space-y-5"
         onClick={e => e.stopPropagation()}
       >
-        <h2 id="nueva-partida-title" className="font-manrope text-lg font-bold text-navy">Nueva partida</h2>
+        <h2 id="nueva-partida-title" className="font-manrope text-lg font-bold text-navy">
+          {isEdit ? 'Editar partida' : 'Nueva partida'}
+        </h2>
 
         <div className="space-y-4">
           <div>
@@ -146,7 +174,7 @@ export default function NuevaPartidaModal({ onClose }: Props) {
             disabled={mutation.isPending}
             className="flex-1 bg-gold text-navy font-bold rounded-lg"
           >
-            {mutation.isPending ? 'Publicando…' : 'Publicar'}
+            {mutation.isPending ? (isEdit ? 'Guardando…' : 'Publicando…') : (isEdit ? 'Guardar' : 'Publicar')}
           </Button>
         </div>
       </div>
