@@ -181,6 +181,7 @@ export default function TorneoDetalle() {
       }))
 
   const hasDesafioSembrado = rosterCats.some(c => c.formato === 'desafio_sembrado')
+  const showMisPill = !!user && fixtureGenerado && (activeTab === 'fixture' || activeTab === 'horario')
 
   return (
     <div className="space-y-3">
@@ -199,18 +200,6 @@ export default function TorneoDetalle() {
           <p className="text-muted text-sm font-inter">{formatFecha(torneo.fecha_inicio, 'long')}</p>
         </div>
         <div className="flex items-center gap-2 shrink-0 pt-0.5">
-          {!!user && (activeTab === 'fixture' || activeTab === 'horario') && (
-            <button
-              type="button"
-              onClick={() => setSoloMis(v => !v)}
-              className={`flex items-center gap-1 px-3 py-1 rounded-full font-inter text-xs font-semibold transition-colors focus:outline-none ${
-                soloMis ? 'bg-navy text-gold' : 'bg-white border border-navy/20 text-slate hover:border-navy/40 hover:text-navy'
-              }`}
-            >
-              <User className="h-3 w-3 shrink-0" />
-              Mis partidos
-            </button>
-          )}
           {isAdmin && (
             <Button
               size="sm"
@@ -277,22 +266,39 @@ export default function TorneoDetalle() {
         </div>
       )}
 
-      <div className="rounded-xl bg-white shadow-card px-4 pb-4 pt-0">
-        <TabsDetalle
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          fixtureGenerado={fixtureGenerado}
-          hasBracket={hasBracket}
-          hasTurnos={hasTurnos}
-          isAdmin={isAdmin}
-          hasDesafioSembrado={hasDesafioSembrado}
-          categorias={categorias}
-          rosterCats={rosterCats}
-          inscripciones={inscripciones}
-          torneo={torneo}
-          onCargarResultado={setPartidoModal}
-          soloMis={soloMis}
-        />
+      {/* Card + Mis partidos pill outside the card, top-right */}
+      <div>
+        {showMisPill && (
+          <div className="flex justify-end mb-1">
+            <button
+              type="button"
+              onClick={() => setSoloMis(v => !v)}
+              className={`flex items-center gap-1 px-3 py-1 rounded-full font-inter text-xs font-semibold transition-colors focus:outline-none ${
+                soloMis ? 'bg-navy text-gold' : 'bg-white border border-navy/20 text-slate hover:border-navy/40 hover:text-navy'
+              }`}
+            >
+              <User className="h-3 w-3 shrink-0" />
+              Mis partidos
+            </button>
+          </div>
+        )}
+        <div className="rounded-xl bg-white shadow-card px-4 pb-4 pt-0">
+          <TabsDetalle
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            fixtureGenerado={fixtureGenerado}
+            hasBracket={hasBracket}
+            hasTurnos={hasTurnos}
+            isAdmin={isAdmin}
+            hasDesafioSembrado={hasDesafioSembrado}
+            categorias={categorias}
+            rosterCats={rosterCats}
+            inscripciones={inscripciones}
+            torneo={torneo}
+            onCargarResultado={setPartidoModal}
+            soloMis={soloMis}
+          />
+        </div>
       </div>
 
       {showEdit && (
@@ -346,7 +352,7 @@ function TabsDetalle({
 
   return (
     <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
-      <Tabs.List className="flex overflow-x-auto no-scrollbar border-b border-navy/10 -mx-4 px-4">
+      <Tabs.List className="flex overflow-x-auto no-scrollbar border-b border-navy/10 -mx-4 px-4 mb-4">
         {fixtureGenerado && (
           <Tabs.Trigger value="fixture" className={TAB_CLS}>Fixture</Tabs.Trigger>
         )}
@@ -458,7 +464,6 @@ function SembradoTabContent({
 
   const saveAll = useMutation({
     mutationFn: async () => {
-      // 1. Patch inscripciones sembrado order
       await Promise.all(
         sembradoCats.flatMap(cat => {
           const order = sgOrders[cat.nombre] ?? []
@@ -467,7 +472,6 @@ function SembradoTabContent({
           )
         })
       )
-      // 2. Patch all rival_pairs in one torneos update
       const updated = (torneoCategorias ?? []).map(c => {
         const names = rivalNamesMap[c.nombre]
         return names !== undefined ? { ...c, rival_pairs: names } : c
