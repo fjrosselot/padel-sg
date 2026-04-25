@@ -5,7 +5,7 @@ import { padelApi } from '@/lib/padelApi'
 import { usePlayerRankings } from '@/hooks/usePlayerRankings'
 import { buildCatColorMap } from '@/features/torneos/catColors'
 import type { CategoriaFixture, PartidoFixture } from '@/lib/fixture/types'
-import { RankingEvolucion, PagosSummary, Novedades } from './DashboardWidgets'
+import { RankingEvolucion, PagosSummary, Novedades, RaceWidget } from './DashboardWidgets'
 
 function isMiPartido(p: PartidoFixture, uid: string): boolean {
   return [p.pareja1?.jugador1_id, p.pareja1?.jugador2_id, p.pareja2?.jugador1_id, p.pareja2?.jugador2_id]
@@ -100,6 +100,8 @@ export function Dashboard() {
           <PagosSummary userId={user.id} />
         </div>
       )}
+
+      <RaceWidget />
 
       <Novedades />
     </div>

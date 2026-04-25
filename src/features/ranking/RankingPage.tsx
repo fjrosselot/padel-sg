@@ -1,13 +1,15 @@
 import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Trophy } from 'lucide-react'
+import { Trophy, Flag } from 'lucide-react'
 import { padelApi } from '../../lib/padelApi'
 import RankingCategoriaCard, { type RankingEntry } from './RankingCategoriaCard'
 
 const CATS_HOMBRES = ['3a', '4a', '5a', 'Open']
 const CATS_MUJERES = ['B', 'C', 'D', 'Open']
+const CURRENT_YEAR = new Date().getFullYear()
 
 type Filtro = 'todas' | string
+type Modo = 'ranking' | 'race'
 
 function FilterPill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
@@ -27,14 +29,17 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
 
 export default function RankingPage() {
   const [filtro, setFiltro] = useState<Filtro>('todas')
+  const [modo, setModo] = useState<Modo>('ranking')
 
   const { data: entries = [], isLoading } = useQuery({
-    queryKey: ['ranking-categoria'],
+    queryKey: ['ranking-categoria', modo],
     queryFn: async () => {
+      const endpoint = modo === 'race'
+        ? `ranking_race?anio=eq.${CURRENT_YEAR}&select=jugador_id,nombre,nombre_pila,apellido,apodo,foto_url,sexo,categoria,puntos_total,eventos_jugados`
+        : 'ranking_categoria?select=jugador_id,nombre,nombre_pila,apellido,apodo,foto_url,sexo,categoria,puntos_total,eventos_jugados'
+
       const [rankingData, jugadoresData] = await Promise.all([
-        padelApi.get<RankingEntry[]>(
-          'ranking_categoria?select=jugador_id,nombre,nombre_pila,apellido,apodo,foto_url,sexo,categoria,puntos_total,eventos_jugados'
-        ),
+        padelApi.get<RankingEntry[]>(endpoint),
         padelApi.get<{ id: string; nombre: string; nombre_pila: string | null; apellido: string | null; apodo: string | null; foto_url: string | null; sexo: string | null; categoria: string | null }[]>(
           'jugadores?select=id,nombre,nombre_pila,apellido,apodo,foto_url,sexo,categoria&estado_cuenta=eq.activo&categoria=not.is.null'
         ),
@@ -92,9 +97,30 @@ export default function RankingPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <Trophy className="h-6 w-6 text-gold" />
-        <h1 className="font-manrope text-2xl font-bold text-navy uppercase tracking-tight">Ranking</h1>
+        {modo === 'race' ? <Flag className="h-6 w-6 text-gold" /> : <Trophy className="h-6 w-6 text-gold" />}
+        <h1 className="font-manrope text-2xl font-bold text-navy uppercase tracking-tight">
+          {modo === 'race' ? `Carrera ${CURRENT_YEAR}` : 'Ranking'}
+        </h1>
+        {/* Modo toggle */}
+        <div className="ml-auto flex items-center rounded-full bg-surface p-0.5 border border-navy/10">
+          <button type="button" onClick={() => { setModo('ranking'); setFiltro('todas') }}
+            className={`px-3 py-1 rounded-full font-inter text-[11px] font-semibold transition-colors ${modo === 'ranking' ? 'bg-navy text-gold' : 'text-slate'}`}>
+            Ranking
+          </button>
+          <button type="button" onClick={() => { setModo('race'); setFiltro('todas') }}
+            className={`px-3 py-1 rounded-full font-inter text-[11px] font-semibold transition-colors ${modo === 'race' ? 'bg-navy text-gold' : 'text-slate'}`}>
+            Carrera {CURRENT_YEAR}
+          </button>
+        </div>
       </div>
+
+      {modo === 'race' && (
+        <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
+          <p className="font-inter text-xs text-amber-800">
+            Puntos acumulados del 1 ene al 31 dic {CURRENT_YEAR}. El líder de cada categoría recibe el premio fin de año.
+          </p>
+        </div>
+      )}
 
       <div className="space-y-2">
         <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { ExternalLink, CheckCircle2 } from 'lucide-react'
+import { ExternalLink, CheckCircle2, Flag } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { padelApi } from '@/lib/padelApi'
 
@@ -169,6 +169,73 @@ export function PagosSummary({ userId }: { userId: string }) {
           )}
         </div>
       )}
+    </button>
+  )
+}
+
+// ---- Race Widget ----
+
+interface RaceEntry {
+  jugador_id: string
+  nombre_pila: string | null
+  apellido: string | null
+  apodo: string | null
+  sexo: string | null
+  categoria: string
+  puntos_total: number
+}
+
+const MEDALS = ['#e8c547', '#94b0cc', '#CD7F32']
+
+export function RaceWidget() {
+  const navigate = useNavigate()
+  const year = new Date().getFullYear()
+
+  const { data: rows = [], isLoading } = useQuery({
+    queryKey: ['race-widget', year],
+    queryFn: () =>
+      padelApi.get<RaceEntry[]>(
+        `ranking_race?anio=eq.${year}&select=jugador_id,nombre_pila,apellido,apodo,sexo,categoria,puntos_total&order=puntos_total.desc&limit=5`
+      ),
+  })
+
+  if (isLoading || rows.length === 0) return null
+
+  const maxPts = rows[0].puntos_total
+
+  return (
+    <button
+      type="button"
+      onClick={() => navigate('/rankings')}
+      className="w-full text-left rounded-xl bg-white shadow-card overflow-hidden hover:shadow-card-hover transition-shadow"
+    >
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-navy/5">
+        <Flag className="h-4 w-4 text-gold" />
+        <p className="font-inter text-xs font-bold uppercase tracking-wider text-muted flex-1">Carrera {year}</p>
+        <span className="font-inter text-[10px] text-muted">Top 5 global</span>
+      </div>
+      <div className="px-4 py-2 space-y-2">
+        {rows.map((r, i) => {
+          const nombre = r.apodo ?? r.nombre_pila ?? r.apellido ?? '—'
+          const pct = maxPts > 0 ? (r.puntos_total / maxPts) * 100 : 0
+          return (
+            <div key={r.jugador_id} className="flex items-center gap-2">
+              <span className="w-4 font-manrope text-[11px] font-bold text-center shrink-0"
+                style={{ color: MEDALS[i] ?? '#94b0cc' }}>
+                {i + 1}
+              </span>
+              <span className="w-20 font-inter text-[12px] font-semibold text-navy truncate shrink-0">{nombre}</span>
+              <div className="flex-1 h-1.5 rounded-full bg-surface overflow-hidden">
+                <div className="h-full rounded-full transition-all"
+                  style={{ width: `${pct}%`, background: i === 0 ? '#e8c547' : '#94b0cc' }} />
+              </div>
+              <span className="font-manrope text-[12px] font-bold text-navy shrink-0 w-10 text-right">
+                {r.puntos_total}
+              </span>
+            </div>
+          )
+        })}
+      </div>
     </button>
   )
 }
