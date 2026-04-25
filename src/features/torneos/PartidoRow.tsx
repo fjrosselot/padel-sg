@@ -109,16 +109,11 @@ export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResulta
       {/* Header */}
       <div className="flex items-center justify-between px-2.5 h-[22px]" style={headerBgStyle}>
         <div className="flex items-center gap-1 min-w-0">
-          {sembradoNum !== undefined && (
-            <span className="font-inter font-bold text-[#e8c547] text-[10px] tabular-nums shrink-0">#{sembradoNum} ·</span>
-          )}
           <span className="font-inter font-bold text-[11px] text-[#162844] shrink-0">{partido.turno ?? '--:--'}</span>
           {partido.cancha != null && (
             <span className="font-inter text-[10px] text-[#94b0cc] shrink-0"> · C{partido.cancha}</span>
           )}
-          {sembradoNum == null && (
-            <span className="font-inter text-[10px] text-[#94b0cc] shrink-0"> · {fasLabel(partido)}</span>
-          )}
+          <span className="font-inter text-[10px] text-[#94b0cc] shrink-0"> · {fasLabel(partido)}</span>
           {catNombre && (
             <span className="font-inter text-[10px] text-[#94b0cc] truncate"> · {abbrevCat(catNombre)}</span>
           )}

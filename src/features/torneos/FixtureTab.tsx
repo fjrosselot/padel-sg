@@ -199,7 +199,7 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
   torneoId: string
   isAdmin: boolean
   onCargarResultado: (p: PartidoFixture) => void
-  catPorPartido: Map<string, string>
+  catPorPartido: Map<PartidoFixture, string>
   catColorMap: Map<string, { bg: string; dot: string }>
   innerGrid?: boolean
 }) {
@@ -209,13 +209,13 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
     return (
       <div className="space-y-6">
         {keys.map(k => {
-          const dotColor = grupos.get(k)!.map(p => catColorMap.get(catPorPartido.get(p.id) ?? '')?.dot).find(Boolean)
+          const dotColor = grupos.get(k)!.map(p => catColorMap.get(catPorPartido.get(p) ?? '')?.dot).find(Boolean)
           return (
             <div key={k}>
               <SectionLabel dot={dotColor}>{labelPrefix}{k}</SectionLabel>
               <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(240px,360px))] gap-x-6 gap-y-1.5">
                 {grupos.get(k)!.map(p => {
-                  const catNombre = catPorPartido.get(p.id) ?? ''
+                  const catNombre = catPorPartido.get(p) ?? ''
                   return (
                     <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catNombre={catNombre} headerBg={catColorMap.get(catNombre)?.bg} />
                   )
@@ -231,13 +231,13 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
   return (
     <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(240px,360px))] gap-x-6 gap-y-6">
       {keys.map(k => {
-        const dotColor = grupos.get(k)!.map(p => catColorMap.get(catPorPartido.get(p.id) ?? '')?.dot).find(Boolean)
+        const dotColor = grupos.get(k)!.map(p => catColorMap.get(catPorPartido.get(p) ?? '')?.dot).find(Boolean)
         return (
           <div key={k}>
             <SectionLabel dot={dotColor}>{labelPrefix}{k}</SectionLabel>
             <div className="space-y-1">
               {grupos.get(k)!.map(p => {
-                const catNombre = catPorPartido.get(p.id) ?? ''
+                const catNombre = catPorPartido.get(p) ?? ''
                 return (
                   <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catNombre={catNombre} headerBg={catColorMap.get(catNombre)?.bg} />
                 )
@@ -261,7 +261,7 @@ export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResu
   const { porCancha, porHora, catPorPartido } = useMemo(() => {
     const porCancha = new Map<string, PartidoFixture[]>()
     const porHora = new Map<string, PartidoFixture[]>()
-    const catPorPartido = new Map<string, string>()
+    const catPorPartido = new Map<PartidoFixture, string>()
 
     for (const cat of categoriasFiltradas) {
       const todos: PartidoFixture[] = [
@@ -271,7 +271,7 @@ export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResu
         ...(cat.partidos ?? []),
       ]
       for (const p of todos) {
-        catPorPartido.set(p.id, cat.nombre)
+        catPorPartido.set(p, cat.nombre)
         if (p.cancha != null) {
           const k = String(p.cancha)
           if (!porCancha.has(k)) porCancha.set(k, [])
