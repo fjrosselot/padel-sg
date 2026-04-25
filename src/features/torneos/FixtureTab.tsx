@@ -64,10 +64,10 @@ function PillSelector({ vista, onChange }: { vista: Vista; onChange: (v: Vista) 
   )
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionLabel({ children, dot }: { children: React.ReactNode; dot?: string }) {
   return (
     <div className="flex items-center gap-2 mb-3">
-      <span className="w-2.5 h-2.5 rounded-sm bg-[#e8c547] shrink-0" />
+      <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: dot ?? '#e8c547' }} />
       <p className="font-inter text-[12px] font-bold uppercase tracking-[0.09em] text-[#162844]">
         {children}
       </p>
@@ -105,7 +105,7 @@ function DesafioSection({ categorias, torneoId, isAdmin, onCargarResultado, cole
             {categorias.length > 1 && (
               <h3 className="font-manrope text-sm font-bold text-navy border-l-4 border-gold pl-3">{cat.nombre}</h3>
             )}
-            <div className="space-y-1.5">
+            <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(240px,360px))] gap-x-6 gap-y-1.5">
               {partidos.map(p => (
                 <PartidoRow
                   key={p.id}
@@ -193,7 +193,7 @@ function VistaGrupo({ categorias, torneoId, isAdmin, onCargarResultado, colegioR
   )
 }
 
-function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResultado, catPorPartido, catColorMap }: {
+function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResultado, catPorPartido, catColorMap, innerGrid = false }: {
   grupos: Map<string, PartidoFixture[]>
   labelPrefix: string
   torneoId: string
@@ -201,23 +201,51 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
   onCargarResultado: (p: PartidoFixture) => void
   catPorPartido: Map<string, string>
   catColorMap: Map<string, { bg: string; dot: string }>
+  innerGrid?: boolean
 }) {
   const keys = [...grupos.keys()].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+
+  if (innerGrid) {
+    return (
+      <div className="space-y-6">
+        {keys.map(k => {
+          const dotColor = grupos.get(k)!.map(p => catColorMap.get(catPorPartido.get(p.id) ?? '')?.dot).find(Boolean)
+          return (
+            <div key={k}>
+              <SectionLabel dot={dotColor}>{labelPrefix}{k}</SectionLabel>
+              <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(240px,360px))] gap-x-6 gap-y-1.5">
+                {grupos.get(k)!.map(p => {
+                  const catNombre = catPorPartido.get(p.id) ?? ''
+                  return (
+                    <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catNombre={catNombre} headerBg={catColorMap.get(catNombre)?.bg} />
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(240px,360px))] gap-x-6 gap-y-6">
-      {keys.map(k => (
-        <div key={k}>
-          <SectionLabel>{labelPrefix}{k}</SectionLabel>
-          <div className="space-y-1">
-            {grupos.get(k)!.map(p => {
-              const catNombre = catPorPartido.get(p.id) ?? ''
-              return (
-                <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catNombre={catNombre} headerBg={catColorMap.get(catNombre)?.bg} />
-              )
-            })}
+      {keys.map(k => {
+        const dotColor = grupos.get(k)!.map(p => catColorMap.get(catPorPartido.get(p.id) ?? '')?.dot).find(Boolean)
+        return (
+          <div key={k}>
+            <SectionLabel dot={dotColor}>{labelPrefix}{k}</SectionLabel>
+            <div className="space-y-1">
+              {grupos.get(k)!.map(p => {
+                const catNombre = catPorPartido.get(p.id) ?? ''
+                return (
+                  <PartidoRow key={p.id} partido={p} torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catNombre={catNombre} headerBg={catColorMap.get(catNombre)?.bg} />
+                )
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -301,7 +329,7 @@ export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResu
       {showPills && vista === 'hora' && (
         porHora.size === 0
           ? <p className="font-inter text-sm text-muted py-2">Sin horarios asignados en el fixture.</p>
-          : <VistaAgrupada grupos={porHora} labelPrefix="" torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catPorPartido={catPorPartido} catColorMap={catColorMap} />
+          : <VistaAgrupada grupos={porHora} labelPrefix="" torneoId={torneoId} isAdmin={isAdmin} onCargarResultado={onCargarResultado} catPorPartido={catPorPartido} catColorMap={catColorMap} innerGrid />
       )}
     </div>
   )
