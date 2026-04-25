@@ -6,6 +6,7 @@ import { padelApi } from '../../lib/padelApi'
 import type { Jugador } from '../../lib/supabase'
 import { usePlayerRankings } from '../../hooks/usePlayerRankings'
 import { PuntosHistorial } from '../ranking/PuntosHistorial'
+import { PuntosDefender } from '../ranking/PuntosDefender'
 import { useUser } from '../../hooks/useUser'
 import { PagosJugador } from '../tesoreria/PagosJugador'
 import { LadoBadge } from './LadoBadge'
@@ -296,6 +297,7 @@ export default function JugadorDetalle() {
             }
           </div>
 
+          <PuntosDefender jugadorId={id!} />
           <PuntosHistorial jugadorId={id!} />
 
           {isAdmin && (

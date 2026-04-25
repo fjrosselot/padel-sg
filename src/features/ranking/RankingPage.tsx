@@ -31,15 +31,9 @@ export default function RankingPage() {
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ['ranking-categoria'],
     queryFn: async () => {
-      const temporadas = await padelApi.get<{ id: string }[]>(
-        'temporadas?select=id&order=anio.desc&limit=1'
-      )
-      const temporadaId = temporadas?.[0]?.id
-      if (!temporadaId) return []
-
       const [rankingData, jugadoresData] = await Promise.all([
         padelApi.get<RankingEntry[]>(
-          `ranking_categoria?select=jugador_id,nombre,nombre_pila,apellido,apodo,foto_url,sexo,categoria,puntos_total,eventos_jugados&temporada_id=eq.${temporadaId}`
+          'ranking_categoria?select=jugador_id,nombre,nombre_pila,apellido,apodo,foto_url,sexo,categoria,puntos_total,eventos_jugados'
         ),
         padelApi.get<{ id: string; nombre: string; nombre_pila: string | null; apellido: string | null; apodo: string | null; foto_url: string | null; sexo: string | null; categoria: string | null }[]>(
           'jugadores?select=id,nombre,nombre_pila,apellido,apodo,foto_url,sexo,categoria&estado_cuenta=eq.activo&categoria=not.is.null'
