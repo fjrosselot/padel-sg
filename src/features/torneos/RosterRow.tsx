@@ -22,11 +22,11 @@ function initials(nombre: string) {
 
 function AvatarPair({ j1, j2, dot }: { j1: string; j2: string; dot: string }) {
   return (
-    <div className="relative shrink-0" style={{ width: 44, height: 28 }}>
-      <span className="absolute left-0 top-0 flex items-center justify-center w-7 h-7 rounded-full text-white font-inter text-[10px] font-bold ring-2 ring-white" style={{ background: dot, zIndex: 2 }}>
+    <div className="flex gap-1 shrink-0">
+      <span className="flex items-center justify-center w-7 h-7 rounded-full text-white font-inter text-[10px] font-bold" style={{ background: dot }}>
         {initials(j1)}
       </span>
-      <span className="absolute left-4 top-0 flex items-center justify-center w-7 h-7 rounded-full text-white font-inter text-[10px] font-bold ring-2 ring-white" style={{ background: dot + 'bb', zIndex: 1 }}>
+      <span className="flex items-center justify-center w-7 h-7 rounded-full text-white font-inter text-[10px] font-bold" style={{ background: dot }}>
         {initials(j2)}
       </span>
     </div>
@@ -63,8 +63,8 @@ export default function RosterRow({
       <AvatarPair j1={j1} j2={j2} dot={dot} />
 
       <div className="flex-1 min-w-0">
-        <p className={`font-inter text-[12px] leading-snug truncate ${isEspera ? 'text-slate' : 'font-semibold text-navy'}`}>{j1}</p>
-        <p className="font-inter text-[12px] text-muted leading-snug truncate">{j2}</p>
+        <p className={`font-inter text-[12px] leading-snug truncate ${isEspera ? 'text-muted' : 'text-navy'}`}>{j1}</p>
+        <p className={`font-inter text-[12px] leading-snug truncate ${isEspera ? 'text-muted' : 'text-navy'}`}>{j2}</p>
       </div>
 
       {isPending && onConfirmar && onRechazar ? (
