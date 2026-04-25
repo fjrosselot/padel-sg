@@ -116,7 +116,9 @@ export default function PartidoRow({ partido, torneoId, isAdmin, onCargarResulta
           {partido.cancha != null && (
             <span className="font-inter text-[10px] text-[#94b0cc] shrink-0"> · C{partido.cancha}</span>
           )}
-          <span className="font-inter text-[10px] text-[#94b0cc] shrink-0"> · {fasLabel(partido)}</span>
+          {sembradoNum == null && (
+            <span className="font-inter text-[10px] text-[#94b0cc] shrink-0"> · {fasLabel(partido)}</span>
+          )}
           {catNombre && (
             <span className="font-inter text-[10px] text-[#94b0cc] truncate"> · {abbrevCat(catNombre)}</span>
           )}
