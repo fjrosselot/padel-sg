@@ -807,6 +807,10 @@ export default function LandingsMockup() {
       {/* Page tabs */}
       <div className="sticky top-0 z-20 bg-white shadow-[0_2px_8px_rgba(13,27,42,0.06)]">
         <div className="flex items-center border-b border-[#F0F4F8]">
+          <a href="/mockup" className="px-3 py-2.5 font-inter text-[11px] font-semibold border-b-2 border-transparent shrink-0 flex items-center gap-1" style={{ color: S }}>
+            ← Índice
+          </a>
+          <div className="w-px h-4 bg-[#F0F4F8] shrink-0" />
           {PAGES.map(p => (
             <button key={p.id} type="button" onClick={() => { setPage(p.id); setVariant('A') }}
               className={`flex-1 py-2.5 font-inter text-[11px] font-semibold transition-colors border-b-2 ${
