@@ -60,6 +60,7 @@ export default function TorneoDetalle() {
   const [showCobro, setShowCobro] = useState(false)
   const [activeTab, setActiveTab] = useState('fixture')
   const [showEdit, setShowEdit] = useState(false)
+  const [soloMis, setSoloMis] = useState(false)
 
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
   const isSuperAdmin = user?.rol === 'superadmin'
@@ -198,6 +199,18 @@ export default function TorneoDetalle() {
           <p className="text-muted text-sm font-inter">{formatFecha(torneo.fecha_inicio, 'long')}</p>
         </div>
         <div className="flex items-center gap-2 shrink-0 pt-0.5">
+          {!!user && (activeTab === 'fixture' || activeTab === 'horario') && (
+            <button
+              type="button"
+              onClick={() => setSoloMis(v => !v)}
+              className={`flex items-center gap-1 px-3 py-1 rounded-full font-inter text-xs font-semibold transition-colors focus:outline-none ${
+                soloMis ? 'bg-navy text-gold' : 'bg-white border border-navy/20 text-slate hover:border-navy/40 hover:text-navy'
+              }`}
+            >
+              <User className="h-3 w-3 shrink-0" />
+              Mis partidos
+            </button>
+          )}
           {isAdmin && (
             <Button
               size="sm"
@@ -278,6 +291,7 @@ export default function TorneoDetalle() {
           inscripciones={inscripciones}
           torneo={torneo}
           onCargarResultado={setPartidoModal}
+          soloMis={soloMis}
         />
       </div>
 
@@ -317,19 +331,17 @@ interface TabsProps {
   inscripciones: InscripcionRow[] | undefined
   torneo: Torneo
   onCargarResultado: (p: PartidoFixture) => void
+  soloMis: boolean
 }
 
 function TabsDetalle({
   activeTab, setActiveTab, fixtureGenerado, hasBracket, hasTurnos,
-  isAdmin, hasDesafioSembrado, categorias, rosterCats, inscripciones, torneo, onCargarResultado,
+  isAdmin, hasDesafioSembrado, categorias, rosterCats, inscripciones, torneo, onCargarResultado, soloMis,
 }: TabsProps) {
   useEffect(() => {
     if (!fixtureGenerado && activeTab === 'fixture') setActiveTab('parejas')
   }, [fixtureGenerado])
 
-  const [soloMis, setSoloMis] = useState(false)
-  const { data: user } = useUser()
-  const showMisPill = !!user && (activeTab === 'fixture' || activeTab === 'horario')
   const sembradoCats = rosterCats.filter(c => c.formato === 'desafio_sembrado')
 
   return (
@@ -349,20 +361,6 @@ function TabsDetalle({
           <Tabs.Trigger value="sembrado" className={TAB_CLS}>Sembrado</Tabs.Trigger>
         )}
       </Tabs.List>
-      {showMisPill && (
-        <div className="flex justify-end -mx-4 px-4 py-2 mb-2">
-          <button
-            type="button"
-            onClick={() => setSoloMis(v => !v)}
-            className={`flex items-center gap-1 px-3 py-1 rounded-full font-inter text-xs font-semibold transition-colors focus:outline-none ${
-              soloMis ? 'bg-navy text-gold' : 'bg-white border border-navy/20 text-slate hover:border-navy/40 hover:text-navy'
-            }`}
-          >
-            <User className="h-3 w-3 shrink-0" />
-            Mis partidos
-          </button>
-        </div>
-      )}
 
       <Tabs.Content value="fixture">
         <FixtureTab
