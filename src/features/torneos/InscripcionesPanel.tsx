@@ -187,14 +187,23 @@ export default function InscripcionesPanel({ torneoId, estado, categorias }: Pro
 
       {isLoading && <p className="text-muted text-sm">Cargando…</p>}
 
-      {!isLoading && categorias.map(cat => {
-        const activas = inscripciones?.filter(i => i.categoria_nombre === cat.nombre && !i.lista_espera) ?? []
-        const espera = inscripciones?.filter(i => i.categoria_nombre === cat.nombre && i.lista_espera) ?? []
-        if (activas.length === 0 && espera.length === 0) return null
-        return (
+      {!isLoading && (() => {
+        // Para torneos externos sin categorías configuradas, agrupar por categoria_nombre de inscripciones
+        const displayCats = categorias.length > 0
+          ? categorias.map(c => ({ nombre: c.nombre, label: `${c.nombre} · ${SEXO_LABEL[c.sexo]} · {activas}/{c.num_parejas}`, useConfig: true as const, config: c }))
+          : [...new Set(inscripciones?.map(i => i.categoria_nombre).filter(Boolean) ?? [])].map(n => ({ nombre: n!, label: n!, useConfig: false as const, config: null }))
+
+        return displayCats.map(cat => {
+          const activas = inscripciones?.filter(i => i.categoria_nombre === cat.nombre && !i.lista_espera) ?? []
+          const espera = inscripciones?.filter(i => i.categoria_nombre === cat.nombre && i.lista_espera) ?? []
+          if (activas.length === 0 && espera.length === 0) return null
+          const headerLabel = (cat.useConfig && cat.config && cat.config.sexo != null && cat.config.num_parejas != null)
+            ? `${cat.nombre} · ${SEXO_LABEL[cat.config.sexo]} · ${activas.length}/${cat.config.num_parejas}`
+            : `${cat.nombre} · ${activas.length} pareja${activas.length !== 1 ? 's' : ''}`
+          return (
           <div key={cat.nombre} className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted">
-              {cat.nombre} · {SEXO_LABEL[cat.sexo]} · {activas.length}/{cat.num_parejas}
+              {headerLabel}
             </p>
             {activas.map(ins => (
               <InscripcionCard
@@ -221,8 +230,9 @@ export default function InscripcionesPanel({ torneoId, estado, categorias }: Pro
               </>
             )}
           </div>
-        )
-      })}
+          )
+        })
+      })()}
 
       {!isLoading && inscripciones?.filter(i => !i.categoria_nombre).map(ins => (
         <InscripcionCard
