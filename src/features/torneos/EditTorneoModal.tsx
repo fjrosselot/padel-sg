@@ -10,6 +10,8 @@ import { padelPatch } from './torneoApi'
 import { useUser } from '../../hooks/useUser'
 import { SEXO_LABEL, SEXO_COLOR } from './TorneoWizard/constants'
 import DeleteTorneoDialog from './DeleteTorneoDialog'
+import { useCategorias } from '../categorias/useCategorias'
+import { CatColorPickerInline, type CatColors } from '../categorias/CatColorPickerInline'
 import type { Database } from '../../lib/types/database.types'
 import type { CategoriaConfig, ConfigFixture } from '../../lib/fixture/types'
 
@@ -69,6 +71,7 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
   const [tipo, setTipo] = useState<'interno' | 'vs_colegio' | 'externo'>(torneo.tipo)
   const [colegioRival, setColegioRival] = useState(torneo.colegio_rival ?? '')
   const [categorias, setCategorias] = useState<CategoriaConfig[]>(initialCats)
+  const { data: globalCats } = useCategorias()
   const [duracionPartido, setDuracionPartido] = useState(initialConfig.duracion_partido ?? 45)
   const [pausaEntrePartidos, setPausaEntrePartidos] = useState(initialConfig.pausa_entre_partidos ?? 10)
   const [numCanchas, setNumCanchas] = useState(initialConfig.num_canchas ?? 2)
@@ -114,7 +117,17 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
   })
 
   function addCategoria(preset: { nombre: string; sexo: 'M' | 'F' | 'Mixto' }) {
-    setCategorias(prev => [...prev, { nombre: preset.nombre, num_parejas: 4, sexo: preset.sexo, formato: 'americano_grupos' }])
+    const gc = globalCats?.find(g => g.id === preset.nombre || g.nombre === preset.nombre)
+    setCategorias(prev => [...prev, {
+      nombre: preset.nombre, num_parejas: 4, sexo: preset.sexo, formato: 'americano_grupos',
+      ...(gc ? { color_fondo: gc.color_fondo, color_borde: gc.color_borde, color_texto: gc.color_texto } : {}),
+    }])
+  }
+
+  function updateCatColor(idx: number, c: CatColors) {
+    setCategorias(prev => prev.map((cat, i) =>
+      i === idx ? { ...cat, color_fondo: c.fondo, color_borde: c.borde, color_texto: c.texto } : cat
+    ))
   }
 
   function removeCategoria(idx: number) {
@@ -246,6 +259,12 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
                             <button type="button" onClick={() => updateNumParejas(idx, cat.num_parejas + 1)} disabled={cat.num_parejas >= 64} className="w-5 h-5 rounded border border-navy/20 flex items-center justify-center text-navy disabled:opacity-30 hover:border-gold hover:text-gold transition-colors text-sm leading-none">+</button>
                           </div>
                           <span className="text-xs text-muted">parejas</span>
+                          <CatColorPickerInline
+                            value={cat.color_fondo ? { fondo: cat.color_fondo, borde: cat.color_borde ?? '', texto: cat.color_texto ?? '' } : null}
+                            onChange={c => updateCatColor(idx, c)}
+                            catNombre={cat.nombre}
+                            globalCats={globalCats}
+                          />
                           <button
                             type="button"
                             onClick={() => removeCategoria(idx)}

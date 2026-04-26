@@ -132,7 +132,7 @@ function ProximosPartidos({ userId }: { userId: string }) {
           (c): c is CategoriaFixture => Array.isArray((c as CategoriaFixture).grupos) || Array.isArray((c as CategoriaFixture).partidos)
         )
         if (cats.length === 0) continue
-        const colorMap = buildCatColorMap(cats.map(c => c.nombre))
+        const colorMap = buildCatColorMap(cats.map(c => ({ nombre: c.nombre, color_fondo: c.color_fondo, color_borde: c.color_borde, color_texto: c.color_texto })))
         for (const cat of cats) {
           const todos: PartidoFixture[] = [
             ...(cat.grupos ?? []).flatMap(g => g.partidos),

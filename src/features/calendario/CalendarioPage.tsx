@@ -400,7 +400,7 @@ export default function CalendarioPage() {
           (c): c is CategoriaFixture => Array.isArray((c as CategoriaFixture).grupos) || Array.isArray((c as CategoriaFixture).partidos)
         )
         if (cats.length === 0) continue
-        const colorMap = buildCatColorMap(cats.map(c => c.nombre))
+        const colorMap = buildCatColorMap(cats.map(c => ({ nombre: c.nombre, color_fondo: c.color_fondo, color_borde: c.color_borde, color_texto: c.color_texto })))
         const dateKey = torneo.fecha_inicio ?? ''
         const fechaLabel = dateKey ? new Date(dateKey + 'T00:00:00').toLocaleDateString('es-CL', {
           weekday: 'short', day: 'numeric', month: 'long', timeZone: 'America/Santiago',

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import PartidoRow from './PartidoRow'
 import { buildCatColorMap } from './catColors'
 import { useUser } from '../../hooks/useUser'
+import { useCategorias } from '../categorias/useCategorias'
 import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
 type Vista = 'grupo' | 'cancha' | 'hora'
@@ -253,8 +254,9 @@ function VistaAgrupada({ grupos, labelPrefix, torneoId, isAdmin, onCargarResulta
 export default function FixtureTab({ categorias, torneoId, isAdmin, onCargarResultado, colegioRival, soloMis = false }: Props) {
   const [vista, setVista] = useState<Vista>('grupo')
   const { data: user } = useUser()
+  const { data: globalCats } = useCategorias()
 
-  const catColorMap = useMemo(() => buildCatColorMap(categorias.map(c => c.nombre)), [categorias])
+  const catColorMap = useMemo(() => buildCatColorMap(categorias, globalCats), [categorias, globalCats])
 
   const categoriasFiltradas = soloMis && user?.id ? filterMisPartidos(categorias, user.id) : categorias
 

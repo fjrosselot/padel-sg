@@ -4,6 +4,8 @@ import { Label } from '../../../components/ui/label'
 import { Input } from '../../../components/ui/input'
 import { Button } from '../../../components/ui/button'
 import { SEXO_LABEL, SEXO_COLOR } from './constants'
+import { useCategorias } from '../../categorias/useCategorias'
+import { CatColorPickerInline, type CatColors } from '../../categorias/CatColorPickerInline'
 
 function ParejasStepper({ idx }: { idx: number }) {
   const { setValue } = useFormContext<WizardData>()
@@ -43,10 +45,47 @@ function SexoBadge({ idx }: { idx: number }) {
   )
 }
 
+function CatColorField({ idx, globalCats }: { idx: number; globalCats: ReturnType<typeof useCategorias>['data'] }) {
+  const { setValue, watch } = useFormContext<WizardData>()
+  const fondo = watch(`categorias.${idx}.color_fondo`)
+  const borde = watch(`categorias.${idx}.color_borde`)
+  const texto = watch(`categorias.${idx}.color_texto`)
+  const nombre = watch(`categorias.${idx}.nombre`)
+
+  const value: CatColors | null = fondo ? { fondo, borde: borde ?? '', texto: texto ?? '' } : null
+
+  function handleChange(c: CatColors) {
+    setValue(`categorias.${idx}.color_fondo`, c.fondo)
+    setValue(`categorias.${idx}.color_borde`, c.borde)
+    setValue(`categorias.${idx}.color_texto`, c.texto)
+  }
+
+  return (
+    <CatColorPickerInline
+      value={value}
+      onChange={handleChange}
+      catNombre={nombre}
+      globalCats={globalCats}
+    />
+  )
+}
+
 export default function StepCategorias() {
-  const { register, control, formState: { errors } } = useFormContext<WizardData>()
+  const { register, control, formState: { errors }, setValue } = useFormContext<WizardData>()
   const { fields, append, remove } = useFieldArray({ control, name: 'categorias' })
   const tipo = useWatch({ name: 'tipo' }) as string
+  const { data: globalCats } = useCategorias()
+
+  function appendWithColors(nombre: string, sexo: 'M' | 'F' | 'Mixto') {
+    const gc = globalCats?.find(g => g.id === nombre || g.nombre === nombre)
+    append({
+      nombre,
+      num_parejas: 4,
+      sexo,
+      formato: 'americano_grupos',
+      ...(gc ? { color_fondo: gc.color_fondo, color_borde: gc.color_borde, color_texto: gc.color_texto } : {}),
+    })
+  }
 
   return (
     <div className="space-y-4">
@@ -58,7 +97,7 @@ export default function StepCategorias() {
               key={cat.nombre}
               type="button"
               aria-label={`Agregar categoría ${cat.nombre}`}
-              onClick={() => append({ nombre: cat.nombre, num_parejas: 4, sexo: cat.sexo, formato: 'americano_grupos' })}
+              onClick={() => appendWithColors(cat.nombre, cat.sexo)}
               className="px-3 py-1 text-sm rounded-full border border-slate/30 text-slate hover:border-gold hover:text-navy transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50"
             >
               + {cat.nombre}
@@ -107,6 +146,8 @@ export default function StepCategorias() {
             </select>
 
             <ParejasStepper idx={idx} />
+
+            <CatColorField idx={idx} globalCats={globalCats} />
 
             <button
               type="button"

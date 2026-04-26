@@ -82,7 +82,7 @@ export default function HorarioTab({ categorias, torneoId, isAdmin, onCargarResu
   }
 
   const catNames = [...new Set(categorias.map(c => c.nombre))]
-  const catColorMap = buildCatColorMap(catNames)
+  const catColorMap = buildCatColorMap(catNames.map(nombre => ({ nombre })))
 
   return (
     <div>

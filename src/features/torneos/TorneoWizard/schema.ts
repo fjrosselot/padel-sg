@@ -12,6 +12,9 @@ export const categoriaSchema = z.object({
   num_parejas: z.number().min(2).max(64),
   sexo: z.enum(['M', 'F', 'Mixto']),
   formato: z.enum(['americano_grupos', 'desafio_puntos', 'desafio_sembrado']).optional().default('americano_grupos'),
+  color_fondo: z.string().optional(),
+  color_borde: z.string().optional(),
+  color_texto: z.string().optional(),
 })
 
 export const stepCategoriasSchema = z.object({

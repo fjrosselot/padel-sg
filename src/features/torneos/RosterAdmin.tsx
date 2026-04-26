@@ -114,7 +114,7 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
 
   const closeModal = () => { setAddingCat(null); setJ1Id(''); setJ2Id(''); setCategoriaFiltro(null) }
 
-  const catColorMap = useMemo(() => buildCatColorMap(categorias.map(c => c.nombre)), [categorias])
+  const catColorMap = useMemo(() => buildCatColorMap(categorias.map(c => ({ nombre: c.nombre, color_fondo: c.color_fondo, color_borde: c.color_borde, color_texto: c.color_texto }))), [categorias])
 
   if (!isAdmin) return null
 

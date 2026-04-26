@@ -33,6 +33,9 @@ export interface CategoriaFixture {
   nombre: string
   formato?: FormatoCategoria
   sexo?: 'M' | 'F' | 'Mixto'
+  color_fondo?: string
+  color_borde?: string
+  color_texto?: string
   grupos: GrupoFixture[]
   faseEliminatoria: PartidoFixture[]
   consola: PartidoFixture[]
@@ -59,6 +62,9 @@ export interface CategoriaConfig {
   sexo: 'M' | 'F' | 'Mixto'
   formato?: FormatoCategoria
   rival_pairs?: string[]
+  color_fondo?: string
+  color_borde?: string
+  color_texto?: string
 }
 
 export interface FixtureResult {

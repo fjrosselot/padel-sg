@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { buildCatColorMap, abbrevCat } from './catColors'
+import { useCategorias } from '../categorias/useCategorias'
 import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 
 const CARD_HEADER_H = 20
@@ -238,7 +239,8 @@ interface Props {
 
 export default function BracketTab({ categorias }: Props) {
   const cats = categorias.filter(c => c.faseEliminatoria.length > 0)
-  const catColorMap = useMemo(() => buildCatColorMap(categorias.map(c => c.nombre)), [categorias])
+  const { data: globalCats } = useCategorias()
+  const catColorMap = useMemo(() => buildCatColorMap(categorias, globalCats), [categorias, globalCats])
 
   if (cats.length === 0) {
     return <p className="font-inter text-sm text-muted py-4">Sin categorías con bracket.</p>
