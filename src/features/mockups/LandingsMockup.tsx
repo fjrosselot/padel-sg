@@ -284,8 +284,13 @@ const ROL_CFG: Record<string, { bg: string; color: string; label: string; short:
   abierto:         { bg:'#F0FDF4', color:'#166534', label:'Abierto',          short:'Abierto' },
 }
 
-// A: Feed social con avatar
+// A: Kanban por tipo de búsqueda
 function AmistososA() {
+  const cols = [
+    { key:'busco_companero', label:'Busco compañero', items: AMISTOSOS.filter(p => p.rol==='busco_companero') },
+    { key:'busco_rivales',   label:'Busco rivales',   items: AMISTOSOS.filter(p => p.rol==='busco_rivales') },
+    { key:'abierto',         label:'Abierto',          items: AMISTOSOS.filter(p => p.rol==='abierto') },
+  ]
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
@@ -293,41 +298,85 @@ function AmistososA() {
         <h1 className="font-manrope text-2xl font-bold" style={{ color: N }}>Amistosos</h1>
         <button className="ml-auto rounded-lg px-3 py-1.5 font-inter text-xs font-bold" style={{ background: G, color: N }}>+ Nueva</button>
       </div>
-      <div className="space-y-3">
+      <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar -mx-4 px-4">
+        {cols.map(col => {
+          const rc = ROL_CFG[col.key]
+          return (
+            <div key={col.key} className="shrink-0 w-[220px] space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-inter text-[11px] font-bold uppercase tracking-widest" style={{ color: S }}>{col.label}</span>
+                <span className="font-inter text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: rc.bg, color: rc.color }}>{col.items.length}</span>
+              </div>
+              {col.items.length === 0 && (
+                <div className="rounded-xl bg-white shadow-[0_2px_8px_rgba(13,27,42,0.06)] px-3 py-4 text-center">
+                  <p className="font-inter text-[11px]" style={{ color: S }}>Sin partidas</p>
+                </div>
+              )}
+              {col.items.map(p => (
+                <div key={p.id} className="rounded-xl bg-white shadow-[0_2px_8px_rgba(13,27,42,0.06)] p-3 space-y-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-manrope text-[15px] font-bold" style={{ color: N }}>{p.hora}</span>
+                    <span className="font-inter text-[11px]" style={{ color: S }}>{p.fecha.split(',')[1]?.trim()}</span>
+                  </div>
+                  <p className="font-inter text-[12px] font-semibold" style={{ color: N }}>{p.creador}</p>
+                  <div className="flex items-center gap-1 flex-wrap">
+                    {p.cancha && <span className="font-inter text-[10px] px-1.5 py-0.5 rounded-md bg-[#F0F4F8]" style={{ color: S }}>C{p.cancha}</span>}
+                    {p.cat && <span className="font-inter text-[10px] px-1.5 py-0.5 rounded-md bg-[#F0F4F8]" style={{ color: S }}>{p.cat}</span>}
+                    {p.mixto && <span className="font-inter text-[10px] px-1.5 py-0.5 rounded-md bg-[#F0F4F8]" style={{ color: S }}>Mixto</span>}
+                  </div>
+                  {p.esMio
+                    ? <button className="w-full h-7 rounded-lg font-inter text-[11px] font-semibold border border-red-200 bg-[#FEE8E8] text-[#BA1A1A]">Cancelar</button>
+                    : <button className="w-full h-7 rounded-lg font-inter text-[11px] font-bold" style={{ background: G, color: N }}>Unirme</button>
+                  }
+                </div>
+              ))}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// B: Cards con franja de color lateral + hora como hero
+function AmistososB() {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <Handshake className="h-6 w-6" style={{ color: G }} />
+        <h1 className="font-manrope text-2xl font-bold" style={{ color: N }}>Amistosos</h1>
+        <button className="ml-auto rounded-lg px-3 py-1.5 font-inter text-xs font-bold" style={{ background: G, color: N }}>+ Nueva</button>
+      </div>
+      <div className="space-y-2.5">
         {AMISTOSOS.map(p => {
           const rol = ROL_CFG[p.rol]
-          const initials = p.creador.split(' ').map(w => w[0]).join('').slice(0,2)
           return (
-            <div key={p.id} className="rounded-xl bg-white shadow-[0_4px_12px_rgba(13,27,42,0.06)] p-4">
-              <div className="flex items-start gap-3">
-                <div className="h-9 w-9 rounded-full shrink-0 flex items-center justify-center font-manrope text-xs font-bold" style={{ background: N, color: G }}>
-                  {initials}
+            <div key={p.id} className="rounded-xl bg-white shadow-[0_4px_12px_rgba(13,27,42,0.06)] overflow-hidden flex">
+              {/* Color strip */}
+              <div className="w-1 shrink-0" style={{ background: rol.color }} />
+              {/* Hora block */}
+              <div className="flex flex-col items-center justify-center px-4 py-3 shrink-0 border-r border-[#F0F4F8]" style={{ minWidth: 60 }}>
+                <p className="font-manrope text-[18px] font-black leading-none" style={{ color: N }}>{p.hora}</p>
+                <p className="font-inter text-[9px] uppercase tracking-wider mt-0.5" style={{ color: S }}>{p.fecha.split(',')[0]}</p>
+              </div>
+              {/* Info */}
+              <div className="flex-1 min-w-0 px-3 py-2.5 flex flex-col justify-center gap-1">
+                <div className="flex items-center gap-2">
+                  <p className="font-inter text-[13px] font-semibold truncate" style={{ color: N }}>{p.creador}</p>
+                  <span className="shrink-0 font-inter text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: rol.bg, color: rol.color }}>{rol.short}</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="font-manrope text-[13px] font-bold" style={{ color: N }}>{p.creador}</p>
-                    <span className="font-inter text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: rol.bg, color: rol.color }}>{rol.short}</span>
-                  </div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <Clock className="h-3 w-3 shrink-0" style={{ color: S }} />
-                    <span className="font-inter text-[12px] font-semibold" style={{ color: N }}>{p.fecha} · {p.hora}</span>
-                  </div>
-                  {(p.cancha || p.cat) && (
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      {p.cancha && <span className="font-inter text-[11px]" style={{ color: S }}>Cancha {p.cancha}</span>}
-                      {p.cancha && p.cat && <span style={{ color: S }}>·</span>}
-                      {p.cat && <span className="font-inter text-[11px]" style={{ color: S }}>Cat. {p.cat}</span>}
-                      {p.mixto && <span className="font-inter text-[11px]" style={{ color: S }}>· Mixto ✓</span>}
-                    </div>
-                  )}
+                <div className="flex items-center gap-1.5">
+                  {p.cancha && <span className="font-inter text-[11px]" style={{ color: S }}>C{p.cancha}</span>}
+                  {p.cat && <><span style={{ color: S }}>·</span><span className="font-inter text-[11px]" style={{ color: S }}>{p.cat}</span></>}
+                  {p.mixto && <><span style={{ color: S }}>·</span><span className="font-inter text-[11px]" style={{ color: S }}>Mixto</span></>}
                 </div>
               </div>
-              <div className="mt-3">
-                {p.esMio ? (
-                  <button className="w-full h-8 rounded-lg font-inter text-xs font-semibold border border-red-200 bg-[#FEE8E8] text-[#BA1A1A]">Cancelar partida</button>
-                ) : (
-                  <button className="w-full h-8 rounded-lg font-inter text-xs font-bold" style={{ background: G, color: N }}>Unirme</button>
-                )}
+              {/* CTA */}
+              <div className="flex items-center pr-3">
+                {p.esMio
+                  ? <button className="rounded-lg px-2.5 py-1.5 font-inter text-[11px] font-semibold border border-red-200 bg-[#FEE8E8] text-[#BA1A1A]">Cancelar</button>
+                  : <button className="rounded-lg px-3 py-1.5 font-inter text-[11px] font-bold" style={{ background: G, color: N }}>Unirme</button>
+                }
               </div>
             </div>
           )
@@ -337,58 +386,7 @@ function AmistososA() {
   )
 }
 
-// B: Organizado por día (agenda)
-function AmistososB() {
-  const byDay: Record<string, typeof AMISTOSOS> = {}
-  for (const p of AMISTOSOS) { (byDay[p.fecha] ??= []).push(p) }
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <Handshake className="h-6 w-6" style={{ color: G }} />
-        <h1 className="font-manrope text-2xl font-bold" style={{ color: N }}>Amistosos</h1>
-        <button className="ml-auto rounded-lg px-3 py-1.5 font-inter text-xs font-bold" style={{ background: G, color: N }}>+ Nueva</button>
-      </div>
-      {Object.entries(byDay).map(([dia, partidas]) => (
-        <div key={dia}>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="h-px flex-1 bg-[#F0F4F8]" />
-            <span className="font-inter text-[11px] font-bold uppercase tracking-widest" style={{ color: S }}>{dia}</span>
-            <div className="h-px flex-1 bg-[#F0F4F8]" />
-          </div>
-          <div className="rounded-xl bg-white shadow-[0_4px_12px_rgba(13,27,42,0.06)] overflow-hidden divide-y divide-[#F0F4F8]">
-            {partidas.map(p => {
-              const rol = ROL_CFG[p.rol]
-              return (
-                <div key={p.id} className="flex items-center gap-3 px-4 py-3">
-                  <div className="text-center shrink-0 w-10">
-                    <p className="font-manrope text-base font-bold" style={{ color: N }}>{p.hora}</p>
-                  </div>
-                  <div className="w-px h-8 bg-[#F0F4F8] shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-inter text-[12px] font-semibold" style={{ color: N }}>{p.creador}</p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      {p.cancha && <><MapPin className="h-2.5 w-2.5" style={{ color: S }} /><span className="font-inter text-[10px]" style={{ color: S }}>C{p.cancha}</span></>}
-                      {p.cat && <span className="font-inter text-[10px]" style={{ color: S }}>Cat. {p.cat}</span>}
-                    </div>
-                  </div>
-                  <span className="font-inter text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: rol.bg, color: rol.color }}>{rol.short}</span>
-                  {!p.esMio && (
-                    <button className="shrink-0 rounded-lg px-2.5 py-1 font-inter text-[11px] font-bold" style={{ background: G, color: N }}>Unirme</button>
-                  )}
-                  {p.esMio && (
-                    <Pencil className="h-3.5 w-3.5 shrink-0" style={{ color: S }} />
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-// C: Lista compacta con chip inline
+// C: Grid 2×n de mini-fichas
 function AmistososC() {
   return (
     <div className="space-y-4">
@@ -397,26 +395,33 @@ function AmistososC() {
         <h1 className="font-manrope text-2xl font-bold" style={{ color: N }}>Amistosos</h1>
         <button className="ml-auto rounded-lg px-3 py-1.5 font-inter text-xs font-bold" style={{ background: G, color: N }}>+ Nueva</button>
       </div>
-      <div className="rounded-xl bg-white shadow-[0_4px_12px_rgba(13,27,42,0.06)] overflow-hidden divide-y divide-[#F0F4F8]">
+      <div className="grid grid-cols-2 gap-3">
         {AMISTOSOS.map(p => {
           const rol = ROL_CFG[p.rol]
           return (
-            <div key={p.id} className="flex items-center gap-3 px-4 py-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-manrope text-[13px] font-bold" style={{ color: N }}>{p.hora}</span>
-                  <span className="font-inter text-[11px]" style={{ color: S }}>{p.fecha.split(',')[1]?.trim()}</span>
-                  <span className="font-inter text-[11px] font-semibold px-1.5 py-0.5 rounded-md" style={{ background: rol.bg, color: rol.color }}>{rol.short}</span>
-                </div>
-                <p className="font-inter text-[11px] mt-0.5" style={{ color: S }}>
-                  {p.creador}{p.cancha ? ` · C${p.cancha}` : ''}{p.cat ? ` · ${p.cat}` : ''}{p.mixto ? ' · Mixto' : ''}
-                </p>
+            <div key={p.id} className="rounded-xl bg-white shadow-[0_4px_12px_rgba(13,27,42,0.06)] overflow-hidden flex flex-col">
+              {/* Header con color de rol */}
+              <div className="px-3 pt-2.5 pb-2 border-b border-[#F0F4F8]" style={{ background: rol.bg }}>
+                <span className="font-inter text-[10px] font-bold uppercase tracking-widest" style={{ color: rol.color }}>{rol.short}</span>
               </div>
-              {p.esMio ? (
-                <button className="shrink-0 font-inter text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-red-200 text-[#BA1A1A]">Cancelar</button>
-              ) : (
-                <button className="shrink-0 font-inter text-[11px] font-bold px-2.5 py-1 rounded-lg" style={{ background: G, color: N }}>Unirme</button>
-              )}
+              {/* Body */}
+              <div className="px-3 pt-2 pb-1 flex-1 space-y-1">
+                <p className="font-manrope text-[16px] font-black leading-none" style={{ color: N }}>{p.hora}</p>
+                <p className="font-inter text-[11px]" style={{ color: S }}>{p.fecha.split(',')[1]?.trim()}</p>
+                <p className="font-inter text-[12px] font-semibold truncate" style={{ color: N }}>{p.creador}</p>
+                <div className="flex flex-wrap gap-1 pb-1">
+                  {p.cancha && <span className="font-inter text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-[#F0F4F8]" style={{ color: S }}>C{p.cancha}</span>}
+                  {p.cat && <span className="font-inter text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-[#F0F4F8]" style={{ color: S }}>{p.cat}</span>}
+                  {p.mixto && <span className="font-inter text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-[#F0F4F8]" style={{ color: S }}>Mixto</span>}
+                </div>
+              </div>
+              {/* CTA */}
+              <div className="px-3 pb-3">
+                {p.esMio
+                  ? <button className="w-full h-7 rounded-lg font-inter text-[11px] font-semibold border border-red-200 bg-[#FEE8E8] text-[#BA1A1A]">Cancelar</button>
+                  : <button className="w-full h-7 rounded-lg font-inter text-[11px] font-bold" style={{ background: G, color: N }}>Unirme</button>
+                }
+              </div>
             </div>
           )
         })}
@@ -769,9 +774,9 @@ const PAGES = [
     { id:'C', label:'Grid',        Component: TorneosC },
   ]},
   { id:'amistosos', label:'Amistosos', variants:[
-    { id:'A', label:'Feed social',    Component: AmistososA },
-    { id:'B', label:'Por día',        Component: AmistososB },
-    { id:'C', label:'Lista compacta', Component: AmistososC },
+    { id:'A', label:'Kanban por rol',   Component: AmistososA },
+    { id:'B', label:'Franja + hora',    Component: AmistososB },
+    { id:'C', label:'Grid mini-fichas', Component: AmistososC },
   ]},
   { id:'ranking',   label:'Ranking',   variants:[
     { id:'A', label:'Podio',         Component: RankingA },
