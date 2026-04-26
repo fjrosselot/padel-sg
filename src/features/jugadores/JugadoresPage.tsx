@@ -21,16 +21,6 @@ type JugadorItem = Pick<Jugador, 'id' | 'nombre' | 'apodo' | 'categoria' | 'elo'
 const LADO_LABEL: Record<string, string> = { drive: 'Drive', reves: 'Revés', ambos: 'Ambos' }
 const MIXTO_LABEL: Record<string, string> = { si: 'Sí', no: 'No', a_veces: 'A veces' }
 
-const CAT_COLORS: Record<string, { bg: string; text: string; ring: string }> = {
-  'Open': { bg: '#FEF3C7', text: '#92400E', ring: '#D97706' },
-  '3a':   { bg: '#DBEAFE', text: '#1E40AF', ring: '#3B82F6' },
-  '4a':   { bg: '#D1FAE5', text: '#065F46', ring: '#10B981' },
-  '5a':   { bg: '#EDE9FE', text: '#5B21B6', ring: '#7C3AED' },
-  'B':    { bg: '#FCE7F3', text: '#9D174D', ring: '#EC4899' },
-  'C':    { bg: '#FFEDD5', text: '#9A3412', ring: '#F97316' },
-  'D':    { bg: '#F1F5F9', text: '#475569', ring: '#94A3B8' },
-}
-
 type FiltroLado = 'todos' | 'drive' | 'reves' | 'ambos'
 type FiltroMixto = 'todos' | 'si' | 'no'
 type FiltroSexo = 'todos' | 'M' | 'F'
@@ -51,13 +41,9 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
 
 function Avatar({ jugador, rankPos }: { jugador: JugadorItem; rankPos?: number }) {
   const initials = jugador.nombre.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || '??'
-  const catColor = jugador.categoria ? CAT_COLORS[jugador.categoria] : null
   return (
     <div className="relative shrink-0">
-      <div
-        className="h-9 w-9 rounded-lg bg-navy flex items-center justify-center overflow-hidden"
-        style={catColor ? { boxShadow: `0 0 0 2px ${catColor.ring}` } : undefined}
-      >
+      <div className="h-9 w-9 rounded-lg bg-navy flex items-center justify-center overflow-hidden">
         {jugador.foto_url
           ? <img src={jugador.foto_url} alt={jugador.nombre} className="h-full w-full object-cover" />
           : <span className="font-manrope text-xs font-bold text-gold">{initials}</span>
@@ -222,14 +208,9 @@ export default function JugadoresPage() {
       header: 'Cat.',
       size: 70,
       enableColumnFilter: false,
-      cell: info => {
-        const cat = info.getValue()
-        if (!cat) return <span className="font-inter text-xs text-muted/50">—</span>
-        const c = CAT_COLORS[cat]
-        return <span className="px-1.5 py-0.5 rounded-md font-inter text-xs font-semibold"
-          style={c ? { background: c.bg, color: c.text } : { background: 'rgba(22,40,68,0.08)', color: '#162844' }}
-        >{cat}</span>
-      },
+      cell: info => info.getValue()
+        ? <span className="px-1.5 py-0.5 rounded-md bg-navy/8 font-inter text-xs font-semibold text-navy">{info.getValue()}</span>
+        : <span className="font-inter text-xs text-muted/50">—</span>,
     }),
     columnHelper.accessor('lado_preferido', {
       header: 'Lado',

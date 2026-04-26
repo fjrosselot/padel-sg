@@ -9,6 +9,16 @@ const G = '#e8c547'   // gold
 const S = '#94b0cc'   // steel
 const SRF = '#F0F4F8' // surface
 
+const CAT_COLORS: Record<string, { bg: string; text: string; ring: string }> = {
+  'Open': { bg: '#FEF3C7', text: '#92400E', ring: '#D97706' },
+  '3a':   { bg: '#DBEAFE', text: '#1E40AF', ring: '#3B82F6' },
+  '4a':   { bg: '#D1FAE5', text: '#065F46', ring: '#10B981' },
+  '5a':   { bg: '#EDE9FE', text: '#5B21B6', ring: '#7C3AED' },
+  'B':    { bg: '#FCE7F3', text: '#9D174D', ring: '#EC4899' },
+  'C':    { bg: '#FFEDD5', text: '#9A3412', ring: '#F97316' },
+  'D':    { bg: '#F1F5F9', text: '#475569', ring: '#94A3B8' },
+}
+
 function BottomNav({ active }: { active: string }) {
   const items = [
     { id: 'torneos',   icon: Trophy,    label: 'Torneos' },
@@ -278,10 +288,10 @@ const AMISTOSOS = [
   { id:'3', fecha:'Dom, 27 abr', hora:'11:30', creador:'Jorge T.', cancha:'1', cat:null, rol:'abierto', mixto:false, esMio:false },
   { id:'4', fecha:'Lun, 28 abr', hora:'19:30', creador:'Andrés V.', cancha:'3', cat:'4a', rol:'busco_companero', mixto:false, esMio:false },
 ]
-const ROL_CFG: Record<string, { bg: string; color: string; label: string; short: string }> = {
-  busco_companero: { bg:'#FFF3CD', color:'#856404', label:'Busca compañero', short:'Compañero' },
-  busco_rivales:   { bg:'#DBEAFE', color:'#1D4ED8', label:'Busca rivales',   short:'Rivales' },
-  abierto:         { bg:'#F0FDF4', color:'#166534', label:'Abierto',          short:'Abierto' },
+const ROL_CFG: Record<string, { bg: string; color: string; label: string; short: string; desc: string }> = {
+  busco_companero: { bg:'#FFF3CD', color:'#856404', label:'Me falta compañero', short:'Falta 1', desc:'Juega solo · busca pareja' },
+  busco_rivales:   { bg:'#DBEAFE', color:'#1D4ED8', label:'Buscamos rival',     short:'Sin rival', desc:'Pareja formada · busca rival' },
+  abierto:         { bg:'#F0FDF4', color:'#166534', label:'Cupo libre',          short:'Abierto', desc:'Flexible · cualquier rol' },
 }
 
 // A: Kanban por tipo de búsqueda
@@ -402,7 +412,8 @@ function AmistososC() {
             <div key={p.id} className="rounded-xl bg-white shadow-[0_4px_12px_rgba(13,27,42,0.06)] overflow-hidden flex flex-col">
               {/* Header con color de rol */}
               <div className="px-3 pt-2.5 pb-2 border-b border-[#F0F4F8]" style={{ background: rol.bg }}>
-                <span className="font-inter text-[10px] font-bold uppercase tracking-widest" style={{ color: rol.color }}>{rol.short}</span>
+                <p className="font-inter text-[10px] font-bold uppercase tracking-widest" style={{ color: rol.color }}>{rol.short}</p>
+                <p className="font-inter text-[9px] mt-0.5" style={{ color: rol.color, opacity: 0.75 }}>{rol.desc}</p>
               </div>
               {/* Body */}
               <div className="px-3 pt-2 pb-1 flex-1 space-y-1">
@@ -637,10 +648,12 @@ function JugadoresA() {
       <div className="grid grid-cols-2 gap-3">
         {JUGADORES.map(j => {
           const in2 = j.nombre.split(',').map(p => p.trim()[0]).join('').slice(0,2).toUpperCase()
+          const cc = CAT_COLORS[j.cat]
           return (
             <div key={j.id} className="rounded-xl bg-white shadow-[0_4px_12px_rgba(13,27,42,0.06)] p-3 flex flex-col items-center gap-2 text-center cursor-pointer">
               <div className="relative">
-                <div className="h-12 w-12 rounded-full flex items-center justify-center font-manrope text-sm font-bold" style={{ background: N, color: G }}>{in2}</div>
+                <div className="h-12 w-12 rounded-full flex items-center justify-center font-manrope text-sm font-bold"
+                  style={{ background: N, color: G, boxShadow: cc ? `0 0 0 2.5px ${cc.ring}` : undefined }}>{in2}</div>
                 {j.pos <= 3 && (
                   <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full flex items-center justify-center font-manrope text-[9px] font-black" style={{ background: MEDALS[j.pos - 1], color: N }}>#{j.pos}</div>
                 )}
@@ -650,7 +663,8 @@ function JugadoresA() {
                 <p className="font-inter text-[10px]" style={{ color: S }}>{j.nombre.split(',')[1]?.trim()}</p>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="font-inter text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-[#F0F4F8]" style={{ color: N }}>{j.cat}</span>
+                <span className="font-inter text-[10px] font-semibold px-1.5 py-0.5 rounded-md"
+                  style={cc ? { background: cc.bg, color: cc.text } : { background: SRF, color: N }}>{j.cat}</span>
                 <span className="font-inter text-[10px]" style={{ color: S }}>{j.sexo === 'M' ? 'H' : 'D'}</span>
               </div>
               <div className="w-full pt-2 border-t border-[#F0F4F8] flex justify-between">
@@ -700,10 +714,12 @@ function JugadoresB() {
                 <div className="border-t border-[#F0F4F8] divide-y divide-[#F0F4F8]">
                   {c.items.map(j => {
                     const in2 = j.nombre.split(',').map(p => p.trim()[0]).join('').slice(0,2).toUpperCase()
+                    const cc = CAT_COLORS[j.cat]
                     return (
                       <div key={j.id} className="flex items-center gap-3 px-4 py-2.5">
                         <span className="w-4 font-manrope text-xs font-bold text-center" style={{ color: MEDALS[j.pos - 1] ?? S }}>#{j.pos}</span>
-                        <div className="h-8 w-8 rounded-full flex items-center justify-center font-manrope text-[10px] font-bold shrink-0" style={{ background: N, color: G }}>{in2}</div>
+                        <div className="h-8 w-8 rounded-full flex items-center justify-center font-manrope text-[10px] font-bold shrink-0"
+                          style={{ background: N, color: G, boxShadow: cc ? `0 0 0 2px ${cc.ring}` : undefined }}>{in2}</div>
                         <div className="flex-1 min-w-0">
                           <p className="font-manrope text-[13px] font-bold truncate" style={{ color: N }}>{j.nombre.split(',')[0]}</p>
                           <p className="font-inter text-[10px]" style={{ color: S }}>{j.lado}{j.mixto ? ' · Mixto' : ''}</p>
@@ -750,9 +766,11 @@ function JugadoresC() {
             const in2 = j.nombre.split(',').map(p => p.trim()[0]).join('').slice(0,2).toUpperCase()
             return (
               <div key={j.id} className="flex items-center gap-2.5 px-4 py-2.5 cursor-pointer hover:bg-[#FAFBFC]">
-                <div className="h-7 w-7 rounded-full flex items-center justify-center font-manrope text-[9px] font-bold shrink-0" style={{ background: N, color: G }}>{in2}</div>
+                <div className="h-7 w-7 rounded-full flex items-center justify-center font-manrope text-[9px] font-bold shrink-0"
+                  style={{ background: N, color: G, boxShadow: CAT_COLORS[j.cat] ? `0 0 0 2px ${CAT_COLORS[j.cat].ring}` : undefined }}>{in2}</div>
                 <span className="flex-1 font-inter text-[13px] font-semibold truncate" style={{ color: N }}>{j.nombre}</span>
-                <span className="w-8 font-inter text-[11px] font-semibold text-center px-1 py-0.5 rounded-md bg-[#F0F4F8]" style={{ color: N }}>{j.cat}</span>
+                <span className="w-8 font-inter text-[11px] font-semibold text-center px-1 py-0.5 rounded-md"
+                  style={CAT_COLORS[j.cat] ? { background: CAT_COLORS[j.cat].bg, color: CAT_COLORS[j.cat].text } : { background: SRF, color: N }}>{j.cat}</span>
                 <span className="w-8 font-manrope text-[12px] font-bold text-center" style={{ color: MEDALS[j.pos - 1] ?? S }}>#{j.pos}</span>
                 <span className="w-12 font-manrope text-[13px] font-bold text-right" style={{ color: N }}>{j.pts}</span>
               </div>
