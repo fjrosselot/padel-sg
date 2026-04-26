@@ -644,10 +644,14 @@ export default function AdminJugadores() {
     }),
   ], [save, setEditingJugador, confirmDeleteId, invitingId, handleInvite, qc])
 
+  const { data: globalCatsAdmin } = useCategorias()
+
   const categorias = useMemo(() => {
     if (!jugadores) return []
     return [...new Set(jugadores.map(j => j.categoria).filter(Boolean))].sort() as string[]
   }, [jugadores])
+
+  const catNombre = (id: string) => globalCatsAdmin?.find(c => c.id === id)?.nombre ?? id
 
   const filteredData = useMemo(() => {
     let data = jugadores ?? []
@@ -715,7 +719,7 @@ export default function AdminJugadores() {
           <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
             <Pill label="Todas" active={filtroCategoria === 'todas'} onClick={() => setFiltroCategoria('todas')} />
             {categorias.map(cat => (
-              <Pill key={cat} label={cat} active={filtroCategoria === cat}
+              <Pill key={cat} label={catNombre(cat)} active={filtroCategoria === cat}
                 onClick={() => setFiltroCategoria(filtroCategoria === cat ? 'todas' : cat)} />
             ))}
           </div>
