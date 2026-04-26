@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { X } from 'lucide-react'
+import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
 import { useUser } from '../../hooks/useUser'
 import { Button } from '../../components/ui/button'
@@ -117,7 +118,7 @@ export default function NuevaPartidaModal({ onClose, partida, isPasado = false }
   const puedeCancelar = isAdmin || esDueno
 
   const mutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (): Promise<{ cuentaRanking: boolean }> => {
       if (!user) throw new Error('No autenticado')
       if (!fecha) throw new Error('La fecha es obligatoria')
 
@@ -139,6 +140,7 @@ export default function NuevaPartidaModal({ onClose, partida, isPasado = false }
         const { error: err } = await supabase.schema('padel')
           .from('partidas_abiertas').update(payload).eq('id', partida!.id)
         if (err) throw err
+        return { cuentaRanking: true }
       } else {
         const categoriaStr = categorias.length > 0 ? categorias.join('/') : null
         if (isPasado) {
@@ -146,23 +148,20 @@ export default function NuevaPartidaModal({ onClose, partida, isPasado = false }
           if (!creador_id || !companero_id || !jugador3_id || !jugador4_id) {
             throw new Error('Los 4 jugadores son obligatorios para registrar un partido jugado')
           }
-          // Check weekly ranked limit per player
+          // Check weekly ranked limit per player — don't block, just flag
           const { weekStart, weekEnd } = getWeekBounds(fecha)
           const playerIds = [creador_id, companero_id, jugador3_id, jugador4_id]
-          await Promise.all(playerIds.map(async (pid) => {
-            const { count } = await supabase.schema('padel')
+          const counts = await Promise.all(playerIds.map(pid =>
+            supabase.schema('padel')
               .from('partidas_abiertas')
               .select('id', { count: 'exact', head: true })
               .eq('estado', 'jugada')
+              .eq('cuenta_ranking', true)
               .gte('fecha', weekStart)
               .lt('fecha', weekEnd)
               .or(`creador_id.eq.${pid},companero_id.eq.${pid},jugador3_id.eq.${pid},jugador4_id.eq.${pid}`)
-            if ((count ?? 0) >= WEEKLY_RANKED_LIMIT) {
-              const p = jugadoresActivos?.find(j => j.id === pid)
-              const name = p?.apodo ?? p?.nombre ?? 'Un jugador'
-              throw new Error(`${name} ya tiene ${WEEKLY_RANKED_LIMIT} partidos con ranking esta semana`)
-            }
-          }))
+          ))
+          const cuentaRanking = counts.every(r => (r.count ?? 0) < WEEKLY_RANKED_LIMIT)
           const { error: err } = await supabase.schema('padel')
             .from('partidas_abiertas')
             .insert({
@@ -174,18 +173,28 @@ export default function NuevaPartidaModal({ onClose, partida, isPasado = false }
               cancha: cancha || null,
               categoria: categoriaStr,
               estado: 'jugada',
+              cuenta_ranking: cuentaRanking,
             })
           if (err) throw err
+          return { cuentaRanking }
         } else {
           const { error: err } = await supabase.schema('padel')
             .from('partidas_abiertas')
             .insert({ creador_id: user.id, fecha, cancha: cancha || null, categoria: categoriaStr })
           if (err) throw err
+          return { cuentaRanking: true }
         }
       }
     },
-    onSuccess: () => {
+    onSuccess: ({ cuentaRanking }) => {
       qc.invalidateQueries({ queryKey: ['partidas-abiertas'] })
+      if (isPasado) {
+        if (cuentaRanking) {
+          toast.success('Partido registrado y cuenta para el ranking')
+        } else {
+          toast.warning('Partido registrado — no cuenta para el ranking (límite semanal alcanzado)')
+        }
+      }
       onClose()
     },
     onError: (err: Error) => setError(err.message),

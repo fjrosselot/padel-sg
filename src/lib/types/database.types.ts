@@ -457,6 +457,7 @@ export interface Database {
           admite_mixto: boolean
           rol_buscado: 'busco_companero' | 'busco_rivales' | 'abierto' | null
           estado: 'abierta' | 'confirmada' | 'completa' | 'jugada' | 'cancelada'
+          cuenta_ranking: boolean
           created_at: string
         }
         Insert: {
@@ -471,6 +472,7 @@ export interface Database {
           admite_mixto?: boolean
           rol_buscado?: 'busco_companero' | 'busco_rivales' | 'abierto' | null
           estado?: 'abierta' | 'confirmada' | 'completa' | 'jugada' | 'cancelada'
+          cuenta_ranking?: boolean
           created_at?: string
         }
         Update: {
@@ -485,6 +487,7 @@ export interface Database {
           admite_mixto?: boolean
           rol_buscado?: 'busco_companero' | 'busco_rivales' | 'abierto' | null
           estado?: 'abierta' | 'confirmada' | 'completa' | 'jugada' | 'cancelada'
+          cuenta_ranking?: boolean
           created_at?: string
         }
       }
