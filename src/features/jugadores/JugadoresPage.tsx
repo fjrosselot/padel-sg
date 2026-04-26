@@ -311,7 +311,7 @@ export default function JugadoresPage() {
           <div className="space-y-1.5">
             {catsH.length > 0 && (
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-inter text-[10px] font-bold text-muted w-4 shrink-0">H</span>
+                <span className="font-inter text-[10px] font-bold text-muted shrink-0">Hombre</span>
                 {catsH.map(cat => (
                   <FilterPill key={cat} label={catNombre(cat)} active={filtroCategoria === cat}
                     onClick={() => setFiltroCategoria(filtroCategoria === cat ? 'todas' : cat)} />
@@ -320,7 +320,7 @@ export default function JugadoresPage() {
             )}
             {catsF.length > 0 && (
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-inter text-[10px] font-bold text-muted w-4 shrink-0">M</span>
+                <span className="font-inter text-[10px] font-bold text-muted shrink-0">Mujer</span>
                 {catsF.map(cat => (
                   <FilterPill key={cat} label={catNombre(cat)} active={filtroCategoria === cat}
                     onClick={() => setFiltroCategoria(filtroCategoria === cat ? 'todas' : cat)} />
@@ -329,7 +329,7 @@ export default function JugadoresPage() {
             )}
             {catsMix.length > 0 && (
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-inter text-[10px] font-bold text-muted w-4 shrink-0">Mx</span>
+                <span className="font-inter text-[10px] font-bold text-muted shrink-0">Mixto</span>
                 {catsMix.map(cat => (
                   <FilterPill key={cat} label={catNombre(cat)} active={filtroCategoria === cat}
                     onClick={() => setFiltroCategoria(filtroCategoria === cat ? 'todas' : cat)} />
