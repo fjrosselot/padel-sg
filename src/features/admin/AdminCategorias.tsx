@@ -1,6 +1,21 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, Trash2, X, Check } from 'lucide-react'
+import { Plus, Pencil, Trash2, X, Check, GripVertical } from 'lucide-react'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { supabase } from '../../lib/supabase'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
@@ -88,7 +103,6 @@ function CategoriaModal({ categoria, onClose }: ModalProps) {
         </div>
 
         <div className="space-y-4">
-          {/* Código (solo en nuevo) */}
           {isNew && (
             <div>
               <Label htmlFor="cat-codigo">Código</Label>
@@ -103,7 +117,6 @@ function CategoriaModal({ categoria, onClose }: ModalProps) {
             </div>
           )}
 
-          {/* Nombre */}
           <div>
             <Label htmlFor="cat-nombre">Nombre</Label>
             <Input
@@ -115,7 +128,6 @@ function CategoriaModal({ categoria, onClose }: ModalProps) {
             />
           </div>
 
-          {/* Sexo */}
           <div>
             <Label>Género</Label>
             <div className="flex gap-2 mt-1.5">
@@ -136,7 +148,6 @@ function CategoriaModal({ categoria, onClose }: ModalProps) {
             </div>
           </div>
 
-          {/* Color palette */}
           <div>
             <Label>Color</Label>
             <div className="grid grid-cols-4 gap-2 mt-1.5">
@@ -158,16 +169,13 @@ function CategoriaModal({ categoria, onClose }: ModalProps) {
                     {codigo || 'Aa'}
                   </span>
                   {colorIdx === i && (
-                    <Check
-                      className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-navy text-white p-0.5"
-                    />
+                    <Check className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-navy text-white p-0.5" />
                   )}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Preview */}
           <div>
             <Label>Preview</Label>
             <div className="mt-1.5 flex items-center gap-3 rounded-xl border border-navy/10 p-3">
@@ -205,11 +213,96 @@ function CategoriaModal({ categoria, onClose }: ModalProps) {
   )
 }
 
+interface SortableRowProps {
+  cat: CategoriaRow
+  confirmDelete: string | null
+  onEdit: () => void
+  onConfirmDelete: () => void
+  onCancelDelete: () => void
+  onDelete: () => void
+}
+
+function SortableRow({ cat, confirmDelete, onEdit, onConfirmDelete, onCancelDelete, onDelete }: SortableRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: cat.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 10 : undefined,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-3 px-4 py-3 bg-white"
+    >
+      <button
+        type="button"
+        className="text-muted/40 hover:text-muted cursor-grab active:cursor-grabbing touch-none shrink-0"
+        {...attributes}
+        {...listeners}
+        aria-label="Arrastrar para reordenar"
+      >
+        <GripVertical className="h-4 w-4" />
+      </button>
+
+      <span
+        className="font-inter text-xs font-semibold px-2 py-0.5 rounded border shrink-0"
+        style={{ background: cat.color_fondo, borderColor: cat.color_borde, color: cat.color_texto }}
+      >
+        {cat.nombre}
+      </span>
+
+      <span className={`font-inter text-[10px] font-semibold px-1.5 py-0.5 rounded-full border shrink-0 ${SEXO_STYLE[cat.sexo]}`}>
+        {cat.sexo === 'M' ? 'H' : cat.sexo === 'F' ? 'M' : 'Mix'}
+      </span>
+
+      <span className="flex-1" />
+
+      {confirmDelete === cat.id ? (
+        <div className="flex items-center gap-2">
+          <span className="font-inter text-xs text-defeat">¿Eliminar?</span>
+          <button type="button" onClick={onDelete} className="font-inter text-xs font-semibold text-defeat hover:underline">Sí</button>
+          <button type="button" onClick={onCancelDelete} className="font-inter text-xs text-muted hover:underline">No</button>
+        </div>
+      ) : (
+        <>
+          <button
+            type="button"
+            onClick={onEdit}
+            className="p-1.5 rounded-lg text-muted hover:text-navy hover:bg-surface transition-colors"
+            aria-label="Editar"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={onConfirmDelete}
+            className="p-1.5 rounded-lg text-muted hover:text-defeat hover:bg-defeat/10 transition-colors"
+            aria-label="Eliminar"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </>
+      )}
+    </div>
+  )
+}
+
 export default function AdminCategorias() {
   const qc = useQueryClient()
   const { data: categorias, isLoading } = useCategorias()
   const [editing, setEditing] = useState<CategoriaRow | 'new' | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [localOrder, setLocalOrder] = useState<string[] | null>(null)
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+
+  const orderedCats = localOrder
+    ? (localOrder.map(id => categorias?.find(c => c.id === id)).filter(Boolean) as CategoriaRow[])
+    : (categorias ?? [])
 
   const deleteMut = useMutation({
     mutationFn: async (id: string) => {
@@ -221,6 +314,29 @@ export default function AdminCategorias() {
       setConfirmDelete(null)
     },
   })
+
+  const reorderMut = useMutation({
+    mutationFn: async (ids: string[]) => {
+      await Promise.all(
+        ids.map((id, idx) =>
+          supabase.schema('padel').from('categorias').update({ orden: idx + 1 }).eq('id', id)
+        )
+      )
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['categorias'] }),
+  })
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const current = orderedCats.map(c => c.id)
+    const oldIdx = current.indexOf(String(active.id))
+    const newIdx = current.indexOf(String(over.id))
+    const reordered = arrayMove(current, oldIdx, newIdx)
+    setLocalOrder(reordered)
+    reorderMut.mutate(reordered)
+  }
 
   if (isLoading) return <div className="p-6 text-muted font-inter text-sm">Cargando…</div>
 
@@ -238,73 +354,30 @@ export default function AdminCategorias() {
       </div>
 
       <div className="rounded-xl bg-white shadow-card overflow-hidden divide-y divide-navy/5">
-        {(!categorias || categorias.length === 0) && (
+        {orderedCats.length === 0 && (
           <p className="px-4 py-6 text-center font-inter text-sm text-muted">No hay categorías.</p>
         )}
-        {categorias?.map(cat => (
-          <div key={cat.id} className="flex items-center gap-3 px-4 py-3">
-            {/* Badge preview */}
-            <span
-              className="font-inter text-xs font-semibold px-2 py-0.5 rounded border shrink-0"
-              style={{ background: cat.color_fondo, borderColor: cat.color_borde, color: cat.color_texto }}
-            >
-              {cat.nombre}
-            </span>
-
-            {/* Sexo */}
-            <span className={`font-inter text-[10px] font-semibold px-1.5 py-0.5 rounded-full border shrink-0 ${SEXO_STYLE[cat.sexo]}`}>
-              {cat.sexo === 'M' ? 'H' : cat.sexo === 'F' ? 'M' : 'Mix'}
-            </span>
-
-            <span className="flex-1" />
-
-            {/* Actions */}
-            {confirmDelete === cat.id ? (
-              <div className="flex items-center gap-2">
-                <span className="font-inter text-xs text-defeat">¿Eliminar?</span>
-                <button
-                  type="button"
-                  onClick={() => deleteMut.mutate(cat.id)}
-                  className="font-inter text-xs font-semibold text-defeat hover:underline"
-                >
-                  Sí
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setConfirmDelete(null)}
-                  className="font-inter text-xs text-muted hover:underline"
-                >
-                  No
-                </button>
-              </div>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setEditing(cat)}
-                  className="p-1.5 rounded-lg text-muted hover:text-navy hover:bg-surface transition-colors"
-                  aria-label="Editar"
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setConfirmDelete(cat.id)}
-                  className="p-1.5 rounded-lg text-muted hover:text-defeat hover:bg-defeat/10 transition-colors"
-                  aria-label="Eliminar"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </>
-            )}
-          </div>
-        ))}
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={orderedCats.map(c => c.id)} strategy={verticalListSortingStrategy}>
+            {orderedCats.map(cat => (
+              <SortableRow
+                key={cat.id}
+                cat={cat}
+                confirmDelete={confirmDelete}
+                onEdit={() => setEditing(cat)}
+                onConfirmDelete={() => setConfirmDelete(cat.id)}
+                onCancelDelete={() => setConfirmDelete(null)}
+                onDelete={() => deleteMut.mutate(cat.id)}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
       </div>
 
       {editing !== null && (
         <CategoriaModal
           categoria={editing === 'new' ? null : editing}
-          onClose={() => setEditing(null)}
+          onClose={() => { setEditing(null); setLocalOrder(null) }}
         />
       )}
     </div>
