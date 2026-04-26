@@ -449,36 +449,42 @@ export interface Database {
           id: string
           creador_id: string
           companero_id: string | null
+          jugador3_id: string | null
+          jugador4_id: string | null
           fecha: string
           cancha: string | null
           categoria: string | null
           admite_mixto: boolean
-          rol_buscado: 'busco_companero' | 'busco_rivales' | 'abierto'
-          estado: 'abierta' | 'confirmada' | 'jugada' | 'cancelada'
+          rol_buscado: 'busco_companero' | 'busco_rivales' | 'abierto' | null
+          estado: 'abierta' | 'confirmada' | 'completa' | 'jugada' | 'cancelada'
           created_at: string
         }
         Insert: {
           id?: string
           creador_id: string
           companero_id?: string | null
+          jugador3_id?: string | null
+          jugador4_id?: string | null
           fecha: string
           cancha?: string | null
           categoria?: string | null
           admite_mixto?: boolean
-          rol_buscado: 'busco_companero' | 'busco_rivales' | 'abierto'
-          estado?: 'abierta' | 'confirmada' | 'jugada' | 'cancelada'
+          rol_buscado?: 'busco_companero' | 'busco_rivales' | 'abierto' | null
+          estado?: 'abierta' | 'confirmada' | 'completa' | 'jugada' | 'cancelada'
           created_at?: string
         }
         Update: {
           id?: string
           creador_id?: string
           companero_id?: string | null
+          jugador3_id?: string | null
+          jugador4_id?: string | null
           fecha?: string
           cancha?: string | null
           categoria?: string | null
           admite_mixto?: boolean
-          rol_buscado?: 'busco_companero' | 'busco_rivales' | 'abierto'
-          estado?: 'abierta' | 'confirmada' | 'jugada' | 'cancelada'
+          rol_buscado?: 'busco_companero' | 'busco_rivales' | 'abierto' | null
+          estado?: 'abierta' | 'confirmada' | 'completa' | 'jugada' | 'cancelada'
           created_at?: string
         }
       }

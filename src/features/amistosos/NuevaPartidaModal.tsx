@@ -7,19 +7,12 @@ import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import type { Database } from '../../lib/types/database.types'
 
-type RolBuscado = Database['padel']['Tables']['partidas_abiertas']['Row']['rol_buscado']
 type PartidaRow = Database['padel']['Tables']['partidas_abiertas']['Row']
 
 interface Props {
   onClose: () => void
   partida?: PartidaRow
 }
-
-const ROLES: { value: RolBuscado; label: string }[] = [
-  { value: 'busco_companero', label: 'Busco compañero' },
-  { value: 'busco_rivales', label: 'Busca rivales' },
-  { value: 'abierto', label: 'Abierto (ambos)' },
-]
 
 function toDatetimeLocal(iso: string): string {
   return new Date(iso).toLocaleString('sv-SE', { timeZone: 'America/Santiago' }).slice(0, 16)
@@ -33,8 +26,6 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
   const [fecha, setFecha] = useState(partida ? toDatetimeLocal(partida.fecha) : '')
   const [cancha, setCancha] = useState(partida?.cancha ?? '')
   const [categoria, setCategoria] = useState(partida?.categoria ?? '')
-  const [rol, setRol] = useState<RolBuscado>(partida?.rol_buscado ?? 'abierto')
-  const [admiteMixto, setAdmiteMixto] = useState(partida?.admite_mixto ?? false)
   const [error, setError] = useState<string | null>(null)
 
   const mutation = useMutation({
@@ -46,13 +37,7 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
         const { error: err } = await supabase
           .schema('padel')
           .from('partidas_abiertas')
-          .update({
-            fecha,
-            cancha: cancha || null,
-            categoria: categoria || null,
-            rol_buscado: rol,
-            admite_mixto: admiteMixto,
-          })
+          .update({ fecha, cancha: cancha || null, categoria: categoria || null })
           .eq('id', partida.id)
           .eq('creador_id', user.id)
         if (err) throw err
@@ -60,14 +45,7 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
         const { error: err } = await supabase
           .schema('padel')
           .from('partidas_abiertas')
-          .insert({
-            creador_id: user.id,
-            fecha,
-            cancha: cancha || null,
-            categoria: categoria || null,
-            rol_buscado: rol,
-            admite_mixto: admiteMixto,
-          })
+          .insert({ creador_id: user.id, fecha, cancha: cancha || null, categoria: categoria || null })
         if (err) throw err
       }
     },
@@ -88,7 +66,7 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
         onClick={e => e.stopPropagation()}
       >
         <h2 id="nueva-partida-title" className="font-manrope text-lg font-bold text-navy">
-          {isEdit ? 'Editar partida' : 'Nueva partida'}
+          {isEdit ? 'Editar partido' : 'Nuevo partido'}
         </h2>
 
         <div className="space-y-4">
@@ -120,43 +98,12 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
             <Label htmlFor="partida-categoria">Categoría (opcional)</Label>
             <Input
               id="partida-categoria"
-              placeholder="Ej: A, B, C…"
+              placeholder="Ej: 3a, B, Open…"
               value={categoria}
               onChange={e => setCategoria(e.target.value)}
               className="mt-1"
             />
           </div>
-
-          <div>
-            <Label>¿Qué buscas?</Label>
-            <div className="flex gap-2 mt-1 flex-wrap">
-              {ROLES.map(r => (
-                <button
-                  key={r.value}
-                  type="button"
-                  aria-pressed={rol === r.value}
-                  onClick={() => setRol(r.value)}
-                  className={`rounded-lg px-3 py-1.5 font-inter text-xs font-semibold border transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
-                    rol === r.value
-                      ? 'bg-gold text-navy border-gold'
-                      : 'bg-white text-muted border-navy/20 hover:border-navy/40'
-                  }`}
-                >
-                  {r.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={admiteMixto}
-              onChange={e => setAdmiteMixto(e.target.checked)}
-              className="h-4 w-4 rounded border-navy/20 accent-gold"
-            />
-            <span className="font-inter text-sm text-navy">Admite mixto</span>
-          </label>
         </div>
 
         {error && (
