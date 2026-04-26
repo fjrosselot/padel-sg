@@ -283,109 +283,75 @@ function TorneosC() {
 // AMISTOSOS DATA
 // ══════════════════════════════════════════════════════════════════
 const AMISTOSOS = [
-  { id:'1', fecha:'Sáb, 26 abr', hora:'18:00', creador:'Pancho R.', cancha:'2', cat:'B', rol:'busco_companero', mixto:false, esMio:true },
-  { id:'2', fecha:'Dom, 27 abr', hora:'10:00', creador:'Martín L.', cancha:null, cat:'3a', rol:'busco_rivales', mixto:true, esMio:false },
-  { id:'3', fecha:'Dom, 27 abr', hora:'11:30', creador:'Jorge T.', cancha:'1', cat:null, rol:'abierto', mixto:false, esMio:false },
-  { id:'4', fecha:'Lun, 28 abr', hora:'19:30', creador:'Andrés V.', cancha:'3', cat:'4a', rol:'busco_companero', mixto:false, esMio:false },
+  { id:'1', fecha:'Sáb, 26 abr', hora:'18:00', organizador:'Pancho R.', cancha:'2', cat:'B', jugadores:['Pancho R.','Martín L.','Jorge T.'], cupos:4, esMio:true },
+  { id:'2', fecha:'Dom, 27 abr', hora:'10:00', organizador:'Martín L.', cancha:null, cat:'3a', jugadores:['Martín L.'], cupos:4, esMio:false },
+  { id:'3', fecha:'Dom, 27 abr', hora:'11:30', organizador:'Jorge T.', cancha:'1', cat:null, jugadores:['Jorge T.','Andrés V.','Luis C.','Pablo M.'], cupos:4, esMio:false },
+  { id:'4', fecha:'Lun, 28 abr', hora:'19:30', organizador:'Andrés V.', cancha:'3', cat:'4a', jugadores:['Andrés V.','Diego S.'], cupos:4, esMio:false },
 ]
-const ROL_CFG: Record<string, { bg: string; color: string; label: string; short: string; desc: string }> = {
-  busco_companero: { bg:'#FFF3CD', color:'#856404', label:'Me falta compañero', short:'Falta 1', desc:'Juega solo · busca pareja' },
-  busco_rivales:   { bg:'#DBEAFE', color:'#1D4ED8', label:'Buscamos rival',     short:'Sin rival', desc:'Pareja formada · busca rival' },
-  abierto:         { bg:'#F0FDF4', color:'#166534', label:'Cupo libre',          short:'Abierto', desc:'Flexible · cualquier rol' },
-}
 
-// A: Kanban por tipo de búsqueda
-function AmistososA() {
-  const cols = [
-    { key:'busco_companero', label:'Busco compañero', items: AMISTOSOS.filter(p => p.rol==='busco_companero') },
-    { key:'busco_rivales',   label:'Busco rivales',   items: AMISTOSOS.filter(p => p.rol==='busco_rivales') },
-    { key:'abierto',         label:'Abierto',          items: AMISTOSOS.filter(p => p.rol==='abierto') },
-  ]
+function SlotAvatar({ name, size = 28 }: { name?: string; size?: number }) {
+  if (name) {
+    const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+    return (
+      <div className="rounded-full flex items-center justify-center font-manrope font-bold shrink-0"
+        style={{ width: size, height: size, background: N, color: G, fontSize: size * 0.28 }}>{initials}</div>
+    )
+  }
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <Handshake className="h-6 w-6" style={{ color: G }} />
-        <h1 className="font-manrope text-2xl font-bold" style={{ color: N }}>Amistosos</h1>
-        <button className="ml-auto rounded-lg px-3 py-1.5 font-inter text-xs font-bold" style={{ background: G, color: N }}>+ Nueva</button>
-      </div>
-      <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar -mx-4 px-4">
-        {cols.map(col => {
-          const rc = ROL_CFG[col.key]
-          return (
-            <div key={col.key} className="shrink-0 w-[220px] space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-inter text-[11px] font-bold uppercase tracking-widest" style={{ color: S }}>{col.label}</span>
-                <span className="font-inter text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: rc.bg, color: rc.color }}>{col.items.length}</span>
-              </div>
-              {col.items.length === 0 && (
-                <div className="rounded-xl bg-white shadow-[0_2px_8px_rgba(13,27,42,0.06)] px-3 py-4 text-center">
-                  <p className="font-inter text-[11px]" style={{ color: S }}>Sin partidas</p>
-                </div>
-              )}
-              {col.items.map(p => (
-                <div key={p.id} className="rounded-xl bg-white shadow-[0_2px_8px_rgba(13,27,42,0.06)] p-3 space-y-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-manrope text-[15px] font-bold" style={{ color: N }}>{p.hora}</span>
-                    <span className="font-inter text-[11px]" style={{ color: S }}>{p.fecha.split(',')[1]?.trim()}</span>
-                  </div>
-                  <p className="font-inter text-[12px] font-semibold" style={{ color: N }}>{p.creador}</p>
-                  <div className="flex items-center gap-1 flex-wrap">
-                    {p.cancha && <span className="font-inter text-[10px] px-1.5 py-0.5 rounded-md bg-[#F0F4F8]" style={{ color: S }}>C{p.cancha}</span>}
-                    {p.cat && <span className="font-inter text-[10px] px-1.5 py-0.5 rounded-md bg-[#F0F4F8]" style={{ color: S }}>{p.cat}</span>}
-                    {p.mixto && <span className="font-inter text-[10px] px-1.5 py-0.5 rounded-md bg-[#F0F4F8]" style={{ color: S }}>Mixto</span>}
-                  </div>
-                  {p.esMio
-                    ? <button className="w-full h-7 rounded-lg font-inter text-[11px] font-semibold border border-red-200 bg-[#FEE8E8] text-[#BA1A1A]">Cancelar</button>
-                    : <button className="w-full h-7 rounded-lg font-inter text-[11px] font-bold" style={{ background: G, color: N }}>Unirme</button>
-                  }
-                </div>
-              ))}
-            </div>
-          )
-        })}
-      </div>
-    </div>
+    <div className="rounded-full border-2 border-dashed shrink-0"
+      style={{ width: size, height: size, borderColor: S + '55' }} />
   )
 }
 
-// B: Cards con franja de color lateral + hora como hero
-function AmistososB() {
+// A: Lista agenda con slots horizontales
+function AmistososA() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <Handshake className="h-6 w-6" style={{ color: G }} />
         <h1 className="font-manrope text-2xl font-bold" style={{ color: N }}>Amistosos</h1>
-        <button className="ml-auto rounded-lg px-3 py-1.5 font-inter text-xs font-bold" style={{ background: G, color: N }}>+ Nueva</button>
+        <div className="ml-auto flex gap-2">
+          <button className="rounded-lg px-2.5 py-1.5 font-inter text-[11px] font-semibold border border-[#162844]/20" style={{ color: N }}>Registrar</button>
+          <button className="rounded-lg px-3 py-1.5 font-inter text-[11px] font-bold" style={{ background: G, color: N }}>+ Nuevo</button>
+        </div>
       </div>
       <div className="space-y-2.5">
         {AMISTOSOS.map(p => {
-          const rol = ROL_CFG[p.rol]
+          const libres = p.cupos - p.jugadores.length
+          const lleno = libres === 0
           return (
-            <div key={p.id} className="rounded-xl bg-white shadow-[0_4px_12px_rgba(13,27,42,0.06)] overflow-hidden flex">
-              {/* Color strip */}
-              <div className="w-1 shrink-0" style={{ background: rol.color }} />
+            <div key={p.id} className="rounded-xl bg-white shadow-[0_4px_12px_rgba(13,27,42,0.06)] overflow-hidden flex items-stretch">
               {/* Hora block */}
-              <div className="flex flex-col items-center justify-center px-4 py-3 shrink-0 border-r border-[#F0F4F8]" style={{ minWidth: 60 }}>
-                <p className="font-manrope text-[18px] font-black leading-none" style={{ color: N }}>{p.hora}</p>
-                <p className="font-inter text-[9px] uppercase tracking-wider mt-0.5" style={{ color: S }}>{p.fecha.split(',')[0]}</p>
+              <div className="flex flex-col items-center justify-center px-4 shrink-0 border-r border-[#F0F4F8]" style={{ minWidth: 64, background: SRF }}>
+                <p className="font-manrope text-[20px] font-black leading-none" style={{ color: N }}>{p.hora}</p>
+                <p className="font-inter text-[9px] uppercase tracking-wider mt-1" style={{ color: S }}>{p.fecha.split(',')[0]}</p>
               </div>
-              {/* Info */}
-              <div className="flex-1 min-w-0 px-3 py-2.5 flex flex-col justify-center gap-1">
+              {/* Info + slots */}
+              <div className="flex-1 min-w-0 px-3 py-3 space-y-2">
                 <div className="flex items-center gap-2">
-                  <p className="font-inter text-[13px] font-semibold truncate" style={{ color: N }}>{p.creador}</p>
-                  <span className="shrink-0 font-inter text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: rol.bg, color: rol.color }}>{rol.short}</span>
+                  <p className="font-inter text-[12px] font-semibold truncate flex-1" style={{ color: N }}>
+                    {p.organizador}
+                  </p>
+                  {p.cat && <span className="shrink-0 font-inter text-[10px] font-semibold px-1.5 py-0.5 rounded-md" style={{ background: SRF, color: N }}>{p.cat}</span>}
+                  {p.cancha && <span className="shrink-0 font-inter text-[10px]" style={{ color: S }}>C{p.cancha}</span>}
                 </div>
+                {/* Slot row */}
                 <div className="flex items-center gap-1.5">
-                  {p.cancha && <span className="font-inter text-[11px]" style={{ color: S }}>C{p.cancha}</span>}
-                  {p.cat && <><span style={{ color: S }}>·</span><span className="font-inter text-[11px]" style={{ color: S }}>{p.cat}</span></>}
-                  {p.mixto && <><span style={{ color: S }}>·</span><span className="font-inter text-[11px]" style={{ color: S }}>Mixto</span></>}
+                  {Array.from({ length: p.cupos }).map((_, i) => (
+                    <SlotAvatar key={i} name={p.jugadores[i]} size={26} />
+                  ))}
+                  <span className="font-inter text-[11px] font-semibold ml-1" style={{ color: lleno ? '#065F46' : '#856404' }}>
+                    {lleno ? 'Lleno' : `${libres} libre${libres !== 1 ? 's' : ''}`}
+                  </span>
                 </div>
               </div>
               {/* CTA */}
-              <div className="flex items-center pr-3">
-                {p.esMio
-                  ? <button className="rounded-lg px-2.5 py-1.5 font-inter text-[11px] font-semibold border border-red-200 bg-[#FEE8E8] text-[#BA1A1A]">Cancelar</button>
-                  : <button className="rounded-lg px-3 py-1.5 font-inter text-[11px] font-bold" style={{ background: G, color: N }}>Unirme</button>
+              <div className="flex items-center pr-3 shrink-0">
+                {lleno
+                  ? <span className="font-inter text-[10px] px-2 py-1 rounded-lg" style={{ background: '#D1FAE5', color: '#065F46' }}>Lleno</span>
+                  : p.esMio
+                  ? <button className="rounded-lg px-2 py-1.5 font-inter text-[10px] font-semibold border border-red-200 bg-[#FEE8E8] text-[#BA1A1A]">Salir</button>
+                  : <button className="rounded-lg px-2.5 py-1.5 font-inter text-[11px] font-bold" style={{ background: G, color: N }}>Unirme</button>
                 }
               </div>
             </div>
@@ -396,40 +362,143 @@ function AmistososB() {
   )
 }
 
-// C: Grid 2×n de mini-fichas
+// B: Vista "cancha" — 2v2 con slots por equipo
+function AmistososB() {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <Handshake className="h-6 w-6" style={{ color: G }} />
+        <h1 className="font-manrope text-2xl font-bold" style={{ color: N }}>Amistosos</h1>
+        <div className="ml-auto flex gap-2">
+          <button className="rounded-lg px-2.5 py-1.5 font-inter text-[11px] font-semibold border border-[#162844]/20" style={{ color: N }}>Registrar</button>
+          <button className="rounded-lg px-3 py-1.5 font-inter text-[11px] font-bold" style={{ background: G, color: N }}>+ Nuevo</button>
+        </div>
+      </div>
+      <div className="space-y-3">
+        {AMISTOSOS.map(p => {
+          const libres = p.cupos - p.jugadores.length
+          const lleno = libres === 0
+          const team1 = [p.jugadores[0], p.jugadores[1]]
+          const team2 = [p.jugadores[2], p.jugadores[3]]
+          return (
+            <div key={p.id} className="rounded-2xl bg-white shadow-[0_4px_16px_rgba(13,27,42,0.08)] overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[#F0F4F8]" style={{ background: SRF }}>
+                <div>
+                  <p className="font-manrope text-[16px] font-black leading-none" style={{ color: N }}>{p.hora}</p>
+                  <p className="font-inter text-[10px]" style={{ color: S }}>{p.fecha}</p>
+                </div>
+                <div className="flex items-center gap-1.5 ml-auto">
+                  {p.cat && <span className="font-inter text-[10px] font-semibold px-1.5 py-0.5 rounded-md" style={{ background: SRF, color: N }}>{p.cat}</span>}
+                  {p.cancha && <span className="font-inter text-[10px]" style={{ color: S }}>C{p.cancha}</span>}
+                  <span className="font-inter text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                    style={{ background: lleno ? '#D1FAE5' : '#FFF3CD', color: lleno ? '#065F46' : '#856404' }}>
+                    {p.jugadores.length}/{p.cupos}
+                  </span>
+                </div>
+              </div>
+              {/* Court: 2 equipos */}
+              <div className="flex items-stretch" style={{ minHeight: 80 }}>
+                {[team1, team2].map((team, ti) => (
+                  <div key={ti} className={`flex-1 flex flex-col items-center justify-center gap-2 px-3 py-3 ${ti === 0 ? 'border-r border-[#F0F4F8]' : ''}`}>
+                    <div className="flex gap-2">
+                      {team.map((j, i) => {
+                        const initials = j ? j.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() : null
+                        return (
+                          <div key={i} className="flex flex-col items-center gap-1">
+                            {j
+                              ? <div className="h-9 w-9 rounded-full flex items-center justify-center font-manrope text-[10px] font-bold" style={{ background: N, color: G }}>{initials}</div>
+                              : <div className="h-9 w-9 rounded-full border-2 border-dashed" style={{ borderColor: S + '55' }} />
+                            }
+                            <p className="font-inter text-[9px] text-center truncate max-w-[44px]" style={{ color: j ? N : S }}>
+                              {j ? j.split(' ')[0] : 'libre'}
+                            </p>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* VS divider — visual only via border above */}
+              {/* CTA */}
+              {!lleno && (
+                <div className="px-4 pb-3 border-t border-[#F0F4F8]">
+                  <div className="pt-2.5">
+                    {p.esMio
+                      ? <button className="w-full h-8 rounded-lg font-inter text-[11px] font-semibold border border-red-200 bg-[#FEE8E8] text-[#BA1A1A]">Salir del partido</button>
+                      : <button className="w-full h-8 rounded-lg font-inter text-[11px] font-bold" style={{ background: G, color: N }}>
+                          Unirme · {libres} cupo{libres !== 1 ? 's' : ''} libre{libres !== 1 ? 's' : ''}
+                        </button>
+                    }
+                  </div>
+                </div>
+              )}
+              {lleno && (
+                <div className="px-4 py-2.5 border-t border-[#F0F4F8] text-center">
+                  <span className="font-inter text-[11px] font-semibold" style={{ color: '#065F46' }}>Partido completo</span>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// C: Grid compacto con ocupación visual
 function AmistososC() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <Handshake className="h-6 w-6" style={{ color: G }} />
         <h1 className="font-manrope text-2xl font-bold" style={{ color: N }}>Amistosos</h1>
-        <button className="ml-auto rounded-lg px-3 py-1.5 font-inter text-xs font-bold" style={{ background: G, color: N }}>+ Nueva</button>
+        <button className="ml-auto rounded-lg px-3 py-1.5 font-inter text-[11px] font-bold" style={{ background: G, color: N }}>+ Nuevo</button>
+      </div>
+      <div className="flex items-center justify-between">
+        <p className="font-inter text-[11px]" style={{ color: S }}>{AMISTOSOS.length} partidos abiertos</p>
+        <button className="font-inter text-[11px] font-semibold border border-[#162844]/20 rounded-lg px-2.5 py-1" style={{ color: N }}>Registrar pasado</button>
       </div>
       <div className="grid grid-cols-2 gap-3">
         {AMISTOSOS.map(p => {
-          const rol = ROL_CFG[p.rol]
+          const libres = p.cupos - p.jugadores.length
+          const lleno = libres === 0
+          const pct = p.jugadores.length / p.cupos
+          const hBg = lleno ? '#D1FAE5' : pct >= 0.5 ? '#FFF3CD' : '#EEF2FF'
+          const hColor = lleno ? '#065F46' : pct >= 0.5 ? '#856404' : '#4338CA'
           return (
             <div key={p.id} className="rounded-xl bg-white shadow-[0_4px_12px_rgba(13,27,42,0.06)] overflow-hidden flex flex-col">
-              {/* Header con color de rol */}
-              <div className="px-3 pt-2.5 pb-2 border-b border-[#F0F4F8]" style={{ background: rol.bg }}>
-                <p className="font-inter text-[10px] font-bold uppercase tracking-widest" style={{ color: rol.color }}>{rol.short}</p>
-                <p className="font-inter text-[9px] mt-0.5" style={{ color: rol.color, opacity: 0.75 }}>{rol.desc}</p>
+              {/* Occupancy header */}
+              <div className="px-3 pt-2 pb-1.5 flex items-center justify-between" style={{ background: hBg }}>
+                <span className="font-inter text-[10px] font-bold" style={{ color: hColor }}>
+                  {lleno ? 'Completo' : `${libres} libre${libres !== 1 ? 's' : ''}`}
+                </span>
+                <span className="font-inter text-[10px] font-semibold" style={{ color: hColor, opacity: 0.7 }}>
+                  {p.jugadores.length}/{p.cupos}
+                </span>
               </div>
               {/* Body */}
-              <div className="px-3 pt-2 pb-1 flex-1 space-y-1">
-                <p className="font-manrope text-[16px] font-black leading-none" style={{ color: N }}>{p.hora}</p>
-                <p className="font-inter text-[11px]" style={{ color: S }}>{p.fecha.split(',')[1]?.trim()}</p>
-                <p className="font-inter text-[12px] font-semibold truncate" style={{ color: N }}>{p.creador}</p>
-                <div className="flex flex-wrap gap-1 pb-1">
-                  {p.cancha && <span className="font-inter text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-[#F0F4F8]" style={{ color: S }}>C{p.cancha}</span>}
-                  {p.cat && <span className="font-inter text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-[#F0F4F8]" style={{ color: S }}>{p.cat}</span>}
-                  {p.mixto && <span className="font-inter text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-[#F0F4F8]" style={{ color: S }}>Mixto</span>}
+              <div className="px-3 pt-2 pb-1 flex-1 space-y-1.5">
+                <p className="font-manrope text-[20px] font-black leading-none" style={{ color: N }}>{p.hora}</p>
+                <p className="font-inter text-[10px]" style={{ color: S }}>{p.fecha.split(',')[1]?.trim()}</p>
+                {/* Slot dots */}
+                <div className="flex gap-1 pt-0.5">
+                  {Array.from({ length: p.cupos }).map((_, i) => (
+                    <SlotAvatar key={i} name={p.jugadores[i]} size={24} />
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-1 pb-0.5">
+                  {p.cancha && <span className="font-inter text-[9px] font-semibold px-1 py-0.5 rounded bg-[#F0F4F8]" style={{ color: S }}>C{p.cancha}</span>}
+                  {p.cat && <span className="font-inter text-[9px] font-semibold px-1 py-0.5 rounded bg-[#F0F4F8]" style={{ color: S }}>{p.cat}</span>}
                 </div>
               </div>
               {/* CTA */}
-              <div className="px-3 pb-3">
-                {p.esMio
-                  ? <button className="w-full h-7 rounded-lg font-inter text-[11px] font-semibold border border-red-200 bg-[#FEE8E8] text-[#BA1A1A]">Cancelar</button>
+              <div className="px-3 pb-3 pt-1">
+                {lleno
+                  ? <div className="w-full h-7 rounded-lg flex items-center justify-center font-inter text-[10px]" style={{ background: SRF, color: S }}>Partido completo</div>
+                  : p.esMio
+                  ? <button className="w-full h-7 rounded-lg font-inter text-[10px] font-semibold border border-red-200 bg-[#FEE8E8] text-[#BA1A1A]">Salir</button>
                   : <button className="w-full h-7 rounded-lg font-inter text-[11px] font-bold" style={{ background: G, color: N }}>Unirme</button>
                 }
               </div>
@@ -792,9 +861,9 @@ const PAGES = [
     { id:'C', label:'Grid',        Component: TorneosC },
   ]},
   { id:'amistosos', label:'Amistosos', variants:[
-    { id:'A', label:'Kanban por rol',   Component: AmistososA },
-    { id:'B', label:'Franja + hora',    Component: AmistososB },
-    { id:'C', label:'Grid mini-fichas', Component: AmistososC },
+    { id:'A', label:'Lista + slots',  Component: AmistososA },
+    { id:'B', label:'Cancha 2v2',     Component: AmistososB },
+    { id:'C', label:'Grid compacto',  Component: AmistososC },
   ]},
   { id:'ranking',   label:'Ranking',   variants:[
     { id:'A', label:'Podio',         Component: RankingA },
