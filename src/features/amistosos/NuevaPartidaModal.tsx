@@ -35,8 +35,24 @@ const SLOTS: { key: SlotKey; dataKey: keyof PartidaConJugadores; label: string }
   { key: 'jugador4_id',  dataKey: 'jugador4',  label: 'Jugador 4' },
 ]
 
+const WEEKLY_RANKED_LIMIT = 2
+
 function toDatetimeLocal(iso: string): string {
   return new Date(iso).toLocaleString('sv-SE', { timeZone: 'America/Santiago' }).slice(0, 16)
+}
+
+function getWeekBounds(fechaLocal: string): { weekStart: string; weekEnd: string } {
+  const [y, m, d] = fechaLocal.slice(0, 10).split('-').map(Number)
+  const date = new Date(y, m - 1, d)
+  const dow = date.getDay()
+  const diffToMonday = dow === 0 ? -6 : 1 - dow
+  const monday = new Date(date)
+  monday.setDate(date.getDate() + diffToMonday)
+  const sunday = new Date(monday)
+  sunday.setDate(monday.getDate() + 7)
+  const fmt = (dt: Date) =>
+    `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}T00:00:00`
+  return { weekStart: fmt(monday), weekEnd: fmt(sunday) }
 }
 
 function slotName(slot: JugadorSlot): string | null {
@@ -126,19 +142,38 @@ export default function NuevaPartidaModal({ onClose, partida, isPasado = false }
       } else {
         const categoriaStr = categorias.length > 0 ? categorias.join('/') : null
         if (isPasado) {
-          if (!slotIds.creador_id) throw new Error('El jugador 1 es obligatorio')
-          const filled = Object.values(slotIds).filter(Boolean).length
+          const { creador_id, companero_id, jugador3_id, jugador4_id } = slotIds
+          if (!creador_id || !companero_id || !jugador3_id || !jugador4_id) {
+            throw new Error('Los 4 jugadores son obligatorios para registrar un partido jugado')
+          }
+          // Check weekly ranked limit per player
+          const { weekStart, weekEnd } = getWeekBounds(fecha)
+          const playerIds = [creador_id, companero_id, jugador3_id, jugador4_id]
+          await Promise.all(playerIds.map(async (pid) => {
+            const { count } = await supabase.schema('padel')
+              .from('partidas_abiertas')
+              .select('id', { count: 'exact', head: true })
+              .eq('estado', 'jugada')
+              .gte('fecha', weekStart)
+              .lt('fecha', weekEnd)
+              .or(`creador_id.eq.${pid},companero_id.eq.${pid},jugador3_id.eq.${pid},jugador4_id.eq.${pid}`)
+            if ((count ?? 0) >= WEEKLY_RANKED_LIMIT) {
+              const p = jugadoresActivos?.find(j => j.id === pid)
+              const name = p?.apodo ?? p?.nombre ?? 'Un jugador'
+              throw new Error(`${name} ya tiene ${WEEKLY_RANKED_LIMIT} partidos con ranking esta semana`)
+            }
+          }))
           const { error: err } = await supabase.schema('padel')
             .from('partidas_abiertas')
             .insert({
-              creador_id:   slotIds.creador_id!,
-              companero_id: slotIds.companero_id,
-              jugador3_id:  slotIds.jugador3_id,
-              jugador4_id:  slotIds.jugador4_id,
+              creador_id,
+              companero_id,
+              jugador3_id,
+              jugador4_id,
               fecha,
               cancha: cancha || null,
               categoria: categoriaStr,
-              estado: filled >= 4 ? 'jugada' : 'jugada',
+              estado: 'jugada',
             })
           if (err) throw err
         } else {
