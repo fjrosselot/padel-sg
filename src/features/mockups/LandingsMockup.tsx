@@ -182,14 +182,12 @@ function TorneoGridCard({ t, bannerH, abbrevSize, featured = false }: {
   const disponibles = t.cupos - t.inscritos
   const cuposBajo = disponibles <= 6 && t.estado === 'inscripcion'
   return (
-    <div className="rounded-2xl overflow-hidden bg-white shadow-[0_4px_16px_rgba(13,27,42,0.08)] cursor-pointer">
+    <div className={`rounded-2xl overflow-hidden bg-white shadow-[0_4px_16px_rgba(13,27,42,0.08)] cursor-pointer flex flex-col ${!featured ? 'h-[200px]' : ''}`}>
       {/* Banner / Poster area */}
-      <div className={`relative ${bannerH} flex items-end`}
+      <div className={`relative ${bannerH} shrink-0 flex items-end`}
         style={{ background: `linear-gradient(145deg, ${c1}, ${c2})` }}>
-        {/* Toda esta área = poster del torneo */}
         <span className="absolute inset-0 flex items-center justify-center font-inter text-[10px] font-semibold tracking-widest uppercase select-none pointer-events-none"
           style={{ color: 'rgba(255,255,255,0.25)' }}>imagen del torneo</span>
-        {/* Badges */}
         <span className="absolute top-2 right-2 font-inter text-[9px] font-bold px-1.5 py-0.5 rounded-full"
           style={{ background: cfg.bg, color: cfg.color }}>{cfg.label}</span>
         {featured && (
@@ -199,29 +197,31 @@ function TorneoGridCard({ t, bannerH, abbrevSize, featured = false }: {
         )}
       </div>
       {/* Content */}
-      <div className="px-3 py-2.5 space-y-1.5">
-        {!featured && <p className="font-manrope text-[12px] font-bold leading-snug" style={{ color: N }}>{t.nombre}</p>}
+      <div className="px-3 py-2.5 flex flex-col flex-1 min-h-0 gap-1">
+        {!featured && <p className="font-manrope text-[12px] font-bold leading-snug truncate" style={{ color: N }}>{t.nombre}</p>}
         <div className="flex items-center gap-1">
           <MapPin className="h-3 w-3 shrink-0" style={{ color: S }} />
-          <p className="font-inter text-[10px]" style={{ color: S }}>{t.lugar} · {t.fecha}</p>
+          <p className="font-inter text-[10px] truncate" style={{ color: S }}>{t.lugar} · {t.fecha}</p>
         </div>
         <div className="flex flex-wrap gap-1">
-          {t.categorias.map(c => (
+          {t.categorias.slice(0, 4).map(c => (
             <span key={c} className="font-inter text-[9px] font-semibold px-1.5 py-0.5 rounded-md"
               style={{ background: '#EEF2FF', color: '#4338CA' }}>{c}</span>
           ))}
         </div>
-        {t.estado !== 'finalizado' && t.estado !== 'borrador' && (
-          <p className="font-inter text-[10px] font-semibold"
-            style={{ color: cuposBajo ? '#DC2626' : S }}>
-            {cuposBajo ? `⚠ ${disponibles} cupos disponibles` : `${disponibles}/${t.cupos} cupos`}
-          </p>
-        )}
-        {t.diasRestantes != null && (
-          <p className="font-inter text-[10px] font-semibold" style={{ color: '#a07808' }}>
-            Cierra en {t.diasRestantes} días
-          </p>
-        )}
+        <div className="mt-auto">
+          {t.estado !== 'finalizado' && t.estado !== 'borrador' && (
+            <p className="font-inter text-[10px] font-semibold"
+              style={{ color: cuposBajo ? '#DC2626' : S }}>
+              {cuposBajo ? `⚠ ${disponibles} cupos` : `${disponibles}/${t.cupos} cupos`}
+            </p>
+          )}
+          {t.diasRestantes != null && (
+            <p className="font-inter text-[10px] font-semibold" style={{ color: '#a07808' }}>
+              Cierra en {t.diasRestantes} días
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )
