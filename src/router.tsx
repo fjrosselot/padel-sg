@@ -23,6 +23,7 @@ const CalendarioPage = lazy(() => import('./features/calendario/CalendarioPage')
 const RankingPage = lazy(() => import('./features/ranking/RankingPage'))
 const PerfilPage = lazy(() => import('./features/perfil/PerfilPage'))
 const TesoreriaAdmin = lazy(() => import('./features/tesoreria/TesoreriaAdmin'))
+const AdminCategorias = lazy(() => import('./features/admin/AdminCategorias'))
 
 const ColorCodingMockup = lazy(() => import('./features/mockups/ColorCodingMockup'))
 const DashboardMockup = lazy(() => import('./features/mockups/DashboardMockup'))
@@ -69,6 +70,7 @@ export const router = createBrowserRouter([
       { path: 'admin/temporadas', element: <AdminTemporadas /> },
       { path: 'admin/tesoreria', element: <TesoreriaAdmin /> },
       { path: 'admin/jugadores', element: <AdminJugadores /> },
+      { path: 'admin/categorias', element: <AdminCategorias /> },
       { path: 'torneos', element: <TorneosList /> },
       { path: 'torneos/:id', element: <TorneoDetalle /> },
       { path: 'jugadores', element: <JugadoresPage /> },

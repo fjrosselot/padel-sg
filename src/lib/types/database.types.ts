@@ -444,6 +444,38 @@ export interface Database {
           created_at?: string
         }
       }
+      categorias: {
+        Row: {
+          id: string
+          nombre: string
+          sexo: 'M' | 'F' | 'mixto'
+          color_fondo: string
+          color_borde: string
+          color_texto: string
+          orden: number
+          created_at: string
+        }
+        Insert: {
+          id: string
+          nombre: string
+          sexo?: 'M' | 'F' | 'mixto'
+          color_fondo?: string
+          color_borde?: string
+          color_texto?: string
+          orden?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          nombre?: string
+          sexo?: 'M' | 'F' | 'mixto'
+          color_fondo?: string
+          color_borde?: string
+          color_texto?: string
+          orden?: number
+          created_at?: string
+        }
+      }
       partidas_abiertas: {
         Row: {
           id: string

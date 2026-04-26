@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { PlayerCombobox, type JugadorOption } from '../torneos/PlayerCombobox'
+import { useCategorias, FALLBACK_COLORS } from '../categorias/useCategorias'
 import type { Database } from '../../lib/types/database.types'
 
 type PartidaRow = Database['padel']['Tables']['partidas_abiertas']['Row']
@@ -27,7 +28,6 @@ interface Props {
 
 type SlotKey = 'creador_id' | 'companero_id' | 'jugador3_id' | 'jugador4_id'
 
-const CATEGORIAS = ['3a', '4a', '5a', 'Open', 'B', 'C', 'D']
 
 const SLOTS: { key: SlotKey; dataKey: keyof PartidaConJugadores; label: string }[] = [
   { key: 'creador_id',   dataKey: 'creador',   label: 'Jugador 1' },
@@ -66,6 +66,7 @@ export default function NuevaPartidaModal({ onClose, partida, isPasado = false }
   const qc = useQueryClient()
   const isEdit = !!partida
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
+  const { data: categoriasList } = useCategorias()
 
   const [fecha, setFecha] = useState(partida ? toDatetimeLocal(partida.fecha) : '')
   const [cancha, setCancha] = useState(partida?.cancha ?? '')
@@ -263,23 +264,24 @@ export default function NuevaPartidaModal({ onClose, partida, isPasado = false }
               )}
             </Label>
             <div className="flex flex-wrap gap-1.5 mt-1.5">
-              {CATEGORIAS.map(c => {
-                const active = categorias.includes(c)
+              {(categoriasList ?? []).map(cat => {
+                const active = categorias.includes(cat.id)
+                const { color_fondo, color_borde, color_texto } = active ? cat : FALLBACK_COLORS
                 return (
                   <button
-                    key={c}
+                    key={cat.id}
                     type="button"
                     disabled={isEdit && !puedeEditar}
                     onClick={() => setCategorias(prev =>
-                      active ? prev.filter(x => x !== c) : [...prev, c]
+                      active ? prev.filter(x => x !== cat.id) : [...prev, cat.id]
                     )}
-                    className={`px-3 py-1 rounded-full font-inter text-xs font-semibold border transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${
-                      active
-                        ? 'bg-navy text-gold border-navy'
-                        : 'bg-white text-slate border-navy/20 hover:border-navy/40'
-                    }`}
+                    className="px-3 py-1 rounded-full font-inter text-xs font-semibold border transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={active
+                      ? { background: color_fondo, borderColor: color_borde, color: color_texto }
+                      : { background: '#fff', borderColor: '#cbd5e1', color: '#64748b' }
+                    }
                   >
-                    {c}
+                    {cat.nombre}
                   </button>
                 )
               })}

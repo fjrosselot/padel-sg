@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { User, Calendar, Shield, ChevronRight, LogOut, Medal, Banknote, UserCog } from 'lucide-react'
+import { User, Calendar, Shield, ChevronRight, LogOut, Medal, Banknote, UserCog, Tag } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useUser } from '../../hooks/useUser'
 
@@ -18,6 +18,7 @@ const LINKS: LinkItem[] = [
   { icon: Banknote, label: 'Tesorería', desc: 'Cobros e historial de pagos', to: '/admin/tesoreria', adminOnly: true },
   { icon: Shield, label: 'Admin usuarios', desc: 'Aprobar y gestionar cuentas', to: '/admin/usuarios', adminOnly: true },
   { icon: UserCog, label: 'Admin jugadores', desc: 'Editar datos de jugadores', to: '/admin/jugadores', adminOnly: true },
+  { icon: Tag,     label: 'Categorías',     desc: 'Colores y configuración',    to: '/admin/categorias', adminOnly: true },
 ]
 
 export default function MasPage() {

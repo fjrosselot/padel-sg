@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase'
 import { useUser } from '../../hooks/useUser'
 import { Button } from '../../components/ui/button'
 import NuevaPartidaModal, { type PartidaConJugadores } from './NuevaPartidaModal'
+import { CategoryBadge } from '../categorias/CategoryBadge'
 
 type JugadorSlot = { nombre: string; apodo: string | null } | null
 
@@ -97,9 +98,7 @@ function PartidaCard({
           </div>
         </div>
         {p.categoria && (
-          <span className="inline-block font-inter text-[9px] font-semibold px-1 py-0.5 rounded bg-surface text-slate">
-            {p.categoria}
-          </span>
+          <CategoryBadge id={p.categoria} className="text-[9px] px-1 py-0.5" />
         )}
       </div>
 
