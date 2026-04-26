@@ -90,19 +90,20 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
     setSlotLabels(s => ({ ...s, [key]: null }))
   }
 
+  const esDueno = isEdit && partida?.creador_id === user?.id
+  const puedeEditar = isAdmin || esDueno
+  const puedeCancelar = isAdmin || esDueno
+
   const mutation = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error('No autenticado')
       if (!fecha) throw new Error('La fecha es obligatoria')
 
       if (isEdit) {
+        if (isAdmin && !slotIds.creador_id) throw new Error('El jugador 1 es obligatorio')
         const filled = Object.values(slotIds).filter(Boolean).length
         const newEstado: PartidaRow['estado'] = filled >= 4 ? 'completa' : 'abierta'
-        const payload: Record<string, unknown> = {
-            fecha,
-            cancha: cancha || null,
-            categoria: categoria || null,
-          }
+        const payload: Record<string, unknown> = { fecha, cancha: cancha || null, categoria: categoria || null }
         if (isAdmin) {
           Object.assign(payload, {
             creador_id:   slotIds.creador_id,
@@ -121,6 +122,19 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
           .insert({ creador_id: user.id, fecha, cancha: cancha || null, categoria: categoria || null })
         if (err) throw err
       }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['partidas-abiertas'] })
+      onClose()
+    },
+    onError: (err: Error) => setError(err.message),
+  })
+
+  const cancelarPartido = useMutation({
+    mutationFn: async () => {
+      const { error: err } = await supabase.schema('padel')
+        .from('partidas_abiertas').update({ estado: 'cancelada' }).eq('id', partida!.id)
+      if (err) throw err
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['partidas-abiertas'] })
@@ -157,7 +171,7 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
               min={new Date().toISOString().slice(0, 16)}
               required
               className="mt-1"
-              readOnly={isEdit && !isAdmin}
+              readOnly={isEdit && !puedeEditar}
             />
           </div>
           <div>
@@ -168,7 +182,7 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
               value={cancha}
               onChange={e => setCancha(e.target.value)}
               className="mt-1"
-              readOnly={isEdit && !isAdmin}
+              readOnly={isEdit && !puedeEditar}
             />
           </div>
           <div>
@@ -179,7 +193,7 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
               value={categoria}
               onChange={e => setCategoria(e.target.value)}
               className="mt-1"
-              readOnly={isEdit && !isAdmin}
+              readOnly={isEdit && !puedeEditar}
             />
           </div>
         </div>
@@ -198,12 +212,13 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
                     {name ? (
                       <>
                         <span className="flex-1 font-inter text-sm font-semibold text-navy">{name}</span>
-                        {isAdmin && !isCreador && (
+                        {isAdmin && (
                           <button
                             type="button"
                             onClick={() => clearSlot(key)}
                             className="shrink-0 text-muted hover:text-defeat transition-colors"
                             aria-label="Quitar jugador"
+                            title={isCreador ? 'Quitar (debes asignar otro jugador 1)' : undefined}
                           >
                             <X className="h-3.5 w-3.5" />
                           </button>
@@ -238,13 +253,13 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
           </div>
         )}
 
-        {/* Mostrar botones solo si hay algo que guardar */}
-        {(!isEdit || isAdmin || !isEdit) && (
+        <div className="space-y-2">
+          {/* Guardar / Publicar */}
           <div className="flex gap-3">
             <Button variant="outline" onClick={onClose} className="flex-1 border border-slate/30 text-slate bg-transparent hover:bg-surface rounded-lg">
-              {isEdit && !isAdmin ? 'Cerrar' : 'Cancelar'}
+              {puedeEditar ? 'Cancelar' : 'Cerrar'}
             </Button>
-            {(!isEdit || isAdmin) && (
+            {puedeEditar && (
               <Button
                 onClick={() => mutation.mutate()}
                 disabled={mutation.isPending}
@@ -256,7 +271,19 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
               </Button>
             )}
           </div>
-        )}
+
+          {/* Cancelar partido — dueño o admin */}
+          {isEdit && puedeCancelar && (
+            <button
+              type="button"
+              onClick={() => cancelarPartido.mutate()}
+              disabled={cancelarPartido.isPending}
+              className="w-full h-9 rounded-lg font-inter text-sm font-semibold border border-red-200 bg-[#FEE8E8] text-[#BA1A1A] hover:bg-red-100 transition-colors"
+            >
+              {cancelarPartido.isPending ? 'Cancelando…' : 'Cancelar partido'}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
