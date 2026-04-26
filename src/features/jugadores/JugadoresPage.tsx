@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom'
 import { padelApi } from '../../lib/padelApi'
 import type { Jugador } from '../../lib/supabase'
 import { LadoBadge } from './LadoBadge'
+import { CategoryBadge } from '../categorias/CategoryBadge'
 
 type JugadorItem = Pick<Jugador, 'id' | 'nombre' | 'apodo' | 'categoria' | 'elo' | 'foto_url' | 'lado_preferido' | 'sexo' | 'mixto' | 'telefono'> & { nombre_pila: string | null; apellido: string | null }
 
@@ -209,7 +210,7 @@ export default function JugadoresPage() {
       size: 70,
       enableColumnFilter: false,
       cell: info => info.getValue()
-        ? <span className="px-1.5 py-0.5 rounded-md bg-navy/8 font-inter text-xs font-semibold text-navy">{info.getValue()}</span>
+        ? <CategoryBadge id={info.getValue()!} className="text-xs px-1.5 py-0.5" />
         : <span className="font-inter text-xs text-muted/50">—</span>,
     }),
     columnHelper.accessor('lado_preferido', {
@@ -402,7 +403,7 @@ export default function JugadoresPage() {
                     </p>
                     <div className="flex gap-1.5 mt-0.5 flex-wrap items-center">
                       {j.categoria && (
-                        <span className="px-1.5 py-0.5 rounded-md bg-navy/8 text-navy font-inter text-[10px] font-semibold">{j.categoria}</span>
+                        <CategoryBadge id={j.categoria} className="text-[10px] px-1.5 py-0.5" />
                       )}
                       {j.lado_preferido && <LadoBadge lado={j.lado_preferido} />}
                       {j.mixto && j.mixto !== 'no' && (
