@@ -14,6 +14,7 @@ import { Search, ChevronsUpDown, ChevronUp, ChevronDown, Zap, Pencil, Trash2, Ma
 import { supabase, type Jugador } from '../../lib/supabase'
 import { adminHeaders } from '../../lib/adminHeaders'
 import { sendInvite } from '../../lib/sendInvite'
+import { useCategorias } from '../categorias/useCategorias'
 
 type JugadorRow = Pick<Jugador, 'id' | 'nombre' | 'nombre_pila' | 'apellido' | 'apodo' | 'email' | 'categoria' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'elo' | 'estado_cuenta'> & { rut?: string | null }
 type EditableField = 'apodo' | 'categoria' | 'lado_preferido' | 'sexo' | 'mixto' | 'gradualidad' | 'estado_cuenta'
@@ -55,8 +56,6 @@ function Pill({ label, active, onClick }: { label: string; active: boolean; onCl
 const LADO_OPTIONS    = [{ value: 'drive', label: 'Drive' }, { value: 'reves', label: 'Revés' }, { value: 'ambos', label: 'Ambos' }]
 const SEXO_OPTIONS    = [{ value: 'M', label: 'Hombre' }, { value: 'F', label: 'Mujer' }]
 const GRAD_OPTIONS    = [{ value: '-', label: '−' }, { value: 'normal', label: 'Normal' }, { value: '+', label: '+' }]
-const CATEGORIA_M     = ['5a', '4a', '3a', 'Open'].map(v => ({ value: v, label: v }))
-const CATEGORIA_F     = ['D', 'C', 'B', 'Open'].map(v => ({ value: v, label: v }))
 const MIXTO_CYCLE     = [
   { value: 'si', label: 'Sí', cls: 'bg-success/15 text-success' },
   { value: 'a_veces', label: 'A veces', cls: 'bg-warning/15 text-warning' },
@@ -85,6 +84,14 @@ function SelectCell({ value, options, onChange }: {
       {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
   )
+}
+
+function CategoriaSelectCell({ value, sexo, onChange }: { value: string | null; sexo: string | null; onChange: (v: string | null) => void }) {
+  const { data: cats } = useCategorias()
+  const opts = (cats ?? [])
+    .filter(c => !sexo || c.sexo === sexo || c.sexo === 'mixto')
+    .map(c => ({ value: c.id, label: c.nombre }))
+  return <SelectCell value={value} options={opts} onChange={onChange} />
 }
 
 function TextCell({ value, onSave }: { value: string | null; onSave: (v: string | null) => void }) {
@@ -131,6 +138,7 @@ function BulkBar({ count, onApply, onClear, onInvite, inviting }: {
   const [bulkField, setBulkField] = useState<EditableField | ''>('')
   const [bulkValue, setBulkValue] = useState('')
   const [applying, setApplying] = useState(false)
+  const { data: globalCats } = useCategorias()
 
   const fieldOptions: { value: EditableField; label: string }[] = [
     { value: 'sexo', label: 'Sexo' },
@@ -143,7 +151,7 @@ function BulkBar({ count, onApply, onClear, onInvite, inviting }: {
 
   const valueOptions: Record<EditableField, { value: string; label: string }[]> = {
     sexo: SEXO_OPTIONS,
-    categoria: [...CATEGORIA_M, { value: 'D', label: 'D' }, { value: 'C', label: 'C' }, { value: 'B', label: 'B' }],
+    categoria: (globalCats ?? []).map(c => ({ value: c.id, label: c.nombre })),
     lado_preferido: LADO_OPTIONS,
     mixto: MIXTO_CYCLE.map(c => ({ value: c.value, label: c.label })),
     gradualidad: GRAD_OPTIONS,
@@ -229,13 +237,15 @@ function JugadorEditModal({ jugador, onClose, onSaved, onDeleted }: {
     lado_preferido: jugador.lado_preferido ?? '',
     mixto: jugador.mixto ?? '',
     gradualidad: jugador.gradualidad ?? '',
-    elo: String(jugador.elo ?? 1200),
     estado_cuenta: jugador.estado_cuenta ?? 'activo',
   })
   const [saving, setSaving] = useState(false)
+  const { data: globalCats } = useCategorias()
 
   const set = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }))
-  const categoriaOpts = form.sexo === 'F' ? CATEGORIA_F : CATEGORIA_M
+  const categoriaOpts = (globalCats ?? [])
+    .filter(c => !form.sexo || c.sexo === form.sexo || c.sexo === 'mixto')
+    .map(c => ({ value: c.id, label: c.nombre }))
 
   const handleSave = async () => {
     setSaving(true)
@@ -254,7 +264,6 @@ function JugadorEditModal({ jugador, onClose, onSaved, onDeleted }: {
         lado_preferido: form.lado_preferido || null,
         mixto: form.mixto || null,
         gradualidad: form.gradualidad || null,
-        elo: form.elo,
         estado_cuenta: form.estado_cuenta || null,
       })
       onSaved()
@@ -327,16 +336,10 @@ function JugadorEditModal({ jugador, onClose, onSaved, onDeleted }: {
             <input type="text" value={form.rut} onChange={e => set('rut', e.target.value)} placeholder="12.345.678-9" className={inputCls} />
           </div>
 
-          {/* Apodo + ELO */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelCls}>Apodo</label>
-              <input type="text" value={form.apodo} onChange={e => set('apodo', e.target.value)} placeholder="—" className={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls}>ELO</label>
-              <input type="number" value={form.elo} onChange={e => set('elo', e.target.value)} className={inputCls} />
-            </div>
+          {/* Apodo */}
+          <div>
+            <label className={labelCls}>Apodo</label>
+            <input type="text" value={form.apodo} onChange={e => set('apodo', e.target.value)} placeholder="—" className={inputCls} />
           </div>
 
           {/* Sexo + Categoría */}
@@ -352,7 +355,9 @@ function JugadorEditModal({ jugador, onClose, onSaved, onDeleted }: {
               <label className={labelCls}>Categoría</label>
               <select value={form.categoria} onChange={e => set('categoria', e.target.value)} className={selectCls}>
                 <option value="">—</option>
-                {categoriaOpts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                {categoriaOpts.map(o => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -543,10 +548,13 @@ export default function AdminJugadores() {
     }),
     columnHelper.accessor('categoria', {
       header: 'Categoría', size: 110,
-      cell: info => {
-        const opts = info.row.original.sexo === 'F' ? CATEGORIA_F : CATEGORIA_M
-        return <SelectCell value={info.getValue()} options={opts} onChange={v => save(info.row.original.id, 'categoria', v)} />
-      },
+      cell: info => (
+        <CategoriaSelectCell
+          value={info.getValue()}
+          sexo={info.row.original.sexo}
+          onChange={v => save(info.row.original.id, 'categoria', v)}
+        />
+      ),
     }),
     columnHelper.accessor('lado_preferido', {
       header: 'Lado', size: 110,
