@@ -568,10 +568,6 @@ export default function AdminJugadores() {
       header: 'Grad.', size: 90,
       cell: info => <SelectCell value={info.getValue()} options={GRAD_OPTIONS} onChange={v => save(info.row.original.id, 'gradualidad', v)} />,
     }),
-    columnHelper.accessor('elo', {
-      header: 'ELO', size: 65,
-      cell: info => <span className="font-manrope text-sm font-bold text-navy">{info.getValue()}</span>,
-    }),
     columnHelper.accessor('estado_cuenta', {
       header: 'Estado', size: 100, enableSorting: false,
       cell: info => <CycleCell value={info.getValue()} cycle={ESTADO_CYCLE} onChange={v => save(info.row.original.id, 'estado_cuenta', v)} />,
