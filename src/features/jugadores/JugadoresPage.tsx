@@ -198,9 +198,22 @@ export default function JugadoresPage() {
       size: 120,
       enableSorting: false,
       enableColumnFilter: false,
-      cell: info => info.getValue()
-        ? <span className="font-inter text-xs text-muted">{info.getValue()}</span>
-        : <span className="font-inter text-xs text-muted/50">—</span>,
+      cell: info => {
+        const tel = info.getValue()
+        if (!tel) return <span className="font-inter text-xs text-muted/50">—</span>
+        const waNum = tel.replace(/\D/g, '')
+        return (
+          <a
+            href={`https://wa.me/${waNum}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            className="font-inter text-xs text-[#25d366] hover:underline"
+          >
+            {tel}
+          </a>
+        )
+      },
     }),
     columnHelper.accessor('apodo', {
       header: 'Apodo',
@@ -315,7 +328,7 @@ export default function JugadoresPage() {
           <div className="space-y-1.5">
             {catsH.length > 0 && (
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-inter text-[10px] font-bold text-muted shrink-0">Hombre</span>
+                <span className="font-inter text-[10px] font-semibold px-1.5 py-0.5 rounded-full border shrink-0 bg-blue-50 text-blue-700 border-blue-200">Hombre</span>
                 {catsH.map(cat => (
                   <FilterPill key={cat} label={catNombre(cat)} active={filtroCategoria === cat}
                     onClick={() => setFiltroCategoria(filtroCategoria === cat ? 'todas' : cat)} />
@@ -324,7 +337,7 @@ export default function JugadoresPage() {
             )}
             {catsF.length > 0 && (
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-inter text-[10px] font-bold text-muted shrink-0">Mujer</span>
+                <span className="font-inter text-[10px] font-semibold px-1.5 py-0.5 rounded-full border shrink-0 bg-pink-50 text-pink-700 border-pink-200">Mujer</span>
                 {catsF.map(cat => (
                   <FilterPill key={cat} label={catNombre(cat)} active={filtroCategoria === cat}
                     onClick={() => setFiltroCategoria(filtroCategoria === cat ? 'todas' : cat)} />
@@ -333,7 +346,7 @@ export default function JugadoresPage() {
             )}
             {catsMix.length > 0 && (
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-inter text-[10px] font-bold text-muted shrink-0">Mixto</span>
+                <span className="font-inter text-[10px] font-semibold px-1.5 py-0.5 rounded-full border shrink-0 bg-purple-50 text-purple-700 border-purple-200">Mixto</span>
                 {catsMix.map(cat => (
                   <FilterPill key={cat} label={catNombre(cat)} active={filtroCategoria === cat}
                     onClick={() => setFiltroCategoria(filtroCategoria === cat ? 'todas' : cat)} />
