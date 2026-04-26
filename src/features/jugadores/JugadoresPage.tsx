@@ -42,13 +42,17 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
 }
 
 function Avatar({ jugador, rankPos }: { jugador: JugadorItem; rankPos?: number }) {
+  const { data: cats } = useCategorias()
   const initials = jugador.nombre.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || '??'
+  const cat = cats?.find(c => c.id === jugador.categoria)
+  const bg = cat?.color_fondo ?? '#162844'
+  const fg = cat?.color_texto ?? '#e8c547'
   return (
     <div className="relative shrink-0">
-      <div className="h-9 w-9 rounded-lg bg-navy flex items-center justify-center overflow-hidden">
+      <div className="h-9 w-9 rounded-lg flex items-center justify-center overflow-hidden" style={{ background: bg }}>
         {jugador.foto_url
           ? <img src={jugador.foto_url} alt={jugador.nombre} className="h-full w-full object-cover" />
-          : <span className="font-manrope text-xs font-bold text-gold">{initials}</span>
+          : <span className="font-manrope text-xs font-bold" style={{ color: fg }}>{initials}</span>
         }
       </div>
       {rankPos != null && (
