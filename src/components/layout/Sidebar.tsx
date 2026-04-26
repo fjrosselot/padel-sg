@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, Trophy, Medal,
   Handshake, CalendarDays, Banknote, Settings,
-  UserCog, CalendarRange, ChevronRight, LogOut, Wallet,
+  UserCog, ChevronRight, LogOut, Wallet,
 } from 'lucide-react'
 import { BrandLogo } from '@/components/brand/BrandLogo'
 import { useUser } from '@/hooks/useUser'
@@ -22,7 +22,6 @@ const NAV_ITEMS = [
 const ADMIN_ITEMS = [
   { to: '/admin/usuarios', icon: Users, label: 'Usuarios' },
   { to: '/admin/jugadores', icon: UserCog, label: 'Jugadores' },
-  { to: '/admin/temporadas', icon: CalendarRange, label: 'Temporadas' },
   { to: '/admin/tesoreria', icon: Wallet, label: 'Tesorería' },
 ]
 
