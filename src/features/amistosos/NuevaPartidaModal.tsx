@@ -25,6 +25,8 @@ interface Props {
 
 type SlotKey = 'creador_id' | 'companero_id' | 'jugador3_id' | 'jugador4_id'
 
+const CATEGORIAS = ['3a', '4a', '5a', 'Open', 'B', 'C', 'D']
+
 const SLOTS: { key: SlotKey; dataKey: keyof PartidaConJugadores; label: string }[] = [
   { key: 'creador_id',   dataKey: 'creador',   label: 'Jugador 1' },
   { key: 'companero_id', dataKey: 'companero', label: 'Jugador 2' },
@@ -49,7 +51,9 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
 
   const [fecha, setFecha] = useState(partida ? toDatetimeLocal(partida.fecha) : '')
   const [cancha, setCancha] = useState(partida?.cancha ?? '')
-  const [categoria, setCategoria] = useState(partida?.categoria ?? '')
+  const [categorias, setCategorias] = useState<string[]>(
+    partida?.categoria ? partida.categoria.split('/').map(s => s.trim()).filter(Boolean) : []
+  )
   const [error, setError] = useState<string | null>(null)
 
   // Mutable slot state for admin
@@ -104,7 +108,8 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
         if (isAdmin && !slotIds.creador_id) throw new Error('El jugador 1 es obligatorio')
         const filled = Object.values(slotIds).filter(Boolean).length
         const newEstado: PartidaRow['estado'] = filled >= 4 ? 'completa' : 'abierta'
-        const payload: Record<string, unknown> = { fecha, cancha: cancha || null, categoria: categoria || null }
+        const categoriaStr = categorias.length > 0 ? categorias.join('/') : null
+        const payload: Record<string, unknown> = { fecha, cancha: cancha || null, categoria: categoriaStr }
         if (isAdmin) {
           Object.assign(payload, {
             creador_id:   slotIds.creador_id,
@@ -118,9 +123,10 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
           .from('partidas_abiertas').update(payload).eq('id', partida!.id)
         if (err) throw err
       } else {
+        const categoriaStr = categorias.length > 0 ? categorias.join('/') : null
         const { error: err } = await supabase.schema('padel')
           .from('partidas_abiertas')
-          .insert({ creador_id: user.id, fecha, cancha: cancha || null, categoria: categoria || null })
+          .insert({ creador_id: user.id, fecha, cancha: cancha || null, categoria: categoriaStr })
         if (err) throw err
       }
     },
@@ -187,15 +193,34 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
             />
           </div>
           <div>
-            <Label htmlFor="partida-categoria">Categoría</Label>
-            <Input
-              id="partida-categoria"
-              placeholder="Ej: 3a, B, Open…"
-              value={categoria}
-              onChange={e => setCategoria(e.target.value)}
-              className="mt-1"
-              readOnly={isEdit && !puedeEditar}
-            />
+            <Label>
+              Categoría
+              {categorias.length > 0 && (
+                <span className="ml-2 font-inter text-xs font-semibold text-gold">{categorias.join('/')}</span>
+              )}
+            </Label>
+            <div className="flex flex-wrap gap-1.5 mt-1.5">
+              {CATEGORIAS.map(c => {
+                const active = categorias.includes(c)
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    disabled={isEdit && !puedeEditar}
+                    onClick={() => setCategorias(prev =>
+                      active ? prev.filter(x => x !== c) : [...prev, c]
+                    )}
+                    className={`px-3 py-1 rounded-full font-inter text-xs font-semibold border transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${
+                      active
+                        ? 'bg-navy text-gold border-navy'
+                        : 'bg-white text-slate border-navy/20 hover:border-navy/40'
+                    }`}
+                  >
+                    {c}
+                  </button>
+                )
+              })}
+            </div>
           </div>
         </div>
 
