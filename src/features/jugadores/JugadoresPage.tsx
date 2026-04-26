@@ -16,6 +16,7 @@ import { padelApi } from '../../lib/padelApi'
 import type { Jugador } from '../../lib/supabase'
 import { LadoBadge } from './LadoBadge'
 import { CategoryBadge } from '../categorias/CategoryBadge'
+import { useCategorias } from '../categorias/useCategorias'
 
 type JugadorItem = Pick<Jugador, 'id' | 'nombre' | 'apodo' | 'categoria' | 'elo' | 'foto_url' | 'lado_preferido' | 'sexo' | 'mixto' | 'telefono'> & { nombre_pila: string | null; apellido: string | null }
 
@@ -126,10 +127,14 @@ export default function JugadoresPage() {
     }))
   , [jugadores, rankingMap])
 
+  const { data: globalCats } = useCategorias()
+
   const categorias = useMemo(() => {
     if (!jugadores) return []
     return [...new Set(jugadores.map(j => j.categoria).filter(Boolean))].sort() as string[]
   }, [jugadores])
+
+  const catNombre = (id: string) => globalCats?.find(c => c.id === id)?.nombre ?? id
 
   const filtradoPills = useMemo(() => {
     return jugadoresConRanking.filter(j => {
@@ -300,7 +305,7 @@ export default function JugadoresPage() {
           <div className="flex gap-2 overflow-x-auto pb-0.5 no-scrollbar">
             <FilterPill label="Todas" active={filtroCategoria === 'todas'} onClick={() => setFiltroCategoria('todas')} />
             {categorias.map(cat => (
-              <FilterPill key={cat} label={cat} active={filtroCategoria === cat}
+              <FilterPill key={cat} label={catNombre(cat)} active={filtroCategoria === cat}
                 onClick={() => setFiltroCategoria(filtroCategoria === cat ? 'todas' : cat)} />
             ))}
           </div>
