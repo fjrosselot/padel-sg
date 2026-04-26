@@ -5,26 +5,18 @@ import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
 import { useUser } from '../../hooks/useUser'
 import { Button } from '../../components/ui/button'
-import NuevaPartidaModal from './NuevaPartidaModal'
-import type { Database } from '../../lib/types/database.types'
+import NuevaPartidaModal, { type PartidaConJugadores } from './NuevaPartidaModal'
 
-type PartidaRow = Database['padel']['Tables']['partidas_abiertas']['Row']
 type JugadorSlot = { nombre: string; apodo: string | null } | null
-type Partida = PartidaRow & {
-  creador:   JugadorSlot
-  companero: JugadorSlot
-  jugador3:  JugadorSlot
-  jugador4:  JugadorSlot
-}
 
-function SlotAvatar({ jugador, size = 32 }: { jugador: JugadorSlot; size?: number }) {
+function SlotAvatar({ jugador, size = 24 }: { jugador: JugadorSlot; size?: number }) {
   if (jugador) {
     const name = jugador.apodo ?? jugador.nombre.split(' ')[0]
     const initials = name.slice(0, 2).toUpperCase()
     return (
       <div
         className="rounded-full flex items-center justify-center font-manrope font-bold shrink-0 bg-navy text-gold"
-        style={{ width: size, height: size, fontSize: size * 0.28 }}
+        style={{ width: size, height: size, fontSize: size * 0.3 }}
         title={jugador.nombre}
       >
         {initials}
@@ -40,13 +32,14 @@ function SlotAvatar({ jugador, size = 32 }: { jugador: JugadorSlot; size?: numbe
 }
 
 function PartidaCard({
-  p, userId, onUnirse, onSalir, onEdit, joining,
+  p, userId, isAdmin, onUnirse, onSalir, onDetalle, joining,
 }: {
-  p: Partida
+  p: PartidaConJugadores
   userId: string | undefined
+  isAdmin: boolean
   onUnirse: (id: string, slot: 'companero_id' | 'jugador3_id' | 'jugador4_id') => void
   onSalir: (id: string) => void
-  onEdit: (p: PartidaRow) => void
+  onDetalle: (p: PartidaConJugadores) => void
   joining: boolean
 }) {
   const slots: JugadorSlot[] = [p.creador, p.companero, p.jugador3, p.jugador4]
@@ -57,20 +50,21 @@ function PartidaCard({
   const hBg    = lleno ? '#D1FAE5' : pct >= 0.5 ? '#FFF3CD' : '#EEF2FF'
   const hColor = lleno ? '#065F46' : pct >= 0.5 ? '#856404' : '#4338CA'
 
-  const esMio     = p.creador_id === userId
-  const yaSoy     = userId ? slots.some(s => s && s === p.creador && p.creador_id === userId) || p.companero_id === userId || p.jugador3_id === userId || p.jugador4_id === userId : false
-  const nextSlot  = !p.companero_id ? 'companero_id' : !p.jugador3_id ? 'jugador3_id' : !p.jugador4_id ? 'jugador4_id' : null
+  const yaSoy = userId
+    ? p.creador_id === userId || p.companero_id === userId || p.jugador3_id === userId || p.jugador4_id === userId
+    : false
+  const nextSlot = !p.companero_id ? 'companero_id' : !p.jugador3_id ? 'jugador3_id' : !p.jugador4_id ? 'jugador4_id' : null
 
   const dt = new Date(p.fecha)
-  const hora = dt.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Santiago' })
+  const hora   = dt.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Santiago' })
   const diaNom = dt.toLocaleDateString('es-CL', { weekday: 'short', timeZone: 'America/Santiago' })
   const diaMes = dt.toLocaleDateString('es-CL', { day: 'numeric', month: 'short', timeZone: 'America/Santiago' })
 
-  const team1: JugadorSlot[] = [p.creador, p.companero]
-  const team2: JugadorSlot[] = [p.jugador3, p.jugador4]
-
   return (
-    <div className="rounded-xl bg-white shadow-card overflow-hidden flex flex-col">
+    <div
+      className="rounded-xl bg-white shadow-card overflow-hidden flex flex-col cursor-pointer"
+      onClick={() => onDetalle(p)}
+    >
       {/* Occupancy header */}
       <div className="px-3 pt-2 pb-1.5 flex items-center justify-between" style={{ background: hBg }}>
         <span className="font-inter text-[10px] font-bold" style={{ color: hColor }}>
@@ -83,30 +77,25 @@ function PartidaCard({
 
       {/* Body */}
       <div className="px-3 pt-2 pb-1 flex-1 space-y-1.5">
-        {/* Hora y fecha igual peso */}
         <p className="font-manrope text-[16px] font-black leading-none text-navy">{hora}</p>
         <p className="font-manrope text-[13px] font-bold leading-none text-navy">
           {diaNom} <span className="font-inter font-normal text-[11px] text-slate">{diaMes}</span>
         </p>
-
-        {/* Cancha siempre visible */}
         <p className="font-inter text-[10px]" style={{ color: p.cancha ? '#162844' : '#94b0cc' }}>
           {p.cancha ? `Cancha ${p.cancha}` : 'Cancha por definir'}
         </p>
-
         {/* Slots 2v2 */}
         <div className="flex items-center gap-1.5 pt-0.5">
           <div className="flex gap-0.5">
-            <SlotAvatar jugador={team1[0]} size={24} />
-            <SlotAvatar jugador={team1[1]} size={24} />
+            <SlotAvatar jugador={p.creador} />
+            <SlotAvatar jugador={p.companero} />
           </div>
           <span className="font-inter text-[9px] font-bold text-slate">vs</span>
           <div className="flex gap-0.5">
-            <SlotAvatar jugador={team2[0]} size={24} />
-            <SlotAvatar jugador={team2[1]} size={24} />
+            <SlotAvatar jugador={p.jugador3} />
+            <SlotAvatar jugador={p.jugador4} />
           </div>
         </div>
-
         {p.categoria && (
           <span className="inline-block font-inter text-[9px] font-semibold px-1 py-0.5 rounded bg-surface text-slate">
             {p.categoria}
@@ -115,30 +104,27 @@ function PartidaCard({
       </div>
 
       {/* CTA */}
-      <div className="px-3 pb-3 pt-1.5 space-y-1.5">
-        {lleno ? (
+      <div className="px-3 pb-3 pt-1.5" onClick={e => e.stopPropagation()}>
+        {isAdmin ? (
+          <button
+            type="button"
+            onClick={() => onDetalle(p)}
+            className="w-full h-7 rounded-lg font-inter text-[10px] font-semibold border border-navy/20 text-navy"
+          >
+            Ver / Editar
+          </button>
+        ) : lleno ? (
           <div className="w-full h-7 rounded-lg flex items-center justify-center font-inter text-[10px] bg-surface text-slate">
             Partido completo
           </div>
         ) : yaSoy ? (
-          <>
-            {esMio && (
-              <button
-                type="button"
-                onClick={() => onEdit(p)}
-                className="w-full h-7 rounded-lg font-inter text-[10px] font-semibold border border-navy/20 text-navy"
-              >
-                Editar
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => onSalir(p.id)}
-              className="w-full h-7 rounded-lg font-inter text-[10px] font-semibold border border-red-200 bg-[#FEE8E8] text-[#BA1A1A]"
-            >
-              Salir
-            </button>
-          </>
+          <button
+            type="button"
+            onClick={() => onSalir(p.id)}
+            className="w-full h-7 rounded-lg font-inter text-[10px] font-semibold border border-red-200 bg-[#FEE8E8] text-[#BA1A1A]"
+          >
+            Salir
+          </button>
         ) : nextSlot ? (
           <Button
             onClick={() => onUnirse(p.id, nextSlot)}
@@ -156,8 +142,9 @@ function PartidaCard({
 export default function AmistososPage() {
   const { data: user } = useUser()
   const qc = useQueryClient()
+  const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
   const [showModal, setShowModal] = useState(false)
-  const [editando, setEditando] = useState<PartidaRow | null>(null)
+  const [detalle, setDetalle] = useState<PartidaConJugadores | null>(null)
 
   const { data: partidas, isLoading } = useQuery({
     queryKey: ['partidas-abiertas'],
@@ -175,7 +162,7 @@ export default function AmistososPage() {
         .in('estado', ['abierta', 'confirmada', 'completa'])
         .order('fecha', { ascending: true })
       if (error) throw error
-      return data as Partida[]
+      return data as PartidaConJugadores[]
     },
   })
 
@@ -200,9 +187,9 @@ export default function AmistososPage() {
       const p = partidas?.find(x => x.id === id)
       if (!p) return
       const patch: Record<string, null | 'abierta'> = {}
-      if (p.jugador4_id === user.id)      { patch.jugador4_id = null; patch.estado = 'abierta' }
-      else if (p.jugador3_id === user.id) { patch.jugador3_id = null; patch.estado = 'abierta' }
-      else if (p.companero_id === user.id){ patch.companero_id = null; patch.estado = 'abierta' }
+      if (p.jugador4_id === user.id)       { patch.jugador4_id  = null; patch.estado = 'abierta' }
+      else if (p.jugador3_id === user.id)  { patch.jugador3_id  = null; patch.estado = 'abierta' }
+      else if (p.companero_id === user.id) { patch.companero_id = null; patch.estado = 'abierta' }
       const { error } = await supabase.schema('padel').from('partidas_abiertas')
         .update(patch).eq('id', id)
       if (error) throw error
@@ -230,10 +217,7 @@ export default function AmistososPage() {
         <p className="font-inter text-xs text-muted">
           {partidas?.length ?? 0} partido{partidas?.length !== 1 ? 's' : ''} abierto{partidas?.length !== 1 ? 's' : ''}
         </p>
-        <button
-          type="button"
-          className="font-inter text-xs font-semibold border border-navy/20 rounded-lg px-2.5 py-1 text-navy"
-        >
+        <button type="button" className="font-inter text-xs font-semibold border border-navy/20 rounded-lg px-2.5 py-1 text-navy">
           Registrar pasado
         </button>
       </div>
@@ -250,9 +234,10 @@ export default function AmistososPage() {
               key={p.id}
               p={p}
               userId={user?.id}
+              isAdmin={isAdmin}
               onUnirse={(id, slot) => unirse.mutate({ id, slot })}
               onSalir={id => salir.mutate(id)}
-              onEdit={setEditando}
+              onDetalle={setDetalle}
               joining={unirse.isPending}
             />
           ))}
@@ -260,7 +245,12 @@ export default function AmistososPage() {
       )}
 
       {showModal && <NuevaPartidaModal onClose={() => setShowModal(false)} />}
-      {editando && <NuevaPartidaModal partida={editando} onClose={() => setEditando(null)} />}
+      {detalle && (
+        <NuevaPartidaModal
+          partida={detalle}
+          onClose={() => setDetalle(null)}
+        />
+      )}
     </div>
   )
 }
