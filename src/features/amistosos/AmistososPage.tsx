@@ -144,6 +144,7 @@ export default function AmistososPage() {
   const qc = useQueryClient()
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
   const [showModal, setShowModal] = useState(false)
+  const [showModalPasado, setShowModalPasado] = useState(false)
   const [detalle, setDetalle] = useState<PartidaConJugadores | null>(null)
 
   const { data: partidas, isLoading } = useQuery({
@@ -217,7 +218,11 @@ export default function AmistososPage() {
         <p className="font-inter text-xs text-muted">
           {partidas?.length ?? 0} partido{partidas?.length !== 1 ? 's' : ''} abierto{partidas?.length !== 1 ? 's' : ''}
         </p>
-        <button type="button" className="font-inter text-xs font-semibold border border-navy/20 rounded-lg px-2.5 py-1 text-navy">
+        <button
+          type="button"
+          onClick={() => setShowModalPasado(true)}
+          className="font-inter text-xs font-semibold border border-navy/20 rounded-lg px-2.5 py-1 text-navy"
+        >
           Registrar pasado
         </button>
       </div>
@@ -245,6 +250,7 @@ export default function AmistososPage() {
       )}
 
       {showModal && <NuevaPartidaModal onClose={() => setShowModal(false)} />}
+      {showModalPasado && <NuevaPartidaModal isPasado onClose={() => setShowModalPasado(false)} />}
       {detalle && (
         <NuevaPartidaModal
           partida={detalle}

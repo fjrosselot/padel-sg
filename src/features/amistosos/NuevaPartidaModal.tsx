@@ -21,6 +21,7 @@ export type PartidaConJugadores = PartidaRow & {
 interface Props {
   onClose: () => void
   partida?: PartidaConJugadores
+  isPasado?: boolean
 }
 
 type SlotKey = 'creador_id' | 'companero_id' | 'jugador3_id' | 'jugador4_id'
@@ -43,7 +44,7 @@ function slotName(slot: JugadorSlot): string | null {
   return slot.apodo ?? slot.nombre
 }
 
-export default function NuevaPartidaModal({ onClose, partida }: Props) {
+export default function NuevaPartidaModal({ onClose, partida, isPasado = false }: Props) {
   const { data: user } = useUser()
   const qc = useQueryClient()
   const isEdit = !!partida
@@ -80,7 +81,7 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
         .order('nombre')
       return (data ?? []) as JugadorOption[]
     },
-    enabled: isEdit && isAdmin,
+    enabled: (isEdit && isAdmin) || isPasado,
   })
 
   function assignSlot(key: SlotKey, id: string) {
@@ -96,7 +97,7 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
   }
 
   const esDueno = isEdit && partida?.creador_id === user?.id
-  const puedeEditar = isAdmin || esDueno
+  const puedeEditar = isAdmin || esDueno || isPasado
   const puedeCancelar = isAdmin || esDueno
 
   const mutation = useMutation({
@@ -124,10 +125,28 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
         if (err) throw err
       } else {
         const categoriaStr = categorias.length > 0 ? categorias.join('/') : null
-        const { error: err } = await supabase.schema('padel')
-          .from('partidas_abiertas')
-          .insert({ creador_id: user.id, fecha, cancha: cancha || null, categoria: categoriaStr })
-        if (err) throw err
+        if (isPasado) {
+          if (!slotIds.creador_id) throw new Error('El jugador 1 es obligatorio')
+          const filled = Object.values(slotIds).filter(Boolean).length
+          const { error: err } = await supabase.schema('padel')
+            .from('partidas_abiertas')
+            .insert({
+              creador_id:   slotIds.creador_id!,
+              companero_id: slotIds.companero_id,
+              jugador3_id:  slotIds.jugador3_id,
+              jugador4_id:  slotIds.jugador4_id,
+              fecha,
+              cancha: cancha || null,
+              categoria: categoriaStr,
+              estado: filled >= 4 ? 'jugada' : 'jugada',
+            })
+          if (err) throw err
+        } else {
+          const { error: err } = await supabase.schema('padel')
+            .from('partidas_abiertas')
+            .insert({ creador_id: user.id, fecha, cancha: cancha || null, categoria: categoriaStr })
+          if (err) throw err
+        }
       }
     },
     onSuccess: () => {
@@ -163,7 +182,7 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
         onClick={e => e.stopPropagation()}
       >
         <h2 id="nueva-partida-title" className="font-manrope text-lg font-bold text-navy">
-          {isEdit ? 'Partido' : 'Nuevo partido'}
+          {isEdit ? 'Partido' : isPasado ? 'Registrar partido pasado' : 'Nuevo partido'}
         </h2>
 
         {/* Detalles */}
@@ -175,7 +194,7 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
               type="datetime-local"
               value={fecha}
               onChange={e => setFecha(e.target.value)}
-              min={new Date().toISOString().slice(0, 16)}
+              {...(!isPasado ? { max: undefined, min: new Date().toISOString().slice(0, 16) } : {})}
               required
               className="mt-1"
               readOnly={isEdit && !puedeEditar}
@@ -224,21 +243,22 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
           </div>
         </div>
 
-        {/* Jugadores — siempre visible al editar */}
-        {isEdit && (
+        {/* Jugadores — visible al editar o en modo pasado */}
+        {(isEdit || isPasado) && (
           <div className="space-y-2">
             <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted">Jugadores</p>
             <div className="rounded-xl border border-navy/10 overflow-hidden divide-y divide-navy/5">
               {SLOTS.map(({ key, label }) => {
                 const name = slotLabels[key]
                 const isCreador = key === 'creador_id'
+                const canPick = isAdmin || isPasado
                 return (
                   <div key={key} className="flex items-center gap-3 px-3 py-2.5">
                     <span className="w-16 font-inter text-[11px] text-muted shrink-0">{label}</span>
                     {name ? (
                       <>
                         <span className="flex-1 font-inter text-sm font-semibold text-navy">{name}</span>
-                        {isAdmin && (
+                        {canPick && (
                           <button
                             type="button"
                             onClick={() => clearSlot(key)}
@@ -250,13 +270,13 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
                           </button>
                         )}
                       </>
-                    ) : isAdmin ? (
+                    ) : canPick ? (
                       <div className="flex-1">
                         <PlayerCombobox
                           players={jugadoresActivos}
                           value={slotIds[key] ?? ''}
                           onChange={id => assignSlot(key, id)}
-                          placeholder="— asignar —"
+                          placeholder="— seleccionar —"
                           inscritosIds={new Set(
                             Object.entries(slotIds)
                               .filter(([k, v]) => k !== key && !!v)
@@ -293,8 +313,8 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
                 className="flex-1 bg-gold text-navy font-bold rounded-lg"
               >
                 {mutation.isPending
-                  ? (isEdit ? 'Guardando…' : 'Publicando…')
-                  : (isEdit ? 'Guardar' : 'Publicar')}
+                  ? (isEdit ? 'Guardando…' : 'Registrando…')
+                  : (isEdit ? 'Guardar' : isPasado ? 'Registrar' : 'Publicar')}
               </Button>
             )}
           </div>
