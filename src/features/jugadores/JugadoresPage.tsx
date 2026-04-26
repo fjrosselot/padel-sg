@@ -135,6 +135,11 @@ export default function JugadoresPage() {
   }, [jugadores])
 
   const catNombre = (id: string) => globalCats?.find(c => c.id === id)?.nombre ?? id
+  const catSexo = (id: string) => globalCats?.find(c => c.id === id)?.sexo ?? 'mixto'
+
+  const catsH = categorias.filter(id => catSexo(id) === 'M')
+  const catsF = categorias.filter(id => catSexo(id) === 'F')
+  const catsMix = categorias.filter(id => catSexo(id) === 'mixto')
 
   const filtradoPills = useMemo(() => {
     return jugadoresConRanking.filter(j => {
@@ -301,15 +306,40 @@ export default function JugadoresPage() {
       </div>
 
       <div className="space-y-2">
+        {/* Categorías: 2 filas fijas H / M */}
         {categorias.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto pb-0.5 no-scrollbar">
-            <FilterPill label="Todas" active={filtroCategoria === 'todas'} onClick={() => setFiltroCategoria('todas')} />
-            {categorias.map(cat => (
-              <FilterPill key={cat} label={catNombre(cat)} active={filtroCategoria === cat}
-                onClick={() => setFiltroCategoria(filtroCategoria === cat ? 'todas' : cat)} />
-            ))}
+          <div className="space-y-1.5">
+            {catsH.length > 0 && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-inter text-[10px] font-bold text-muted w-4 shrink-0">H</span>
+                {catsH.map(cat => (
+                  <FilterPill key={cat} label={catNombre(cat)} active={filtroCategoria === cat}
+                    onClick={() => setFiltroCategoria(filtroCategoria === cat ? 'todas' : cat)} />
+                ))}
+              </div>
+            )}
+            {catsF.length > 0 && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-inter text-[10px] font-bold text-muted w-4 shrink-0">M</span>
+                {catsF.map(cat => (
+                  <FilterPill key={cat} label={catNombre(cat)} active={filtroCategoria === cat}
+                    onClick={() => setFiltroCategoria(filtroCategoria === cat ? 'todas' : cat)} />
+                ))}
+              </div>
+            )}
+            {catsMix.length > 0 && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-inter text-[10px] font-bold text-muted w-4 shrink-0">Mx</span>
+                {catsMix.map(cat => (
+                  <FilterPill key={cat} label={catNombre(cat)} active={filtroCategoria === cat}
+                    onClick={() => setFiltroCategoria(filtroCategoria === cat ? 'todas' : cat)} />
+                ))}
+              </div>
+            )}
           </div>
         )}
+
+        {/* Otros filtros */}
         <div className="flex gap-2 overflow-x-auto pb-0.5 no-scrollbar">
           <FilterPill label="Hombre" active={filtroSexo === 'M'} onClick={() => setFiltroSexo(filtroSexo === 'M' ? 'todos' : 'M')} />
           <FilterPill label="Mujer" active={filtroSexo === 'F'} onClick={() => setFiltroSexo(filtroSexo === 'F' ? 'todos' : 'F')} />
@@ -321,15 +351,17 @@ export default function JugadoresPage() {
           <FilterPill label="Juega mixto" active={filtroMixto === 'si'} onClick={() => setFiltroMixto(filtroMixto === 'si' ? 'todos' : 'si')} />
           <FilterPill label="No mixto" active={filtroMixto === 'no'} onClick={() => setFiltroMixto(filtroMixto === 'no' ? 'todos' : 'no')} />
         </div>
-      </div>
 
-      {hayFiltros && (
-        <button type="button"
-          onClick={() => { setSearch(''); setFiltroCategoria('todas'); setFiltroLado('todos'); setFiltroMixto('todos'); setFiltroSexo('todos') }}
-          className="font-inter text-xs text-muted hover:text-navy underline underline-offset-2">
-          Limpiar filtros
-        </button>
-      )}
+        {hayFiltros && (
+          <button
+            type="button"
+            onClick={() => { setSearch(''); setFiltroCategoria('todas'); setFiltroLado('todos'); setFiltroMixto('todos'); setFiltroSexo('todos') }}
+            className="flex items-center gap-1 font-inter text-xs font-semibold text-defeat/80 hover:text-defeat transition-colors"
+          >
+            <span className="text-[10px] leading-none">✕</span> Limpiar filtros
+          </button>
+        )}
+      </div>
 
       {rows.length === 0 ? (
         <div className="rounded-xl bg-white shadow-card p-8 text-center">
