@@ -34,11 +34,28 @@ interface PartidoHistorial {
   p2j2: JugadorNombre | null
 }
 
+interface AmistosoRaw {
+  id: string
+  fecha: string | null
+  creador_id: string | null
+  companero_id: string | null
+  jugador3_id: string | null
+  jugador4_id: string | null
+  creador: JugadorNombre | null
+  companero: JugadorNombre | null
+  jugador3: JugadorNombre | null
+  jugador4: JugadorNombre | null
+}
+
 interface InscripcionCompanero {
   jugador1_id: string
   jugador2_id: string
   j1: { nombre: string; foto_url: string | null } | null
   j2: { nombre: string; foto_url: string | null } | null
+}
+
+type JugadorExtra = Jugador & {
+  rut?: string | null
 }
 
 function nombreCorto(nombre: string) {
@@ -48,7 +65,8 @@ function nombreCorto(nombre: string) {
 }
 
 function calcularRacha(historial: PartidoHistorial[], jugadorId: string): { tipo: 'victoria' | 'derrota'; n: number } | null {
-  const results = historial.map(p => {
+  const torneos = historial.filter(p => p.tipo !== 'amistoso')
+  const results = torneos.map(p => {
     if (p.ganador === null) return null
     const enP1 = p.pareja1_j1 === jugadorId || p.pareja1_j2 === jugadorId
     return (enP1 && p.ganador === 1) || (!enP1 && p.ganador === 2) ? 'victoria' as const : 'derrota' as const
@@ -63,6 +81,7 @@ function calcularRacha(historial: PartidoHistorial[], jugadorId: string): { tipo
 function PartidoCard({ p, jugadorId }: { p: PartidoHistorial; jugadorId: string }) {
   const enP1 = p.pareja1_j1 === jugadorId || p.pareja1_j2 === jugadorId
   const gano = p.ganador !== null && ((enP1 && p.ganador === 1) || (!enP1 && p.ganador === 2))
+  const isAmistoso = p.tipo === 'amistoso'
   const score = p.sets_pareja1 !== null && p.sets_pareja2 !== null
     ? enP1 ? `${p.sets_pareja1}–${p.sets_pareja2}` : `${p.sets_pareja2}–${p.sets_pareja1}`
     : p.resultado ?? '—'
@@ -74,18 +93,26 @@ function PartidoCard({ p, jugadorId }: { p: PartidoHistorial; jugadorId: string 
   const rivalJ2 = enP1 ? p.p2j2 : p.p1j2
   const rivalStr = [rivalJ1, rivalJ2].filter(Boolean).map(j => nombreCorto(j!.nombre)).join(' / ') || '—'
 
+  const badgeClass = isAmistoso
+    ? 'bg-surface text-muted'
+    : p.ganador === null
+      ? 'bg-surface text-muted'
+      : gano ? 'bg-success/10 text-success' : 'bg-defeat/10 text-defeat'
+
+  const badgeLabel = isAmistoso
+    ? 'Amist.'
+    : p.ganador === null ? 'Pend.' : gano ? 'Victoria' : 'Derrota'
+
   return (
     <div className="flex items-center gap-3 px-4 py-3">
-      <span className={`shrink-0 w-14 text-center rounded-md px-1.5 py-0.5 font-inter text-[10px] font-black uppercase ${
-        p.ganador === null ? 'bg-surface text-muted' : gano ? 'bg-success/10 text-success' : 'bg-defeat/10 text-defeat'
-      }`}>
-        {p.ganador === null ? 'Pend.' : gano ? 'Victoria' : 'Derrota'}
+      <span className={`shrink-0 w-14 text-center rounded-md px-1.5 py-0.5 font-inter text-[10px] font-black uppercase ${badgeClass}`}>
+        {badgeLabel}
       </span>
       <div className="flex-1 min-w-0">
         <p className="font-inter text-xs font-medium text-navy truncate">vs {rivalStr}</p>
         <p className="font-inter text-[10px] text-muted">{tipoLabel} · {fechaStr}</p>
       </div>
-      <span className="font-manrope text-sm font-bold text-navy shrink-0">{score}</span>
+      <span className="font-manrope text-sm font-bold text-navy shrink-0">{isAmistoso ? '—' : score}</span>
     </div>
   )
 }
@@ -99,17 +126,26 @@ export default function JugadorDetalle() {
   const { data: jugador, isLoading, error } = useQuery({
     queryKey: ['jugador', id],
     queryFn: () =>
-      padelApi.get<(Jugador & { mixto?: string | null; frecuencia_semanal?: string | null })[]>(
-        `jugadores?select=id,nombre,apodo,categoria,foto_url,lado_preferido,sexo,mixto,frecuencia_semanal,rut&id=eq.${id}`
+      padelApi.get<JugadorExtra[]>(
+        `jugadores?select=id,nombre,apodo,categoria,foto_url,lado_preferido,sexo,mixto,frecuencia_semanal,rut,telefono&id=eq.${id}`
       ).then(rows => rows[0] ?? null),
     enabled: !!id,
   })
 
-  const { data: historial = [] } = useQuery({
+  const { data: torneosHistorial = [] } = useQuery({
     queryKey: ['jugador-historial', id],
     queryFn: () =>
       padelApi.get<PartidoHistorial[]>(
-        `partidos?select=id,fecha,tipo,ganador,resultado,pareja1_j1,pareja1_j2,pareja2_j1,pareja2_j2,sets_pareja1,sets_pareja2,p1j1:jugadores!pareja1_j1(nombre,apodo),p1j2:jugadores!pareja1_j2(nombre,apodo),p2j1:jugadores!pareja2_j1(nombre,apodo),p2j2:jugadores!pareja2_j2(nombre,apodo)&or=(pareja1_j1.eq.${id},pareja1_j2.eq.${id},pareja2_j1.eq.${id},pareja2_j2.eq.${id})&estado=eq.jugado&order=fecha.desc&limit=10`
+        `partidos?select=id,fecha,tipo,ganador,resultado,pareja1_j1,pareja1_j2,pareja2_j1,pareja2_j2,sets_pareja1,sets_pareja2,p1j1:jugadores!pareja1_j1(nombre,apodo),p1j2:jugadores!pareja1_j2(nombre,apodo),p2j1:jugadores!pareja2_j1(nombre,apodo),p2j2:jugadores!pareja2_j2(nombre,apodo)&or=(pareja1_j1.eq.${id},pareja1_j2.eq.${id},pareja2_j1.eq.${id},pareja2_j2.eq.${id})&estado=eq.jugado&order=fecha.desc&limit=20`
+      ),
+    enabled: !!id,
+  })
+
+  const { data: amistososRaw = [] } = useQuery({
+    queryKey: ['jugador-amistosos', id],
+    queryFn: () =>
+      padelApi.get<AmistosoRaw[]>(
+        `partidas_abiertas?select=id,fecha,creador_id,companero_id,jugador3_id,jugador4_id,creador:jugadores!creador_id(nombre,apodo),companero:jugadores!companero_id(nombre,apodo),jugador3:jugadores!jugador3_id(nombre,apodo),jugador4:jugadores!jugador4_id(nombre,apodo)&or=(creador_id.eq.${id},companero_id.eq.${id},jugador3_id.eq.${id},jugador4_id.eq.${id})&estado=eq.jugada&order=fecha.desc&limit=20`
       ),
     enabled: !!id,
   })
@@ -123,6 +159,33 @@ export default function JugadorDetalle() {
   })
 
   const { data: rankings } = usePlayerRankings(id)
+
+  const historial = useMemo((): PartidoHistorial[] => {
+    const amistososMapped: PartidoHistorial[] = amistososRaw.map(a => ({
+      id: a.id,
+      fecha: a.fecha,
+      tipo: 'amistoso',
+      ganador: null,
+      resultado: null,
+      pareja1_j1: a.creador_id,
+      pareja1_j2: a.companero_id,
+      pareja2_j1: a.jugador3_id,
+      pareja2_j2: a.jugador4_id,
+      sets_pareja1: null,
+      sets_pareja2: null,
+      p1j1: a.creador,
+      p1j2: a.companero,
+      p2j1: a.jugador3,
+      p2j2: a.jugador4,
+    }))
+    return [...torneosHistorial, ...amistososMapped]
+      .sort((a, b) => {
+        if (!a.fecha) return 1
+        if (!b.fecha) return -1
+        return new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+      })
+      .slice(0, 10)
+  }, [torneosHistorial, amistososRaw])
 
   const companerosFrecuentes = useMemo(() => {
     const count = new Map<string, { nombre: string; foto_url: string | null; n: number }>()
@@ -151,12 +214,13 @@ export default function JugadorDetalle() {
   )
 
   const initials = jugador.nombre.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || '??'
+  const torneosJugados = torneosHistorial.length
   const totalPartidos = historial.length
-  const victorias = historial.filter(p => {
+  const victorias = torneosHistorial.filter(p => {
     const enP1 = p.pareja1_j1 === id || p.pareja1_j2 === id
     return (enP1 && p.ganador === 1) || (!enP1 && p.ganador === 2)
   }).length
-  const winRate = totalPartidos > 0 ? Math.round((victorias / totalPartidos) * 100) : null
+  const winRate = torneosJugados > 0 ? Math.round((victorias / torneosJugados) * 100) : null
   const racha = calcularRacha(historial, id!)
 
   return (
@@ -234,7 +298,7 @@ export default function JugadorDetalle() {
                 <p className={`font-manrope text-sm font-bold ${racha.tipo === 'victoria' ? 'text-success' : 'text-defeat'}`}>
                   Racha de {racha.n} {racha.tipo === 'victoria' ? (racha.n === 1 ? 'victoria' : 'victorias') : (racha.n === 1 ? 'derrota' : 'derrotas')}
                 </p>
-                <p className="font-inter text-xs text-muted">De los últimos {historial.length} partidos registrados</p>
+                <p className="font-inter text-xs text-muted">De los últimos {torneosJugados} torneos registrados</p>
               </div>
             </div>
           )}
@@ -243,9 +307,23 @@ export default function JugadorDetalle() {
           <div className="rounded-xl bg-white shadow-card overflow-hidden">
             {[
               { label: 'Lado preferido', value: jugador.lado_preferido ? LADO_LABEL[jugador.lado_preferido] : '—', node: jugador.lado_preferido ? <LadoBadge lado={jugador.lado_preferido} /> : null },
-              { label: 'Juega mixto', value: (jugador as { mixto?: string | null }).mixto ? MIXTO_LABEL[(jugador as { mixto: string }).mixto] : '—' },
-              ...((jugador as { frecuencia_semanal?: string | null }).frecuencia_semanal ? [{ label: 'Frecuencia', value: (jugador as { frecuencia_semanal: string }).frecuencia_semanal }] : []),
-              ...((jugador as { rut?: string | null }).rut ? [{ label: 'RUT', value: (jugador as unknown as { rut: string }).rut }] : []),
+              { label: 'Juega mixto', value: jugador.mixto ? MIXTO_LABEL[jugador.mixto] : '—' },
+              ...(jugador.frecuencia_semanal ? [{ label: 'Frecuencia', value: jugador.frecuencia_semanal }] : []),
+              ...(jugador.rut ? [{ label: 'RUT', value: jugador.rut as unknown as string }] : []),
+              ...(jugador.telefono ? [{
+                label: 'Teléfono',
+                value: '',
+                node: (
+                  <a
+                    href={`https://wa.me/${jugador.telefono.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-inter text-sm font-medium text-[#25d366] hover:underline"
+                  >
+                    {jugador.telefono}
+                  </a>
+                ),
+              }] : []),
             ].map(({ label, value, node }, idx, arr) => (
               <div key={label} className={`flex items-center justify-between px-4 py-3 ${idx !== arr.length - 1 ? 'border-b border-surface-high' : ''}`}>
                 <span className="font-inter text-sm text-muted">{label}</span>
