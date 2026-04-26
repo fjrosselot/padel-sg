@@ -6,6 +6,7 @@ import { useUser } from '../../hooks/useUser'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
+import { PlayerCombobox, type JugadorOption } from '../torneos/PlayerCombobox'
 import type { Database } from '../../lib/types/database.types'
 
 type PartidaRow = Database['padel']['Tables']['partidas_abiertas']['Row']
@@ -70,10 +71,10 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
     queryFn: async () => {
       const { data } = await supabase.schema('padel')
         .from('jugadores')
-        .select('id, nombre, apodo')
+        .select('id, nombre, apodo, sexo')
         .eq('estado_cuenta', 'activo')
         .order('nombre')
-      return data ?? []
+      return (data ?? []) as JugadorOption[]
     },
     enabled: isEdit && isAdmin,
   })
@@ -225,18 +226,19 @@ export default function NuevaPartidaModal({ onClose, partida }: Props) {
                         )}
                       </>
                     ) : isAdmin ? (
-                      <select
-                        value=""
-                        onChange={e => { if (e.target.value) assignSlot(key, e.target.value) }}
-                        className="flex-1 rounded-lg border border-navy/20 bg-white px-2 py-1 font-inter text-sm text-navy focus:border-gold focus:outline-none"
-                      >
-                        <option value="">— asignar —</option>
-                        {jugadoresActivos
-                          ?.filter(j => !assignedIds.has(j.id))
-                          .map(j => (
-                            <option key={j.id} value={j.id}>{j.apodo ?? j.nombre}</option>
-                          ))}
-                      </select>
+                      <div className="flex-1">
+                        <PlayerCombobox
+                          players={jugadoresActivos}
+                          value={slotIds[key] ?? ''}
+                          onChange={id => assignSlot(key, id)}
+                          placeholder="— asignar —"
+                          inscritosIds={new Set(
+                            Object.entries(slotIds)
+                              .filter(([k, v]) => k !== key && !!v)
+                              .map(([, v]) => v as string)
+                          )}
+                        />
+                      </div>
                     ) : (
                       <span className="flex-1 font-inter text-sm text-muted">Libre</span>
                     )}
