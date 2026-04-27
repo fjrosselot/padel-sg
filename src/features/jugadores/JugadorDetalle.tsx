@@ -10,13 +10,12 @@ import { PuntosDefender } from '../ranking/PuntosDefender'
 import { useUser } from '../../hooks/useUser'
 import { PagosJugador } from '../tesoreria/PagosJugador'
 import { LadoBadge } from './LadoBadge'
+import { useCategorias } from '../categorias/useCategorias'
 
 const LADO_LABEL: Record<string, string> = { drive: 'Drive', reves: 'Revés', ambos: 'Ambos' }
 const MIXTO_LABEL: Record<string, string> = { si: 'Sí', no: 'No', a_veces: 'A veces' }
 
-interface JugadorNombre { nombre: string; apodo: string | null }
-
-interface PartidoHistorial {
+interface PartidoBase {
   id: string
   fecha: string | null
   tipo: string
@@ -28,23 +27,22 @@ interface PartidoHistorial {
   pareja2_j2: string | null
   sets_pareja1: number | null
   sets_pareja2: number | null
-  p1j1: JugadorNombre | null
-  p1j2: JugadorNombre | null
-  p2j1: JugadorNombre | null
-  p2j2: JugadorNombre | null
 }
 
-interface AmistosoRaw {
+interface PartidoHistorial extends PartidoBase {
+  p1j1: { nombre: string; apodo: string | null } | null
+  p1j2: { nombre: string; apodo: string | null } | null
+  p2j1: { nombre: string; apodo: string | null } | null
+  p2j2: { nombre: string; apodo: string | null } | null
+}
+
+interface AmistosoBase {
   id: string
   fecha: string | null
   creador_id: string | null
   companero_id: string | null
   jugador3_id: string | null
   jugador4_id: string | null
-  creador: JugadorNombre | null
-  companero: JugadorNombre | null
-  jugador3: JugadorNombre | null
-  jugador4: JugadorNombre | null
 }
 
 interface InscripcionCompanero {
@@ -54,9 +52,7 @@ interface InscripcionCompanero {
   j2: { nombre: string; foto_url: string | null } | null
 }
 
-type JugadorExtra = Jugador & {
-  rut?: string | null
-}
+type JugadorExtra = Jugador & { rut?: string | null }
 
 function nombreCorto(nombre: string) {
   const parts = nombre.trim().split(' ').filter(Boolean)
@@ -64,8 +60,7 @@ function nombreCorto(nombre: string) {
   return `${parts[0]} ${parts[parts.length - 1][0]}.`
 }
 
-function calcularRacha(historial: PartidoHistorial[], jugadorId: string): { tipo: 'victoria' | 'derrota'; n: number } | null {
-  const torneos = historial.filter(p => p.tipo !== 'amistoso')
+function calcularRacha(torneos: PartidoBase[], jugadorId: string): { tipo: 'victoria' | 'derrota'; n: number } | null {
   const results = torneos.map(p => {
     if (p.ganador === null) return null
     const enP1 = p.pareja1_j1 === jugadorId || p.pareja1_j2 === jugadorId
@@ -98,10 +93,7 @@ function PartidoCard({ p, jugadorId }: { p: PartidoHistorial; jugadorId: string 
     : p.ganador === null
       ? 'bg-surface text-muted'
       : gano ? 'bg-success/10 text-success' : 'bg-defeat/10 text-defeat'
-
-  const badgeLabel = isAmistoso
-    ? 'Amist.'
-    : p.ganador === null ? 'Pend.' : gano ? 'Victoria' : 'Derrota'
+  const badgeLabel = isAmistoso ? 'Amist.' : p.ganador === null ? 'Pend.' : gano ? 'Victoria' : 'Derrota'
 
   return (
     <div className="flex items-center gap-3 px-4 py-3">
@@ -122,6 +114,7 @@ export default function JugadorDetalle() {
   const navigate = useNavigate()
   const { data: user } = useUser()
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
+  const { data: globalCats } = useCategorias()
 
   const { data: jugador, isLoading, error } = useQuery({
     queryKey: ['jugador', id],
@@ -132,11 +125,12 @@ export default function JugadorDetalle() {
     enabled: !!id,
   })
 
-  const { data: torneosHistorial = [] } = useQuery({
+  // Query partidos WITHOUT embedded joins to avoid PostgREST ambiguity with multiple FKs to same table
+  const { data: torneosRaw = [] } = useQuery({
     queryKey: ['jugador-historial', id],
     queryFn: () =>
-      padelApi.get<PartidoHistorial[]>(
-        `partidos?select=id,fecha,tipo,ganador,resultado,pareja1_j1,pareja1_j2,pareja2_j1,pareja2_j2,sets_pareja1,sets_pareja2,p1j1:jugadores!pareja1_j1(nombre,apodo),p1j2:jugadores!pareja1_j2(nombre,apodo),p2j1:jugadores!pareja2_j1(nombre,apodo),p2j2:jugadores!pareja2_j2(nombre,apodo)&or=(pareja1_j1.eq.${id},pareja1_j2.eq.${id},pareja2_j1.eq.${id},pareja2_j2.eq.${id})&estado=eq.jugado&order=fecha.desc&limit=20`
+      padelApi.get<PartidoBase[]>(
+        `partidos?select=id,fecha,tipo,ganador,resultado,pareja1_j1,pareja1_j2,pareja2_j1,pareja2_j2,sets_pareja1,sets_pareja2&or=(pareja1_j1.eq.${id},pareja1_j2.eq.${id},pareja2_j1.eq.${id},pareja2_j2.eq.${id})&estado=eq.jugado&order=fecha.desc&limit=20`
       ),
     enabled: !!id,
   })
@@ -144,10 +138,33 @@ export default function JugadorDetalle() {
   const { data: amistososRaw = [] } = useQuery({
     queryKey: ['jugador-amistosos', id],
     queryFn: () =>
-      padelApi.get<AmistosoRaw[]>(
-        `partidas_abiertas?select=id,fecha,creador_id,companero_id,jugador3_id,jugador4_id,creador:jugadores!creador_id(nombre,apodo),companero:jugadores!companero_id(nombre,apodo),jugador3:jugadores!jugador3_id(nombre,apodo),jugador4:jugadores!jugador4_id(nombre,apodo)&or=(creador_id.eq.${id},companero_id.eq.${id},jugador3_id.eq.${id},jugador4_id.eq.${id})&estado=eq.jugada&order=fecha.desc&limit=20`
+      padelApi.get<AmistosoBase[]>(
+        `partidas_abiertas?select=id,fecha,creador_id,companero_id,jugador3_id,jugador4_id&or=(creador_id.eq.${id},companero_id.eq.${id},jugador3_id.eq.${id},jugador4_id.eq.${id})&estado=eq.jugada&order=fecha.desc&limit=20`
       ),
     enabled: !!id,
+  })
+
+  // Collect all player IDs from both queries, then fetch names in one request
+  const allPlayerIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (const p of torneosRaw) {
+      [p.pareja1_j1, p.pareja1_j2, p.pareja2_j1, p.pareja2_j2].forEach(pid => { if (pid) ids.add(pid) })
+    }
+    for (const a of amistososRaw) {
+      [a.creador_id, a.companero_id, a.jugador3_id, a.jugador4_id].forEach(pid => { if (pid) ids.add(pid) })
+    }
+    return Array.from(ids)
+  }, [torneosRaw, amistososRaw])
+
+  const { data: playerNamesMap = {} } = useQuery({
+    queryKey: ['player-names', allPlayerIds.slice().sort().join(',')],
+    queryFn: async () => {
+      const players = await padelApi.get<{ id: string; nombre: string; apodo: string | null }[]>(
+        `jugadores?select=id,nombre,apodo&id=in.(${allPlayerIds.join(',')})`
+      )
+      return Object.fromEntries(players.map(p => [p.id, { nombre: p.nombre, apodo: p.apodo }]))
+    },
+    enabled: allPlayerIds.length > 0,
   })
 
   const { data: inscripcionesRaw = [] } = useQuery({
@@ -161,7 +178,17 @@ export default function JugadorDetalle() {
   const { data: rankings } = usePlayerRankings(id)
 
   const historial = useMemo((): PartidoHistorial[] => {
-    const amistososMapped: PartidoHistorial[] = amistososRaw.map(a => ({
+    const lookup = (pid: string | null) => (pid ? playerNamesMap[pid] ?? null : null)
+
+    const torneos: PartidoHistorial[] = torneosRaw.map(p => ({
+      ...p,
+      p1j1: lookup(p.pareja1_j1),
+      p1j2: lookup(p.pareja1_j2),
+      p2j1: lookup(p.pareja2_j1),
+      p2j2: lookup(p.pareja2_j2),
+    }))
+
+    const amistosos: PartidoHistorial[] = amistososRaw.map(a => ({
       id: a.id,
       fecha: a.fecha,
       tipo: 'amistoso',
@@ -173,19 +200,20 @@ export default function JugadorDetalle() {
       pareja2_j2: a.jugador4_id,
       sets_pareja1: null,
       sets_pareja2: null,
-      p1j1: a.creador,
-      p1j2: a.companero,
-      p2j1: a.jugador3,
-      p2j2: a.jugador4,
+      p1j1: lookup(a.creador_id),
+      p1j2: lookup(a.companero_id),
+      p2j1: lookup(a.jugador3_id),
+      p2j2: lookup(a.jugador4_id),
     }))
-    return [...torneosHistorial, ...amistososMapped]
+
+    return [...torneos, ...amistosos]
       .sort((a, b) => {
         if (!a.fecha) return 1
         if (!b.fecha) return -1
         return new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
       })
       .slice(0, 10)
-  }, [torneosHistorial, amistososRaw])
+  }, [torneosRaw, amistososRaw, playerNamesMap])
 
   const companerosFrecuentes = useMemo(() => {
     const count = new Map<string, { nombre: string; foto_url: string | null; n: number }>()
@@ -213,15 +241,21 @@ export default function JugadorDetalle() {
     </div>
   )
 
+  const cat = globalCats?.find(c => c.id === jugador.categoria || c.nombre === jugador.categoria)
+  const headerBg = cat?.color_fondo ?? '#162844'
+  const headerText = cat?.color_texto ?? '#ffffff'
+  const headerMuted = cat ? `${cat.color_texto}99` : 'rgba(255,255,255,0.5)'
+  const avatarBg = cat?.color_borde ?? '#1e3a5f'
+  const avatarText = cat?.color_texto ?? '#e8c547'
+
   const initials = jugador.nombre.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || '??'
-  const torneosJugados = torneosHistorial.length
   const totalPartidos = historial.length
-  const victorias = torneosHistorial.filter(p => {
+  const victorias = torneosRaw.filter(p => {
     const enP1 = p.pareja1_j1 === id || p.pareja1_j2 === id
     return (enP1 && p.ganador === 1) || (!enP1 && p.ganador === 2)
   }).length
-  const winRate = torneosJugados > 0 ? Math.round((victorias / torneosJugados) * 100) : null
-  const racha = calcularRacha(historial, id!)
+  const winRate = torneosRaw.length > 0 ? Math.round((victorias / torneosRaw.length) * 100) : null
+  const racha = calcularRacha(torneosRaw, id!)
 
   return (
     <div className="space-y-4">
@@ -236,29 +270,39 @@ export default function JugadorDetalle() {
       <div className="grid grid-cols-1 md:grid-cols-[1fr_380px] gap-6 items-start">
         {/* Left column */}
         <div className="space-y-4">
-          {/* Header */}
-          <div className="rounded-xl bg-navy p-5 flex items-center gap-4">
-            <div className="h-20 w-20 rounded-2xl shrink-0 bg-navy-mid flex items-center justify-center overflow-hidden border-2 border-white/10">
+          {/* Header — background from category color */}
+          <div className="rounded-xl p-5 flex items-center gap-4" style={{ background: headerBg }}>
+            <div
+              className="h-20 w-20 rounded-2xl shrink-0 flex items-center justify-center overflow-hidden border-2"
+              style={{ background: avatarBg, borderColor: `${headerText}30` }}
+            >
               {jugador.foto_url
                 ? <img src={jugador.foto_url} alt={jugador.nombre} className="h-full w-full object-cover" />
-                : <span className="font-manrope text-2xl font-bold text-gold">{initials}</span>
+                : <span className="font-manrope text-2xl font-bold" style={{ color: avatarText }}>{initials}</span>
               }
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 {jugador.categoria && (
-                  <span className="inline-block px-2 py-0.5 rounded-md bg-gold/20 text-gold font-inter text-[10px] font-black tracking-wider uppercase">
+                  <span
+                    className="inline-block px-2 py-0.5 rounded-md font-inter text-[10px] font-black tracking-wider uppercase"
+                    style={{ background: `${headerText}20`, color: headerText }}
+                  >
                     Cat. {jugador.categoria}
                   </span>
                 )}
                 {jugador.sexo && (
-                  <span className="font-inter text-[10px] text-white/50 uppercase tracking-wider">
+                  <span className="font-inter text-[10px] uppercase tracking-wider" style={{ color: headerMuted }}>
                     {jugador.sexo === 'M' ? 'Masculino' : 'Femenino'}
                   </span>
                 )}
               </div>
-              <h1 className="font-manrope text-xl font-extrabold text-white leading-tight truncate">{jugador.nombre}</h1>
-              {jugador.apodo && <p className="font-inter text-sm text-white/50 mt-0.5">"{jugador.apodo}"</p>}
+              <h1 className="font-manrope text-xl font-extrabold leading-tight truncate" style={{ color: headerText }}>
+                {jugador.nombre}
+              </h1>
+              {jugador.apodo && (
+                <p className="font-inter text-sm mt-0.5" style={{ color: headerMuted }}>"{jugador.apodo}"</p>
+              )}
             </div>
           </div>
 
@@ -298,7 +342,7 @@ export default function JugadorDetalle() {
                 <p className={`font-manrope text-sm font-bold ${racha.tipo === 'victoria' ? 'text-success' : 'text-defeat'}`}>
                   Racha de {racha.n} {racha.tipo === 'victoria' ? (racha.n === 1 ? 'victoria' : 'victorias') : (racha.n === 1 ? 'derrota' : 'derrotas')}
                 </p>
-                <p className="font-inter text-xs text-muted">De los últimos {torneosJugados} torneos registrados</p>
+                <p className="font-inter text-xs text-muted">De los últimos {torneosRaw.length} torneos registrados</p>
               </div>
             </div>
           )}
