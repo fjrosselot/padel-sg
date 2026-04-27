@@ -2,7 +2,7 @@ const SERVICE_KEY = () => import.meta.env.VITE_SUPABASE_SERVICE_KEY as string | 
 const ANON_KEY = () => import.meta.env.VITE_SUPABASE_ANON_KEY as string
 const API_URL = () => import.meta.env.VITE_SUPABASE_URL as string
 
-// Sends invite email (new user) or magic link (existing user)
+// New user → invite (set password + activate). Existing user → password reset.
 export async function sendInvite(email: string): Promise<void> {
   const key = SERVICE_KEY() ?? ANON_KEY()
   const headers = { 'Content-Type': 'application/json', apikey: key, Authorization: `Bearer ${key}` }
@@ -22,15 +22,15 @@ export async function sendInvite(email: string): Promise<void> {
 
   if (!alreadyRegistered) throw new Error(inviteBody?.msg ?? inviteBody?.message ?? `Error ${inviteRes.status}`)
 
-  // User already has an account — send magic link instead
-  const otpRes = await fetch(`${API_URL()}/auth/v1/otp`, {
+  // User already has an account — send password reset email
+  const recoverRes = await fetch(`${API_URL()}/auth/v1/recover`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ email, create_user: false }),
+    body: JSON.stringify({ email }),
   })
 
-  if (!otpRes.ok) {
-    const body = await otpRes.json().catch(() => ({}))
-    throw new Error(body?.msg ?? body?.message ?? `Error ${otpRes.status}`)
+  if (!recoverRes.ok) {
+    const body = await recoverRes.json().catch(() => ({}))
+    throw new Error(body?.msg ?? body?.message ?? `Error ${recoverRes.status}`)
   }
 }
