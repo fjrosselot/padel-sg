@@ -1,5 +1,21 @@
 # DEVLOG — padel-sg
 
+## [2026-04-27 18:00] — TipTap WYSIWYG editor para novedades
+
+**Resumen:** Se integró TipTap v3 como editor de texto enriquecido en la admin de novedades. El contenido se guarda como HTML y se renderiza en el dashboard con `dangerouslySetInnerHTML`. Se agregó regla global al CLAUDE.md para siempre pushear a origin tras cada commit (Vercel deploy automático).
+
+**Archivos:** `src/features/admin/RichTextEditor.tsx` (nuevo), `src/features/admin/AdminNovedades.tsx`, `src/features/dashboard/DashboardWidgets.tsx`, `src/index.css`, `~/.claude/CLAUDE.md`
+
+**Decisiones:**
+- TipTap sobre alternativas (Quill, Slate) — ya instalado en este proyecto, v3 con extensiones separadas
+- HTML en vez de Markdown — más directo para renderizado, sin parser custom
+- Estilos `.novedad-content` en CSS global — no se usa `@tailwindcss/typography` para mantener control fino
+
+**Pendientes:**
+- [ ] RLS para que jugadores vean sus propios cobros
+
+---
+
 ## [2026-04-27 13:00] — Cobros de inscripción + toggle torneo externo + fixes de grants
 
 **Resumen:** Se agregó campo `cobrar_inscripcion` (bool) y `monto_inscripcion` (int CLP) a `torneos`. El `EditTorneoModal` muestra un toggle cuando el tipo es `externo`. Se diagnosticó y corrigió problema de cobros invisibles en Tesorería: `service_role` no tenía GRANT en `cobros`, `cobro_jugadores` ni `pagos` (mismo patrón que ranking). Se generaron cobros del OSP Primera Fecha 2026 (10 jugadores × $25.000). Se ajustó umbral de morosos de `>1` a `>=1`.
