@@ -82,7 +82,7 @@ export default function JugadorDetalle() {
     queryKey: ['jugador', id],
     queryFn: () =>
       padelApi.get<(Jugador & { rut?: string | null })[]>(
-        `jugadores?select=id,nombre,apodo,categoria,foto_url,lado_preferido,sexo,mixto,frecuencia_semanal,rut,telefono&id=eq.${id}`
+        `jugadores?select=id,nombre,nombre_pila,apellido,apodo,email,categoria,foto_url,lado_preferido,sexo,mixto,frecuencia_semanal,rut,telefono,hijos_sg&id=eq.${id}`
       ).then(r => r[0] ?? null),
     enabled: !!id,
   })
