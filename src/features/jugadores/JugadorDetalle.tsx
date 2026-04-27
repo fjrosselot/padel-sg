@@ -1,7 +1,7 @@
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, Trophy, Target, Percent, Flame, Users, Wallet } from 'lucide-react'
+import { ArrowLeft, Search, Trophy, TrendingUp, CreditCard } from 'lucide-react'
 import { padelApi } from '../../lib/padelApi'
 import type { Jugador } from '../../lib/supabase'
 import { usePlayerRankings } from '../../hooks/usePlayerRankings'
@@ -9,74 +9,45 @@ import { PuntosHistorial } from '../ranking/PuntosHistorial'
 import { PuntosDefender } from '../ranking/PuntosDefender'
 import { useUser } from '../../hooks/useUser'
 import { PagosJugador } from '../tesoreria/PagosJugador'
-import { LadoBadge } from './LadoBadge'
-import { useCategorias } from '../categorias/useCategorias'
+import { JugadorDetalleSidebar } from './JugadorDetalleSidebar'
 
-const LADO_LABEL: Record<string, string> = { drive: 'Drive', reves: 'Revés', ambos: 'Ambos' }
-const MIXTO_LABEL: Record<string, string> = { si: 'Sí', no: 'No', a_veces: 'A veces' }
 const FASE_LABEL: Record<string, string> = {
-  grupo: 'Fase de grupos', cuartos: 'Cuartos de final',
-  semifinal: 'Semifinal', final: 'Final', tercer_lugar: 'Tercer lugar',
-  octavos: 'Octavos de final', consolacion_cuartos: 'Consolación',
-  consolacion_sf: 'Cons. SF', consolacion_final: 'Cons. Final', desafio: 'Desafío',
+  grupo: 'Grupos', cuartos: 'Cuartos', semifinal: 'Semifinal', final: 'Final',
+  tercer_lugar: '3er lugar', octavos: 'Octavos', consolacion_cuartos: 'Consola C',
+  consolacion_sf: 'Consola SF', consolacion_final: 'Consola F', desafio: 'Desafío',
 }
 
 interface HistorialEntry {
-  torneo_id: string
-  torneo_nombre: string
-  torneo_fecha: string | null
-  match_id: string
-  fase: string | null
-  turno: string | null
-  pareja1_nombre: string | null
-  pareja2_nombre: string | null
-  ganador: number | null
-  resultado: string | null
-  es_pareja1: boolean
+  torneo_id: string; torneo_nombre: string; torneo_fecha: string | null
+  match_id: string; fase: string | null; turno: string | null
+  pareja1_nombre: string | null; pareja2_nombre: string | null
+  ganador: number | null; resultado: string | null; es_pareja1: boolean
 }
 
-interface AmistosoBase {
-  id: string
-  fecha: string | null
-  creador_id: string | null
-  companero_id: string | null
-  jugador3_id: string | null
-  jugador4_id: string | null
-}
+type Tab = 'partidos' | 'puntos' | 'pagos'
 
-interface InscripcionCompanero {
-  jugador1_id: string
-  jugador2_id: string
-  j1: { nombre: string; foto_url: string | null } | null
-  j2: { nombre: string; foto_url: string | null } | null
-}
-
-type JugadorExtra = Jugador & { rut?: string | null }
-
-function TorneoCard({ entry }: { entry: HistorialEntry }) {
+function PartidoRow({ entry, query }: { entry: HistorialEntry; query: string }) {
   const gano = entry.ganador !== null && (
-    (entry.es_pareja1 && entry.ganador === 1) ||
-    (!entry.es_pareja1 && entry.ganador === 2)
+    (entry.es_pareja1 && entry.ganador === 1) || (!entry.es_pareja1 && entry.ganador === 2)
   )
   const rival = entry.es_pareja1 ? entry.pareja2_nombre : entry.pareja1_nombre
   const faseLabel = entry.fase ? (FASE_LABEL[entry.fase] ?? entry.fase) : null
-
-  let displayScore = '—'
-  if (entry.resultado) {
-    if (entry.es_pareja1) {
-      displayScore = entry.resultado
-    } else {
-      displayScore = entry.resultado
-        .split(' ')
-        .map(set => set.split('-').reverse().join('-'))
-        .join(' ')
-    }
+  if (query) {
+    const q = query.toLowerCase()
+    const hayMatch = (rival ?? '').toLowerCase().includes(q)
+      || entry.torneo_nombre.toLowerCase().includes(q)
+      || (faseLabel ?? '').toLowerCase().includes(q)
+    if (!hayMatch) return null
   }
-
-  const fechaStr = entry.torneo_fecha
+  let score = '—'
+  if (entry.resultado) {
+    score = entry.es_pareja1
+      ? entry.resultado
+      : entry.resultado.split(' ').map(s => s.split('-').reverse().join('-')).join(' ')
+  }
+  const fecha = entry.torneo_fecha
     ? new Date(entry.torneo_fecha).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', timeZone: 'America/Santiago' })
     : '—'
-
   return (
     <div className="flex items-center gap-3 px-4 py-3">
       <span className={`shrink-0 w-14 text-center rounded-md px-1.5 py-0.5 font-inter text-[10px] font-black uppercase ${
@@ -89,28 +60,10 @@ function TorneoCard({ entry }: { entry: HistorialEntry }) {
           {rival ? `vs ${rival}` : (faseLabel ?? entry.torneo_nombre)}
         </p>
         <p className="font-inter text-[10px] text-muted truncate">
-          {entry.torneo_nombre}{faseLabel ? ` · ${faseLabel}` : ''} · {fechaStr}
+          {entry.torneo_nombre}{faseLabel ? ` · ${faseLabel}` : ''} · {fecha}
         </p>
       </div>
-      <span className="font-manrope text-sm font-bold text-navy shrink-0">{displayScore}</span>
-    </div>
-  )
-}
-
-function AmistosoCard({ a }: { a: AmistosoBase }) {
-  const fechaStr = a.fecha
-    ? new Date(a.fecha).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', timeZone: 'America/Santiago' })
-    : '—'
-  return (
-    <div className="flex items-center gap-3 px-4 py-3">
-      <span className="shrink-0 w-14 text-center rounded-md px-1.5 py-0.5 font-inter text-[10px] font-black uppercase bg-surface text-muted">
-        Amist.
-      </span>
-      <div className="flex-1 min-w-0">
-        <p className="font-inter text-xs font-medium text-navy">Amistoso jugado</p>
-        <p className="font-inter text-[10px] text-muted">{fechaStr}</p>
-      </div>
-      <span className="font-manrope text-sm font-bold text-navy shrink-0">—</span>
+      <span className="font-manrope text-sm font-bold text-navy shrink-0">{score}</span>
     </div>
   )
 }
@@ -120,283 +73,190 @@ export default function JugadorDetalle() {
   const navigate = useNavigate()
   const { data: user } = useUser()
   const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin_torneo'
-  const { data: globalCats } = useCategorias()
+  const esPropioPeril = !!user?.id && user.id === id
+
+  const [tab, setTab] = useState<Tab>('partidos')
+  const [query, setQuery] = useState('')
 
   const { data: jugador, isLoading, error } = useQuery({
     queryKey: ['jugador', id],
     queryFn: () =>
-      padelApi.get<JugadorExtra[]>(
+      padelApi.get<(Jugador & { rut?: string | null })[]>(
         `jugadores?select=id,nombre,apodo,categoria,foto_url,lado_preferido,sexo,mixto,frecuencia_semanal,rut,telefono&id=eq.${id}`
-      ).then(rows => rows[0] ?? null),
+      ).then(r => r[0] ?? null),
     enabled: !!id,
   })
 
-  // Read historial from torneos.categorias JSON via RPC — has both pairs and correct results
-  const { data: historialTorneos = [] } = useQuery({
+  const { data: historial = [] } = useQuery({
     queryKey: ['jugador-historial-rpc', id],
     queryFn: () => padelApi.rpc<HistorialEntry[]>('get_player_historial', { p_jugador_id: id }),
     enabled: !!id,
   })
 
-  const { data: amistososRaw = [] } = useQuery({
-    queryKey: ['jugador-amistosos', id],
-    queryFn: () =>
-      padelApi.get<AmistosoBase[]>(
-        `partidas_abiertas?select=id,fecha,creador_id,companero_id,jugador3_id,jugador4_id&or=(creador_id.eq.${id},companero_id.eq.${id},jugador3_id.eq.${id},jugador4_id.eq.${id})&estado=eq.jugada&order=fecha.desc&limit=20`
-      ),
-    enabled: !!id,
-  })
+  const { data: rankings = [] } = usePlayerRankings(id)
 
-  const { data: inscripcionesRaw = [] } = useQuery({
-    queryKey: ['jugador-companeros', id],
-    queryFn: () => padelApi.get<InscripcionCompanero[]>(
-      `inscripciones?select=jugador1_id,jugador2_id,j1:jugadores!jugador1_id(nombre,foto_url),j2:jugadores!jugador2_id(nombre,foto_url)&or=(jugador1_id.eq.${id},jugador2_id.eq.${id})&estado=eq.confirmada`
-    ),
-    enabled: !!id,
-  })
+  // Computed stats
+  const victorias = useMemo(() =>
+    historial.filter(e => (e.es_pareja1 && e.ganador === 1) || (!e.es_pareja1 && e.ganador === 2)).length
+  , [historial])
+  const winRate = historial.length > 0 ? Math.round((victorias / historial.length) * 100) : null
 
-  const { data: rankings } = usePlayerRankings(id)
+  const racha = useMemo(() => {
+    if (!historial.length) return null
+    const results = historial.map(e =>
+      (e.es_pareja1 && e.ganador === 1) || (!e.es_pareja1 && e.ganador === 2) ? 'v' : 'd'
+    )
+    const tipo = results[0]
+    let n = 0; for (const r of results) { if (r === tipo) n++; else break }
+    return n >= 2 ? { tipo: tipo === 'v' ? 'victoria' as const : 'derrota' as const, n } : null
+  }, [historial])
 
-  const companerosFrecuentes = useMemo(() => {
-    const count = new Map<string, { nombre: string; foto_url: string | null; n: number }>()
-    for (const ins of inscripcionesRaw) {
-      const isJ1 = ins.jugador1_id === id
-      const partnerId = isJ1 ? ins.jugador2_id : ins.jugador1_id
-      const partnerData = isJ1 ? ins.j2 : ins.j1
-      if (!partnerData || !partnerId || partnerId === id) continue
-      if (!count.has(partnerId)) count.set(partnerId, { nombre: partnerData.nombre, foto_url: partnerData.foto_url, n: 0 })
-      count.get(partnerId)!.n++
-    }
-    return Array.from(count.entries())
-      .map(([pid, data]) => ({ id: pid, ...data }))
-      .sort((a, b) => b.n - a.n)
-      .slice(0, 3)
-  }, [inscripcionesRaw, id])
+  const badges = useMemo(() => {
+    const list = []
+    if (racha?.tipo === 'victoria' && racha.n >= 3)
+      list.push({ emoji: '🔥', label: 'En racha', desc: `${racha.n} victorias consecutivas`, color: '#FF6B35', bg: '#FFF0EB' })
+    const ganoFinal = historial.some(e => e.fase === 'final' && ((e.es_pareja1 && e.ganador === 1) || (!e.es_pareja1 && e.ganador === 2)))
+    const llegFinal = historial.some(e => e.fase === 'final')
+    if (ganoFinal) list.push({ emoji: '🏆', label: 'Campeón', desc: 'Ganó al menos una final', color: '#D97706', bg: '#FEF3C7' })
+    else if (llegFinal) list.push({ emoji: '🥈', label: 'Finalista', desc: 'Llegó a una final', color: '#6B7280', bg: '#F3F4F6' })
+    if (winRate !== null && winRate >= 65 && historial.length >= 5)
+      list.push({ emoji: '💪', label: 'Sólido', desc: '+65% de efectividad', color: '#059669', bg: '#D1FAE5' })
+    if (new Set(historial.map(e => e.torneo_id)).size >= 5)
+      list.push({ emoji: '⭐', label: 'Veterano', desc: 'Participó en 5+ torneos', color: '#7C3AED', bg: '#EDE9FE' })
+    return list
+  }, [racha, historial, winRate])
 
-  if (isLoading) return <div className="p-6 text-muted font-inter text-sm">Cargando…</div>
+  const tabs: { id: Tab; label: string; icon: typeof Trophy }[] = [
+    { id: 'partidos', label: 'Mis partidos', icon: Trophy },
+    { id: 'puntos',   label: 'Mis puntos',   icon: TrendingUp },
+    ...(isAdmin || esPropioPeril ? [{ id: 'pagos' as Tab, label: 'Mis pagos', icon: CreditCard }] : []),
+  ]
+  const placeholders: Record<Tab, string> = {
+    partidos: 'Buscar rival, torneo, fase…',
+    puntos: 'Buscar torneo…',
+    pagos: 'Buscar concepto…',
+  }
+
+  if (isLoading) return <div className="p-6 font-inter text-sm text-muted">Cargando…</div>
   if (error || !jugador) return (
     <div className="p-6 space-y-4">
-      <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted font-inter text-sm">
+      <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-2 font-inter text-sm text-muted">
         <ArrowLeft className="h-4 w-4" /> Volver
       </button>
       <p className="font-inter text-sm text-muted">Jugador no encontrado.</p>
     </div>
   )
 
-  const cat = globalCats?.find(c => c.id === jugador.categoria || c.nombre === jugador.categoria)
-  const headerBg = cat?.color_fondo ?? '#162844'
-  const headerText = cat?.color_texto ?? '#ffffff'
-  const headerMuted = cat ? `${cat.color_texto}99` : 'rgba(255,255,255,0.5)'
-  const avatarBg = cat?.color_borde ?? '#1e3a5f'
-  const avatarText = cat?.color_texto ?? '#e8c547'
-
-  const initials = jugador.nombre.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || '??'
-  const victorias = historialTorneos.filter(e =>
-    (e.es_pareja1 && e.ganador === 1) || (!e.es_pareja1 && e.ganador === 2)
-  ).length
-  const totalTorneos = historialTorneos.length
-  const totalPartidos = totalTorneos + amistososRaw.length
-  const winRate = totalTorneos > 0 ? Math.round((victorias / totalTorneos) * 100) : null
-
-  // Racha: consecutive wins/losses from latest tournament matches
-  const rachaResults = historialTorneos.map(e =>
-    (e.es_pareja1 && e.ganador === 1) || (!e.es_pareja1 && e.ganador === 2) ? 'v' : 'd'
-  )
-  const rachaTipo = rachaResults.length > 0 ? rachaResults[0] : null
-  let rachaN = 0
-  for (const r of rachaResults) { if (r === rachaTipo) rachaN++; else break }
-  const racha = rachaN >= 2 ? { tipo: rachaTipo === 'v' ? 'victoria' as const : 'derrota' as const, n: rachaN } : null
-
-  // Merge tournament historial (last 10) and amistosos sorted by date
-  const recentAmistosos = amistososRaw.slice(0, 10)
-  const showHistorial = historialTorneos.slice(0, 10)
+  const victoriasFiltradas = historial.filter(e => (query
+    ? (e.pareja2_nombre ?? e.pareja1_nombre ?? '').toLowerCase().includes(query.toLowerCase()) || e.torneo_nombre.toLowerCase().includes(query.toLowerCase())
+    : true
+  ) && ((e.es_pareja1 && e.ganador === 1) || (!e.es_pareja1 && e.ganador === 2))).length
 
   return (
     <div className="space-y-4">
-      <button
-        type="button"
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-muted font-inter text-sm hover:text-navy transition-colors"
-      >
+      <button type="button" onClick={() => navigate(-1)}
+        className="flex items-center gap-2 font-inter text-sm text-muted hover:text-navy transition-colors">
         <ArrowLeft className="h-4 w-4" /> Jugadores
       </button>
 
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_380px] gap-6 items-start">
-        {/* Left column */}
-        <div className="space-y-4">
-          {/* Header */}
-          <div className="rounded-xl p-5 flex items-center gap-4" style={{ background: headerBg }}>
-            <div
-              className="h-20 w-20 rounded-2xl shrink-0 flex items-center justify-center overflow-hidden border-2"
-              style={{ background: avatarBg, borderColor: `${headerText}30` }}
-            >
-              {jugador.foto_url
-                ? <img src={jugador.foto_url} alt={jugador.nombre} className="h-full w-full object-cover" />
-                : <span className="font-manrope text-2xl font-bold" style={{ color: avatarText }}>{initials}</span>
-              }
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-5 items-start">
+
+        {/* ── Main area ── */}
+        <div className="space-y-3 order-2 md:order-1">
+          {/* Tab selector */}
+          <div className="flex gap-1 p-1 rounded-xl bg-white shadow-card">
+            {tabs.map(t => {
+              const Icon = t.icon
+              const active = tab === t.id
+              return (
+                <button key={t.id} type="button"
+                  onClick={() => { setTab(t.id); setQuery('') }}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg font-inter text-[11px] font-semibold transition-all ${
+                    active ? 'bg-navy text-gold shadow-sm' : 'text-slate hover:text-navy'
+                  }`}>
+                  <Icon className="h-3.5 w-3.5 shrink-0" />
+                  <span>{t.label}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Search (only for partidos) */}
+          {tab === 'partidos' && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white shadow-card">
+              <Search className="h-3.5 w-3.5 shrink-0 text-muted" />
+              <input type="text" value={query} onChange={e => setQuery(e.target.value)}
+                placeholder={placeholders[tab]}
+                className="flex-1 bg-transparent font-inter text-xs text-navy outline-none placeholder:text-muted" />
+              {query && (
+                <button type="button" onClick={() => setQuery('')} className="font-inter text-[10px] text-muted">✕</button>
+              )}
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                {jugador.categoria && (
-                  <span
-                    className="inline-block px-2 py-0.5 rounded-md font-inter text-[10px] font-black tracking-wider uppercase"
-                    style={{ background: `${headerText}20`, color: headerText }}
-                  >
-                    Cat. {jugador.categoria}
-                  </span>
-                )}
-                {jugador.sexo && (
-                  <span className="font-inter text-[10px] uppercase tracking-wider" style={{ color: headerMuted }}>
-                    {jugador.sexo === 'M' ? 'Masculino' : 'Femenino'}
-                  </span>
+          )}
+
+          {/* Tab content */}
+          {tab === 'partidos' && (
+            <div className="rounded-xl bg-white shadow-card overflow-hidden">
+              <div className="px-4 py-3 border-b border-surface flex items-center justify-between">
+                <div>
+                  <p className="font-manrope text-sm font-bold text-navy">Partidos</p>
+                  {historial.length > 0 && !query && (
+                    <p className="font-inter text-[10px] text-muted mt-0.5">
+                      {historial.length} partidos · {victorias} victorias{winRate !== null ? ` · ${winRate}%` : ''}
+                    </p>
+                  )}
+                  {query && (
+                    <p className="font-inter text-[10px] text-muted mt-0.5">
+                      {victoriasFiltradas} victorias en resultados filtrados
+                    </p>
+                  )}
+                </div>
+                {historial.length > 10 && !query && (
+                  <Link to={`/jugadores/${id}/partidos`} className="font-inter text-xs text-gold hover:underline">
+                    Ver todos →
+                  </Link>
                 )}
               </div>
-              <h1 className="font-manrope text-xl font-extrabold leading-tight truncate" style={{ color: headerText }}>
-                {jugador.nombre}
-              </h1>
-              {jugador.apodo && (
-                <p className="font-inter text-sm mt-0.5" style={{ color: headerMuted }}>"{jugador.apodo}"</p>
-              )}
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-xl bg-white shadow-card p-3 text-center">
-              <div className="flex items-center justify-center mb-1"><Trophy className="h-4 w-4 text-gold" /></div>
-              {rankings && rankings.length > 0 ? rankings.map(r => (
-                <div key={`${r.categoria}_${r.sexo}`}>
-                  <p className="font-manrope text-lg font-bold text-navy leading-tight">#{r.posicion}</p>
-                  <p className="font-inter text-[9px] text-muted uppercase tracking-wide">{r.categoria} · {r.puntos_total} pts</p>
-                </div>
-              )) : (
-                <>
-                  <p className="font-manrope text-xl font-bold text-navy">—</p>
-                  <p className="font-inter text-[10px] text-muted uppercase tracking-wide">Ranking</p>
-                </>
-              )}
-            </div>
-            <div className="rounded-xl bg-white shadow-card p-3 text-center">
-              <div className="flex items-center justify-center mb-1"><Target className="h-4 w-4 text-slate" /></div>
-              <p className="font-manrope text-xl font-bold text-navy">{totalPartidos}</p>
-              <p className="font-inter text-[10px] text-muted uppercase tracking-wide">Partidos</p>
-            </div>
-            <div className="rounded-xl bg-white shadow-card p-3 text-center">
-              <div className="flex items-center justify-center mb-1"><Percent className="h-4 w-4 text-slate" /></div>
-              <p className="font-manrope text-xl font-bold text-navy">{winRate !== null ? `${winRate}%` : '—'}</p>
-              <p className="font-inter text-[10px] text-muted uppercase tracking-wide">Victorias</p>
-            </div>
-          </div>
-
-          {/* Racha */}
-          {racha && (
-            <div className={`rounded-xl p-3 flex items-center gap-3 ${racha.tipo === 'victoria' ? 'bg-success/10 border border-success/20' : 'bg-defeat/10 border border-defeat/20'}`}>
-              <Flame className={`h-5 w-5 shrink-0 ${racha.tipo === 'victoria' ? 'text-success' : 'text-defeat'}`} />
-              <div>
-                <p className={`font-manrope text-sm font-bold ${racha.tipo === 'victoria' ? 'text-success' : 'text-defeat'}`}>
-                  Racha de {racha.n} {racha.tipo === 'victoria' ? (racha.n === 1 ? 'victoria' : 'victorias') : (racha.n === 1 ? 'derrota' : 'derrotas')}
-                </p>
-                <p className="font-inter text-xs text-muted">Últimos {totalTorneos} torneos registrados</p>
+              <div className="divide-y divide-surface">
+                {historial.length === 0
+                  ? <p className="px-4 py-8 text-center font-inter text-sm text-muted">Sin partidos registrados.</p>
+                  : historial.slice(0, query ? undefined : 10).map(e => (
+                      <PartidoRow key={e.match_id} entry={e} query={query} />
+                    ))
+                }
               </div>
             </div>
           )}
 
-          {/* Detalles */}
-          <div className="rounded-xl bg-white shadow-card overflow-hidden">
-            {[
-              { label: 'Lado preferido', value: jugador.lado_preferido ? LADO_LABEL[jugador.lado_preferido] : '—', node: jugador.lado_preferido ? <LadoBadge lado={jugador.lado_preferido} /> : null },
-              { label: 'Juega mixto', value: jugador.mixto ? MIXTO_LABEL[jugador.mixto] : '—' },
-              ...(jugador.frecuencia_semanal ? [{ label: 'Frecuencia', value: jugador.frecuencia_semanal }] : []),
-              ...(jugador.rut ? [{ label: 'RUT', value: jugador.rut as unknown as string }] : []),
-              ...(jugador.telefono ? [{
-                label: 'Teléfono',
-                value: '',
-                node: (
-                  <a
-                    href={`https://wa.me/${jugador.telefono.replace(/\D/g, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-inter text-sm font-medium text-[#25d366] hover:underline"
-                  >
-                    {jugador.telefono}
-                  </a>
-                ),
-              }] : []),
-            ].map(({ label, value, node }, idx, arr) => (
-              <div key={label} className={`flex items-center justify-between px-4 py-3 ${idx !== arr.length - 1 ? 'border-b border-surface-high' : ''}`}>
-                <span className="font-inter text-sm text-muted">{label}</span>
-                {node ?? <span className="font-inter text-sm font-medium text-navy">{value}</span>}
-              </div>
-            ))}
-          </div>
-
-          {/* Compañeros frecuentes */}
-          {companerosFrecuentes.length > 0 && (
-            <div className="rounded-xl bg-white shadow-card overflow-hidden">
-              <div className="px-4 py-3 border-b border-surface-high flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted" />
-                <p className="font-manrope text-sm font-bold text-navy">Compañeros frecuentes</p>
-              </div>
-              {companerosFrecuentes.map((c, idx) => {
-                const init = c.nombre.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
-                return (
-                  <div key={c.id} className={`flex items-center gap-3 px-4 py-3 ${idx !== companerosFrecuentes.length - 1 ? 'border-b border-surface-high' : ''}`}>
-                    <div className="h-8 w-8 rounded-full bg-navy shrink-0 flex items-center justify-center overflow-hidden">
-                      {c.foto_url
-                        ? <img src={c.foto_url} alt={c.nombre} className="h-full w-full object-cover" />
-                        : <span className="font-manrope text-xs font-bold text-gold">{init}</span>
-                      }
-                    </div>
-                    <p className="flex-1 font-inter text-sm text-navy">{c.nombre}</p>
-                    <span className="font-inter text-xs text-muted">{c.n} {c.n === 1 ? 'torneo' : 'torneos'}</span>
-                  </div>
-                )
-              })}
+          {tab === 'puntos' && (
+            <div className="space-y-3">
+              <PuntosDefender jugadorId={id!} />
+              <PuntosHistorial jugadorId={id!} />
             </div>
           )}
-        </div>
 
-        {/* Right column */}
-        <div className="space-y-4">
-          {/* Últimos partidos */}
-          <div className="rounded-xl bg-white shadow-card overflow-hidden">
-            <div className="px-4 py-3 border-b border-surface-high flex items-center justify-between">
-              <p className="font-manrope text-sm font-bold text-navy">Últimos partidos</p>
-              {historialTorneos.length > 0 && (
-                <Link to={`/jugadores/${id}/partidos`} className="font-inter text-xs text-gold hover:underline">
-                  Ver todos →
-                </Link>
-              )}
-            </div>
-            {showHistorial.length === 0 && recentAmistosos.length === 0 ? (
-              <p className="px-4 py-6 font-inter text-sm text-muted text-center">Sin partidos jugados aún.</p>
-            ) : (
-              <div className="divide-y divide-surface-high">
-                {showHistorial.map(e => <TorneoCard key={e.match_id} entry={e} />)}
-                {recentAmistosos.map(a => <AmistosoCard key={a.id} a={a} />)}
-              </div>
-            )}
-          </div>
-
-          <PuntosDefender jugadorId={id!} />
-          <PuntosHistorial jugadorId={id!} />
-
-          {isAdmin && (
+          {tab === 'pagos' && (isAdmin || esPropioPeril) && (
             <div className="rounded-xl bg-white shadow-card overflow-hidden">
-              <div className="px-4 py-3 border-b border-surface-high flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Wallet className="h-4 w-4 text-muted" />
-                  <p className="font-manrope text-sm font-bold text-navy">Pagos</p>
-                </div>
-                <Link to="/finanzas" className="font-inter text-xs text-gold hover:underline">
-                  Ver historial →
-                </Link>
+              <div className="px-4 py-3 border-b border-surface">
+                <p className="font-manrope text-sm font-bold text-navy">Pagos y cobros</p>
               </div>
               <div className="p-4">
                 <PagosJugador jugadorId={id!} />
               </div>
             </div>
           )}
+        </div>
+
+        {/* ── Sidebar ── */}
+        <div className="order-1 md:order-2">
+          <JugadorDetalleSidebar
+            jugador={jugador}
+            rankings={rankings}
+            badges={badges}
+            esPropioPeril={esPropioPeril}
+            isAdmin={isAdmin}
+            currentUserId={user?.id}
+          />
         </div>
       </div>
     </div>
