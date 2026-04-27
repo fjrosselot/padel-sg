@@ -37,6 +37,7 @@ const PerfilPage = lazyWithReload(() => import('./features/perfil/PerfilPage'))
 const TesoreriaAdmin = lazyWithReload(() => import('./features/tesoreria/TesoreriaAdmin'))
 const AdminCategorias = lazyWithReload(() => import('./features/admin/AdminCategorias'))
 const AdminPartidos = lazyWithReload(() => import('./features/admin/AdminPartidos'))
+const AdminNovedades = lazyWithReload(() => import('./features/admin/AdminNovedades'))
 
 const ColorCodingMockup = lazyWithReload(() => import('./features/mockups/ColorCodingMockup'))
 const DashboardMockup = lazyWithReload(() => import('./features/mockups/DashboardMockup'))
@@ -87,6 +88,7 @@ export const router = createBrowserRouter([
       { path: 'admin/jugadores', element: <AdminJugadores /> },
       { path: 'admin/categorias', element: <AdminCategorias /> },
       { path: 'admin/partidos', element: <AdminPartidos /> },
+      { path: 'admin/novedades', element: <AdminNovedades /> },
       { path: 'torneos', element: <TorneosList /> },
       { path: 'torneos/:id', element: <TorneoDetalle /> },
       { path: 'jugadores', element: <JugadoresPage /> },

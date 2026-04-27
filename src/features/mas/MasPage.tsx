@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { User, Shield, ChevronRight, LogOut, TrendingUp, Banknote, UserCog, Tag, ClipboardList } from 'lucide-react'
+import { User, Shield, ChevronRight, LogOut, TrendingUp, Banknote, UserCog, Tag, ClipboardList, Megaphone } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useUser } from '../../hooks/useUser'
 
@@ -21,6 +21,7 @@ const ADMIN_LINKS: LinkItem[] = [
   { icon: UserCog, label: 'Admin jugadores', desc: 'Editar datos de jugadores', to: '/admin/jugadores' },
   { icon: Tag, label: 'Categorías', desc: 'Colores y configuración', to: '/admin/categorias' },
   { icon: ClipboardList, label: 'Partidos', desc: 'Gestión de partidos', to: '/admin/partidos' },
+  { icon: Megaphone, label: 'Novedades', desc: 'Publicar anuncios en el dashboard', to: '/admin/novedades' },
 ]
 
 function LinkGroup({ items }: { items: LinkItem[] }) {
