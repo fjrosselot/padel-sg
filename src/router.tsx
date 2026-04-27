@@ -33,6 +33,7 @@ const CalendarioMockup = lazy(() => import('./features/mockups/CalendarioMockup'
 const TorneoDetalleMockup = lazy(() => import('./features/mockups/TorneoDetalleMockup'))
 const ParejasMockup = lazy(() => import('./features/mockups/ParejasMockup'))
 const LandingsMockup = lazy(() => import('./features/mockups/LandingsMockup'))
+const JugadorDetalleMockup = lazy(() => import('./features/mockups/JugadorDetalleMockup'))
 const MockupsIndex = lazy(() => import('./features/mockups/MockupsIndex'))
 
 const isMockupHub = import.meta.env.VITE_MOCKUP_HUB === 'true'
@@ -49,6 +50,7 @@ export const router = createBrowserRouter([
   { path: '/mockup/padel-sg/torneo-detalle', element: <Suspense fallback={fallback}><TorneoDetalleMockup /></Suspense> },
   { path: '/mockup/padel-sg/parejas', element: <Suspense fallback={fallback}><ParejasMockup /></Suspense> },
   { path: '/mockup/padel-sg/landings', element: <Suspense fallback={fallback}><LandingsMockup /></Suspense> },
+  { path: '/mockup/padel-sg/jugador-detalle', element: <Suspense fallback={fallback}><JugadorDetalleMockup /></Suspense> },
   { path: '/login', element: <LoginForm /> },
   { path: '/registro', element: <RegisterForm /> },
   { path: '/pendiente', element: <PendingApproval /> },

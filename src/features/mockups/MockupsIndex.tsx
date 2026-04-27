@@ -18,6 +18,7 @@ const PROJECTS = [
       { label: 'Dashboard', path: '/mockup/padel-sg/dashboard' },
       { label: 'Calendario', path: '/mockup/padel-sg/calendario' },
       { label: 'Torneo detalle', path: '/mockup/padel-sg/torneo-detalle' },
+      { label: 'Jugador detalle (3 tabs)', path: '/mockup/padel-sg/jugador-detalle' },
       { label: 'Parejas', path: '/mockup/padel-sg/parejas' },
       { label: 'Color coding', path: '/mockup/padel-sg/color-coding' },
     ],
