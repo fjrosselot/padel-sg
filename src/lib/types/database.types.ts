@@ -146,6 +146,8 @@ export interface Database {
           colegio_rival: string | null
           categorias: Json
           config_fixture: Json
+          cobrar_inscripcion: boolean
+          monto_inscripcion: number | null
           created_at: string
         }
         Insert: {
@@ -169,6 +171,8 @@ export interface Database {
           colegio_rival?: string | null
           categorias?: Json
           config_fixture?: Json
+          cobrar_inscripcion?: boolean
+          monto_inscripcion?: number | null
           created_at?: string
         }
         Update: {
@@ -192,6 +196,8 @@ export interface Database {
           colegio_rival?: string | null
           categorias?: Json
           config_fixture?: Json
+          cobrar_inscripcion?: boolean
+          monto_inscripcion?: number | null
           created_at?: string
         }
       }

@@ -76,6 +76,8 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
   const [pausaEntrePartidos, setPausaEntrePartidos] = useState(initialConfig.pausa_entre_partidos ?? 10)
   const [numCanchas, setNumCanchas] = useState(initialConfig.num_canchas ?? 2)
   const [horaInicio, setHoraInicio] = useState(initialConfig.hora_inicio ?? '09:00')
+  const [cobrarInscripcion, setCobrarInscripcion] = useState(torneo.cobrar_inscripcion ?? false)
+  const [montoInscripcion, setMontoInscripcion] = useState<string>(torneo.monto_inscripcion?.toString() ?? '')
 
   const showColegioRival = tipo === 'vs_colegio'
 
@@ -84,6 +86,8 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
       const body: Record<string, unknown> = {
         nombre,
         fecha_inicio: fechaInicio || null,
+        cobrar_inscripcion: cobrarInscripcion,
+        monto_inscripcion: cobrarInscripcion && montoInscripcion ? parseInt(montoInscripcion, 10) : null,
       }
 
       if (showColegioRival) {
@@ -187,6 +191,41 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
               {horaOptions.map(v => <option key={v} value={v}>{v}</option>)}
             </select>
           </div>
+
+          {/* Cobro de inscripción — visible cuando el torneo es externo */}
+          {tipo === 'externo' && (
+            <div className="rounded-xl border border-navy/10 bg-surface p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-inter text-sm font-semibold text-navy">Cobro de inscripción</p>
+                  <p className="font-inter text-xs text-muted">El colegio recauda y paga como institución</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={cobrarInscripcion}
+                  onClick={() => setCobrarInscripcion(v => !v)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${cobrarInscripcion ? 'bg-gold' : 'bg-navy/20'}`}
+                >
+                  <span className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${cobrarInscripcion ? 'translate-x-5' : 'translate-x-0'}`} />
+                </button>
+              </div>
+              {cobrarInscripcion && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-monto" className="label-editorial">Monto por pareja (CLP)</Label>
+                  <Input
+                    id="edit-monto"
+                    type="number"
+                    min={0}
+                    step={1000}
+                    placeholder="0"
+                    value={montoInscripcion}
+                    onChange={e => setMontoInscripcion(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Colegio rival — shown when tipo is vs_colegio */}
           {showColegioRival && (
