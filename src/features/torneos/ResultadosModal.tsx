@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { padelApi } from '../../lib/padelApi'
 import { applyEloMatch } from '../../lib/fixture/elo'
-import type { PartidoFixture } from '../../lib/fixture/types'
+import type { CategoriaFixture, PartidoFixture } from '../../lib/fixture/types'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
@@ -18,7 +18,31 @@ interface Props {
   partido: PartidoFixture
   torneoId: string
   torneo?: TorneoBasic
+  categorias: CategoriaFixture[]
   onClose: () => void
+}
+
+function parseResultadoSets(s: string): { p1: number; p2: number } | null {
+  if (!s.trim()) return null
+  const parts = s.trim().split(/\s+/)
+  let p1 = 0, p2 = 0
+  for (const part of parts) {
+    const [a, b] = part.split('-').map(Number)
+    if (isNaN(a) || isNaN(b)) return null
+    if (a > b) p1++; else p2++
+  }
+  return { p1, p2 }
+}
+
+function applyResultToCategoria(cat: CategoriaFixture, id: string, ganador: 1 | 2, resultado: string | null): CategoriaFixture {
+  const apply = (p: PartidoFixture) => p.id === id ? { ...p, ganador, resultado } : p
+  return {
+    ...cat,
+    grupos: (cat.grupos ?? []).map(g => ({ ...g, partidos: g.partidos.map(apply) })),
+    faseEliminatoria: cat.faseEliminatoria.map(apply),
+    consola: cat.consola.map(apply),
+    partidos: (cat.partidos ?? []).map(apply),
+  }
 }
 
 async function upsertRankingPoints(
@@ -72,7 +96,7 @@ async function upsertRankingPoints(
   )
 }
 
-export default function ResultadosModal({ partido, torneoId, torneo, onClose }: Props) {
+export default function ResultadosModal({ partido, torneoId, torneo, categorias, onClose }: Props) {
   const [ganador, setGanador] = useState<1 | 2 | null>(null)
   const [resultado, setResultado] = useState('')
   const qc = useQueryClient()
@@ -84,11 +108,26 @@ export default function ResultadosModal({ partido, torneoId, torneo, onClose }: 
         throw new Error('Datos incompletos')
       }
 
+      const sets = parseResultadoSets(resultado)
+
+      // 1. Update partidos relational table (source of truth going forward)
       await padelApi.patch('partidos', `id=eq.${partido.id}`, {
         ganador,
         resultado: resultado || null,
         estado: 'jugado',
+        pareja1_j1: partido.pareja1.jugador1_id,
+        pareja1_j2: partido.pareja1.jugador2_id ?? null,
+        pareja2_j1: partido.pareja2?.jugador1_id ?? null,
+        pareja2_j2: partido.pareja2?.jugador2_id ?? null,
+        sets_pareja1: sets?.p1 ?? null,
+        sets_pareja2: sets?.p2 ?? null,
       })
+
+      // 2. Update torneos.categorias JSONB so fixture display stays consistent
+      const updatedCats = categorias.map(cat =>
+        applyResultToCategoria(cat, partido.id, ganador, resultado || null)
+      )
+      await padelApi.patch('torneos', `id=eq.${torneoId}`, { categorias: updatedCats })
 
       if (isDesafio && !torneo) throw new Error('Datos del torneo requeridos para registrar puntos')
 

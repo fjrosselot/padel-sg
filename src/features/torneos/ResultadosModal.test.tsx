@@ -51,7 +51,7 @@ const mockPartido: PartidoFixture = {
 describe('ResultadosModal', () => {
   it('shows both team names', () => {
     render(
-      <ResultadosModal partido={mockPartido} torneoId="t1" onClose={() => {}} />,
+      <ResultadosModal partido={mockPartido} torneoId="t1" categorias={[]} onClose={() => {}} />,
       { wrapper }
     )
     expect(screen.getByText('García / López')).toBeDefined()
@@ -59,7 +59,7 @@ describe('ResultadosModal', () => {
   })
   it('shows save button disabled without ganador selection', () => {
     render(
-      <ResultadosModal partido={mockPartido} torneoId="t1" onClose={() => {}} />,
+      <ResultadosModal partido={mockPartido} torneoId="t1" categorias={[]} onClose={() => {}} />,
       { wrapper }
     )
     const saveBtn = screen.getByText('Guardar resultado')

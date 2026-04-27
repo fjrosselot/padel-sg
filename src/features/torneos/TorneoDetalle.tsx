@@ -317,6 +317,7 @@ export default function TorneoDetalle() {
           partido={partidoModal}
           torneoId={id!}
           torneo={{ id: id!, nombre: torneo.nombre, fecha_inicio: torneo.fecha_inicio ?? '', colegio_rival: torneo.colegio_rival }}
+          categorias={categorias}
           onClose={() => setPartidoModal(null)}
         />
       )}
