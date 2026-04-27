@@ -5,7 +5,6 @@ import {
   Handshake, CalendarDays, Banknote, Settings,
   UserCog, ChevronRight, LogOut, Wallet, Tag, ClipboardList,
 } from 'lucide-react'
-import { BrandLogo } from '@/components/brand/BrandLogo'
 import { useUser } from '@/hooks/useUser'
 import { supabase } from '@/lib/supabase'
 
@@ -68,18 +67,10 @@ export function Sidebar() {
     <nav className={`hidden h-full flex-col bg-navy transition-all duration-200 md:flex ${expanded ? 'w-56' : 'w-12'}`}>
       <button
         onClick={() => setExpanded(v => !v)}
-        className="flex h-14 w-full items-center px-1.5 hover:bg-navy-mid transition-colors"
+        className="flex h-14 w-full items-center justify-center px-2 hover:bg-navy-mid transition-colors"
         aria-label={expanded ? 'Colapsar menú' : 'Expandir menú'}
       >
-        {expanded ? (
-          <>
-            <BrandLogo variant="compact" className="shrink-0" />
-            <span className="ml-2 font-manrope text-sm font-bold text-gold flex-1 text-left">Pádel SG</span>
-            <ChevronRight className="h-4 w-4 text-muted rotate-180 shrink-0" />
-          </>
-        ) : (
-          <BrandLogo variant="compact" className="shrink-0" />
-        )}
+        <ChevronRight className={`h-5 w-5 text-muted transition-transform ${expanded ? 'rotate-180' : ''}`} />
       </button>
 
       <ul className="flex flex-1 flex-col gap-1 px-1.5 py-2">
