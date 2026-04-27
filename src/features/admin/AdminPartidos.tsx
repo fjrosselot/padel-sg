@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Pencil, X, Check, Search } from 'lucide-react'
+import { Pencil, X, Check, Search, ArrowUpDown } from 'lucide-react'
 import { padelApi } from '../../lib/padelApi'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
@@ -187,6 +187,7 @@ function EditModal({ partido, jugadoresMap, torneosMap, onClose }: EditModalProp
 export default function AdminPartidos() {
   const [busqueda, setBusqueda] = useState('')
   const [filtroTipo, setFiltroTipo] = useState<'todos' | 'torneo' | 'amistoso'>('todos')
+  const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc')
   const [editing, setEditing] = useState<PartidoRow | null>(null)
 
   const { data: partidos, isLoading } = useQuery({
@@ -242,8 +243,15 @@ export default function AdminPartidos() {
         return names.some(n => n.includes(q)) || torneo?.includes(q)
       })
     }
-    return rows
-  }, [partidos, filtroTipo, busqueda, jMap, tMap])
+    return [...rows].sort((a, b) => {
+      const da = a.fecha ?? ''
+      const db = b.fecha ?? ''
+      const ta = a.turno ?? ''
+      const tb = b.turno ?? ''
+      const cmp = da !== db ? da.localeCompare(db) : ta.localeCompare(tb)
+      return sortDir === 'desc' ? -cmp : cmp
+    })
+  }, [partidos, filtroTipo, busqueda, sortDir, jMap, tMap])
 
   if (isLoading) return <div className="p-6 text-muted font-inter text-sm">Cargando…</div>
 
@@ -280,6 +288,15 @@ export default function AdminPartidos() {
             {t === 'todos' ? 'Todos' : t === 'torneo' ? 'Torneos' : 'Amistosos'}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => setSortDir(d => d === 'desc' ? 'asc' : 'desc')}
+          className="ml-auto flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-navy/20 font-inter text-xs text-muted hover:text-navy transition-colors"
+          title={sortDir === 'desc' ? 'Más reciente primero' : 'Más antiguo primero'}
+        >
+          <ArrowUpDown className="h-3 w-3" />
+          {sortDir === 'desc' ? 'Reciente' : 'Antiguo'}
+        </button>
       </div>
 
       {/* Tabla */}
@@ -304,6 +321,7 @@ export default function AdminPartidos() {
                 {p.fecha && (
                   <p className="font-inter text-xs font-semibold text-navy">
                     {new Date(p.fecha + 'T12:00:00').toLocaleDateString('es-CL', { day: '2-digit', month: 'short' })}
+                    {p.turno && <span className="ml-1 text-muted font-normal">{p.turno}</span>}
                   </p>
                 )}
                 <p className="font-inter text-[10px] text-muted truncate">{torneo?.nombre ?? 'Sin torneo'}</p>
