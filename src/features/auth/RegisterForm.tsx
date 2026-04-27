@@ -3,8 +3,8 @@ import { useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import { BrandLogo } from '@/components/brand/BrandLogo'
 import { registerSchema, type RegisterFormData } from './schemas'
+import { AuthCard, inputCls, labelCls } from './AuthCard'
 
 const STEPS = ['Datos personales', 'Vinculación SG', 'Nivel de juego', 'Participación', 'Comentarios', 'Acceso']
 const CURSOS = ['PK', 'KK', '1°', '2°', '3°', '4°', '5°', '6°', '7°', '8°', '9°', '10°', '11°', '12°', 'Egresado']
@@ -19,9 +19,6 @@ const ACTIVIDADES = [
   { value: 'solo_convenio', label: 'Solo usar el convenio' },
 ]
 
-const inputCls = 'w-full rounded-lg border border-navy-mid bg-navy px-4 py-3 font-inter text-sm text-white placeholder-slate transition-colors focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold'
-const labelCls = 'mb-1.5 block font-inter text-xs font-medium uppercase tracking-widest text-muted'
-
 function ToggleBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
@@ -29,7 +26,7 @@ function ToggleBtn({ active, onClick, children }: { active: boolean; onClick: ()
       aria-pressed={active}
       onClick={onClick}
       className={`rounded-lg px-3 py-2 font-inter text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
-        active ? 'bg-gold text-navy' : 'border border-navy-mid bg-navy text-muted hover:border-gold/30 hover:text-white'
+        active ? 'bg-gold text-navy' : 'border border-navy/20 bg-surface text-slate hover:border-gold/40 hover:text-navy'
       }`}
     >
       {children}
@@ -99,33 +96,15 @@ export function RegisterForm() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-navy px-4 py-8">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0"
-        style={{
-          background: 'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(245,197,24,0.07) 0%, transparent 70%)',
-        }}
-      />
-
-      <div className="relative z-10 w-full max-w-sm">
-        {/* Logo */}
-        <div className="mb-8 flex flex-col items-center gap-3">
-          <BrandLogo variant="compact" />
-          <p className="font-inter text-xs font-semibold uppercase tracking-[0.2em] text-muted">
-            Solicitar acceso
-          </p>
-        </div>
-
-        {/* Card */}
-        <div className="rounded-2xl border border-navy-mid bg-navy-mid/50 px-7 py-7 backdrop-blur-sm">
+    <AuthCard>
+        <div className="rounded-2xl bg-white px-0 py-0 shadow-none">
           {/* Header con progreso */}
           <div className="mb-5">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-manrope text-base font-bold text-white">{STEPS[step]}</h2>
+              <h2 className="font-manrope text-base font-bold text-navy">{STEPS[step]}</h2>
               <span className="font-inter text-xs text-muted">{step + 1} / {STEPS.length}</span>
             </div>
-            <div className="h-1 rounded-full bg-navy">
+            <div className="h-1 rounded-full bg-surface">
               <div
                 className="h-1 rounded-full bg-gold transition-all duration-300"
                 style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
@@ -279,7 +258,7 @@ export function RegisterForm() {
                             setValue('intereses_actividades', selected ? curr.filter((a) => a !== value) : [...curr, value])
                           }}
                           className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-inter text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${
-                            selected ? 'bg-gold/10 text-gold' : 'border border-navy-mid bg-navy text-muted hover:border-gold/30'
+                            selected ? 'bg-gold/10 text-gold border border-gold/30' : 'border border-navy/20 bg-surface text-slate hover:border-gold/40'
                           }`}
                         >
                           <span aria-hidden="true" className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${selected ? 'border-gold bg-gold' : 'border-slate'}`}>
@@ -307,7 +286,7 @@ export function RegisterForm() {
                   id="comentarios"
                   {...register('comentarios_registro')}
                   rows={4}
-                  className="w-full rounded-lg border border-navy-mid bg-navy px-4 py-3 font-inter text-sm text-white placeholder-slate transition-colors focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+                  className={inputCls}
                   placeholder="Ej: Juego los martes y jueves tarde..."
                 />
               </div>
@@ -369,13 +348,10 @@ export function RegisterForm() {
           </form>
         </div>
 
-        <p className="mt-6 text-center font-inter text-xs text-slate">
-          ¿Ya tienes cuenta?{' '}
-          <Link to="/login" className="text-muted transition-colors hover:text-gold">
-            Inicia sesión
-          </Link>
-        </p>
-      </div>
-    </div>
+      <p className="mt-6 text-center font-inter text-xs text-muted">
+        ¿Ya tienes cuenta?{' '}
+        <Link to="/login" className="hover:text-navy transition-colors">Inicia sesión</Link>
+      </p>
+    </AuthCard>
   )
 }
