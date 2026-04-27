@@ -1,5 +1,27 @@
 # DEVLOG — padel-sg
 
+## [2026-04-27 00:00] — Redesign JugadorDetalle + Mi perfil unificados
+
+**Resumen:** Rediseño completo de `JugadorDetalle` con layout sidebar + 3 tabs (Mis partidos / Mis puntos / Mis pagos). Sidebar muestra avatar, apodo, lado preferido, ranking ATP, badges computados (En racha, Campeón, Finalista, Sólido, Veterano), contacto, morosidad, y edición de perfil + cambio de contraseña cuando es el propio usuario. `PerfilPage` ahora redirige a `/jugadores/:id`, unificando la vista "Mi perfil" con JugadorDetalle. Iteración en mockup (v1→v3) antes de llevar a producción.
+
+**Archivos:** `src/features/jugadores/JugadorDetalle.tsx` (reescritura), `src/features/jugadores/JugadorDetalleSidebar.tsx` (nuevo), `src/features/perfil/PerfilPage.tsx` (redirect), `src/features/mockups/JugadorDetalleMockup.tsx` (nuevo, v3), `src/router.tsx`, `src/features/mockups/MockupsIndex.tsx`, `package.json`
+
+**Decisiones:**
+- Sidebar extraído a `JugadorDetalleSidebar.tsx` para mantener `JugadorDetalle.tsx` < 300 líneas
+- `PerfilPage` reducida a un redirect en lugar de duplicar lógica de edición — "Mi perfil" IS JugadorDetalle con `esPropioPeril=true`
+- `useMorosidad` en sidebar usa queryKey `['morosidad-jugador', id]` distinto al de `PagosJugador` (`['pagos-jugador', id]`) para evitar colisión de caché React Query
+- "Mis pagos" tab visible solo para admin o propio perfil; usa `PagosJugador` existente
+- Badges computados en el frontend desde `historialTorneos` real (sin nueva columna DB)
+- Mockup en `/mockup/padel-sg/jugador-detalle` con toggle móvil/escritorio y toggle "Mi perfil / Otro jugador"
+
+**Pendientes:**
+- [ ] Toggle `resultado_bloqueado` en TorneoDetalle
+- [ ] Recálculo automático de ranking al guardar resultado
+- [ ] UI admin para novedades/noticias
+- [ ] RLS para que jugadores vean sus propios cobros (actualmente requiere adminHeaders)
+
+---
+
 ## [2026-04-26 22:30] — Completar datos OSP Primera Fecha 2026 + actualizar CLAUDE-padel.md
 
 **Resumen:** Se completaron todos los partidos del OSP Primera Fecha 2026 en la tabla `padel.partidos`: marcadores de grupos G2/G3/G4, eliminatorias completas de Larraín/Winter (octavos, cuartos, semifinal, final) y Calleja/Reyes (cuartos, semifinal, final). Se actualizó el resultado de la final: Larraín/Winter ganaron 7-5 6-2 a Calleja/Reyes. Se reescribió `CLAUDE-padel.md` para reflejar el estado real del proyecto (v0.4.108, TypeScript, arquitectura actual, modelo de datos vigente).

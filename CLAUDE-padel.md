@@ -13,7 +13,7 @@ Y → Minor: nuevo módulo o funcionalidad
 Z → Patch: bug fix, ajuste menor, mejora de UI — se bumea en CADA commit con código
 ```
 
-Versión actual: **0.4.108**
+Versión actual: **0.4.116**
 
 ---
 
@@ -57,7 +57,7 @@ src/
 ├── features/           ← lógica de dominio
 │   ├── torneos/        ← TorneosList, TorneoDetalle, TorneoWizard/, ResultadosModal, BracketTab, FixtureTab, HorarioTab, PartidoRow, etc.
 │   ├── admin/          ← AdminJugadores, AdminCategorias, AdminTemporadas, AdminPartidos, PendingUsers
-│   ├── jugadores/      ← JugadoresList, JugadorDetalle, etc.
+│   ├── jugadores/      ← JugadoresPage, JugadorDetalle, JugadorDetalleSidebar, JugadorPartidos, LadoBadge
 │   ├── ranking/        ← RankingPage, etc.
 │   ├── amistosos/
 │   ├── finanzas/
@@ -213,7 +213,9 @@ Agrupadores. Solo deporte `padel` en v1.
 ```
 /dashboard
 /jugadores
-/jugadores/:id       ← JugadorDetalle (usa get_player_historial RPC)
+/jugadores/:id       ← JugadorDetalle (sidebar + 3 tabs: Mis partidos / Mis puntos / Mis pagos)
+/jugadores/:id/partidos ← JugadorPartidos (historial completo, paginado)
+/perfil              ← redirect a /jugadores/:myId (propio perfil = esPropioPeril=true)
 /rankings
 /torneos
 /torneos/:id         ← TorneoDetalle (tabs: Fixture / Bracket / Horario)
@@ -231,7 +233,7 @@ Agrupadores. Solo deporte `padel` en v1.
 
 ## RPCs útiles
 
-- `get_player_historial(jugador_id)` → lee `torneos.categorias` JSONB, retorna partidos del jugador
+- `get_player_historial(jugador_id)` → lee tabla `partidos` vía LEFT JOINs en jugadores ×4, retorna historial completo del jugador (incluye torneos externos como OSP)
 - `ranking_categoria` VIEW → puntos por jugador/categoría
 
 ---
@@ -256,7 +258,7 @@ npm run typecheck     # tsc --noEmit
 
 ---
 
-## Estado actual (al 26-04-2026) — v0.4.108
+## Estado actual (al 27-04-2026) — v0.4.116
 
 ### Implementado y funcionando:
 - ✅ Auth completo (registro → pendiente → aprobación → activo) + reset contraseña
@@ -271,21 +273,26 @@ npm run typecheck     # tsc --noEmit
 - ✅ Tabla de grupos, bracket eliminatorio
 - ✅ Ranking por temporada (puntos / ELO / WDL) — VIEW ranking_categoria
 - ✅ Registro de amistosos
-- ✅ JugadorDetalle con historial de partidos (RPC get_player_historial)
-- ✅ Panel admin: usuarios, jugadores, categorías, tesorería, partidos (log completo)
-- ✅ AdminPartidos: log de todos los partidos con filtros + edición inline (v0.4.107)
+- ✅ JugadorDetalle rediseñado: sidebar + 3 tabs (Mis partidos / Mis puntos / Mis pagos)
+- ✅ JugadorDetalleSidebar: avatar, apodo, lado preferido, ranking ATP, badges, morosidad, editar perfil, cambiar contraseña (solo propio)
+- ✅ get_player_historial RPC migrado a leer de tabla `partidos` (incluye torneos externos OSP)
+- ✅ JugadorPartidos: página `/jugadores/:id/partidos` con historial completo y sort
+- ✅ PerfilPage unificada: redirect a `/jugadores/:id` → esPropioPeril=true muestra edición
+- ✅ Badges computados desde historial: 🔥 En racha, 🏆 Campeón, 🥈 Finalista, 💪 Sólido, ⭐ Veterano
+- ✅ Panel admin: usuarios, jugadores, categorías, tesorería, partidos (log + sort por fecha/hora)
+- ✅ AdminPartidos: log con sort cronológico y edición inline
 - ✅ Sembrado (seeding) de bracket (SembradoPanel)
 - ✅ Edición y borrado de torneos (EditTorneoModal, DeleteTorneoDialog)
 - ✅ Inscripciones con categoría + RosterAdmin
+- ✅ OSP Primera Fecha 2026: todos los partidos completos en tabla `partidos`
 
 ### Pendiente / deuda técnica:
-- ⬜ OSP Primera Fecha: corregir Larraín/Winter — grupo=G4, scores faltantes, resultado final pendiente
-- ⬜ get_player_historial RPC aún lee JSONB — podría migrar a leer de tabla `partidos` cuando datos estén completos
 - ⬜ Toggle `resultado_bloqueado` en TorneoDetalle
 - ⬜ Recálculo automático de ranking al guardar resultado
 - ⬜ Toggle "amistosos afectan ranking" por temporada
 - ⬜ UI admin para novedades/noticias
-- ⬜ Cambio de contraseña desde perfil
+- ⬜ RLS para jugadores vean sus propios cobros (hoy requiere adminHeaders)
+- ⬜ Puntos/historial en sidebar: mostrar puntos a defender reales desde `puntos_por_defender` view
 
 ---
 
@@ -296,4 +303,7 @@ npm run typecheck     # tsc --noEmit
 - **adminHeaders**: `{ 'apikey': SERVICE_KEY, 'Authorization': 'Bearer SERVICE_KEY' }` — usar en páginas admin para bypass RLS
 - La app usa el supabase JS client para auth, pero `padelApi` (fetch directo) para queries con adminHeaders
 - PostgREST multi-FK limitation: múltiples FKs de `partidos` a `jugadores` impiden embedded joins → usar two-step queries (fetch partidos, luego fetch jugadores por IDs)
+- **esPropioPeril**: `user?.id === id` — determina si JugadorDetalle muestra edición de perfil, contraseña y logout
+- **queryKey colisión**: `useMorosidad` usa `['morosidad-jugador', id]`, distinto al de `PagosJugador` `['pagos-jugador', id]`
+- Mockups en `/mockup/padel-sg/*` — iteración de diseño antes de implementar en producción
 - Diseños en `/stitch-designs/` son la referencia visual definitiva. No usar `~/Pictures/AppPadel/` (obsoleto).
