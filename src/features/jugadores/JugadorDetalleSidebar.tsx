@@ -218,7 +218,7 @@ export function JugadorDetalleSidebar({ jugador, rankings, badges, esPropioPeril
                 </div>
                 <div className="text-center">
                   <p className="font-inter text-[10px] text-muted">Categoría</p>
-                  <p className="font-inter text-xs font-semibold text-navy leading-tight">{mainRanking.categoria}</p>
+                  <p className="font-manrope font-black text-xl text-navy leading-tight">{mainRanking.categoria}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-inter text-[10px] text-muted">Posición</p>
