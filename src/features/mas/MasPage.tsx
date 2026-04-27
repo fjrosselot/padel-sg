@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { User, Calendar, Shield, ChevronRight, LogOut, Medal, Banknote, UserCog, Tag } from 'lucide-react'
+import { User, Shield, ChevronRight, LogOut, TrendingUp, Banknote, UserCog, Tag, ClipboardList } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useUser } from '../../hooks/useUser'
 
@@ -8,18 +8,50 @@ interface LinkItem {
   label: string
   desc: string
   to: string
-  adminOnly?: boolean
 }
 
-const LINKS: LinkItem[] = [
+const NAV_LINKS: LinkItem[] = [
   { icon: User, label: 'Mi perfil', desc: 'Datos personales y contraseña', to: '/perfil' },
-  { icon: Medal, label: 'Ranking', desc: 'Tabla de posiciones por categoría', to: '/rankings' },
-  { icon: Calendar, label: 'Calendario', desc: 'Torneos y ligas programados', to: '/calendario' },
-  { icon: Banknote, label: 'Tesorería', desc: 'Cobros e historial de pagos', to: '/admin/tesoreria', adminOnly: true },
-  { icon: Shield, label: 'Admin usuarios', desc: 'Aprobar y gestionar cuentas', to: '/admin/usuarios', adminOnly: true },
-  { icon: UserCog, label: 'Admin jugadores', desc: 'Editar datos de jugadores', to: '/admin/jugadores', adminOnly: true },
-  { icon: Tag,     label: 'Categorías',     desc: 'Colores y configuración',    to: '/admin/categorias', adminOnly: true },
+  { icon: TrendingUp, label: 'Ranking', desc: 'Tabla de posiciones por categoría', to: '/rankings' },
 ]
+
+const ADMIN_LINKS: LinkItem[] = [
+  { icon: Banknote, label: 'Tesorería', desc: 'Cobros e historial de pagos', to: '/admin/tesoreria' },
+  { icon: Shield, label: 'Admin usuarios', desc: 'Aprobar y gestionar cuentas', to: '/admin/usuarios' },
+  { icon: UserCog, label: 'Admin jugadores', desc: 'Editar datos de jugadores', to: '/admin/jugadores' },
+  { icon: Tag, label: 'Categorías', desc: 'Colores y configuración', to: '/admin/categorias' },
+  { icon: ClipboardList, label: 'Partidos', desc: 'Gestión de partidos', to: '/admin/partidos' },
+]
+
+function LinkGroup({ items }: { items: LinkItem[] }) {
+  const navigate = useNavigate()
+  return (
+    <div className="rounded-xl bg-white shadow-card overflow-hidden">
+      {items.map((item, idx) => {
+        const Icon = item.icon
+        return (
+          <button
+            key={item.to}
+            type="button"
+            onClick={() => navigate(item.to)}
+            className={`w-full flex items-center gap-4 px-4 py-3 hover:bg-surface transition-colors text-left focus:outline-none focus:bg-surface ${
+              idx !== items.length - 1 ? 'border-b border-surface-high' : ''
+            }`}
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-navy">
+              <Icon className="h-4 w-4 text-gold" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-manrope text-sm font-bold text-navy">{item.label}</p>
+              <p className="font-inter text-xs text-muted">{item.desc}</p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted shrink-0" />
+          </button>
+        )
+      })}
+    </div>
+  )
+}
 
 export default function MasPage() {
   const { data: user } = useUser()
@@ -31,36 +63,18 @@ export default function MasPage() {
     navigate('/login')
   }
 
-  const visibles = LINKS.filter(l => !l.adminOnly || isAdmin)
-
   return (
     <div className="space-y-4">
       <h1 className="font-manrope text-2xl font-bold text-navy">Más</h1>
 
-      <div className="rounded-xl bg-white shadow-card overflow-hidden">
-        {visibles.map((item, idx) => {
-          const Icon = item.icon
-          return (
-            <button
-              key={item.to}
-              type="button"
-              onClick={() => navigate(item.to)}
-              className={`w-full flex items-center gap-4 px-4 py-3 hover:bg-surface transition-colors text-left focus:outline-none focus:bg-surface ${
-                idx !== visibles.length - 1 ? 'border-b border-surface-high' : ''
-              }`}
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-navy">
-                <Icon className="h-4 w-4 text-gold" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-manrope text-sm font-bold text-navy">{item.label}</p>
-                <p className="font-inter text-xs text-muted">{item.desc}</p>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted shrink-0" />
-            </button>
-          )
-        })}
-      </div>
+      <LinkGroup items={NAV_LINKS} />
+
+      {isAdmin && (
+        <div className="space-y-2">
+          <p className="px-1 font-inter text-[10px] font-bold uppercase tracking-widest text-muted/60">Admin</p>
+          <LinkGroup items={ADMIN_LINKS} />
+        </div>
+      )}
 
       <button
         type="button"
