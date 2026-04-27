@@ -33,7 +33,7 @@ const fmt = (n: number) => `$${n.toLocaleString('es-CL')}`
 
 function useMorosidad(jugadorId: string, enabled: boolean) {
   return useQuery({
-    queryKey: ['pagos-jugador', jugadorId],
+    queryKey: ['morosidad-jugador', jugadorId],
     queryFn: async () => {
       const h = await adminHeaders('read')
       const [cjRes, pagosRes] = await Promise.all([
