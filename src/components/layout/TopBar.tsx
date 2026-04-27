@@ -1,6 +1,7 @@
 import { ChevronDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useUser } from '@/hooks/useUser'
+import { BrandLogo } from '@/components/brand/BrandLogo'
 
 export function TopBar() {
   const { data: user } = useUser()
@@ -11,7 +12,10 @@ export function TopBar() {
     : '?'
 
   return (
-    <header className="flex h-14 items-center justify-end border-b border-surface bg-white px-4">
+    <header className="flex h-14 items-center justify-between border-b border-surface bg-white px-4">
+      <div className="md:hidden">
+        <BrandLogo variant="compact" />
+      </div>
       <button
         type="button"
         onClick={() => navigate('/perfil')}
