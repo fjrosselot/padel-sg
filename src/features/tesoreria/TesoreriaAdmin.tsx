@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle2, Circle, Plus, Users, Banknote, AlertCircle, Archive, Trash2, UserPlus, Pencil, X, Check } from 'lucide-react'
+import { DateInputCL } from './DateInputCL'
 import { adminHeaders } from '@/lib/adminHeaders'
 import type { Cobro, CobroJugador, Pago } from './types'
 import NuevoCobro from './NuevoCobro'
@@ -294,11 +295,10 @@ export default function TesoreriaAdmin() {
                     onChange={e => setEditing(v => v && ({ ...v, monto: e.target.value.replace(/\D/g, '') }))}
                     placeholder="25.000"
                   />
-                  <input
-                    type="date"
-                    className="flex-1 rounded-lg border border-navy/20 px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none"
+                  <DateInputCL
                     value={editing.vencimiento}
-                    onChange={e => setEditing(v => v && ({ ...v, vencimiento: e.target.value }))}
+                    onChange={vencimiento => setEditing(v => v && ({ ...v, vencimiento }))}
+                    className="flex-1 rounded-lg border border-navy/20 px-3 py-2 font-inter text-sm text-navy focus:border-gold focus:outline-none"
                   />
                 </div>
                 <div className="flex gap-2">
@@ -436,9 +436,10 @@ export default function TesoreriaAdmin() {
             )}
             {bulkMode && bulkForm && (
               <div className="flex items-center gap-2 flex-wrap w-full mt-1">
-                <input type="date" value={bulkForm.fecha}
-                  onChange={e => setBulkForm(v => v && ({ ...v, fecha: e.target.value }))}
-                  className="rounded-lg border border-navy/20 px-2 py-1 font-inter text-xs text-navy focus:border-gold focus:outline-none"
+                <DateInputCL
+                  value={bulkForm.fecha}
+                  onChange={fecha => setBulkForm(v => v && ({ ...v, fecha }))}
+                  className="rounded-lg border border-navy/20 px-2 py-1 font-inter text-xs text-navy focus:border-gold focus:outline-none w-28"
                 />
                 <select value={bulkForm.metodo}
                   onChange={e => setBulkForm(v => v && ({ ...v, metodo: e.target.value }))}
@@ -510,9 +511,10 @@ export default function TesoreriaAdmin() {
                     </div>
                     {showForm && (
                       <div className="px-5 pb-3 flex items-center gap-2 flex-wrap border-t border-navy/5 bg-surface/30">
-                        <input type="date" value={pagoForm!.fecha}
-                          onChange={e => setPagoForm(v => v && ({ ...v, fecha: e.target.value }))}
-                          className="rounded-lg border border-navy/20 px-2 py-1.5 font-inter text-xs text-navy focus:border-gold focus:outline-none"
+                        <DateInputCL
+                          value={pagoForm!.fecha}
+                          onChange={fecha => setPagoForm(v => v && ({ ...v, fecha }))}
+                          className="rounded-lg border border-navy/20 px-2 py-1.5 font-inter text-xs text-navy focus:border-gold focus:outline-none w-28"
                         />
                         <select value={pagoForm!.metodo}
                           onChange={e => setPagoForm(v => v && ({ ...v, metodo: e.target.value }))}
