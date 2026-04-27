@@ -174,3 +174,24 @@
     backdrop-filter: blur(12px);
   }
 }
+
+/* ── TipTap editor ───────────────────────────────────────────────── */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: rgba(7, 27, 59, 0.3);
+  pointer-events: none;
+  height: 0;
+}
+
+/* Rendered novedad HTML in dashboard */
+.novedad-content p { margin-bottom: 0.25rem; }
+.novedad-content strong { font-weight: 700; }
+.novedad-content em { font-style: italic; }
+.novedad-content u { text-decoration: underline; }
+.novedad-content h2 { font-family: 'Manrope', sans-serif; font-size: 0.875rem; font-weight: 700; margin-bottom: 0.25rem; }
+.novedad-content ul { list-style: disc; padding-left: 1rem; margin-bottom: 0.25rem; }
+.novedad-content ol { list-style: decimal; padding-left: 1rem; margin-bottom: 0.25rem; }
+.novedad-content a { color: #e8c547; text-decoration: underline; }
+.novedad-content [style*="text-align: center"] { text-align: center; }
+.novedad-content [style*="text-align: right"] { text-align: right; }

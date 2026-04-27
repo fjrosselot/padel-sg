@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2, Eye, EyeOff, ExternalLink, Check, X, Pencil } from 'lucide-react'
 import { adminHeaders } from '@/lib/adminHeaders'
+import { RichTextEditor } from './RichTextEditor'
 
 const SB = import.meta.env.VITE_SUPABASE_URL as string
 
@@ -114,12 +115,10 @@ export default function AdminNovedades() {
             value={form.titulo}
             onChange={e => setForm(v => ({ ...v, titulo: e.target.value }))}
           />
-          <textarea
-            className={inputCls}
-            rows={3}
-            placeholder="Contenido (opcional) — usa **negrita** y saltos de línea"
+          <RichTextEditor
             value={form.contenido}
-            onChange={e => setForm(v => ({ ...v, contenido: e.target.value }))}
+            onChange={html => setForm(v => ({ ...v, contenido: html }))}
+            placeholder="Contenido (opcional)"
           />
           <input
             className={inputCls}
@@ -163,12 +162,10 @@ export default function AdminNovedades() {
                       onChange={e => setEditing(v => v && ({ ...v, titulo: e.target.value }))}
                       placeholder="Título *"
                     />
-                    <textarea
-                      className={inputCls}
-                      rows={2}
+                    <RichTextEditor
                       value={editing.contenido ?? ''}
-                      onChange={e => setEditing(v => v && ({ ...v, contenido: e.target.value }))}
-                      placeholder="Contenido — usa **negrita** y saltos de línea"
+                      onChange={html => setEditing(v => v && ({ ...v, contenido: html }))}
+                      placeholder="Contenido"
                     />
                     <input
                       className={inputCls}

@@ -292,19 +292,6 @@ function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', timeZone: 'America/Santiago' })
 }
 
-// Renders **bold** and line breaks
-function RichText({ text }: { text: string }) {
-  const parts = text.split(/(\*\*[^*]+\*\*|\n)/)
-  return (
-    <>
-      {parts.map((part, i) => {
-        if (part === '\n') return <br key={i} />
-        if (part.startsWith('**') && part.endsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>
-        return <span key={i}>{part}</span>
-      })}
-    </>
-  )
-}
 
 export function Novedades() {
   const [idx, setIdx] = useState(0)
@@ -344,9 +331,10 @@ export function Novedades() {
           )}
         </div>
         {n.contenido && (
-          <p className="font-inter text-xs text-slate mt-1 leading-relaxed">
-            <RichText text={n.contenido} />
-          </p>
+          <div
+            className="novedad-content font-inter text-xs text-slate mt-1 leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: n.contenido }}
+          />
         )}
         <p className="font-inter text-[10px] text-muted/70 mt-1.5">{fmtDate(n.published_at)}</p>
         {total > 1 && (
