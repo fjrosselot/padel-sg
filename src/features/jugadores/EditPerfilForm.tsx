@@ -11,7 +11,7 @@ const LADO_MAP: Record<string, string> = { Drive: 'drive', 'Revés': 'reves', Am
 const LADO_RMAP: Record<string, string> = { drive: 'Drive', reves: 'Revés', ambos: 'Ambos' }
 
 type HijoSg = { curso_ingreso: string; anio: number }
-type JugadorExtended = Jugador & { rut?: string | null }
+type JugadorExtended = Jugador & { rut?: string | null; fecha_nacimiento?: string | null }
 
 interface Props {
   jugador: JugadorExtended
@@ -32,6 +32,8 @@ export function EditPerfilForm({ jugador }: Props) {
     const raw = jugador.hijos_sg
     return Array.isArray(raw) ? (raw as HijoSg[]) : []
   })
+
+  const [fechaNacimiento, setFechaNacimiento] = useState(jugador.fecha_nacimiento ?? '')
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -58,6 +60,7 @@ export function EditPerfilForm({ jugador }: Props) {
       categoria: categoria || null,
       lado_preferido: (LADO_MAP[ladoLabel] as 'drive' | 'reves' | 'ambos') ?? null,
       hijos_sg: hijossg,
+      fecha_nacimiento: fechaNacimiento || null,
     }).eq('id', jugador.id)
     setSaving(false)
     if (err) { setError(err.message); return }
@@ -111,6 +114,12 @@ export function EditPerfilForm({ jugador }: Props) {
               <input value={rut} onChange={e => setRut(e.target.value)} placeholder="12.345.678-9"
                 className="w-full px-3 py-2 rounded-lg bg-surface font-inter text-xs text-navy outline-none focus:ring-2 focus:ring-gold/40" />
             </div>
+          </div>
+
+          <div>
+            <label className="font-inter text-[10px] font-semibold uppercase tracking-wider text-muted block mb-1">Fecha de nacimiento</label>
+            <input type="date" value={fechaNacimiento} onChange={e => setFechaNacimiento(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg bg-surface font-inter text-xs text-navy outline-none focus:ring-2 focus:ring-gold/40" />
           </div>
 
           <div>

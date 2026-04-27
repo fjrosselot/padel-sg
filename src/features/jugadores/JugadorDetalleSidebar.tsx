@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
-import { CheckCircle2, AlertCircle, Camera, Eye, EyeOff, Users } from 'lucide-react'
+import { CheckCircle2, AlertCircle, Camera, Eye, EyeOff, Users, Cake } from 'lucide-react'
 import { supabase, type Jugador } from '../../lib/supabase'
 import { padelApi } from '../../lib/padelApi'
 import { LadoBadge } from './LadoBadge'
@@ -16,8 +16,19 @@ const fmt = (n: number) => `$${n.toLocaleString('es-CL')}`
 
 interface Badge { emoji: string; label: string; desc: string; color: string; bg: string }
 
+function calcEdadYCumple(fechaNac: string): { edad: number; cumple: string; esCumple: boolean } {
+  const hoy = new Date()
+  const nac = new Date(fechaNac + 'T12:00:00')
+  let edad = hoy.getFullYear() - nac.getFullYear()
+  const diffMes = hoy.getMonth() - nac.getMonth()
+  if (diffMes < 0 || (diffMes === 0 && hoy.getDate() < nac.getDate())) edad--
+  const cumple = nac.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', timeZone: 'America/Santiago' })
+  const esCumple = hoy.getMonth() === nac.getMonth() && hoy.getDate() === nac.getDate()
+  return { edad, cumple, esCumple }
+}
+
 interface Props {
-  jugador: Jugador & { rut?: string | null }
+  jugador: Jugador & { rut?: string | null; fecha_nacimiento?: string | null }
   rankings: PlayerRankingEntry[]
   badges: Badge[]
   esPropioPeril: boolean
@@ -226,6 +237,20 @@ export function JugadorDetalleSidebar({ jugador, rankings, badges, esPropioPeril
                 </div>
               </div>
             )}
+
+            {/* Edad / cumpleaños */}
+            {jugador.fecha_nacimiento && (() => {
+              const { edad, cumple, esCumple } = calcEdadYCumple(jugador.fecha_nacimiento!)
+              return (
+                <div className="flex items-center gap-2">
+                  <Cake className={`h-3.5 w-3.5 shrink-0 ${esCumple ? 'text-gold' : 'text-muted'}`} />
+                  <span className="font-inter text-xs text-slate">
+                    {edad} años · {cumple}
+                    {esCumple && <span className="ml-1 text-gold font-semibold">¡Hoy!</span>}
+                  </span>
+                </div>
+              )
+            })()}
 
             {/* Badges */}
             {badges.length > 0 && (

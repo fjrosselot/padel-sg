@@ -32,6 +32,7 @@ export interface Database {
           frecuencia_semanal: string | null
           comentarios_registro: string | null
           elo: number
+          fecha_nacimiento: string | null
           created_at: string
         }
         Insert: {
@@ -56,6 +57,7 @@ export interface Database {
           frecuencia_semanal?: string | null
           comentarios_registro?: string | null
           elo?: number
+          fecha_nacimiento?: string | null
           created_at?: string
         }
         Update: {
@@ -80,6 +82,7 @@ export interface Database {
           frecuencia_semanal?: string | null
           comentarios_registro?: string | null
           elo?: number
+          fecha_nacimiento?: string | null
           created_at?: string
         }
       }

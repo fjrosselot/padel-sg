@@ -81,8 +81,8 @@ export default function JugadorDetalle() {
   const { data: jugador, isLoading, error } = useQuery({
     queryKey: ['jugador', id],
     queryFn: () =>
-      padelApi.get<(Jugador & { rut?: string | null })[]>(
-        `jugadores?select=id,nombre,nombre_pila,apellido,apodo,email,categoria,foto_url,lado_preferido,sexo,mixto,frecuencia_semanal,rut,telefono,hijos_sg&id=eq.${id}`
+      padelApi.get<(Jugador & { rut?: string | null; fecha_nacimiento?: string | null })[]>(
+        `jugadores?select=id,nombre,nombre_pila,apellido,apodo,email,categoria,foto_url,lado_preferido,sexo,mixto,frecuencia_semanal,rut,telefono,hijos_sg,fecha_nacimiento&id=eq.${id}`
       ).then(r => r[0] ?? null),
     enabled: !!id,
   })

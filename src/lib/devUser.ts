@@ -22,6 +22,7 @@ export const DEV_USER: Jugador = {
   frecuencia_semanal: null,
   comentarios_registro: null,
   elo: 1200,
+  fecha_nacimiento: null,
   created_at: new Date().toISOString(),
 }
 
