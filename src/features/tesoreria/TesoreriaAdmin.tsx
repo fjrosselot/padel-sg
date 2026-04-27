@@ -230,7 +230,7 @@ export default function TesoreriaAdmin() {
         }
       })
     })
-    return Array.from(map.entries()).filter(([, v]) => v.count > 1).sort((a, b) => b[1].count - a[1].count)
+    return Array.from(map.entries()).filter(([, v]) => v.count >= 1).sort((a, b) => b[1].count - a[1].count)
   })()
 
   return (
