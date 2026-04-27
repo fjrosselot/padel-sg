@@ -248,7 +248,7 @@ export function RaceWidget() {
       {/* Rows */}
       <div className="px-4 py-2 space-y-2">
         {rows.map((r, i) => {
-          const nombre = r.apodo ?? r.nombre_pila ?? r.apellido ?? '—'
+          const nombre = [r.nombre_pila, r.apellido].filter(Boolean).join(' ') || r.apodo || '—'
           const pct = maxPts > 0 ? (r.puntos_total / maxPts) * 100 : 0
           const isMe = r.jugador_id === user?.id
           return (
@@ -257,7 +257,7 @@ export function RaceWidget() {
                 style={{ color: MEDALS[i] ?? '#94b0cc' }}>
                 {i + 1}
               </span>
-              <span className={`w-20 font-inter text-[12px] truncate shrink-0 ${isMe ? 'text-navy font-bold' : 'font-semibold text-navy'}`}>
+              <span className={`w-36 font-inter text-[12px] truncate shrink-0 ${isMe ? 'text-navy font-bold' : 'font-semibold text-navy'}`}>
                 {nombre}{isMe ? ' ★' : ''}
               </span>
               <div className="flex-1 h-1.5 rounded-full bg-surface overflow-hidden">
