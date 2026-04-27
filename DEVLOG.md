@@ -1,5 +1,23 @@
 # DEVLOG — padel-sg
 
+## [2026-04-26 22:30] — Completar datos OSP Primera Fecha 2026 + actualizar CLAUDE-padel.md
+
+**Resumen:** Se completaron todos los partidos del OSP Primera Fecha 2026 en la tabla `padel.partidos`: marcadores de grupos G2/G3/G4, eliminatorias completas de Larraín/Winter (octavos, cuartos, semifinal, final) y Calleja/Reyes (cuartos, semifinal, final). Se actualizó el resultado de la final: Larraín/Winter ganaron 7-5 6-2 a Calleja/Reyes. Se reescribió `CLAUDE-padel.md` para reflejar el estado real del proyecto (v0.4.108, TypeScript, arquitectura actual, modelo de datos vigente).
+
+**Archivos:** `CLAUDE-padel.md` (reescritura completa), `DEVLOG.md`
+
+**Decisiones:**
+- Correcciones de datos solo en DB vía Supabase MCP, sin migración SQL (son data corrections no schema changes)
+- CLAUDE-padel.md reemplazado completamente — la versión anterior estaba desactualizada desde 30-03-2026 (JSX, colores incorrectos, arquitectura vieja)
+
+**Pendientes:**
+- [ ] get_player_historial RPC aún lee JSONB — migrar a tabla partidos cuando datos estén completos
+- [ ] Toggle resultado_bloqueado en TorneoDetalle
+- [ ] Recálculo automático de ranking al guardar resultado
+- [ ] UI admin para novedades/noticias
+
+---
+
 ## [2026-04-26 20:00] — Partidos como fuente de verdad + admin log + backfill americano
 
 **Resumen:** Se estableció `padel.partidos` como fuente de verdad para historial y rankings. Se arregló `ResultadosModal` para escribir los 4 player UUIDs (pareja1/pareja2) y actualizar `torneos.categorias` JSONB al guardar resultados. Se construyó `AdminPartidos` (log editable en `/admin/partidos`). Se hizo backfill de los 24 partidos del americano SG desde JSONB hacia la tabla relacional. Se corrigió la lectura del historial de jugadores con RPC `get_player_historial` que lee JSONB. Se investigó OSP Primera Fecha 2026: datos incompletos de Larraín/Winter (grupo, scores) — pendiente corrección con fotos del torneo.
