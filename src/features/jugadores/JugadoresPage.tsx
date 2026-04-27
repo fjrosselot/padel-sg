@@ -11,7 +11,7 @@ import {
   type ColumnFiltersState,
 } from '@tanstack/react-table'
 import { Search, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { padelApi } from '../../lib/padelApi'
 import type { Jugador } from '../../lib/supabase'
 import { LadoBadge } from './LadoBadge'
@@ -422,7 +422,11 @@ export default function JugadoresPage() {
                 {rows.map((row, idx) => (
                   <tr
                     key={row.id}
-                    onClick={() => navigate(`/jugadores/${row.original.id}`)}
+                    onClick={(e) => {
+                      if (e.ctrlKey || e.metaKey) window.open(`/jugadores/${row.original.id}`, '_blank')
+                      else navigate(`/jugadores/${row.original.id}`)
+                    }}
+                    onAuxClick={(e) => { if (e.button === 1) window.open(`/jugadores/${row.original.id}`, '_blank') }}
                     className={`cursor-pointer hover:bg-surface transition-colors ${
                       idx !== rows.length - 1 ? 'border-b border-surface-high' : ''
                     }`}
@@ -442,11 +446,10 @@ export default function JugadoresPage() {
             {rows.map((row, idx) => {
               const j = row.original
               return (
-                <button
+                <Link
                   key={j.id}
-                  type="button"
-                  onClick={() => navigate(`/jugadores/${j.id}`)}
-                  className={`w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-surface transition-colors ${
+                  to={`/jugadores/${j.id}`}
+                  className={`flex items-center gap-4 px-4 py-3 hover:bg-surface transition-colors ${
                     idx !== rows.length - 1 ? 'border-b border-surface-high' : ''
                   }`}
                 >
@@ -475,7 +478,7 @@ export default function JugadoresPage() {
                     }
                     <ChevronRight className="h-4 w-4 text-muted mt-0.5" />
                   </div>
-                </button>
+                </Link>
               )
             })}
           </div>
