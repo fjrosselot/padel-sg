@@ -33,6 +33,8 @@ const baseTorneo: Torneo = {
   max_parejas: null,
   inscripcion_abierta: false,
   deporte_id: 'padel',
+  cobrar_inscripcion: false,
+  monto_inscripcion: null,
 }
 
 function wrapper({ children }: { children: React.ReactNode }) {

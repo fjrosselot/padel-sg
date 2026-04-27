@@ -1,5 +1,16 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
+
+function lazyWithReload<T extends { default: React.ComponentType<unknown> }>(
+  factory: () => Promise<T>
+): React.LazyExoticComponent<T['default']> {
+  return lazy(() =>
+    factory().catch(() => {
+      window.location.reload()
+      return new Promise<T>(() => {})
+    })
+  )
+}
 import { AppShell } from '@/components/layout/AppShell'
 import { AuthGuard } from '@/features/auth/AuthGuard'
 import { LoginForm } from '@/features/auth/LoginForm'
@@ -8,33 +19,33 @@ import { PendingApproval } from '@/features/auth/PendingApproval'
 import { ResetPassword } from '@/features/auth/ResetPassword'
 import { EmergencyLogin } from '@/features/auth/EmergencyLogin'
 
-const PendingUsers = lazy(() => import('./features/admin/PendingUsers').then(m => ({ default: m.PendingUsers })))
-const AdminTemporadas = lazy(() => import('./features/admin/AdminTemporadas'))
-const AdminJugadores = lazy(() => import('./features/admin/AdminJugadores'))
-const TorneosList = lazy(() => import('./features/torneos/TorneosList'))
-const TorneoDetalle = lazy(() => import('./features/torneos/TorneoDetalle'))
-const Dashboard = lazy(() => import('./features/dashboard/Dashboard').then(m => ({ default: m.Dashboard })))
-const AmistososPage = lazy(() => import('./features/amistosos/AmistososPage'))
-const JugadoresPage = lazy(() => import('./features/jugadores/JugadoresPage'))
-const JugadorDetalle = lazy(() => import('./features/jugadores/JugadorDetalle'))
-const JugadorPartidos = lazy(() => import('./features/jugadores/JugadorPartidos'))
-const FinanzasPage = lazy(() => import('./features/finanzas/FinanzasPage'))
-const MasPage = lazy(() => import('./features/mas/MasPage'))
-const CalendarioPage = lazy(() => import('./features/calendario/CalendarioPage'))
-const RankingPage = lazy(() => import('./features/ranking/RankingPage'))
-const PerfilPage = lazy(() => import('./features/perfil/PerfilPage'))
-const TesoreriaAdmin = lazy(() => import('./features/tesoreria/TesoreriaAdmin'))
-const AdminCategorias = lazy(() => import('./features/admin/AdminCategorias'))
-const AdminPartidos = lazy(() => import('./features/admin/AdminPartidos'))
+const PendingUsers = lazyWithReload(() => import('./features/admin/PendingUsers').then(m => ({ default: m.PendingUsers })))
+const AdminTemporadas = lazyWithReload(() => import('./features/admin/AdminTemporadas'))
+const AdminJugadores = lazyWithReload(() => import('./features/admin/AdminJugadores'))
+const TorneosList = lazyWithReload(() => import('./features/torneos/TorneosList'))
+const TorneoDetalle = lazyWithReload(() => import('./features/torneos/TorneoDetalle'))
+const Dashboard = lazyWithReload(() => import('./features/dashboard/Dashboard').then(m => ({ default: m.Dashboard })))
+const AmistososPage = lazyWithReload(() => import('./features/amistosos/AmistososPage'))
+const JugadoresPage = lazyWithReload(() => import('./features/jugadores/JugadoresPage'))
+const JugadorDetalle = lazyWithReload(() => import('./features/jugadores/JugadorDetalle'))
+const JugadorPartidos = lazyWithReload(() => import('./features/jugadores/JugadorPartidos'))
+const FinanzasPage = lazyWithReload(() => import('./features/finanzas/FinanzasPage'))
+const MasPage = lazyWithReload(() => import('./features/mas/MasPage'))
+const CalendarioPage = lazyWithReload(() => import('./features/calendario/CalendarioPage'))
+const RankingPage = lazyWithReload(() => import('./features/ranking/RankingPage'))
+const PerfilPage = lazyWithReload(() => import('./features/perfil/PerfilPage'))
+const TesoreriaAdmin = lazyWithReload(() => import('./features/tesoreria/TesoreriaAdmin'))
+const AdminCategorias = lazyWithReload(() => import('./features/admin/AdminCategorias'))
+const AdminPartidos = lazyWithReload(() => import('./features/admin/AdminPartidos'))
 
-const ColorCodingMockup = lazy(() => import('./features/mockups/ColorCodingMockup'))
-const DashboardMockup = lazy(() => import('./features/mockups/DashboardMockup'))
-const CalendarioMockup = lazy(() => import('./features/mockups/CalendarioMockup'))
-const TorneoDetalleMockup = lazy(() => import('./features/mockups/TorneoDetalleMockup'))
-const ParejasMockup = lazy(() => import('./features/mockups/ParejasMockup'))
-const LandingsMockup = lazy(() => import('./features/mockups/LandingsMockup'))
-const JugadorDetalleMockup = lazy(() => import('./features/mockups/JugadorDetalleMockup'))
-const MockupsIndex = lazy(() => import('./features/mockups/MockupsIndex'))
+const ColorCodingMockup = lazyWithReload(() => import('./features/mockups/ColorCodingMockup'))
+const DashboardMockup = lazyWithReload(() => import('./features/mockups/DashboardMockup'))
+const CalendarioMockup = lazyWithReload(() => import('./features/mockups/CalendarioMockup'))
+const TorneoDetalleMockup = lazyWithReload(() => import('./features/mockups/TorneoDetalleMockup'))
+const ParejasMockup = lazyWithReload(() => import('./features/mockups/ParejasMockup'))
+const LandingsMockup = lazyWithReload(() => import('./features/mockups/LandingsMockup'))
+const JugadorDetalleMockup = lazyWithReload(() => import('./features/mockups/JugadorDetalleMockup'))
+const MockupsIndex = lazyWithReload(() => import('./features/mockups/MockupsIndex'))
 
 const isMockupHub = import.meta.env.VITE_MOCKUP_HUB === 'true'
 
