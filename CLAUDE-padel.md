@@ -254,11 +254,13 @@ npm run typecheck     # tsc --noEmit
 - Instancia: `dzxhtvfrvkisrjcicdfo` (Pro, sa-east-1)
 - PostgREST expone schema `padel`: `ALTER ROLE authenticator SET pgrst.db_schemas = 'public, americano, padel'`
 - Si se agrega tabla nueva: `NOTIFY pgrst, 'reload schema'`
-- Env vars: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` en Vercel. `SUPABASE_SERVICE_ROLE_KEY` solo en `.env.local`.
+- Env vars: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SUPABASE_SERVICE_KEY` en Vercel (producción).
+- `service_role` necesita GRANT explícito en cada tabla del schema `padel` — BYPASSRLS no es suficiente sin GRANT.
+- Si una tabla no muestra datos con service_role: `GRANT SELECT, INSERT, UPDATE, DELETE ON padel.<tabla> TO service_role;`
 
 ---
 
-## Estado actual (al 27-04-2026) — v0.4.116
+## Estado actual (al 27-04-2026) — v0.4.132
 
 ### Implementado y funcionando:
 - ✅ Auth completo (registro → pendiente → aprobación → activo) + reset contraseña
@@ -285,6 +287,17 @@ npm run typecheck     # tsc --noEmit
 - ✅ Edición y borrado de torneos (EditTorneoModal, DeleteTorneoDialog)
 - ✅ Inscripciones con categoría + RosterAdmin
 - ✅ OSP Primera Fecha 2026: todos los partidos completos en tabla `partidos`
+- ✅ Tesorería: cobros activos visibles con service_role (GRANTs en cobros/cobro_jugadores/pagos)
+- ✅ Toggle `cobrar_inscripcion` + `monto_inscripcion` en torneos externos (EditTorneoModal)
+- ✅ Cobros OSP Primera Fecha 2026 generados (10 jugadores × $25.000)
+- ✅ Umbral morosos: cualquier deuda pendiente (>=1) en lugar de múltiples cobros (>1)
+- ✅ `fecha_nacimiento` en perfil jugador: input en EditPerfilForm, edad + cumple en sidebar
+
+### `torneos` — campos nuevos (v0.4.131)
+| campo | tipo | notas |
+|---|---|---|
+| cobrar_inscripcion | boolean | DEFAULT false — el colegio recauda y paga como institución |
+| monto_inscripcion | integer | CLP por persona, null si no aplica |
 
 ### Pendiente / deuda técnica:
 - ⬜ Toggle `resultado_bloqueado` en TorneoDetalle

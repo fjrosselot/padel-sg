@@ -1,5 +1,24 @@
 # DEVLOG — padel-sg
 
+## [2026-04-27 13:00] — Cobros de inscripción + toggle torneo externo + fixes de grants
+
+**Resumen:** Se agregó campo `cobrar_inscripcion` (bool) y `monto_inscripcion` (int CLP) a `torneos`. El `EditTorneoModal` muestra un toggle cuando el tipo es `externo`. Se diagnosticó y corrigió problema de cobros invisibles en Tesorería: `service_role` no tenía GRANT en `cobros`, `cobro_jugadores` ni `pagos` (mismo patrón que ranking). Se generaron cobros del OSP Primera Fecha 2026 (10 jugadores × $25.000). Se ajustó umbral de morosos de `>1` a `>=1`.
+
+**Archivos:** `src/features/torneos/EditTorneoModal.tsx`, `src/features/tesoreria/TesoreriaAdmin.tsx`, `src/lib/types/database.types.ts`, `package.json`
+
+**Decisiones:**
+- Toggle `cobrar_inscripcion` solo visible cuando `tipo === 'externo'` — aplica a todos los estados del torneo
+- GRANTs `service_role` en cobros/cobro_jugadores/pagos — sin GRANT PostgREST rechaza aunque BYPASSRLS esté activo
+- Cobros OSP creados directamente por SQL (CTE INSERT) — no había UI para torneos finalizados
+
+**Pendientes:**
+- [ ] Toggle `resultado_bloqueado` en TorneoDetalle
+- [ ] Recálculo automático de ranking al guardar resultado
+- [ ] UI admin para novedades/noticias
+- [ ] RLS para que jugadores vean sus propios cobros (actualmente requiere adminHeaders)
+
+---
+
 ## [2026-04-27 00:00] — Redesign JugadorDetalle + Mi perfil unificados
 
 **Resumen:** Rediseño completo de `JugadorDetalle` con layout sidebar + 3 tabs (Mis partidos / Mis puntos / Mis pagos). Sidebar muestra avatar, apodo, lado preferido, ranking ATP, badges computados (En racha, Campeón, Finalista, Sólido, Veterano), contacto, morosidad, y edición de perfil + cambio de contraseña cuando es el propio usuario. `PerfilPage` ahora redirige a `/jugadores/:id`, unificando la vista "Mi perfil" con JugadorDetalle. Iteración en mockup (v1→v3) antes de llevar a producción.
