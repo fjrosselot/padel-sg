@@ -7,6 +7,7 @@ import { AuthCard, inputCls, labelCls } from './AuthCard'
 export function ResetPassword() {
   const navigate = useNavigate()
   const [mode, setMode] = useState<'request' | 'update' | 'invalid'>('request')
+  const isInvite = window.location.hash.includes('type=invite')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -19,11 +20,15 @@ export function ResetPassword() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         const params = new URLSearchParams(window.location.search)
-        if (params.has('code') || window.location.hash.includes('type=recovery')) setMode('update')
+        const hash = window.location.hash
+        if (params.has('code') || hash.includes('type=recovery') || hash.includes('type=invite')) setMode('update')
       }
     })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') setMode('update')
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+        const hash = window.location.hash
+        if (hash.includes('type=recovery') || hash.includes('type=invite')) setMode('update')
+      }
     })
     return () => subscription.unsubscribe()
   }, [])
@@ -92,8 +97,12 @@ export function ResetPassword() {
 
       {mode === 'update' && !success && (
         <>
-          <h1 className="font-manrope text-xl font-bold text-navy mb-1">Nueva contraseña</h1>
-          <p className="font-inter text-sm text-muted mb-6">Elige una contraseña segura.</p>
+          <h1 className="font-manrope text-xl font-bold text-navy mb-1">
+            {isInvite ? 'Crea tu contraseña' : 'Nueva contraseña'}
+          </h1>
+          <p className="font-inter text-sm text-muted mb-6">
+            {isInvite ? 'Bienvenido. Elige una contraseña para activar tu cuenta.' : 'Elige una contraseña segura.'}
+          </p>
           <form onSubmit={handleUpdate} className="space-y-4">
             <div>
               <label htmlFor="password" className={labelCls}>Nueva contraseña</label>

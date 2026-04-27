@@ -2,7 +2,10 @@ const SERVICE_KEY = () => import.meta.env.VITE_SUPABASE_SERVICE_KEY as string | 
 const ANON_KEY = () => import.meta.env.VITE_SUPABASE_ANON_KEY as string
 const API_URL = () => import.meta.env.VITE_SUPABASE_URL as string
 
-// New user → invite (set password + activate). Existing user → password reset.
+const RESET_URL = `${window.location.origin}/reset-password`
+
+// New user → invite (redirect to /reset-password to set password).
+// Existing user → password reset email (same redirect).
 export async function sendInvite(email: string): Promise<void> {
   const key = SERVICE_KEY() ?? ANON_KEY()
   const headers = { 'Content-Type': 'application/json', apikey: key, Authorization: `Bearer ${key}` }
@@ -10,7 +13,7 @@ export async function sendInvite(email: string): Promise<void> {
   const inviteRes = await fetch(`${API_URL()}/auth/v1/invite`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, redirect_to: RESET_URL }),
   })
 
   if (inviteRes.ok) return
@@ -26,7 +29,7 @@ export async function sendInvite(email: string): Promise<void> {
   const recoverRes = await fetch(`${API_URL()}/auth/v1/recover`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, redirect_to: RESET_URL }),
   })
 
   if (!recoverRes.ok) {
