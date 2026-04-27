@@ -17,6 +17,7 @@ const Dashboard = lazy(() => import('./features/dashboard/Dashboard').then(m => 
 const AmistososPage = lazy(() => import('./features/amistosos/AmistososPage'))
 const JugadoresPage = lazy(() => import('./features/jugadores/JugadoresPage'))
 const JugadorDetalle = lazy(() => import('./features/jugadores/JugadorDetalle'))
+const JugadorPartidos = lazy(() => import('./features/jugadores/JugadorPartidos'))
 const FinanzasPage = lazy(() => import('./features/finanzas/FinanzasPage'))
 const MasPage = lazy(() => import('./features/mas/MasPage'))
 const CalendarioPage = lazy(() => import('./features/calendario/CalendarioPage'))
@@ -77,6 +78,7 @@ export const router = createBrowserRouter([
       { path: 'torneos/:id', element: <TorneoDetalle /> },
       { path: 'jugadores', element: <JugadoresPage /> },
       { path: 'jugadores/:id', element: <JugadorDetalle /> },
+      { path: 'jugadores/:id/partidos', element: <JugadorPartidos /> },
       { path: 'rankings', element: <RankingPage /> },
       { path: 'amistosos', element: <AmistososPage /> },
       { path: 'calendario', element: <CalendarioPage /> },

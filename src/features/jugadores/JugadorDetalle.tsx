@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Trophy, Target, Percent, Flame, Users, Wallet } from 'lucide-react'
 import { padelApi } from '../../lib/padelApi'
@@ -360,8 +360,13 @@ export default function JugadorDetalle() {
         <div className="space-y-4">
           {/* Últimos partidos */}
           <div className="rounded-xl bg-white shadow-card overflow-hidden">
-            <div className="px-4 py-3 border-b border-surface-high">
+            <div className="px-4 py-3 border-b border-surface-high flex items-center justify-between">
               <p className="font-manrope text-sm font-bold text-navy">Últimos partidos</p>
+              {historialTorneos.length > 0 && (
+                <Link to={`/jugadores/${id}/partidos`} className="font-inter text-xs text-gold hover:underline">
+                  Ver todos →
+                </Link>
+              )}
             </div>
             {showHistorial.length === 0 && recentAmistosos.length === 0 ? (
               <p className="px-4 py-6 font-inter text-sm text-muted text-center">Sin partidos jugados aún.</p>
@@ -378,9 +383,14 @@ export default function JugadorDetalle() {
 
           {isAdmin && (
             <div className="rounded-xl bg-white shadow-card overflow-hidden">
-              <div className="px-4 py-3 border-b border-surface-high flex items-center gap-2">
-                <Wallet className="h-4 w-4 text-muted" />
-                <p className="font-manrope text-sm font-bold text-navy">Pagos</p>
+              <div className="px-4 py-3 border-b border-surface-high flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-4 w-4 text-muted" />
+                  <p className="font-manrope text-sm font-bold text-navy">Pagos</p>
+                </div>
+                <Link to="/finanzas" className="font-inter text-xs text-gold hover:underline">
+                  Ver historial →
+                </Link>
               </div>
               <div className="p-4">
                 <PagosJugador jugadorId={id!} />
