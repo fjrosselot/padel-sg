@@ -1,5 +1,25 @@
 # DEVLOG — padel-sg
 
+## [2026-04-26 20:00] — Partidos como fuente de verdad + admin log + backfill americano
+
+**Resumen:** Se estableció `padel.partidos` como fuente de verdad para historial y rankings. Se arregló `ResultadosModal` para escribir los 4 player UUIDs (pareja1/pareja2) y actualizar `torneos.categorias` JSONB al guardar resultados. Se construyó `AdminPartidos` (log editable en `/admin/partidos`). Se hizo backfill de los 24 partidos del americano SG desde JSONB hacia la tabla relacional. Se corrigió la lectura del historial de jugadores con RPC `get_player_historial` que lee JSONB. Se investigó OSP Primera Fecha 2026: datos incompletos de Larraín/Winter (grupo, scores) — pendiente corrección con fotos del torneo.
+
+**Archivos:** `src/features/torneos/ResultadosModal.tsx`, `src/features/torneos/TorneoDetalle.tsx`, `src/features/admin/AdminPartidos.tsx` (nuevo), `src/router.tsx`, `src/components/layout/Sidebar.tsx`, `src/features/jugadores/JugadorDetalle.tsx`, `supabase/migrations/20260426_partidos_resultado.sql`, `supabase/migrations/20260426_backfill_americano_partidos.sql`, `package.json`
+
+**Decisiones:**
+- `ResultadosModal` actualiza tanto `partidos` (relacional) como `torneos.categorias` (JSONB) al guardar — doble escritura necesaria porque el fixture display lee del JSONB
+- `AdminPartidos`: two-step query para nombres de jugadores (evita bug PostgREST con múltiples FK a misma tabla)
+- Backfill americano vía SQL desde JSONB: los player UUIDs ya estaban en el fixture, solo faltaba la fila relacional
+- `get_player_historial` RPC sigue leyendo JSONB (datos históricos más completos que la tabla partidos)
+- v0.4.106 → v0.4.108
+
+**Pendientes:**
+- [ ] Completar datos OSP: Larraín/Winter (grupos G4, scores de previa/cuartos/semis/final) y resultado final categoría 1 hombres (Astaburuaga vs Calleja)
+- [ ] Mujeres OSP: completar scores de grupo 2 y grupo 4 (resultado texto falta en partidos)
+- [ ] UI admin para gestionar novedades (crear/editar/desactivar desde la app)
+
+---
+
 ## [2026-04-24 17:30] — Dashboard widgets + UX tab bar mis partidos + reabrir en modal
 
 **Resumen:** Se reemplazó la sección "Accesos rápidos" del Dashboard por 3 widgets funcionales: sparkline de evolución de ranking (últimos 60 días, SVG puro), resumen de pagos pendientes con link a /finanzas, y lista de novedades admin desde nueva tabla `padel.novedades`. Se movió el pill "Mis partidos" al nivel del tab bar (fuera del contenido) y "Reabrir torneo" se trasladó al modal de edición.
