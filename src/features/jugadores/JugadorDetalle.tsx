@@ -20,7 +20,6 @@ interface PartidoBase {
   fecha: string | null
   tipo: string
   ganador: 1 | 2 | null
-  resultado: string | null
   pareja1_j1: string | null
   pareja1_j2: string | null
   pareja2_j1: string | null
@@ -79,7 +78,7 @@ function PartidoCard({ p, jugadorId }: { p: PartidoHistorial; jugadorId: string 
   const isAmistoso = p.tipo === 'amistoso'
   const score = p.sets_pareja1 !== null && p.sets_pareja2 !== null
     ? enP1 ? `${p.sets_pareja1}–${p.sets_pareja2}` : `${p.sets_pareja2}–${p.sets_pareja1}`
-    : p.resultado ?? '—'
+    : '—'
   const fechaStr = p.fecha
     ? new Date(p.fecha).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', timeZone: 'America/Santiago' })
     : '—'
@@ -130,7 +129,7 @@ export default function JugadorDetalle() {
     queryKey: ['jugador-historial', id],
     queryFn: () =>
       padelApi.get<PartidoBase[]>(
-        `partidos?select=id,fecha,tipo,ganador,resultado,pareja1_j1,pareja1_j2,pareja2_j1,pareja2_j2,sets_pareja1,sets_pareja2&or=(pareja1_j1.eq.${id},pareja1_j2.eq.${id},pareja2_j1.eq.${id},pareja2_j2.eq.${id})&estado=eq.jugado&order=fecha.desc&limit=20`
+        `partidos?select=id,fecha,tipo,ganador,pareja1_j1,pareja1_j2,pareja2_j1,pareja2_j2,sets_pareja1,sets_pareja2&or=(pareja1_j1.eq.${id},pareja1_j2.eq.${id},pareja2_j1.eq.${id},pareja2_j2.eq.${id})&estado=eq.jugado&order=fecha.desc&limit=20`
       ),
     enabled: !!id,
   })
@@ -193,7 +192,6 @@ export default function JugadorDetalle() {
       fecha: a.fecha,
       tipo: 'amistoso',
       ganador: null,
-      resultado: null,
       pareja1_j1: a.creador_id,
       pareja1_j2: a.companero_id,
       pareja2_j1: a.jugador3_id,
