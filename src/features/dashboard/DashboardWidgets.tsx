@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { ExternalLink, CheckCircle2, Flag } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { padelApi } from '@/lib/padelApi'
+import { useUser } from '@/hooks/useUser'
+import { useState } from 'react'
 
 const SB = import.meta.env.VITE_SUPABASE_URL as string
 const ANON = import.meta.env.VITE_SUPABASE_ANON_KEY as string
@@ -189,45 +191,78 @@ const MEDALS = ['#e8c547', '#94b0cc', '#CD7F32']
 
 export function RaceWidget() {
   const navigate = useNavigate()
+  const { data: user } = useUser()
   const year = new Date().getFullYear()
 
-  const { data: rows = [], isLoading } = useQuery({
+  const { data: allRows = [], isLoading } = useQuery({
     queryKey: ['race-widget', year],
     queryFn: () =>
       padelApi.get<RaceEntry[]>(
-        `ranking_race?anio=eq.${year}&select=jugador_id,nombre_pila,apellido,apodo,sexo,categoria,puntos_total&order=puntos_total.desc&limit=5`
+        `ranking_race?anio=eq.${year}&select=jugador_id,nombre_pila,apellido,apodo,sexo,categoria,puntos_total&order=categoria.asc,puntos_total.desc`
       ),
   })
 
-  if (isLoading || rows.length === 0) return null
+  // Derive ordered category list; default to user's own category
+  const categorias = [...new Set(allRows.map(r => r.categoria))]
+  const defaultCat = categorias.includes(user?.categoria ?? '') ? (user?.categoria ?? '') : (categorias[0] ?? '')
+  const [selectedCat, setSelectedCat] = useState<string>('')
+  const activeCat = selectedCat || defaultCat
 
-  const maxPts = rows[0].puntos_total
+  const rows = allRows.filter(r => r.categoria === activeCat).slice(0, 5)
+
+  if (isLoading || allRows.length === 0) return null
+
+  const maxPts = rows[0]?.puntos_total ?? 1
 
   return (
-    <button
-      type="button"
-      onClick={() => navigate('/rankings')}
-      className="w-full text-left rounded-xl bg-white shadow-card overflow-hidden hover:shadow-card-hover transition-shadow"
-    >
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-navy/5">
-        <Flag className="h-4 w-4 text-gold" />
+    <div className="rounded-xl bg-white shadow-card overflow-hidden">
+      {/* Header */}
+      <button
+        type="button"
+        onClick={() => navigate('/rankings')}
+        className="w-full flex items-center gap-2 px-4 py-3 border-b border-navy/5 hover:bg-surface transition-colors text-left"
+      >
+        <Flag className="h-4 w-4 text-gold shrink-0" />
         <p className="font-inter text-xs font-bold uppercase tracking-wider text-muted flex-1">Carrera {year}</p>
-        <span className="font-inter text-[10px] text-muted">Top 5 global</span>
+        <span className="font-inter text-[10px] text-muted">Top 5</span>
+      </button>
+
+      {/* Category tabs */}
+      <div className="flex overflow-x-auto no-scrollbar border-b border-navy/5 px-3 gap-1 pt-2">
+        {categorias.map(cat => (
+          <button
+            key={cat}
+            type="button"
+            onClick={() => setSelectedCat(cat)}
+            className={`shrink-0 px-3 py-1.5 mb-2 rounded-lg font-inter text-[11px] font-semibold transition-colors ${
+              cat === activeCat
+                ? 'bg-navy text-gold'
+                : 'text-muted hover:text-navy hover:bg-surface'
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
       </div>
+
+      {/* Rows */}
       <div className="px-4 py-2 space-y-2">
         {rows.map((r, i) => {
           const nombre = r.apodo ?? r.nombre_pila ?? r.apellido ?? '—'
           const pct = maxPts > 0 ? (r.puntos_total / maxPts) * 100 : 0
+          const isMe = r.jugador_id === user?.id
           return (
-            <div key={r.jugador_id} className="flex items-center gap-2">
+            <div key={r.jugador_id} className={`flex items-center gap-2 ${isMe ? 'font-bold' : ''}`}>
               <span className="w-4 font-manrope text-[11px] font-bold text-center shrink-0"
                 style={{ color: MEDALS[i] ?? '#94b0cc' }}>
                 {i + 1}
               </span>
-              <span className="w-20 font-inter text-[12px] font-semibold text-navy truncate shrink-0">{nombre}</span>
+              <span className={`w-20 font-inter text-[12px] truncate shrink-0 ${isMe ? 'text-navy font-bold' : 'font-semibold text-navy'}`}>
+                {nombre}{isMe ? ' ★' : ''}
+              </span>
               <div className="flex-1 h-1.5 rounded-full bg-surface overflow-hidden">
                 <div className="h-full rounded-full transition-all"
-                  style={{ width: `${pct}%`, background: i === 0 ? '#e8c547' : '#94b0cc' }} />
+                  style={{ width: `${pct}%`, background: isMe ? '#F5C518' : (i === 0 ? '#e8c547' : '#94b0cc') }} />
               </div>
               <span className="font-manrope text-[12px] font-bold text-navy shrink-0 w-10 text-right">
                 {r.puntos_total}
@@ -235,8 +270,11 @@ export function RaceWidget() {
             </div>
           )
         })}
+        {rows.length === 0 && (
+          <p className="font-inter text-xs text-muted py-2 text-center">Sin datos para esta categoría.</p>
+        )}
       </div>
-    </button>
+    </div>
   )
 }
 
