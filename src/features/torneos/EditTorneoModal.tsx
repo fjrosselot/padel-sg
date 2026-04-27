@@ -212,7 +212,7 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
               </div>
               {cobrarInscripcion && (
                 <div className="space-y-1.5">
-                  <Label htmlFor="edit-monto" className="label-editorial">Monto por pareja (CLP)</Label>
+                  <Label htmlFor="edit-monto" className="label-editorial">Monto por persona (CLP)</Label>
                   <Input
                     id="edit-monto"
                     type="number"
