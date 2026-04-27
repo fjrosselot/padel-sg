@@ -58,6 +58,8 @@ export function Dashboard() {
         </p>
       </div>
 
+      <Novedades />
+
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="Categoría" value={user?.categoria ?? '—'} />
         <div className="rounded-xl bg-white p-4 shadow-card">
@@ -102,8 +104,6 @@ export function Dashboard() {
       )}
 
       <RaceWidget />
-
-      <Novedades />
     </div>
   )
 }

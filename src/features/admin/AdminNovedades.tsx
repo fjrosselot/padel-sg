@@ -117,7 +117,7 @@ export default function AdminNovedades() {
           <textarea
             className={inputCls}
             rows={3}
-            placeholder="Contenido (opcional)"
+            placeholder="Contenido (opcional) — usa **negrita** y saltos de línea"
             value={form.contenido}
             onChange={e => setForm(v => ({ ...v, contenido: e.target.value }))}
           />
@@ -168,7 +168,7 @@ export default function AdminNovedades() {
                       rows={2}
                       value={editing.contenido ?? ''}
                       onChange={e => setEditing(v => v && ({ ...v, contenido: e.target.value }))}
-                      placeholder="Contenido"
+                      placeholder="Contenido — usa **negrita** y saltos de línea"
                     />
                     <input
                       className={inputCls}

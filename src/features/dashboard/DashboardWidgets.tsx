@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { ExternalLink, CheckCircle2, Flag } from 'lucide-react'
+import { ExternalLink, CheckCircle2, Flag, ChevronLeft, ChevronRight } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { padelApi } from '@/lib/padelApi'
 import { useUser } from '@/hooks/useUser'
@@ -292,42 +292,72 @@ function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', timeZone: 'America/Santiago' })
 }
 
+// Renders **bold** and line breaks
+function RichText({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*|\n)/)
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part === '\n') return <br key={i} />
+        if (part.startsWith('**') && part.endsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>
+        return <span key={i}>{part}</span>
+      })}
+    </>
+  )
+}
+
 export function Novedades() {
+  const [idx, setIdx] = useState(0)
   const { data: novedades = [], isLoading } = useQuery({
     queryKey: ['novedades'],
-    queryFn: () => padelApi.get<Novedad[]>('novedades?activo=eq.true&order=published_at.desc&limit=5'),
+    queryFn: () => padelApi.get<Novedad[]>('novedades?activo=eq.true&order=published_at.desc&limit=10'),
   })
 
   if (isLoading || novedades.length === 0) return null
 
+  const n = novedades[idx]
+  const total = novedades.length
+
   return (
-    <div className="rounded-xl bg-white shadow-card overflow-hidden">
-      <div className="px-4 py-3 border-b border-navy/5">
-        <p className="font-inter text-xs font-bold uppercase tracking-wider text-muted">Novedades</p>
-      </div>
-      <div className="divide-y divide-navy/5">
-        {novedades.map(n => (
-          <div key={n.id} className="px-4 py-3">
-            <div className="flex items-start justify-between gap-2">
-              <p className="font-inter text-sm font-medium text-navy leading-snug">{n.titulo}</p>
-              {n.url && (
-                <a
-                  href={n.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={e => e.stopPropagation()}
-                  className="shrink-0 text-muted hover:text-navy mt-0.5"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </a>
-              )}
-            </div>
-            {n.contenido && (
-              <p className="font-inter text-xs text-muted mt-0.5 leading-snug">{n.contenido}</p>
-            )}
-            <p className="font-inter text-[10px] text-muted/70 mt-1">{fmtDate(n.published_at)}</p>
+    <div className="rounded-xl bg-gold/10 border border-gold/30 overflow-hidden">
+      <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+        <p className="font-inter text-[10px] font-bold uppercase tracking-wider text-gold">Novedades</p>
+        {total > 1 && (
+          <div className="flex items-center gap-2">
+            <button onClick={() => setIdx(i => (i - 1 + total) % total)} className="text-gold hover:text-navy transition-colors">
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span className="font-inter text-[10px] text-muted tabular-nums">{idx + 1}/{total}</span>
+            <button onClick={() => setIdx(i => (i + 1) % total)} className="text-gold hover:text-navy transition-colors">
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
-        ))}
+        )}
+      </div>
+      <div className="px-4 pb-3">
+        <div className="flex items-start justify-between gap-2">
+          <p className="font-manrope text-sm font-bold text-navy leading-snug">{n.titulo}</p>
+          {n.url && (
+            <a href={n.url} target="_blank" rel="noopener noreferrer" className="shrink-0 text-gold hover:text-navy mt-0.5">
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          )}
+        </div>
+        {n.contenido && (
+          <p className="font-inter text-xs text-slate mt-1 leading-relaxed">
+            <RichText text={n.contenido} />
+          </p>
+        )}
+        <p className="font-inter text-[10px] text-muted/70 mt-1.5">{fmtDate(n.published_at)}</p>
+        {total > 1 && (
+          <div className="flex gap-1 mt-2">
+            {novedades.map((_, i) => (
+              <button key={i} onClick={() => setIdx(i)}
+                className={`h-1.5 rounded-full transition-all ${i === idx ? 'w-4 bg-gold' : 'w-1.5 bg-gold/30'}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
