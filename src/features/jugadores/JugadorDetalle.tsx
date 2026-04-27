@@ -14,11 +14,18 @@ import { useCategorias } from '../categorias/useCategorias'
 
 const LADO_LABEL: Record<string, string> = { drive: 'Drive', reves: 'Revés', ambos: 'Ambos' }
 const MIXTO_LABEL: Record<string, string> = { si: 'Sí', no: 'No', a_veces: 'A veces' }
+const FASE_LABEL: Record<string, string> = {
+  grupo: 'Fase de grupos', cuartos: 'Cuartos de final',
+  semifinal: 'Semifinal', final: 'Final', tercer_lugar: 'Tercer lugar',
+  octavos: 'Octavos de final', consolacion_cuartos: 'Consolación',
+  consolacion_sf: 'Consolación SF', consolacion_final: 'Consolación F', desafio: 'Desafío',
+}
 
 interface PartidoBase {
   id: string
   fecha: string | null
   tipo: string
+  fase: string | null
   ganador: 1 | 2 | null
   pareja1_j1: string | null
   pareja1_j2: string | null
@@ -83,9 +90,21 @@ function PartidoCard({ p, jugadorId }: { p: PartidoHistorial; jugadorId: string 
     ? new Date(p.fecha).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', timeZone: 'America/Santiago' })
     : '—'
   const tipoLabel = ({ torneo: 'Torneo', amistoso: 'Amistoso', liga: 'Liga' } as Record<string, string>)[p.tipo] ?? p.tipo
+  const faseLabel = p.fase ? (FASE_LABEL[p.fase] ?? p.fase) : null
+
   const rivalJ1 = enP1 ? p.p2j1 : p.p1j1
   const rivalJ2 = enP1 ? p.p2j2 : p.p1j2
-  const rivalStr = [rivalJ1, rivalJ2].filter(Boolean).map(j => nombreCorto(j!.nombre)).join(' / ') || '—'
+  const rivalStr = [rivalJ1, rivalJ2].filter(Boolean).map(j => nombreCorto(j!.nombre)).join(' / ')
+
+  // When rival is unknown, show the partner instead
+  const partnerJ = enP1
+    ? (p.pareja1_j1 === jugadorId ? p.p1j2 : p.p1j1)
+    : (p.pareja2_j1 === jugadorId ? p.p2j2 : p.p2j1)
+  const partnerStr = partnerJ ? `con ${nombreCorto(partnerJ.nombre)}` : null
+
+  const mainLine = rivalStr
+    ? `vs ${rivalStr}`
+    : faseLabel ?? (partnerStr ?? tipoLabel)
 
   const badgeClass = isAmistoso
     ? 'bg-surface text-muted'
@@ -94,14 +113,16 @@ function PartidoCard({ p, jugadorId }: { p: PartidoHistorial; jugadorId: string 
       : gano ? 'bg-success/10 text-success' : 'bg-defeat/10 text-defeat'
   const badgeLabel = isAmistoso ? 'Amist.' : p.ganador === null ? 'Pend.' : gano ? 'Victoria' : 'Derrota'
 
+  const subLine = [tipoLabel, faseLabel && !rivalStr ? null : faseLabel, fechaStr].filter(Boolean).join(' · ')
+
   return (
     <div className="flex items-center gap-3 px-4 py-3">
       <span className={`shrink-0 w-14 text-center rounded-md px-1.5 py-0.5 font-inter text-[10px] font-black uppercase ${badgeClass}`}>
         {badgeLabel}
       </span>
       <div className="flex-1 min-w-0">
-        <p className="font-inter text-xs font-medium text-navy truncate">vs {rivalStr}</p>
-        <p className="font-inter text-[10px] text-muted">{tipoLabel} · {fechaStr}</p>
+        <p className="font-inter text-xs font-medium text-navy truncate">{mainLine}</p>
+        <p className="font-inter text-[10px] text-muted">{subLine}</p>
       </div>
       <span className="font-manrope text-sm font-bold text-navy shrink-0">{isAmistoso ? '—' : score}</span>
     </div>
@@ -129,7 +150,7 @@ export default function JugadorDetalle() {
     queryKey: ['jugador-historial', id],
     queryFn: () =>
       padelApi.get<PartidoBase[]>(
-        `partidos?select=id,fecha,tipo,ganador,pareja1_j1,pareja1_j2,pareja2_j1,pareja2_j2,sets_pareja1,sets_pareja2&or=(pareja1_j1.eq.${id},pareja1_j2.eq.${id},pareja2_j1.eq.${id},pareja2_j2.eq.${id})&estado=eq.jugado&order=fecha.desc&limit=20`
+        `partidos?select=id,fecha,tipo,fase,ganador,pareja1_j1,pareja1_j2,pareja2_j1,pareja2_j2,sets_pareja1,sets_pareja2&or=(pareja1_j1.eq.${id},pareja1_j2.eq.${id},pareja2_j1.eq.${id},pareja2_j2.eq.${id})&estado=eq.jugado&order=fecha.desc&limit=20`
       ),
     enabled: !!id,
   })
@@ -191,6 +212,7 @@ export default function JugadorDetalle() {
       id: a.id,
       fecha: a.fecha,
       tipo: 'amistoso',
+      fase: null,
       ganador: null,
       pareja1_j1: a.creador_id,
       pareja1_j2: a.companero_id,
