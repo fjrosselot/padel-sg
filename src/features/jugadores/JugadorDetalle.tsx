@@ -18,28 +18,21 @@ const FASE_LABEL: Record<string, string> = {
   grupo: 'Fase de grupos', cuartos: 'Cuartos de final',
   semifinal: 'Semifinal', final: 'Final', tercer_lugar: 'Tercer lugar',
   octavos: 'Octavos de final', consolacion_cuartos: 'Consolación',
-  consolacion_sf: 'Consolación SF', consolacion_final: 'Consolación F', desafio: 'Desafío',
+  consolacion_sf: 'Cons. SF', consolacion_final: 'Cons. Final', desafio: 'Desafío',
 }
 
-interface PartidoBase {
-  id: string
-  fecha: string | null
-  tipo: string
+interface HistorialEntry {
+  torneo_id: string
+  torneo_nombre: string
+  torneo_fecha: string | null
+  match_id: string
   fase: string | null
-  ganador: 1 | 2 | null
-  pareja1_j1: string | null
-  pareja1_j2: string | null
-  pareja2_j1: string | null
-  pareja2_j2: string | null
-  sets_pareja1: number | null
-  sets_pareja2: number | null
-}
-
-interface PartidoHistorial extends PartidoBase {
-  p1j1: { nombre: string; apodo: string | null } | null
-  p1j2: { nombre: string; apodo: string | null } | null
-  p2j1: { nombre: string; apodo: string | null } | null
-  p2j2: { nombre: string; apodo: string | null } | null
+  turno: string | null
+  pareja1_nombre: string | null
+  pareja2_nombre: string | null
+  ganador: number | null
+  resultado: string | null
+  es_pareja1: boolean
 }
 
 interface AmistosoBase {
@@ -60,71 +53,62 @@ interface InscripcionCompanero {
 
 type JugadorExtra = Jugador & { rut?: string | null }
 
-function nombreCorto(nombre: string) {
-  const parts = nombre.trim().split(' ').filter(Boolean)
-  if (parts.length <= 1) return nombre
-  return `${parts[0]} ${parts[parts.length - 1][0]}.`
-}
+function TorneoCard({ entry }: { entry: HistorialEntry }) {
+  const gano = entry.ganador !== null && (
+    (entry.es_pareja1 && entry.ganador === 1) ||
+    (!entry.es_pareja1 && entry.ganador === 2)
+  )
+  const rival = entry.es_pareja1 ? entry.pareja2_nombre : entry.pareja1_nombre
+  const faseLabel = entry.fase ? (FASE_LABEL[entry.fase] ?? entry.fase) : null
 
-function calcularRacha(torneos: PartidoBase[], jugadorId: string): { tipo: 'victoria' | 'derrota'; n: number } | null {
-  const results = torneos.map(p => {
-    if (p.ganador === null) return null
-    const enP1 = p.pareja1_j1 === jugadorId || p.pareja1_j2 === jugadorId
-    return (enP1 && p.ganador === 1) || (!enP1 && p.ganador === 2) ? 'victoria' as const : 'derrota' as const
-  }).filter(Boolean) as ('victoria' | 'derrota')[]
-  if (results.length === 0) return null
-  const tipo = results[0]
-  let n = 0
-  for (const r of results) { if (r === tipo) n++; else break }
-  return n >= 2 ? { tipo, n } : null
-}
+  let displayScore = '—'
+  if (entry.resultado) {
+    const parts = entry.resultado.split('-')
+    if (parts.length === 2) {
+      displayScore = entry.es_pareja1
+        ? `${parts[0]}–${parts[1]}`
+        : `${parts[1]}–${parts[0]}`
+    }
+  }
 
-function PartidoCard({ p, jugadorId }: { p: PartidoHistorial; jugadorId: string }) {
-  const enP1 = p.pareja1_j1 === jugadorId || p.pareja1_j2 === jugadorId
-  const gano = p.ganador !== null && ((enP1 && p.ganador === 1) || (!enP1 && p.ganador === 2))
-  const isAmistoso = p.tipo === 'amistoso'
-  const score = p.sets_pareja1 !== null && p.sets_pareja2 !== null
-    ? enP1 ? `${p.sets_pareja1}–${p.sets_pareja2}` : `${p.sets_pareja2}–${p.sets_pareja1}`
+  const fechaStr = entry.torneo_fecha
+    ? new Date(entry.torneo_fecha).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', timeZone: 'America/Santiago' })
     : '—'
-  const fechaStr = p.fecha
-    ? new Date(p.fecha).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', timeZone: 'America/Santiago' })
-    : '—'
-  const tipoLabel = ({ torneo: 'Torneo', amistoso: 'Amistoso', liga: 'Liga' } as Record<string, string>)[p.tipo] ?? p.tipo
-  const faseLabel = p.fase ? (FASE_LABEL[p.fase] ?? p.fase) : null
-
-  const rivalJ1 = enP1 ? p.p2j1 : p.p1j1
-  const rivalJ2 = enP1 ? p.p2j2 : p.p1j2
-  const rivalStr = [rivalJ1, rivalJ2].filter(Boolean).map(j => nombreCorto(j!.nombre)).join(' / ')
-
-  // When rival is unknown, show the partner instead
-  const partnerJ = enP1
-    ? (p.pareja1_j1 === jugadorId ? p.p1j2 : p.p1j1)
-    : (p.pareja2_j1 === jugadorId ? p.p2j2 : p.p2j1)
-  const partnerStr = partnerJ ? `con ${nombreCorto(partnerJ.nombre)}` : null
-
-  const mainLine = rivalStr
-    ? `vs ${rivalStr}`
-    : faseLabel ?? (partnerStr ?? tipoLabel)
-
-  const badgeClass = isAmistoso
-    ? 'bg-surface text-muted'
-    : p.ganador === null
-      ? 'bg-surface text-muted'
-      : gano ? 'bg-success/10 text-success' : 'bg-defeat/10 text-defeat'
-  const badgeLabel = isAmistoso ? 'Amist.' : p.ganador === null ? 'Pend.' : gano ? 'Victoria' : 'Derrota'
-
-  const subLine = [tipoLabel, faseLabel && !rivalStr ? null : faseLabel, fechaStr].filter(Boolean).join(' · ')
 
   return (
     <div className="flex items-center gap-3 px-4 py-3">
-      <span className={`shrink-0 w-14 text-center rounded-md px-1.5 py-0.5 font-inter text-[10px] font-black uppercase ${badgeClass}`}>
-        {badgeLabel}
+      <span className={`shrink-0 w-14 text-center rounded-md px-1.5 py-0.5 font-inter text-[10px] font-black uppercase ${
+        gano ? 'bg-success/10 text-success' : 'bg-defeat/10 text-defeat'
+      }`}>
+        {gano ? 'Victoria' : 'Derrota'}
       </span>
       <div className="flex-1 min-w-0">
-        <p className="font-inter text-xs font-medium text-navy truncate">{mainLine}</p>
-        <p className="font-inter text-[10px] text-muted">{subLine}</p>
+        <p className="font-inter text-xs font-medium text-navy truncate">
+          {rival ? `vs ${rival}` : (faseLabel ?? entry.torneo_nombre)}
+        </p>
+        <p className="font-inter text-[10px] text-muted truncate">
+          {entry.torneo_nombre}{faseLabel ? ` · ${faseLabel}` : ''} · {fechaStr}
+        </p>
       </div>
-      <span className="font-manrope text-sm font-bold text-navy shrink-0">{isAmistoso ? '—' : score}</span>
+      <span className="font-manrope text-sm font-bold text-navy shrink-0">{displayScore}</span>
+    </div>
+  )
+}
+
+function AmistosoCard({ a }: { a: AmistosoBase }) {
+  const fechaStr = a.fecha
+    ? new Date(a.fecha).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', timeZone: 'America/Santiago' })
+    : '—'
+  return (
+    <div className="flex items-center gap-3 px-4 py-3">
+      <span className="shrink-0 w-14 text-center rounded-md px-1.5 py-0.5 font-inter text-[10px] font-black uppercase bg-surface text-muted">
+        Amist.
+      </span>
+      <div className="flex-1 min-w-0">
+        <p className="font-inter text-xs font-medium text-navy">Amistoso jugado</p>
+        <p className="font-inter text-[10px] text-muted">{fechaStr}</p>
+      </div>
+      <span className="font-manrope text-sm font-bold text-navy shrink-0">—</span>
     </div>
   )
 }
@@ -145,13 +129,10 @@ export default function JugadorDetalle() {
     enabled: !!id,
   })
 
-  // Query partidos WITHOUT embedded joins to avoid PostgREST ambiguity with multiple FKs to same table
-  const { data: torneosRaw = [] } = useQuery({
-    queryKey: ['jugador-historial', id],
-    queryFn: () =>
-      padelApi.get<PartidoBase[]>(
-        `partidos?select=id,fecha,tipo,fase,ganador,pareja1_j1,pareja1_j2,pareja2_j1,pareja2_j2,sets_pareja1,sets_pareja2&or=(pareja1_j1.eq.${id},pareja1_j2.eq.${id},pareja2_j1.eq.${id},pareja2_j2.eq.${id})&estado=eq.jugado&order=fecha.desc&limit=20`
-      ),
+  // Read historial from torneos.categorias JSON via RPC — has both pairs and correct results
+  const { data: historialTorneos = [] } = useQuery({
+    queryKey: ['jugador-historial-rpc', id],
+    queryFn: () => padelApi.rpc<HistorialEntry[]>('get_player_historial', { p_jugador_id: id }),
     enabled: !!id,
   })
 
@@ -164,29 +145,6 @@ export default function JugadorDetalle() {
     enabled: !!id,
   })
 
-  // Collect all player IDs from both queries, then fetch names in one request
-  const allPlayerIds = useMemo(() => {
-    const ids = new Set<string>()
-    for (const p of torneosRaw) {
-      [p.pareja1_j1, p.pareja1_j2, p.pareja2_j1, p.pareja2_j2].forEach(pid => { if (pid) ids.add(pid) })
-    }
-    for (const a of amistososRaw) {
-      [a.creador_id, a.companero_id, a.jugador3_id, a.jugador4_id].forEach(pid => { if (pid) ids.add(pid) })
-    }
-    return Array.from(ids)
-  }, [torneosRaw, amistososRaw])
-
-  const { data: playerNamesMap = {} } = useQuery({
-    queryKey: ['player-names', allPlayerIds.slice().sort().join(',')],
-    queryFn: async () => {
-      const players = await padelApi.get<{ id: string; nombre: string; apodo: string | null }[]>(
-        `jugadores?select=id,nombre,apodo&id=in.(${allPlayerIds.join(',')})`
-      )
-      return Object.fromEntries(players.map(p => [p.id, { nombre: p.nombre, apodo: p.apodo }]))
-    },
-    enabled: allPlayerIds.length > 0,
-  })
-
   const { data: inscripcionesRaw = [] } = useQuery({
     queryKey: ['jugador-companeros', id],
     queryFn: () => padelApi.get<InscripcionCompanero[]>(
@@ -196,44 +154,6 @@ export default function JugadorDetalle() {
   })
 
   const { data: rankings } = usePlayerRankings(id)
-
-  const historial = useMemo((): PartidoHistorial[] => {
-    const lookup = (pid: string | null) => (pid ? playerNamesMap[pid] ?? null : null)
-
-    const torneos: PartidoHistorial[] = torneosRaw.map(p => ({
-      ...p,
-      p1j1: lookup(p.pareja1_j1),
-      p1j2: lookup(p.pareja1_j2),
-      p2j1: lookup(p.pareja2_j1),
-      p2j2: lookup(p.pareja2_j2),
-    }))
-
-    const amistosos: PartidoHistorial[] = amistososRaw.map(a => ({
-      id: a.id,
-      fecha: a.fecha,
-      tipo: 'amistoso',
-      fase: null,
-      ganador: null,
-      pareja1_j1: a.creador_id,
-      pareja1_j2: a.companero_id,
-      pareja2_j1: a.jugador3_id,
-      pareja2_j2: a.jugador4_id,
-      sets_pareja1: null,
-      sets_pareja2: null,
-      p1j1: lookup(a.creador_id),
-      p1j2: lookup(a.companero_id),
-      p2j1: lookup(a.jugador3_id),
-      p2j2: lookup(a.jugador4_id),
-    }))
-
-    return [...torneos, ...amistosos]
-      .sort((a, b) => {
-        if (!a.fecha) return 1
-        if (!b.fecha) return -1
-        return new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
-      })
-      .slice(0, 10)
-  }, [torneosRaw, amistososRaw, playerNamesMap])
 
   const companerosFrecuentes = useMemo(() => {
     const count = new Map<string, { nombre: string; foto_url: string | null; n: number }>()
@@ -269,13 +189,25 @@ export default function JugadorDetalle() {
   const avatarText = cat?.color_texto ?? '#e8c547'
 
   const initials = jugador.nombre.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || '??'
-  const totalPartidos = historial.length
-  const victorias = torneosRaw.filter(p => {
-    const enP1 = p.pareja1_j1 === id || p.pareja1_j2 === id
-    return (enP1 && p.ganador === 1) || (!enP1 && p.ganador === 2)
-  }).length
-  const winRate = torneosRaw.length > 0 ? Math.round((victorias / torneosRaw.length) * 100) : null
-  const racha = calcularRacha(torneosRaw, id!)
+  const victorias = historialTorneos.filter(e =>
+    (e.es_pareja1 && e.ganador === 1) || (!e.es_pareja1 && e.ganador === 2)
+  ).length
+  const totalTorneos = historialTorneos.length
+  const totalPartidos = totalTorneos + amistososRaw.length
+  const winRate = totalTorneos > 0 ? Math.round((victorias / totalTorneos) * 100) : null
+
+  // Racha: consecutive wins/losses from latest tournament matches
+  const rachaResults = historialTorneos.map(e =>
+    (e.es_pareja1 && e.ganador === 1) || (!e.es_pareja1 && e.ganador === 2) ? 'v' : 'd'
+  )
+  const rachaTipo = rachaResults.length > 0 ? rachaResults[0] : null
+  let rachaN = 0
+  for (const r of rachaResults) { if (r === rachaTipo) rachaN++; else break }
+  const racha = rachaN >= 2 ? { tipo: rachaTipo === 'v' ? 'victoria' as const : 'derrota' as const, n: rachaN } : null
+
+  // Merge tournament historial (last 10) and amistosos sorted by date
+  const recentAmistosos = amistososRaw.slice(0, 10)
+  const showHistorial = historialTorneos.slice(0, 10)
 
   return (
     <div className="space-y-4">
@@ -290,7 +222,7 @@ export default function JugadorDetalle() {
       <div className="grid grid-cols-1 md:grid-cols-[1fr_380px] gap-6 items-start">
         {/* Left column */}
         <div className="space-y-4">
-          {/* Header — background from category color */}
+          {/* Header */}
           <div className="rounded-xl p-5 flex items-center gap-4" style={{ background: headerBg }}>
             <div
               className="h-20 w-20 rounded-2xl shrink-0 flex items-center justify-center overflow-hidden border-2"
@@ -362,7 +294,7 @@ export default function JugadorDetalle() {
                 <p className={`font-manrope text-sm font-bold ${racha.tipo === 'victoria' ? 'text-success' : 'text-defeat'}`}>
                   Racha de {racha.n} {racha.tipo === 'victoria' ? (racha.n === 1 ? 'victoria' : 'victorias') : (racha.n === 1 ? 'derrota' : 'derrotas')}
                 </p>
-                <p className="font-inter text-xs text-muted">De los últimos {torneosRaw.length} torneos registrados</p>
+                <p className="font-inter text-xs text-muted">Últimos {totalTorneos} torneos registrados</p>
               </div>
             </div>
           )}
@@ -429,14 +361,14 @@ export default function JugadorDetalle() {
             <div className="px-4 py-3 border-b border-surface-high">
               <p className="font-manrope text-sm font-bold text-navy">Últimos partidos</p>
             </div>
-            {historial.length > 0
-              ? historial.map((p, idx) => (
-                <div key={p.id} className={idx !== historial.length - 1 ? 'border-b border-surface-high' : ''}>
-                  <PartidoCard p={p} jugadorId={id!} />
-                </div>
-              ))
-              : <p className="px-4 py-6 font-inter text-sm text-muted text-center">Sin partidos jugados aún.</p>
-            }
+            {showHistorial.length === 0 && recentAmistosos.length === 0 ? (
+              <p className="px-4 py-6 font-inter text-sm text-muted text-center">Sin partidos jugados aún.</p>
+            ) : (
+              <div className="divide-y divide-surface-high">
+                {showHistorial.map(e => <TorneoCard key={e.match_id} entry={e} />)}
+                {recentAmistosos.map(a => <AmistosoCard key={a.id} a={a} />)}
+              </div>
+            )}
           </div>
 
           <PuntosDefender jugadorId={id!} />
