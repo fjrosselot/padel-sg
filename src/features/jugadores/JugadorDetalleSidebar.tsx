@@ -129,6 +129,7 @@ export function JugadorDetalleSidebar({ jugador, rankings, badges, esPropioPeril
   const { data: companeros = [] } = useCompanerosFrecuentes(jugador.id)
 
   // Password
+  const [showPwSection, setShowPwSection] = useState(false)
   const [showPw, setShowPw] = useState(false)
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -144,6 +145,7 @@ export function JugadorDetalleSidebar({ jugador, rankings, badges, esPropioPeril
     setPwLoading(false)
     if (error) { setPwError(error.message); return }
     setPwSuccess(true); setPassword(''); setConfirm('')
+    setTimeout(() => setShowPwSection(false), 800)
   }
 
   const initials = jugador.nombre.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || '??'
@@ -308,28 +310,40 @@ export function JugadorDetalleSidebar({ jugador, rankings, badges, esPropioPeril
 
         {/* ── Cambiar contraseña (solo propio) ── */}
         {esPropioPeril && (
-          <div className="rounded-xl bg-white shadow-card p-4 space-y-2.5">
-            <p className="font-inter text-xs font-semibold text-navy">Cambiar contraseña</p>
-            {pwSuccess && <p className="font-inter text-xs text-victory">Contraseña actualizada.</p>}
-            <form onSubmit={handlePw} className="space-y-2">
-              <div className="relative">
-                <input type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
-                  placeholder="Nueva contraseña" autoComplete="new-password" required
-                  className="w-full px-3 py-2 pr-8 rounded-lg bg-surface font-inter text-xs text-navy outline-none focus:ring-2 focus:ring-gold/40" />
-                <button type="button" onClick={() => setShowPw(v => !v)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted">
-                  {showPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                </button>
+          <div className="rounded-xl bg-white shadow-card overflow-hidden">
+            <button type="button"
+              onClick={() => { setShowPwSection(o => !o); setPwError(null); setPwSuccess(false) }}
+              className="w-full flex items-center justify-between px-4 py-3 hover:bg-surface transition-colors">
+              <div className="flex items-center gap-2">
+                <Eye className="h-3.5 w-3.5 text-muted" />
+                <span className="font-inter text-xs font-semibold text-navy">Cambiar contraseña</span>
               </div>
-              <input type={showPw ? 'text' : 'password'} value={confirm} onChange={e => setConfirm(e.target.value)}
-                placeholder="Confirmar contraseña" autoComplete="new-password" required
-                className="w-full px-3 py-2 rounded-lg bg-surface font-inter text-xs text-navy outline-none focus:ring-2 focus:ring-gold/40" />
-              {pwError && <p className="font-inter text-xs text-defeat">{pwError}</p>}
-              <button type="submit" disabled={pwLoading}
-                className="w-full py-2 rounded-lg font-inter text-xs font-bold bg-gold text-navy disabled:opacity-50">
-                {pwLoading ? 'Guardando…' : 'Cambiar contraseña'}
-              </button>
-            </form>
+              <span className="font-inter text-[10px] text-muted">{showPwSection ? '↑ Cerrar' : '↓ Abrir'}</span>
+            </button>
+            {showPwSection && (
+              <div className="px-4 pb-4 border-t border-surface">
+                {pwSuccess && <p className="font-inter text-xs text-victory pt-3">Contraseña actualizada.</p>}
+                <form onSubmit={handlePw} className="space-y-2 pt-3">
+                  <div className="relative">
+                    <input type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
+                      placeholder="Nueva contraseña" autoComplete="new-password" required
+                      className="w-full px-3 py-2 pr-8 rounded-lg bg-surface font-inter text-xs text-navy outline-none focus:ring-2 focus:ring-gold/40" />
+                    <button type="button" onClick={() => setShowPw(v => !v)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted">
+                      {showPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    </button>
+                  </div>
+                  <input type={showPw ? 'text' : 'password'} value={confirm} onChange={e => setConfirm(e.target.value)}
+                    placeholder="Confirmar contraseña" autoComplete="new-password" required
+                    className="w-full px-3 py-2 rounded-lg bg-surface font-inter text-xs text-navy outline-none focus:ring-2 focus:ring-gold/40" />
+                  {pwError && <p className="font-inter text-xs text-defeat">{pwError}</p>}
+                  <button type="submit" disabled={pwLoading}
+                    className="w-full py-2 rounded-lg font-inter text-xs font-bold bg-gold text-navy disabled:opacity-50">
+                    {pwLoading ? 'Guardando…' : 'Cambiar contraseña'}
+                  </button>
+                </form>
+              </div>
+            )}
           </div>
         )}
 
