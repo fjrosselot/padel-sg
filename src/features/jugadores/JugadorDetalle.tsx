@@ -63,11 +63,13 @@ function TorneoCard({ entry }: { entry: HistorialEntry }) {
 
   let displayScore = '—'
   if (entry.resultado) {
-    const parts = entry.resultado.split('-')
-    if (parts.length === 2) {
-      displayScore = entry.es_pareja1
-        ? `${parts[0]}–${parts[1]}`
-        : `${parts[1]}–${parts[0]}`
+    if (entry.es_pareja1) {
+      displayScore = entry.resultado
+    } else {
+      displayScore = entry.resultado
+        .split(' ')
+        .map(set => set.split('-').reverse().join('-'))
+        .join(' ')
     }
   }
 
