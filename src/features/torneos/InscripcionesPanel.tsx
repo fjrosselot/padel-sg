@@ -75,7 +75,7 @@ export default function InscripcionesPanel({ torneoId, estado, categorias }: Pro
       if (!user || !categoriaNombre) throw new Error('Selecciona una categoría')
       const ocupados = cuposOcupados(categoriaNombre)
       const total = cuposTotal(categoriaNombre)
-      const estaLlena = ocupados >= total
+      const estaLlena = total > 0 && ocupados >= total
       const posicion_espera = estaLlena ? enListaEspera(categoriaNombre).length + 1 : null
       await padelApi.post('inscripciones', {
         torneo_id: torneoId,

@@ -69,7 +69,7 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
         i => i.categoria_nombre === cat && !i.lista_espera && i.estado !== 'rechazada'
       ).length ?? 0
       const total = categorias.find(c => c.nombre === cat)?.num_parejas ?? 0
-      const estaLlena = activas >= total
+      const estaLlena = total > 0 && activas >= total
       const posicion_espera = estaLlena
         ? (inscripciones?.filter(i => i.categoria_nombre === cat && i.lista_espera).length ?? 0) + 1
         : null
