@@ -1,5 +1,27 @@
 # DEVLOG — padel-sg
 
+## [2026-04-28 14:00] — Ficha completa: RUT, hijos_sg, todos los atributos
+
+**Resumen:** Se expandió SetupEmailPage con todos los campos del jugador: RUT (nueva columna DB), fecha de nacimiento, sexo, mixto, frecuencia de juego, hijos en SG (lista dinámica con selector de curso). Se corrigió el gate `ficha_validada` — todos los usuarios válidos revertidos a false excepto fjrosselot (único que tenía sesiones previas).
+
+**Archivos:** `src/features/auth/SetupEmailPage.tsx`, `src/lib/types/database.types.ts`, `src/lib/devUser.ts`, `package.json`
+
+**Decisiones:**
+- `rut text` en DB — no tipado ni validado en frontend (simplicidad, se puede formatear después)
+- `hijos_sg` mantiene estructura `[{anio, curso_ingreso}]` — ya existente, ahora editable en ficha
+- `ficha_validada = false` para todos excepto fjrosselot — gate aplica a todos en primer login, incluyendo usuarios con email real
+- Selector de cursos Pre-kinder → IV° Medio hardcodeado en frontend — no requiere tabla DB
+
+**Pendientes:**
+- [ ] Ejecutar `reset-passwords.mjs` (DRY_RUN=false) + `gen-whatsapp.mjs` para lanzar enrollment
+- [ ] Sistema de puntos tipo ATP/WTA (defensa de puntos año a año)
+- [ ] Vista bracket visual interactiva en TorneoDetalle
+- [ ] Actualizar teléfonos faltantes (18 jugadores)
+- [ ] Probar wizard end-to-end: 1 torneo interno + 1 desafío
+- [ ] Ligas: jornadas + tabla de posiciones
+
+---
+
 ## [2026-04-28 12:00] — Enrollment masivo + ficha_validada + backbone-mockups hub
 
 **Resumen:** Sistema completo de enrollment masivo (143 jugadores): normalización de emails placeholder a formato `naguayo@sgpadel.cl`, scripts de reset de contraseñas y generación de links WhatsApp. Login con username o email real. Gate universal de primer login con columna `ficha_validada`. Creación del repo `backbone-mockups` como hub visual independiente con los 20 mockups migrados, conectado a `mockups-backbone.vercel.app`. Skill `/mockup` global creado.
