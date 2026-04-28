@@ -36,6 +36,8 @@ const PROJECTS = [
       { label: 'Wizard — Selección de menú', path: '/mockup/app-asados/wizard-menu' },
       { label: 'Lista de compras', path: '/mockup/app-asados/lista-compras' },
       { label: 'Receta detalle', path: '/mockup/app-asados/receta-detalle' },
+      { label: 'Panel de cobros', path: '/mockup/app-asados/cobros' },
+      { label: 'Historial de asados', path: '/mockup/app-asados/historial' },
     ],
   },
   {
