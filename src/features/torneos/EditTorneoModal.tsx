@@ -94,14 +94,16 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
         body.colegio_rival = colegioRival || null
       }
 
-      body.config_fixture = {
-        ...initialConfig,
-        hora_inicio: horaInicio,
-        ...(isBorrador && {
-          duracion_partido: duracionPartido,
-          pausa_entre_partidos: pausaEntrePartidos,
-          num_canchas: numCanchas,
-        }),
+      if (tipo !== 'externo') {
+        body.config_fixture = {
+          ...initialConfig,
+          hora_inicio: horaInicio,
+          ...(isBorrador && {
+            duracion_partido: duracionPartido,
+            pausa_entre_partidos: pausaEntrePartidos,
+            num_canchas: numCanchas,
+          }),
+        }
       }
 
       if (isBorrador) {
@@ -179,18 +181,20 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
             />
           </div>
 
-          {/* Hora de inicio */}
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-hora-top" className="label-editorial">Hora de inicio</Label>
-            <select
-              id="edit-hora-top"
-              value={horaInicio}
-              onChange={e => setHoraInicio(e.target.value)}
-              className="w-full rounded-lg border border-navy/20 bg-white px-3 py-2 text-sm text-navy focus:border-gold focus:outline-none"
-            >
-              {horaOptions.map(v => <option key={v} value={v}>{v}</option>)}
-            </select>
-          </div>
+          {/* Hora de inicio — no aplica para torneos externos (sin fixture) */}
+          {tipo !== 'externo' && (
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-hora-top" className="label-editorial">Hora de inicio</Label>
+              <select
+                id="edit-hora-top"
+                value={horaInicio}
+                onChange={e => setHoraInicio(e.target.value)}
+                className="w-full rounded-lg border border-navy/20 bg-white px-3 py-2 text-sm text-navy focus:border-gold focus:outline-none"
+              >
+                {horaOptions.map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </div>
+          )}
 
           {/* Cobro de inscripción — visible cuando el torneo es externo */}
           {tipo === 'externo' && (
@@ -326,49 +330,50 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
                 </div>
               )}
 
-              {/* Config fixture */}
-              <div className="space-y-3">
-                <Label className="label-editorial">Configuración de fixture</Label>
+              {/* Config fixture — no aplica para torneos externos */}
+              {tipo !== 'externo' && (
+                <div className="space-y-3">
+                  <Label className="label-editorial">Configuración de fixture</Label>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label htmlFor="edit-duracion" className="text-xs text-muted uppercase tracking-widest">Duración partido (min)</Label>
-                    <Input
-                      id="edit-duracion"
-                      type="number"
-                      min={15}
-                      max={120}
-                      value={duracionPartido}
-                      onChange={e => setDuracionPartido(Number(e.target.value))}
-                    />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="edit-duracion" className="text-xs text-muted uppercase tracking-widest">Duración partido (min)</Label>
+                      <Input
+                        id="edit-duracion"
+                        type="number"
+                        min={15}
+                        max={120}
+                        value={duracionPartido}
+                        onChange={e => setDuracionPartido(Number(e.target.value))}
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="edit-pausa" className="text-xs text-muted uppercase tracking-widest">Pausa entre partidos (min)</Label>
+                      <Input
+                        id="edit-pausa"
+                        type="number"
+                        min={0}
+                        max={60}
+                        value={pausaEntrePartidos}
+                        onChange={e => setPausaEntrePartidos(Number(e.target.value))}
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="edit-canchas" className="text-xs text-muted uppercase tracking-widest">Canchas disponibles</Label>
+                      <Input
+                        id="edit-canchas"
+                        type="number"
+                        min={1}
+                        max={20}
+                        value={numCanchas}
+                        onChange={e => setNumCanchas(Number(e.target.value))}
+                      />
+                    </div>
                   </div>
-
-                  <div className="space-y-1">
-                    <Label htmlFor="edit-pausa" className="text-xs text-muted uppercase tracking-widest">Pausa entre partidos (min)</Label>
-                    <Input
-                      id="edit-pausa"
-                      type="number"
-                      min={0}
-                      max={60}
-                      value={pausaEntrePartidos}
-                      onChange={e => setPausaEntrePartidos(Number(e.target.value))}
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <Label htmlFor="edit-canchas" className="text-xs text-muted uppercase tracking-widest">Canchas disponibles</Label>
-                    <Input
-                      id="edit-canchas"
-                      type="number"
-                      min={1}
-                      max={20}
-                      value={numCanchas}
-                      onChange={e => setNumCanchas(Number(e.target.value))}
-                    />
-                  </div>
-
                 </div>
-              </div>
+              )}
             </>
           )}
 
