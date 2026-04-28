@@ -1,5 +1,34 @@
 # DEVLOG — padel-sg
 
+## [2026-04-28 12:00] — Enrollment masivo + ficha_validada + backbone-mockups hub
+
+**Resumen:** Sistema completo de enrollment masivo (143 jugadores): normalización de emails placeholder a formato `naguayo@sgpadel.cl`, scripts de reset de contraseñas y generación de links WhatsApp. Login con username o email real. Gate universal de primer login con columna `ficha_validada`. Creación del repo `backbone-mockups` como hub visual independiente con los 20 mockups migrados, conectado a `mockups-backbone.vercel.app`. Skill `/mockup` global creado.
+
+**Archivos:** `src/features/auth/SetupEmailPage.tsx`, `src/features/auth/AuthGuard.tsx`, `src/features/auth/LoginForm.tsx`, `src/lib/types/database.types.ts`, `src/lib/devUser.ts`, `scripts/reset-passwords.mjs` (nuevo), `scripts/gen-whatsapp.mjs` (nuevo), `~/.claude/skills/mockup.md` (nuevo), `~/.claude/CLAUDE.md`
+
+**Decisiones:**
+- `ficha_validada boolean DEFAULT false` en DB — gate universal para todos los usuarios, no solo `@sgpadel.cl`
+- Auth email no cambia al validar ficha — evita loop de confirmación de Supabase; email real solo en `jugadores.email`
+- Login fallback: si email real falla → busca en jugadores → deriva `@sgpadel.cl` → reintenta
+- `backbone-mockups` como repo Vite standalone sin Supabase — desacoplado de padel-sg, hub agnostico por proyecto
+- Vercel git reconnect vía REST API (no CLI — interactivo) usando token de `~/.local/share/com.vercel.cli/auth.json`
+
+**Cerrados como listos:**
+- [x] Toggle `resultado_bloqueado` en TorneoDetalle
+- [x] Recálculo automático de ranking al guardar resultado
+- [x] RLS para cobros de jugadores
+- [x] Limpiar mockups de padel-sg (migrados a backbone-mockups)
+
+**Pendientes:**
+- [ ] Ejecutar `reset-passwords.mjs` (DRY_RUN=false) para crear cuentas en Supabase auth
+- [ ] Ejecutar `gen-whatsapp.mjs` y enviar mensajes de bienvenida a los 143 jugadores
+- [ ] Sistema de puntos tipo ATP/WTA (defensa de puntos año a año) — diseño pendiente
+- [ ] Vista bracket visual interactiva en TorneoDetalle
+- [ ] Actualizar teléfonos faltantes (18 jugadores)
+- [ ] Ligas: jornadas + tabla de posiciones
+
+---
+
 ## [2026-04-27 18:00] — TipTap WYSIWYG editor para novedades
 
 **Resumen:** Se integró TipTap v3 como editor de texto enriquecido en la admin de novedades. El contenido se guarda como HTML y se renderiza en el dashboard con `dangerouslySetInnerHTML`. Se agregó regla global al CLAUDE.md para siempre pushear a origin tras cada commit (Vercel deploy automático).
