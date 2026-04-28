@@ -76,11 +76,13 @@ export default function StepCategorias() {
   const tipo = useWatch({ name: 'tipo' }) as string
   const { data: globalCats } = useCategorias()
 
+  const esExterno = tipo === 'externo'
+
   function appendWithColors(nombre: string, sexo: 'M' | 'F' | 'Mixto') {
     const gc = globalCats?.find(g => g.id === nombre || g.nombre === nombre)
     append({
       nombre,
-      num_parejas: 4,
+      num_parejas: esExterno ? 0 : 4,
       sexo,
       formato: 'americano_grupos',
       ...(gc ? { color_fondo: gc.color_fondo, color_borde: gc.color_borde, color_texto: gc.color_texto } : {}),
@@ -145,7 +147,7 @@ export default function StepCategorias() {
               )}
             </select>
 
-            <ParejasStepper idx={idx} />
+            {!esExterno && <ParejasStepper idx={idx} />}
 
             <CatColorField idx={idx} globalCats={globalCats} />
 
@@ -165,7 +167,7 @@ export default function StepCategorias() {
         type="button"
         variant="outline"
         className="w-full"
-        onClick={() => append({ nombre: '', num_parejas: 4, sexo: 'M', formato: 'americano_grupos' })}
+        onClick={() => append({ nombre: '', num_parejas: esExterno ? 0 : 4, sexo: 'M', formato: 'americano_grupos' })}
       >
         + Agregar categoría
       </Button>

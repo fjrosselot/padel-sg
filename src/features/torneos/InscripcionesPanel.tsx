@@ -126,10 +126,11 @@ export default function InscripcionesPanel({ torneoId, estado, categorias }: Pro
               <option value="">— elige categoría —</option>
               {categorias.map(c => {
                 const ocupados = cuposOcupados(c.nombre)
-                const llena = ocupados >= c.num_parejas
+                const llena = c.num_parejas > 0 && ocupados >= c.num_parejas
+                const cuposLabel = c.num_parejas > 0 ? `${ocupados}/${c.num_parejas}` : `${ocupados} inscrit${ocupados !== 1 ? 'as' : 'a'}`
                 return (
                   <option key={c.nombre} value={c.nombre}>
-                    {c.nombre} · {SEXO_LABEL[c.sexo]} · {ocupados}/{c.num_parejas}{llena ? ' (lista espera)' : ''}
+                    {c.nombre} · {SEXO_LABEL[c.sexo]} · {cuposLabel}{llena ? ' (lista espera)' : ''}
                   </option>
                 )
               })}
@@ -197,9 +198,11 @@ export default function InscripcionesPanel({ torneoId, estado, categorias }: Pro
           const activas = inscripciones?.filter(i => i.categoria_nombre === cat.nombre && !i.lista_espera) ?? []
           const espera = inscripciones?.filter(i => i.categoria_nombre === cat.nombre && i.lista_espera) ?? []
           if (activas.length === 0 && espera.length === 0) return null
-          const headerLabel = (cat.useConfig && cat.config && cat.config.sexo != null && cat.config.num_parejas != null)
+          const headerLabel = (cat.useConfig && cat.config && cat.config.sexo != null && cat.config.num_parejas != null && cat.config.num_parejas > 0)
             ? `${cat.nombre} · ${SEXO_LABEL[cat.config.sexo]} · ${activas.length}/${cat.config.num_parejas}`
-            : `${cat.nombre} · ${activas.length} pareja${activas.length !== 1 ? 's' : ''}`
+            : (cat.useConfig && cat.config && cat.config.sexo != null)
+              ? `${cat.nombre} · ${SEXO_LABEL[cat.config.sexo]} · ${activas.length} pareja${activas.length !== 1 ? 's' : ''}`
+              : `${cat.nombre} · ${activas.length} pareja${activas.length !== 1 ? 's' : ''}`
           return (
           <div key={cat.nombre} className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted">

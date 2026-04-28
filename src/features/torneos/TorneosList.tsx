@@ -105,7 +105,7 @@ export default function TorneosList() {
       </div>
 
       <Dialog open={showWizard} onOpenChange={setShowWizard}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nuevo torneo</DialogTitle>
           </DialogHeader>

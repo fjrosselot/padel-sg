@@ -123,7 +123,7 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
   function addCategoria(preset: { nombre: string; sexo: 'M' | 'F' | 'Mixto' }) {
     const gc = globalCats?.find(g => g.id === preset.nombre || g.nombre === preset.nombre)
     setCategorias(prev => [...prev, {
-      nombre: preset.nombre, num_parejas: 4, sexo: preset.sexo, formato: 'americano_grupos',
+      nombre: preset.nombre, num_parejas: tipo === 'externo' ? 0 : 4, sexo: preset.sexo, formato: 'americano_grupos',
       ...(gc ? { color_fondo: gc.color_fondo, color_borde: gc.color_borde, color_texto: gc.color_texto } : {}),
     }])
   }
@@ -292,12 +292,16 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
                             {SEXO_LABEL[sexo]}
                           </span>
                           <span className="text-sm font-medium text-navy flex-1">{cat.nombre}</span>
-                          <div className="flex items-center gap-1">
-                            <button type="button" onClick={() => updateNumParejas(idx, cat.num_parejas - 1)} disabled={cat.num_parejas <= 2} className="w-5 h-5 rounded border border-navy/20 flex items-center justify-center text-navy disabled:opacity-30 hover:border-gold hover:text-gold transition-colors text-sm leading-none">−</button>
-                            <span className="w-5 text-center font-inter text-xs font-semibold text-navy tabular-nums">{cat.num_parejas}</span>
-                            <button type="button" onClick={() => updateNumParejas(idx, cat.num_parejas + 1)} disabled={cat.num_parejas >= 64} className="w-5 h-5 rounded border border-navy/20 flex items-center justify-center text-navy disabled:opacity-30 hover:border-gold hover:text-gold transition-colors text-sm leading-none">+</button>
-                          </div>
-                          <span className="text-xs text-muted">parejas</span>
+                          {tipo !== 'externo' && (
+                            <>
+                              <div className="flex items-center gap-1">
+                                <button type="button" onClick={() => updateNumParejas(idx, cat.num_parejas - 1)} disabled={cat.num_parejas <= 2} className="w-5 h-5 rounded border border-navy/20 flex items-center justify-center text-navy disabled:opacity-30 hover:border-gold hover:text-gold transition-colors text-sm leading-none">−</button>
+                                <span className="w-5 text-center font-inter text-xs font-semibold text-navy tabular-nums">{cat.num_parejas}</span>
+                                <button type="button" onClick={() => updateNumParejas(idx, cat.num_parejas + 1)} disabled={cat.num_parejas >= 64} className="w-5 h-5 rounded border border-navy/20 flex items-center justify-center text-navy disabled:opacity-30 hover:border-gold hover:text-gold transition-colors text-sm leading-none">+</button>
+                              </div>
+                              <span className="text-xs text-muted">parejas</span>
+                            </>
+                          )}
                           <CatColorPickerInline
                             value={cat.color_fondo ? { fondo: cat.color_fondo, borde: cat.color_borde ?? '', texto: cat.color_texto ?? '' } : null}
                             onChange={c => updateCatColor(idx, c)}

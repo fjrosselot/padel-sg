@@ -225,10 +225,12 @@ export default function RosterAdmin({ torneoId, categorias }: Props) {
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="font-inter text-[10px] text-muted">{SEXO_LABEL[cat.sexo]}</span>
                   <span className="font-inter text-[10px] text-muted">·</span>
-                  <span className="font-inter text-[10px] font-semibold text-navy">{activas.length}/{cat.num_parejas}</span>
-                  <div className="flex-1 max-w-[56px] h-1 rounded-full bg-navy/10 overflow-hidden">
+                  <span className="font-inter text-[10px] font-semibold text-navy">
+                    {cat.num_parejas > 0 ? `${activas.length}/${cat.num_parejas}` : `${activas.length} parejas`}
+                  </span>
+                  {cat.num_parejas > 0 && <div className="flex-1 max-w-[56px] h-1 rounded-full bg-navy/10 overflow-hidden">
                     <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: colors.dot }} />
-                  </div>
+                  </div>}
                 </div>
               </div>
               <button
