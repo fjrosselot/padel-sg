@@ -49,6 +49,7 @@ const JugadorDetalleMockup = lazyWithReload(() => import('./features/mockups/Jug
 const MockupsIndex = lazyWithReload(() => import('./features/mockups/MockupsIndex'))
 const AsadosDashboardMockup = lazyWithReload(() => import('./features/mockups/AsadosDashboardMockup'))
 const AsadosCortesListMockup = lazyWithReload(() => import('./features/mockups/AsadosCortesListMockup'))
+const AsadosWizardMenuMockup = lazyWithReload(() => import('./features/mockups/AsadosWizardMenuMockup'))
 
 const isMockupHub = import.meta.env.VITE_MOCKUP_HUB === 'true'
 
@@ -67,6 +68,7 @@ export const router = createBrowserRouter([
   { path: '/mockup/padel-sg/jugador-detalle', element: <Suspense fallback={fallback}><JugadorDetalleMockup /></Suspense> },
   { path: '/mockup/app-asados/dashboard', element: <Suspense fallback={fallback}><AsadosDashboardMockup /></Suspense> },
   { path: '/mockup/app-asados/cortes', element: <Suspense fallback={fallback}><AsadosCortesListMockup /></Suspense> },
+  { path: '/mockup/app-asados/wizard-menu', element: <Suspense fallback={fallback}><AsadosWizardMenuMockup /></Suspense> },
   { path: '/login', element: <LoginForm /> },
   { path: '/registro', element: <RegisterForm /> },
   { path: '/pendiente', element: <PendingApproval /> },
