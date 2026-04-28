@@ -1,7 +1,7 @@
 // MOCKUP — App Asados · Receta detalle
 // Aplica para recetas de carne (con cortes como ingredientes) y acompañamientos
 import { useState } from 'react'
-import { ChevronLeft, Minus, Plus, Users, ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronLeft, Minus, Plus, Users, ChevronDown, ChevronUp, Camera, X } from 'lucide-react'
 
 const C = {
   bg:     '#FAF8F5',
@@ -17,8 +17,6 @@ const C = {
 
 function fmt(n: number) { return '$' + Math.round(n).toLocaleString('es-CL') }
 
-// ─── Dos recetas de ejemplo para demostrar ambos tipos ────────────────────────
-
 type Receta = {
   id: string
   nombre: string
@@ -28,12 +26,13 @@ type Receta = {
   personas_base: number
   notas?: string
   instrucciones?: string
+  fotoGradient?: string   // gradient CSS para simular foto en el mockup
   ingredientes: {
     nombre: string
     cantidad: number
     unidad: string
     esCorte: boolean
-    precioUnit: number  // precio por unidad base
+    precioUnit: number
   }[]
 }
 
@@ -45,6 +44,7 @@ const RECETAS: Record<string, Receta> = {
     catLabel: 'Receta de carne',
     desc: 'Entraña limpia con técnica de trenzado para cocción pareja y presentación vistosa.',
     personas_base: 10,
+    fotoGradient: 'linear-gradient(135deg, #3D1A08 0%, #7A2E0A 30%, #C4541A 60%, #8B3A12 80%, #2A1005 100%)',
     notas: 'Pedir entraña sin membrana. Se puede preparar el día anterior y refrigerar ya trenzada.',
     instrucciones: 'Limpiar la entraña retirando la membrana exterior. Realizar cortes longitudinales sin separar y trenzar. Sazonar con sal gruesa justo antes de la parrilla.',
     ingredientes: [
@@ -59,6 +59,7 @@ const RECETAS: Record<string, Receta> = {
     catLabel: 'Receta de carne',
     desc: 'Malaya abierta y rellena con tomate, queso y tocino. Se enrolla y sella en la parrilla.',
     personas_base: 10,
+    fotoGradient: 'linear-gradient(135deg, #1A0A00 0%, #5C2209 25%, #9B3D15 50%, #C4541A 70%, #3D1205 100%)',
     notas: 'Pedir malaya bien abierta en la carnicería. El queso derretido es clave — tapar los últimos 5 min.',
     instrucciones: 'Abrir la malaya en libro. Cubrir con láminas de tomate, queso y tiras de tocino. Enrollar y atar con hilo. Sellar a fuego alto y terminar a fuego medio.',
     ingredientes: [
@@ -75,6 +76,7 @@ const RECETAS: Record<string, Receta> = {
     catLabel: 'Ensalada',
     desc: 'Clásica con tomate, cebolla en pluma y cilantro. Se macera la cebolla para suavizarla.',
     personas_base: 10,
+    // sin fotoGradient → muestra placeholder "Agregar foto"
     notas: 'Macerar la cebolla con sal 10 min y enjuagar antes de agregar. Condimentar justo antes de servir.',
     instrucciones: 'Cortar tomates en gajos. Cortar cebolla en pluma fina, macerar con sal y enjuagar. Mezclar con cilantro picado, sal, aceite y limón.',
     ingredientes: [
@@ -113,14 +115,18 @@ function costIng(cantidad: number, unidad: string, precioUnit: number): number {
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
 export default function AsadosRecetaDetalleMockup() {
-  // Alternar entre recetas con los tabs
   const [recetaId, setRecetaId] = useState<string>('entrana_trenz')
   const receta = RECETAS[recetaId]
 
-  const [personas, setPersonas] = useState(23)
+  const [personas, setPersonas]   = useState(23)
   const [showInstr, setShowInstr] = useState(false)
 
-  const esCarne = receta.categoria === 'carne'
+  // foto: null = usa lo que venga del data, true = forzar con foto, false = forzar sin foto
+  // En el mockup usamos el estado para simular "eliminar" la foto
+  const [fotoRemovida, setFotoRemovida] = useState<Record<string, boolean>>({})
+  const tieneFoto = receta.fotoGradient && !fotoRemovida[receta.id]
+
+  const esCarne    = receta.categoria === 'carne'
   const accentColor = esCarne ? C.ember : C.recipe
   const softBg      = esCarne ? C.soft  : C.softR
 
@@ -176,6 +182,59 @@ export default function AsadosRecetaDetalleMockup() {
         </div>
 
         <div className="px-4 space-y-4 mt-3">
+
+          {/* ── Foto de referencia ────────────────────────────────────────── */}
+          {tieneFoto ? (
+            <div className="relative rounded-2xl overflow-hidden"
+              style={{ height: 180, background: receta.fotoGradient }}>
+              {/* grain overlay para simular textura fotográfica */}
+              <div className="absolute inset-0"
+                style={{ background: 'rgba(28,26,23,0.18)' }} />
+              {/* etiqueta */}
+              <div className="absolute bottom-3 left-3">
+                <span className="font-inter text-[10px] font-semibold text-white/70 uppercase tracking-widest">
+                  Foto de referencia
+                </span>
+              </div>
+              {/* botones: cambiar + eliminar */}
+              <div className="absolute top-3 right-3 flex gap-1.5">
+                <button type="button"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-inter text-[11px] font-semibold"
+                  style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(4px)', color: '#FFF' }}>
+                  <Camera className="h-3.5 w-3.5" />
+                  Cambiar
+                </button>
+                <button type="button"
+                  onClick={() => setFotoRemovida(p => ({ ...p, [receta.id]: true }))}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg"
+                  style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(4px)' }}>
+                  <X className="h-3.5 w-3.5 text-white" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Placeholder vacío */
+            <button type="button"
+              onClick={() => setFotoRemovida(p => ({ ...p, [receta.id]: false }))}
+              className="w-full rounded-2xl flex flex-col items-center justify-center gap-2 py-7 transition-colors"
+              style={{
+                border: `1.5px dashed ${C.border}`,
+                background: C.card,
+              }}>
+              <div className="flex h-10 w-10 items-center justify-center rounded-full"
+                style={{ background: softBg }}>
+                <Camera className="h-5 w-5" style={{ color: accentColor }} />
+              </div>
+              <div className="text-center">
+                <p className="font-manrope text-[13px] font-bold" style={{ color: C.ink }}>
+                  Agregar foto de referencia
+                </p>
+                <p className="font-inter text-[11px] mt-0.5" style={{ color: C.muted }}>
+                  Útil para recordar la presentación
+                </p>
+              </div>
+            </button>
+          )}
 
           {/* Descripción */}
           <p className="font-inter text-[13px] leading-relaxed" style={{ color: C.muted }}>
@@ -236,9 +295,9 @@ export default function AsadosRecetaDetalleMockup() {
                       </div>
                       {ing.precioUnit > 0 && (
                         <p className="font-inter text-[11px] mt-0.5" style={{ color: C.border }}>
-                          {ing.unidad === 'kg' ? `${fmt(ing.precioUnit)}/kg` :
+                          {ing.unidad === 'kg'    ? `${fmt(ing.precioUnit)}/kg`    :
                            ing.unidad === 'atado' ? `${fmt(ing.precioUnit)}/atado` :
-                           ing.unidad === 'un' ? `${fmt(ing.precioUnit)}/un` : ''}
+                           ing.unidad === 'un'    ? `${fmt(ing.precioUnit)}/un`    : ''}
                         </p>
                       )}
                     </div>
