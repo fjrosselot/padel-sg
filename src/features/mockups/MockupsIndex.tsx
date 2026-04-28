@@ -34,6 +34,7 @@ const PROJECTS = [
       { label: 'Catálogo de cortes', path: '/mockup/app-asados/cortes' },
       { label: 'Wizard — Configuración del evento', path: '/mockup/app-asados/wizard-config' },
       { label: 'Wizard — Selección de menú', path: '/mockup/app-asados/wizard-menu' },
+      { label: 'Lista de compras', path: '/mockup/app-asados/lista-compras' },
     ],
   },
   {

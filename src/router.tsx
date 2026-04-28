@@ -50,7 +50,8 @@ const MockupsIndex = lazyWithReload(() => import('./features/mockups/MockupsInde
 const AsadosDashboardMockup = lazyWithReload(() => import('./features/mockups/AsadosDashboardMockup'))
 const AsadosCortesListMockup = lazyWithReload(() => import('./features/mockups/AsadosCortesListMockup'))
 const AsadosWizardMenuMockup  = lazyWithReload(() => import('./features/mockups/AsadosWizardMenuMockup'))
-const AsadosWizardConfigMockup = lazyWithReload(() => import('./features/mockups/AsadosWizardConfigMockup'))
+const AsadosWizardConfigMockup  = lazyWithReload(() => import('./features/mockups/AsadosWizardConfigMockup'))
+const AsadosListaComprasMockup  = lazyWithReload(() => import('./features/mockups/AsadosListaComprasMockup'))
 
 const isMockupHub = import.meta.env.VITE_MOCKUP_HUB === 'true'
 
@@ -70,6 +71,7 @@ export const router = createBrowserRouter([
   { path: '/mockup/app-asados/dashboard', element: <Suspense fallback={fallback}><AsadosDashboardMockup /></Suspense> },
   { path: '/mockup/app-asados/cortes', element: <Suspense fallback={fallback}><AsadosCortesListMockup /></Suspense> },
   { path: '/mockup/app-asados/wizard-config', element: <Suspense fallback={fallback}><AsadosWizardConfigMockup /></Suspense> },
+  { path: '/mockup/app-asados/lista-compras', element: <Suspense fallback={fallback}><AsadosListaComprasMockup /></Suspense> },
   { path: '/mockup/app-asados/wizard-menu', element: <Suspense fallback={fallback}><AsadosWizardMenuMockup /></Suspense> },
   { path: '/login', element: <LoginForm /> },
   { path: '/registro', element: <RegisterForm /> },
