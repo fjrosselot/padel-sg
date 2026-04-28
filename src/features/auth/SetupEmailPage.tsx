@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useUser } from '@/hooks/useUser'
 import { useQueryClient } from '@tanstack/react-query'
@@ -20,7 +20,6 @@ export default function SetupEmailPage() {
   const [ladoPreferido, setLadoPreferido] = useState<string>(user?.lado_preferido ?? '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [done, setDone] = useState(false)
 
   const needsEmail = user?.email?.endsWith('@sgpadel.cl')
   const nombre = user?.nombre_pila ?? user?.nombre?.split(' ')[0] ?? 'Jugador'
@@ -43,63 +42,36 @@ export default function SetupEmailPage() {
     setLoading(true)
     setError(null)
 
-    // Actualizar email en auth (solo si necesita cambio)
-    if (needsEmail && trimmedEmail) {
-      const { error: authErr } = await supabase.auth.updateUser({ email: trimmedEmail })
-      if (authErr) {
-        setError('No se pudo actualizar el correo. Intenta nuevamente.')
-        setLoading(false)
-        return
-      }
-    }
-
-    // Actualizar ficha en jugadores
     if (user?.id) {
       const patch: Record<string, unknown> = {
         nombre_pila: nombrePila.trim() || null,
         telefono: telefono.trim() || null,
         lado_preferido: ladoPreferido || null,
+        ficha_validada: true,
       }
+      // Store real email in jugadores only — don't change auth email (avoids confirmation loop)
       if (needsEmail && trimmedEmail) patch.email = trimmedEmail
 
-      await supabase.schema('padel').from('jugadores').update(patch).eq('id', user.id)
+      const { error: updateErr } = await supabase
+        .schema('padel')
+        .from('jugadores')
+        .update(patch)
+        .eq('id', user.id)
+
+      if (updateErr) {
+        setError('No se pudo guardar. Intenta nuevamente.')
+        setLoading(false)
+        return
+      }
     }
 
-    qc.invalidateQueries({ queryKey: ['user'] })
-    setLoading(false)
-
-    if (needsEmail) {
-      setDone(true)
-    } else {
-      navigate('/dashboard')
-    }
-  }
-
-  if (done) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 text-center">
-        <CheckCircle2 className="h-12 w-12 text-green-500 mb-4" />
-        <h1 className="font-manrope text-2xl font-bold text-navy mb-2">¡Ficha actualizada!</h1>
-        <p className="font-inter text-sm text-slate max-w-sm mb-1">
-          Te enviamos un correo a <strong>{email}</strong> para confirmar tu acceso.
-        </p>
-        <p className="font-inter text-xs text-muted max-w-sm">
-          Una vez confirmado, usa ese correo para ingresar la próxima vez.
-        </p>
-        <button
-          onClick={() => { supabase.auth.signOut(); navigate('/login') }}
-          className="mt-6 rounded-lg bg-gold px-6 py-2.5 font-inter text-sm font-bold text-navy"
-        >
-          Cerrar sesión y confirmar correo
-        </button>
-      </div>
-    )
+    await qc.invalidateQueries({ queryKey: ['user'] })
+    navigate('/dashboard')
   }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-10">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="flex items-center gap-3 mb-8">
           <div className="h-10 w-10 overflow-hidden rounded-full" style={{ background: '#FFD91C' }}>
             <img src={logo} alt="" className="h-full w-full object-cover" />
@@ -121,7 +93,6 @@ export default function SetupEmailPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Nombre completo — solo lectura */}
           <div>
             <label className={labelCls}>Nombre completo</label>
             <div className="rounded-lg border border-navy/10 bg-surface px-3 py-2.5 font-inter text-sm text-muted">
@@ -129,7 +100,6 @@ export default function SetupEmailPage() {
             </div>
           </div>
 
-          {/* Cómo te llaman */}
           <div>
             <label className={labelCls}>¿Cómo te llaman? <span className="text-muted/60 normal-case font-normal">(apodo o nombre corto)</span></label>
             <input
@@ -140,7 +110,6 @@ export default function SetupEmailPage() {
             />
           </div>
 
-          {/* Teléfono */}
           <div>
             <label className={labelCls}>Teléfono</label>
             <input
@@ -151,7 +120,6 @@ export default function SetupEmailPage() {
             />
           </div>
 
-          {/* Lado preferido */}
           <div>
             <label className={labelCls}>Lado preferido en cancha</label>
             <div className="grid grid-cols-3 gap-2">
@@ -172,7 +140,6 @@ export default function SetupEmailPage() {
             </div>
           </div>
 
-          {/* Email — solo si es placeholder */}
           {needsEmail && (
             <div>
               <label className={labelCls}>
@@ -194,7 +161,7 @@ export default function SetupEmailPage() {
 
           <button
             type="submit"
-            disabled={loading || (needsEmail && !email.trim())}
+            disabled={loading || (needsEmail ? !email.trim() : false)}
             className="w-full flex h-12 items-center justify-center gap-2 rounded-lg bg-gold font-inter text-sm font-bold text-navy disabled:opacity-50 mt-2"
           >
             {loading ? 'Guardando…' : <>Confirmar mi ficha <ArrowRight className="h-4 w-4" /></>}

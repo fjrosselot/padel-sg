@@ -191,8 +191,31 @@ export function LoginForm() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    const resolvedEmail = email.trim().includes('@') ? email.trim() : `${email.trim().toLowerCase()}@sgpadel.cl`
-    const { error: authError } = await supabase.auth.signInWithPassword({ email: resolvedEmail, password })
+
+    const input = email.trim()
+    const hasAt = input.includes('@')
+    const resolvedEmail = hasAt ? input : `${input.toLowerCase()}@sgpadel.cl`
+
+    let authError = (await supabase.auth.signInWithPassword({ email: resolvedEmail, password })).error
+
+    // Fallback: if user entered their real email but auth still uses @sgpadel.cl username
+    if (authError && hasAt && !input.toLowerCase().endsWith('@sgpadel.cl')) {
+      const SB_URL = import.meta.env.VITE_SUPABASE_URL as string
+      const SERVICE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_KEY as string
+      if (SERVICE_KEY) {
+        const res = await fetch(
+          `${SB_URL}/rest/v1/jugadores?select=nombre,apellido&email=eq.${encodeURIComponent(input)}&limit=1`,
+          { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Profile': 'padel' } }
+        )
+        const rows = (await res.json()) as Array<{ nombre: string; apellido: string }>
+        if (rows?.length) {
+          const clean = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z]/g, '').toLowerCase()
+          const sgEmail = `${clean(rows[0].nombre.trim()[0] ?? '')}${clean(rows[0].apellido ?? '')}@sgpadel.cl`
+          authError = (await supabase.auth.signInWithPassword({ email: sgEmail, password })).error
+        }
+      }
+    }
+
     if (authError) {
       setError('Email o contraseña incorrectos.')
       setLoading(false)

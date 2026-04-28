@@ -34,6 +34,7 @@ export interface Database {
           elo: number
           fecha_nacimiento: string | null
           created_at: string
+          ficha_validada: boolean
         }
         Insert: {
           id: string
@@ -59,6 +60,7 @@ export interface Database {
           elo?: number
           fecha_nacimiento?: string | null
           created_at?: string
+          ficha_validada?: boolean
         }
         Update: {
           id?: string
@@ -84,6 +86,7 @@ export interface Database {
           elo?: number
           fecha_nacimiento?: string | null
           created_at?: string
+          ficha_validada?: boolean
         }
       }
       temporadas: {

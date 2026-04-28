@@ -24,6 +24,7 @@ export const DEV_USER: Jugador = {
   elo: 1200,
   fecha_nacimiento: null,
   created_at: new Date().toISOString(),
+  ficha_validada: true,
 }
 
 export const IS_DEV_BYPASS = import.meta.env.DEV && import.meta.env.VITE_DEV_BYPASS === 'true'
