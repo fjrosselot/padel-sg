@@ -32,6 +32,7 @@ const PROJECTS = [
     mockups: [
       { label: 'Dashboard', path: '/mockup/app-asados/dashboard' },
       { label: 'Catálogo de cortes', path: '/mockup/app-asados/cortes' },
+      { label: 'Wizard — Configuración del evento', path: '/mockup/app-asados/wizard-config' },
       { label: 'Wizard — Selección de menú', path: '/mockup/app-asados/wizard-menu' },
     ],
   },
