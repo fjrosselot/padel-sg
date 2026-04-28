@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Trophy, BarChart2, DollarSign, Layers, ChevronRight, ExternalLink } from 'lucide-react'
+import { Trophy, BarChart2, DollarSign, Layers, ChevronRight, ExternalLink, Flame } from 'lucide-react'
 
 const N = '#162844'
 const G = '#e8c547'
@@ -21,6 +21,16 @@ const PROJECTS = [
       { label: 'Jugador detalle (3 tabs)', path: '/mockup/padel-sg/jugador-detalle' },
       { label: 'Parejas', path: '/mockup/padel-sg/parejas' },
       { label: 'Color coding', path: '/mockup/padel-sg/color-coding' },
+    ],
+  },
+  {
+    id: 'app-asados',
+    label: 'App de Asados',
+    description: 'Planificador de asados — cantidades, presupuesto y cobros',
+    icon: Flame,
+    color: '#C4541A',
+    mockups: [
+      { label: 'Dashboard', path: '/mockup/app-asados/dashboard' },
     ],
   },
   {
