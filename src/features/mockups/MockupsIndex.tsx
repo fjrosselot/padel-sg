@@ -31,6 +31,7 @@ const PROJECTS = [
     color: '#C4541A',
     mockups: [
       { label: 'Dashboard', path: '/mockup/app-asados/dashboard' },
+      { label: 'Catálogo de cortes', path: '/mockup/app-asados/cortes' },
     ],
   },
   {
