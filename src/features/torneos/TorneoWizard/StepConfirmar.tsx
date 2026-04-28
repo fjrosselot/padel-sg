@@ -89,49 +89,55 @@ export default function StepConfirmar({ onCreated }: Props) {
         <div className="text-sm space-y-1">
           {values.categorias.map(c => (
             <p key={c.nombre}>
-              {c.nombre} ({SEXO_LABEL[c.sexo]}) — {c.num_parejas} parejas
+              {c.nombre} ({SEXO_LABEL[c.sexo]}){c.num_parejas > 0 ? ` — ${c.num_parejas} parejas` : ''}
               {c.formato === 'desafio_puntos' && <span className="ml-1 text-xs text-gold font-medium">Desafío</span>}
             </p>
           ))}
         </div>
-        <p className="text-sm text-muted">
-          {values.num_canchas} canchas · {values.hora_inicio} · {values.duracion_partido}min/partido
-        </p>
+        {values.tipo !== 'externo' && (
+          <p className="text-sm text-muted">
+            {values.num_canchas} canchas · {values.hora_inicio} · {values.duracion_partido}min/partido
+          </p>
+        )}
       </div>
 
-      <button
-        type="button"
-        onClick={() => setPreviewShown(v => !v)}
-        className="text-sm text-navy hover:underline"
-      >
-        {previewShown ? 'Ocultar preview del fixture' : 'Ver preview del fixture'}
-      </button>
+      {values.tipo !== 'externo' && (
+        <>
+          <button
+            type="button"
+            onClick={() => setPreviewShown(v => !v)}
+            className="text-sm text-navy hover:underline"
+          >
+            {previewShown ? 'Ocultar preview del fixture' : 'Ver preview del fixture'}
+          </button>
 
-      {previewShown && (
-        <div className="space-y-4 max-h-64 overflow-y-auto text-xs bg-surface rounded-lg p-3">
-          {previewCats.map(cat => (
-            <div key={cat.nombre}>
-              <p className="font-semibold text-sm text-navy mb-2">
-                {cat.nombre}
-                {cat.formato === 'desafio_puntos' && <span className="ml-1 text-xs text-gold">Desafío</span>}
-              </p>
-              {cat.formato === 'desafio_puntos' ? (
-                (cat.partidos ?? []).map(p => (
-                  <p key={p.id}>{p.turno} · C{p.cancha} · {p.pareja1?.nombre} vs Rival</p>
-                ))
-              ) : (
-                cat.grupos.map(g => (
-                  <div key={g.letra} className="mb-2">
-                    <p className="text-muted uppercase text-xs mb-1">Grupo {g.letra}</p>
-                    {g.partidos.map(p => (
-                      <p key={p.id}>{p.turno} · C{p.cancha} · {p.pareja1?.nombre} vs {p.pareja2?.nombre}</p>
-                    ))}
-                  </div>
-                ))
-              )}
+          {previewShown && (
+            <div className="space-y-4 max-h-64 overflow-y-auto text-xs bg-surface rounded-lg p-3">
+              {previewCats.map(cat => (
+                <div key={cat.nombre}>
+                  <p className="font-semibold text-sm text-navy mb-2">
+                    {cat.nombre}
+                    {cat.formato === 'desafio_puntos' && <span className="ml-1 text-xs text-gold">Desafío</span>}
+                  </p>
+                  {cat.formato === 'desafio_puntos' ? (
+                    (cat.partidos ?? []).map(p => (
+                      <p key={p.id}>{p.turno} · C{p.cancha} · {p.pareja1?.nombre} vs Rival</p>
+                    ))
+                  ) : (
+                    cat.grupos.map(g => (
+                      <div key={g.letra} className="mb-2">
+                        <p className="text-muted uppercase text-xs mb-1">Grupo {g.letra}</p>
+                        {g.partidos.map(p => (
+                          <p key={p.id}>{p.turno} · C{p.cancha} · {p.pareja1?.nombre} vs {p.pareja2?.nombre}</p>
+                        ))}
+                      </div>
+                    ))
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
 
       {mutation.error && (
