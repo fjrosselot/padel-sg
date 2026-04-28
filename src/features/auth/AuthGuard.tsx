@@ -28,6 +28,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   if (user.estado_cuenta === 'suspendido' || user.estado_cuenta === 'inactivo') {
     return <Navigate to="/login" replace />
   }
+  if (user.email?.endsWith('@sgpadel.cl')) return <Navigate to="/configurar-acceso" replace />
 
   return <>{children}</>
 }

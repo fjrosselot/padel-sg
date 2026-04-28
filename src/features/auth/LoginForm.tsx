@@ -133,7 +133,7 @@ function Field({ id, label, icon: Icon, type, placeholder, value, onChange, righ
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
-          autoComplete={id === 'password' ? 'current-password' : 'email'}
+          autoComplete={id === 'password' ? 'current-password' : 'username'}
           className="flex-1 border-none bg-transparent font-inter text-sm text-navy outline-none placeholder:text-muted"
         />
         {rightAction && (
@@ -191,7 +191,8 @@ export function LoginForm() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
+    const resolvedEmail = email.trim().includes('@') ? email.trim() : `${email.trim().toLowerCase()}@sgpadel.cl`
+    const { error: authError } = await supabase.auth.signInWithPassword({ email: resolvedEmail, password })
     if (authError) {
       setError('Email o contraseña incorrectos.')
       setLoading(false)
@@ -244,7 +245,7 @@ export function LoginForm() {
         </div>
       )}
 
-      <Field id="email" label="Email" icon={Mail} type="email" placeholder="tu@correo.cl"
+      <Field id="email" label="Email o usuario" icon={Mail} type="text" placeholder="tu@correo.cl o tuusuario"
         value={email} onChange={setEmail} error={!!error} />
 
       <Field id="password" label="Contraseña" icon={Lock}

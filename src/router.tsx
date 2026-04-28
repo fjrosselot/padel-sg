@@ -18,6 +18,7 @@ import { RegisterForm } from '@/features/auth/RegisterForm'
 import { PendingApproval } from '@/features/auth/PendingApproval'
 import { ResetPassword } from '@/features/auth/ResetPassword'
 import { EmergencyLogin } from '@/features/auth/EmergencyLogin'
+const SetupEmailPage = lazyWithReload(() => import('@/features/auth/SetupEmailPage'))
 
 const PendingUsers = lazyWithReload(() => import('./features/admin/PendingUsers').then(m => ({ default: m.PendingUsers })))
 const AdminTemporadas = lazyWithReload(() => import('./features/admin/AdminTemporadas'))
@@ -79,6 +80,7 @@ export const router = createBrowserRouter([
   { path: '/registro', element: <RegisterForm /> },
   { path: '/pendiente', element: <PendingApproval /> },
   { path: '/reset-password', element: <ResetPassword /> },
+  { path: '/configurar-acceso', element: <Suspense fallback={null}><SetupEmailPage /></Suspense> },
   { path: '/emergencia', element: <EmergencyLogin /> },
   {
     path: '/',
