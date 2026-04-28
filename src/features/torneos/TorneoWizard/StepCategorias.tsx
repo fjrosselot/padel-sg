@@ -23,17 +23,6 @@ function ParejasStepper({ idx }: { idx: number }) {
   )
 }
 
-const CATEGORIAS_PRESET: Array<{ nombre: string; sexo: 'M' | 'F' | 'Mixto' }> = [
-  { nombre: 'D', sexo: 'F' },
-  { nombre: 'C', sexo: 'F' },
-  { nombre: 'B', sexo: 'F' },
-  { nombre: 'Open Damas', sexo: 'F' },
-  { nombre: '5a', sexo: 'M' },
-  { nombre: '4a', sexo: 'M' },
-  { nombre: '3a', sexo: 'M' },
-  { nombre: 'Open Varones', sexo: 'M' },
-  { nombre: 'Mixto', sexo: 'Mixto' },
-]
 
 function SexoBadge({ idx }: { idx: number }) {
   const raw = useWatch({ name: `categorias.${idx}.sexo` })
@@ -94,17 +83,22 @@ export default function StepCategorias() {
       <div>
         <Label className="label-editorial mb-3 block">Categorías participantes</Label>
         <div className="flex flex-wrap gap-2 mb-4">
-          {CATEGORIAS_PRESET.map(cat => (
-            <button
-              key={cat.nombre}
-              type="button"
-              aria-label={`Agregar categoría ${cat.nombre}`}
-              onClick={() => appendWithColors(cat.nombre, cat.sexo)}
-              className="px-3 py-1 text-sm rounded-full border border-slate/30 text-slate hover:border-gold hover:text-navy transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50"
-            >
-              + {cat.nombre}
-            </button>
-          ))}
+          {(globalCats ?? [])
+            .filter(gc => !fields.some(f => f.nombre === gc.nombre))
+            .map(gc => {
+              const sexo: 'M' | 'F' | 'Mixto' = gc.sexo === 'mixto' ? 'Mixto' : gc.sexo as 'M' | 'F'
+              return (
+                <button
+                  key={gc.nombre}
+                  type="button"
+                  aria-label={`Agregar categoría ${gc.nombre}`}
+                  onClick={() => appendWithColors(gc.nombre, sexo)}
+                  className="px-3 py-1 text-sm rounded-full border border-slate/30 text-slate hover:border-gold hover:text-navy transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50"
+                >
+                  + {gc.nombre}
+                </button>
+              )
+            })}
         </div>
       </div>
 

@@ -22,17 +22,6 @@ interface Props {
   onClose: () => void
 }
 
-const CATEGORIAS_PRESET: Array<{ nombre: string; sexo: 'M' | 'F' | 'Mixto' }> = [
-  { nombre: 'D', sexo: 'F' },
-  { nombre: 'C', sexo: 'F' },
-  { nombre: 'B', sexo: 'F' },
-  { nombre: 'Open Damas', sexo: 'F' },
-  { nombre: '5a', sexo: 'M' },
-  { nombre: '4a', sexo: 'M' },
-  { nombre: '3a', sexo: 'M' },
-  { nombre: 'Open Varones', sexo: 'M' },
-  { nombre: 'Mixto', sexo: 'Mixto' },
-]
 
 function parseRawCategorias(raw: unknown): { categorias: CategoriaConfig[]; isCategoriaConfig: boolean } {
   const arr = Array.isArray(raw) ? raw : []
@@ -272,18 +261,26 @@ export default function EditTorneoModal({ torneo, onClose }: Props) {
                 <div className="space-y-3">
                   <Label className="label-editorial">Categorías</Label>
 
-                  {/* Preset chips */}
+                  {/* Chips desde categorías globales, ocultando las ya agregadas */}
                   <div className="flex flex-wrap gap-2 p-3 bg-surface rounded-lg">
-                    {CATEGORIAS_PRESET.map(cat => (
-                      <button
-                        key={cat.nombre}
-                        type="button"
-                        onClick={() => addCategoria(cat)}
-                        className="px-3 py-1 text-xs rounded-lg border border-slate/30 text-slate hover:border-gold hover:text-navy transition-colors"
-                      >
-                        + {cat.nombre}
-                      </button>
-                    ))}
+                    {(globalCats ?? [])
+                      .filter(gc => !categorias.some(c => c.nombre === gc.nombre))
+                      .map(gc => {
+                        const sexo: 'M' | 'F' | 'Mixto' = gc.sexo === 'mixto' ? 'Mixto' : gc.sexo as 'M' | 'F'
+                        return (
+                          <button
+                            key={gc.nombre}
+                            type="button"
+                            onClick={() => addCategoria({ nombre: gc.nombre, sexo })}
+                            className="px-3 py-1 text-xs rounded-lg border border-slate/30 text-slate hover:border-gold hover:text-navy transition-colors"
+                          >
+                            + {gc.nombre}
+                          </button>
+                        )
+                      })}
+                    {(globalCats ?? []).filter(gc => !categorias.some(c => c.nombre === gc.nombre)).length === 0 && (
+                      <p className="text-xs text-muted">Todas las categorías ya están agregadas.</p>
+                    )}
                   </div>
 
                   {/* Active categories */}
