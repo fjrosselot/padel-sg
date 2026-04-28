@@ -35,6 +35,7 @@ export interface Database {
           fecha_nacimiento: string | null
           created_at: string
           ficha_validada: boolean
+          rut: string | null
         }
         Insert: {
           id: string
@@ -61,6 +62,7 @@ export interface Database {
           fecha_nacimiento?: string | null
           created_at?: string
           ficha_validada?: boolean
+          rut?: string | null
         }
         Update: {
           id?: string
@@ -87,6 +89,7 @@ export interface Database {
           fecha_nacimiento?: string | null
           created_at?: string
           ficha_validada?: boolean
+          rut?: string | null
         }
       }
       temporadas: {

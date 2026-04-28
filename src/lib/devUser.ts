@@ -25,6 +25,7 @@ export const DEV_USER: Jugador = {
   fecha_nacimiento: null,
   created_at: new Date().toISOString(),
   ficha_validada: true,
+  rut: null,
 }
 
 export const IS_DEV_BYPASS = import.meta.env.DEV && import.meta.env.VITE_DEV_BYPASS === 'true'
