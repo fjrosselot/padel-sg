@@ -38,6 +38,11 @@ const PROJECTS = [
       { label: 'Receta detalle', path: '/mockup/app-asados/receta-detalle' },
       { label: 'Panel de cobros', path: '/mockup/app-asados/cobros' },
       { label: 'Historial de asados', path: '/mockup/app-asados/historial' },
+      { label: 'Post-asado (registro real)', path: '/mockup/app-asados/post-asado' },
+      { label: 'Asado detalle', path: '/mockup/app-asados/asado-detalle' },
+      { label: 'Wizard — Ítems y extras', path: '/mockup/app-asados/wizard-items-libres' },
+      { label: 'Calculadora rápida', path: '/mockup/app-asados/calculadora' },
+      { label: 'Form de receta (crear/editar)', path: '/mockup/app-asados/receta-form' },
     ],
   },
   {

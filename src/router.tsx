@@ -54,8 +54,13 @@ const AsadosWizardMenuMockup  = lazyWithReload(() => import('./features/mockups/
 const AsadosWizardConfigMockup  = lazyWithReload(() => import('./features/mockups/AsadosWizardConfigMockup'))
 const AsadosListaComprasMockup  = lazyWithReload(() => import('./features/mockups/AsadosListaComprasMockup'))
 const AsadosRecetaDetalleMockup = lazyWithReload(() => import('./features/mockups/AsadosRecetaDetalleMockup'))
-const AsadosCobrosListMockup    = lazyWithReload(() => import('./features/mockups/AsadosCobrosListMockup'))
-const AsadosHistorialMockup     = lazyWithReload(() => import('./features/mockups/AsadosHistorialMockup'))
+const AsadosCobrosListMockup         = lazyWithReload(() => import('./features/mockups/AsadosCobrosListMockup'))
+const AsadosHistorialMockup          = lazyWithReload(() => import('./features/mockups/AsadosHistorialMockup'))
+const AsadosPostAsadoMockup          = lazyWithReload(() => import('./features/mockups/AsadosPostAsadoMockup'))
+const AsadoDetalleMockup             = lazyWithReload(() => import('./features/mockups/AsadoDetalleMockup'))
+const AsadosWizardItemsLibresMockup  = lazyWithReload(() => import('./features/mockups/AsadosWizardItemsLibresMockup'))
+const AsadosCalculadoraRapidaMockup  = lazyWithReload(() => import('./features/mockups/AsadosCalculadoraRapidaMockup'))
+const AsadosRecetaFormMockup         = lazyWithReload(() => import('./features/mockups/AsadosRecetaFormMockup'))
 
 const isMockupHub = import.meta.env.VITE_MOCKUP_HUB === 'true'
 
@@ -78,8 +83,13 @@ export const router = createBrowserRouter([
   { path: '/mockup/app-asados/lista-compras', element: <Suspense fallback={fallback}><AsadosListaComprasMockup /></Suspense> },
   { path: '/mockup/app-asados/wizard-menu', element: <Suspense fallback={fallback}><AsadosWizardMenuMockup /></Suspense> },
   { path: '/mockup/app-asados/receta-detalle', element: <Suspense fallback={fallback}><AsadosRecetaDetalleMockup /></Suspense> },
-  { path: '/mockup/app-asados/cobros',        element: <Suspense fallback={fallback}><AsadosCobrosListMockup /></Suspense> },
-  { path: '/mockup/app-asados/historial',     element: <Suspense fallback={fallback}><AsadosHistorialMockup /></Suspense> },
+  { path: '/mockup/app-asados/cobros',               element: <Suspense fallback={fallback}><AsadosCobrosListMockup /></Suspense> },
+  { path: '/mockup/app-asados/historial',            element: <Suspense fallback={fallback}><AsadosHistorialMockup /></Suspense> },
+  { path: '/mockup/app-asados/post-asado',           element: <Suspense fallback={fallback}><AsadosPostAsadoMockup /></Suspense> },
+  { path: '/mockup/app-asados/asado-detalle',        element: <Suspense fallback={fallback}><AsadoDetalleMockup /></Suspense> },
+  { path: '/mockup/app-asados/wizard-items-libres',  element: <Suspense fallback={fallback}><AsadosWizardItemsLibresMockup /></Suspense> },
+  { path: '/mockup/app-asados/calculadora',          element: <Suspense fallback={fallback}><AsadosCalculadoraRapidaMockup /></Suspense> },
+  { path: '/mockup/app-asados/receta-form',          element: <Suspense fallback={fallback}><AsadosRecetaFormMockup /></Suspense> },
   { path: '/login', element: <LoginForm /> },
   { path: '/registro', element: <RegisterForm /> },
   { path: '/pendiente', element: <PendingApproval /> },
