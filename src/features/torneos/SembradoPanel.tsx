@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react'
 import { GripVertical, Pencil } from 'lucide-react'
-import { Input } from '../../components/ui/input'
 import type { CategoriaConfig } from '../../lib/fixture/types'
 import type { InscripcionRow } from './RosterRow'
 
@@ -13,6 +12,26 @@ interface Props {
   onRivalNamesChange: (names: string[]) => void
 }
 
+function initials(nombre: string) {
+  const parts = nombre.trim().split(' ')
+  return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase()
+}
+
+function AvatarOverlap({ j1, j2, color }: { j1: string; j2: string; color: string }) {
+  return (
+    <div className="relative flex shrink-0" style={{ width: 42, height: 26 }}>
+      <span className="absolute left-0 top-0 flex items-center justify-center w-6 h-6 rounded-full text-white font-inter text-[10px] font-bold ring-2 ring-white"
+        style={{ background: color, zIndex: 2 }}>
+        {initials(j1)}
+      </span>
+      <span className="absolute top-0 flex items-center justify-center w-6 h-6 rounded-full text-white font-inter text-[10px] font-bold ring-2 ring-white"
+        style={{ left: 16, background: color + 'bb', zIndex: 1 }}>
+        {initials(j2)}
+      </span>
+    </div>
+  )
+}
+
 export default function SembradoPanel({
   cat, colegioRival, sgOrder, onSgOrderChange, rivalNames, onRivalNamesChange,
 }: Props) {
@@ -20,6 +39,9 @@ export default function SembradoPanel({
   const [dragOver, setDragOver] = useState<number | null>(null)
   const [editingRivalIdx, setEditingRivalIdx] = useState<number | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const avatarColor = cat.color_borde ?? '#94b0cc'
+  const slots = Math.max(sgOrder.length, rivalNames.length)
 
   function handleDrop(toIdx: number) {
     if (dragIdx === null || dragIdx === toIdx) return
@@ -36,17 +58,45 @@ export default function SembradoPanel({
     setTimeout(() => inputRef.current?.focus(), 0)
   }
 
-  const slots = Math.max(sgOrder.length, rivalNames.length)
+  if (sgOrder.length === 0) {
+    return (
+      <p className="text-xs text-muted py-2">Sin inscritos confirmados.</p>
+    )
+  }
 
   return (
-    <div className="mt-4 border-t border-navy/10 pt-4 space-y-3">
-      <p className="font-inter text-xs font-bold uppercase tracking-widest text-muted">Sembrado</p>
-      <div className="grid grid-cols-2 gap-4">
+    <div className="rounded-xl overflow-hidden border border-navy/8" style={{ background: 'white' }}>
+      {/* Column headers */}
+      <div className="grid grid-cols-[36px_1fr_32px_1fr] border-b border-navy/8 bg-surface">
+        <div />
+        <div className="px-3 py-2 flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#e8c547' }} />
+          <span className="font-inter text-[10px] font-bold uppercase tracking-wider text-navy">SG</span>
+        </div>
+        <div />
+        <div className="px-3 py-2 flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full" style={{ background: avatarColor }} />
+          <span className="font-inter text-[10px] font-bold uppercase tracking-wider text-navy truncate">
+            {colegioRival || 'Rival'}
+          </span>
+        </div>
+      </div>
 
-        {/* SG column */}
-        <div className="space-y-2">
-          <p className="font-inter text-xs font-semibold text-navy">SG</p>
-          {sgOrder.map((ins, idx) => (
+      {/* Rows */}
+      <div className="divide-y divide-navy/5">
+        {Array.from({ length: slots }, (_, idx) => {
+          const ins = sgOrder[idx]
+          const rival = rivalNames[idx] ?? ''
+          const isOver = dragOver === idx && dragIdx !== idx
+          const isDrag = dragIdx === idx
+          const isEdit = editingRivalIdx === idx
+
+          if (!ins) return null
+
+          const j1 = ins.jugador1?.nombre ?? '?'
+          const j2 = ins.jugador2?.nombre ?? '?'
+
+          return (
             <div
               key={ins.id}
               draggable
@@ -54,65 +104,77 @@ export default function SembradoPanel({
               onDragOver={e => { e.preventDefault(); setDragOver(idx) }}
               onDrop={() => handleDrop(idx)}
               onDragEnd={() => { setDragIdx(null); setDragOver(null) }}
-              className={`flex items-center gap-1.5 p-2 rounded-lg transition-colors cursor-grab active:cursor-grabbing
-                ${dragOver === idx && dragIdx !== idx ? 'bg-gold/20 border border-gold/40' : 'bg-surface'}
-                ${dragIdx === idx ? 'opacity-40' : ''}`}
+              className={`grid grid-cols-[36px_1fr_32px_1fr] items-center h-14 cursor-grab active:cursor-grabbing select-none transition-all
+                ${isDrag ? 'opacity-40' : ''}
+                ${isOver ? 'bg-gold/8' : ''}`}
             >
-              <GripVertical className="h-3.5 w-3.5 text-muted shrink-0" />
-              <span className="font-inter text-xs font-bold text-gold w-5 text-center tabular-nums">{idx + 1}</span>
-              <span className="flex-1 font-inter text-xs text-navy truncate">
-                {ins.jugador1?.nombre ?? '?'} / {ins.jugador2?.nombre ?? '?'}
-              </span>
-            </div>
-          ))}
-          {sgOrder.length === 0 && (
-            <p className="text-xs text-muted">Sin inscritos confirmados.</p>
-          )}
-        </div>
+              {/* Seed */}
+              <div className="flex flex-col items-center justify-center h-full" style={{ background: '#162844' }}>
+                <span className="font-manrope text-sm font-bold leading-none" style={{ color: '#e8c547' }}>{idx + 1}</span>
+              </div>
 
-        {/* Rival column */}
-        <div className="space-y-2">
-          <p className="font-inter text-xs font-semibold text-navy">{colegioRival || 'Rival'}</p>
-          {Array.from({ length: slots }, (_, idx) => (
-            <div key={idx} className="flex items-center gap-1.5 p-2 bg-surface rounded-lg min-h-[2rem]">
-              <span className="font-inter text-xs font-bold text-muted w-5 text-center tabular-nums shrink-0">{idx + 1}</span>
-              {editingRivalIdx === idx ? (
-                <Input
-                  ref={editingRivalIdx === idx ? inputRef : undefined}
-                  value={rivalNames[idx] ?? ''}
-                  onChange={e => {
-                    const next = [...rivalNames]
-                    next[idx] = e.target.value
-                    onRivalNamesChange(next)
-                  }}
-                  onBlur={() => setEditingRivalIdx(null)}
-                  onKeyDown={e => { if (e.key === 'Enter') setEditingRivalIdx(null) }}
-                  placeholder={`Jugador ${cat.nombre} #${idx + 1}`}
-                  className="flex-1 h-6 text-xs px-1.5 py-0"
-                  autoFocus
-                />
-              ) : (
-                <>
-                  <span className="flex-1 font-inter text-xs text-navy truncate">
-                    {rivalNames[idx] || (
-                      <span className="text-muted">{`Jugador ${cat.nombre} #${idx + 1}`}</span>
-                    )}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => startEditRival(idx)}
-                    className="shrink-0 text-muted hover:text-navy transition-colors p-0.5 rounded"
-                  >
-                    <Pencil className="h-3 w-3" />
-                  </button>
-                </>
-              )}
+              {/* SG pair */}
+              <div className="flex items-center gap-2.5 px-3 h-full border-r border-navy/8">
+                <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted" />
+                <AvatarOverlap j1={j1} j2={j2} color={avatarColor} />
+                <div className="flex-1 min-w-0">
+                  <p className="font-inter text-[12px] font-semibold text-navy leading-tight truncate">{j1}</p>
+                  <p className="font-inter text-[11px] text-slate leading-tight truncate">{j2}</p>
+                </div>
+              </div>
+
+              {/* VS */}
+              <div className="flex items-center justify-center h-full">
+                <span className="font-inter text-[9px] font-bold tracking-widest" style={{ color: 'rgba(22,40,68,0.28)' }}>VS</span>
+              </div>
+
+              {/* Rival */}
+              <div className="flex items-center gap-2 px-3 h-full border-l border-navy/8">
+                {isEdit ? (
+                  <input
+                    ref={inputRef}
+                    autoFocus
+                    value={rival}
+                    onChange={e => {
+                      const next = [...rivalNames]
+                      next[idx] = e.target.value
+                      onRivalNamesChange(next)
+                    }}
+                    onBlur={() => setEditingRivalIdx(null)}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setEditingRivalIdx(null) }}
+                    placeholder={`Jugador ${cat.nombre} #${idx + 1}`}
+                    className="flex-1 bg-transparent outline-none border-b pb-0.5 font-inter text-xs"
+                    style={{ borderColor: '#e8c547', color: '#162844' }}
+                  />
+                ) : (
+                  <>
+                    <div className="flex-1 min-w-0">
+                      {rival ? (
+                        <p className="font-inter text-[12px] font-semibold text-navy truncate">{rival}</p>
+                      ) : (
+                        <>
+                          <p className="font-inter text-[12px] italic text-muted/60">Sin asignar</p>
+                          <p className="font-inter text-[9px] font-bold" style={{ color: '#f59e0b' }}>⚠ pendiente</p>
+                        </>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => startEditRival(idx)}
+                      className="shrink-0 p-1.5 rounded-lg hover:bg-surface transition-colors"
+                    >
+                      <Pencil className="h-3 w-3 text-muted" />
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
-          ))}
-          {slots === 0 && (
-            <p className="text-xs text-muted">Agrega inscritos SG primero.</p>
-          )}
-        </div>
+          )
+        })}
+      </div>
+
+      <div className="px-3 py-2 border-t border-navy/5 bg-surface/50">
+        <p className="font-inter text-[9px] text-muted">Arrastra las filas SG para cambiar el sembrado · lápiz para editar rival</p>
       </div>
     </div>
   )
