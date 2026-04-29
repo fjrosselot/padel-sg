@@ -1,5 +1,28 @@
 # DEVLOG — padel-sg
 
+## [2026-04-29 20:00] — Dashboard D·iii implementado — PerfilCard + 3 columnas desktop
+
+**Resumen:** Rediseño completo del dashboard siguiendo el mockup ganador D·iii. Se crearon 3 nuevos widgets reales (PerfilCard, TorneosDisponibles, AmistososAbiertos) y se reescribió Dashboard.tsx con layout de 3 columnas en desktop (`[1fr 1fr 280px]`). Las iteraciones del mockup (AltC, D1, D2, D3) quedaron en backbone-mockups.
+
+**Archivos:** `src/features/dashboard/Dashboard.tsx`, `src/features/dashboard/PerfilCard.tsx` (nuevo), `src/features/dashboard/TorneosDisponibles.tsx` (nuevo), `src/features/dashboard/AmistososAbiertos.tsx` (nuevo), `package.json`
+
+**Decisiones:**
+- PerfilCard: header navy con iniciales/foto, categoría gold, fila de 4 stats reales (Ranking, Torneos jugados, Partidos, Ganados); `torneosJugados` via `inscripciones` confirmadas con distinct torneo_id
+- TorneosDisponibles: filtra `estado in (inscripcion, en_curso)`, detecta si el usuario ya está inscrito y muestra badge de su categoría + CTA diferenciado
+- AmistososAbiertos: consulta `padel.partidas_abiertas` excluyendo las propias, con etiqueta de `rol_buscado`
+- Desktop 3 col: Col1 Próximos+Amistosos / Col2 Torneos / Col3 Pagos+Race+Ranking (sidebar angosto 280px)
+- Móvil: columna única en orden de relevancia
+
+**Pendientes:**
+- [ ] Ejecutar `reset-passwords.mjs` (DRY_RUN=false) + `gen-whatsapp.mjs` para lanzar enrollment
+- [ ] Sistema de puntos tipo ATP/WTA (defensa de puntos año a año)
+- [ ] Vista bracket visual interactiva en TorneoDetalle
+- [ ] Actualizar teléfonos faltantes (18 jugadores)
+- [ ] Probar wizard end-to-end: 1 torneo interno + 1 desafío
+- [ ] Ligas: jornadas + tabla de posiciones
+
+---
+
 ## [2026-04-28 14:00] — Ficha completa: RUT, hijos_sg, todos los atributos
 
 **Resumen:** Se expandió SetupEmailPage con todos los campos del jugador: RUT (nueva columna DB), fecha de nacimiento, sexo, mixto, frecuencia de juego, hijos en SG (lista dinámica con selector de curso). Se corrigió el gate `ficha_validada` — todos los usuarios válidos revertidos a false excepto fjrosselot (único que tenía sesiones previas).
