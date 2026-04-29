@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { ExternalLink, CheckCircle2, Flag, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ExternalLink, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { padelApi } from '@/lib/padelApi'
 import { useUser } from '@/hooks/useUser'
@@ -70,7 +70,6 @@ export function RankingEvolucion({ userId }: { userId: string }) {
   if (data.length === 0) {
     return (
       <div className="rounded-xl bg-white shadow-card p-4">
-        <p className="font-inter text-xs font-bold uppercase tracking-wider text-muted mb-2">Ranking · últimos 60 días</p>
         <p className="font-inter text-sm text-muted">Sin actividad de ranking reciente.</p>
       </div>
     )
@@ -82,7 +81,6 @@ export function RankingEvolucion({ userId }: { userId: string }) {
       onClick={() => navigate('/rankings')}
       className="w-full text-left rounded-xl bg-white shadow-card p-4 hover:shadow-card-hover transition-shadow"
     >
-      <p className="font-inter text-xs font-bold uppercase tracking-wider text-muted mb-3">Ranking · últimos 60 días</p>
       <div className="space-y-3">
         {data.map(cat => (
           <div key={cat.categoria}>
@@ -148,7 +146,6 @@ export function PagosSummary({ userId }: { userId: string }) {
       onClick={() => navigate('/finanzas')}
       className="w-full text-left rounded-xl bg-white shadow-card p-4 hover:shadow-card-hover transition-shadow"
     >
-      <p className="font-inter text-xs font-bold uppercase tracking-wider text-muted mb-2">Mis pagos</p>
       {alDia ? (
         <div className="flex items-center gap-2">
           <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
@@ -216,17 +213,6 @@ export function RaceWidget() {
 
   return (
     <div className="rounded-xl bg-white shadow-card overflow-hidden">
-      {/* Header */}
-      <button
-        type="button"
-        onClick={() => navigate('/rankings')}
-        className="w-full flex items-center gap-2 px-4 py-3 border-b border-navy/5 hover:bg-surface transition-colors text-left"
-      >
-        <Flag className="h-4 w-4 text-gold shrink-0" />
-        <p className="font-inter text-xs font-bold uppercase tracking-wider text-muted flex-1">Carrera {year}</p>
-        <span className="font-inter text-[10px] text-muted">Top 5</span>
-      </button>
-
       {/* Category tabs */}
       <div className="flex overflow-x-auto no-scrollbar border-b border-navy/5 px-3 gap-1 pt-2">
         {categorias.map(cat => (

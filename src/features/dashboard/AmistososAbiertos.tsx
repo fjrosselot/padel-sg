@@ -59,9 +59,6 @@ export function AmistososAbiertos() {
 
   return (
     <div className="rounded-xl bg-white shadow-card overflow-hidden">
-      <div className="px-4 py-3 border-b border-navy/5">
-        <p className="font-inter text-xs font-bold uppercase tracking-wider text-muted">Amistosos abiertos</p>
-      </div>
       <div className="divide-y divide-navy/5">
         {partidas.map(p => {
           const jugador = p.jugador

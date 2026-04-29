@@ -15,8 +15,22 @@ function isMiPartido(p: PartidoFixture, uid: string): boolean {
     .includes(uid)
 }
 
+function SL({ label, linkLabel, onLink }: { label: string; linkLabel?: string; onLink?: () => void }) {
+  return (
+    <div className="flex items-center justify-between px-1">
+      <p className="font-inter text-xs font-bold uppercase tracking-wider text-muted">{label}</p>
+      {linkLabel && onLink && (
+        <button type="button" onClick={onLink} className="font-inter text-[11px] text-muted hover:text-navy transition-colors">
+          {linkLabel}
+        </button>
+      )}
+    </div>
+  )
+}
+
 export function Dashboard() {
   const { data: user } = useUser()
+  const navigate = useNavigate()
 
   const { data: stats } = useQuery({
     queryKey: ['user-stats', user?.id],
@@ -62,12 +76,36 @@ export function Dashboard() {
 
       {/* Mobile — single column */}
       <div className="lg:hidden space-y-4">
-        {user?.id && <ProximosPartidos userId={user.id} />}
-        <TorneosDisponibles />
-        <AmistososAbiertos />
-        {user?.id && <PagosSummary userId={user.id} />}
-        <RaceWidget />
-        {user?.id && <RankingEvolucion userId={user.id} />}
+        {user?.id && (
+          <div className="space-y-2">
+            <SL label="Próximos partidos" />
+            <ProximosPartidos userId={user.id} />
+          </div>
+        )}
+        <div className="space-y-2">
+          <SL label="Torneos" />
+          <TorneosDisponibles />
+        </div>
+        <div className="space-y-2">
+          <SL label="Amistosos abiertos" />
+          <AmistososAbiertos />
+        </div>
+        {user?.id && (
+          <div className="space-y-2">
+            <SL label="Mis pagos" onLink={() => navigate('/finanzas')} linkLabel="Ver todos →" />
+            <PagosSummary userId={user.id} />
+          </div>
+        )}
+        <div className="space-y-2">
+          <SL label="Carrera 2026" linkLabel="Ver ranking →" onLink={() => navigate('/rankings')} />
+          <RaceWidget />
+        </div>
+        {user?.id && (
+          <div className="space-y-2">
+            <SL label="Ranking · últimos 60 días" linkLabel="Ver →" onLink={() => navigate('/rankings')} />
+            <RankingEvolucion userId={user.id} />
+          </div>
+        )}
       </div>
 
       {/* Desktop — 3 columns */}
@@ -75,20 +113,44 @@ export function Dashboard() {
         className="hidden lg:grid gap-5 items-start"
         style={{ gridTemplateColumns: '1fr 1fr 280px' }}
       >
-        {/* Col 1: Próximos partidos + Amistosos */}
+        {/* Col 1 */}
         <div className="space-y-4">
-          {user?.id && <ProximosPartidos userId={user.id} />}
-          <AmistososAbiertos />
+          {user?.id && (
+            <div className="space-y-2">
+              <SL label="Próximos partidos" />
+              <ProximosPartidos userId={user.id} />
+            </div>
+          )}
+          <div className="space-y-2">
+            <SL label="Amistosos abiertos" />
+            <AmistososAbiertos />
+          </div>
         </div>
 
-        {/* Col 2: Torneos disponibles */}
-        <TorneosDisponibles />
+        {/* Col 2 */}
+        <div className="space-y-2">
+          <SL label="Torneos" />
+          <TorneosDisponibles />
+        </div>
 
-        {/* Col 3: Pagos + Race + Ranking */}
+        {/* Col 3 */}
         <div className="space-y-4">
-          {user?.id && <PagosSummary userId={user.id} />}
-          <RaceWidget />
-          {user?.id && <RankingEvolucion userId={user.id} />}
+          {user?.id && (
+            <div className="space-y-2">
+              <SL label="Mis pagos" linkLabel="Ver →" onLink={() => navigate('/finanzas')} />
+              <PagosSummary userId={user.id} />
+            </div>
+          )}
+          <div className="space-y-2">
+            <SL label="Carrera 2026" linkLabel="Ver →" onLink={() => navigate('/rankings')} />
+            <RaceWidget />
+          </div>
+          {user?.id && (
+            <div className="space-y-2">
+              <SL label="Ranking · últimos 60 días" />
+              <RankingEvolucion userId={user.id} />
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -139,14 +201,12 @@ function ProximosPartidos({ userId }: { userId: string }) {
   if (isLoading) return null
   if (grupos.length === 0) return (
     <div className="rounded-xl bg-white p-4 shadow-card text-center">
-      <p className="font-inter text-xs font-bold uppercase tracking-wider text-muted mb-1">Próximos partidos</p>
       <p className="font-inter text-sm text-muted">Sin partidos programados próximamente</p>
     </div>
   )
 
   return (
     <div className="space-y-3">
-      <p className="font-inter text-xs font-bold uppercase tracking-wider text-muted px-1">Próximos partidos</p>
       {grupos.map((g, i) => (
         <button
           key={i}
