@@ -40,7 +40,7 @@ export default function SembradoPanel({
   const [editingRivalIdx, setEditingRivalIdx] = useState<number | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const avatarColor = cat.color_borde ?? '#94b0cc'
+  const avatarColor = cat.color_texto ?? '#94b0cc'
   const slots = Math.max(sgOrder.length, rivalNames.length)
 
   function handleDrop(toIdx: number) {
