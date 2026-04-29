@@ -18,6 +18,7 @@ import SembradoPanel from './SembradoPanel'
 import GenerarCobroModal from './GenerarCobroModal'
 import EditTorneoModal from './EditTorneoModal'
 import { buildFixture, buildDesafioFixture, buildDesafioSembradoFixture } from '../../lib/fixture/engine'
+import { buildCatColorMap } from './catColors'
 import type { Database } from '../../lib/types/database.types'
 import type { CategoriaConfig, CategoriaFixture, PartidoFixture, ParejaFixture, ConfigFixture } from '../../lib/fixture/types'
 import type { InscripcionRow } from './RosterRow'
@@ -452,6 +453,7 @@ function SembradoTabContent({
   })
 
   const [isDirty, setIsDirty] = useState(false)
+  const colorMap = buildCatColorMap(sembradoCats)
 
   function handleSgOrderChange(catNombre: string, order: InscripcionRow[]) {
     setSgOrders(prev => ({ ...prev, [catNombre]: order }))
@@ -500,6 +502,7 @@ function SembradoTabContent({
             onSgOrderChange={order => handleSgOrderChange(cat.nombre, order)}
             rivalNames={rivalNamesMap[cat.nombre] ?? []}
             onRivalNamesChange={names => handleRivalNamesChange(cat.nombre, names)}
+            dotColor={colorMap.get(cat.nombre)?.dot}
           />
         </div>
       ))}
