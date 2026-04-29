@@ -1,11 +1,14 @@
-import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useUser } from '@/hooks/useUser'
 import { padelApi } from '@/lib/padelApi'
 import { usePlayerRankings } from '@/hooks/usePlayerRankings'
+import { useNavigate } from 'react-router-dom'
 import { buildCatColorMap } from '@/features/torneos/catColors'
 import type { CategoriaFixture, PartidoFixture } from '@/lib/fixture/types'
 import { RankingEvolucion, PagosSummary, Novedades, RaceWidget } from './DashboardWidgets'
+import { PerfilCard } from './PerfilCard'
+import { TorneosDisponibles } from './TorneosDisponibles'
+import { AmistososAbiertos } from './AmistososAbiertos'
 
 function isMiPartido(p: PartidoFixture, uid: string): boolean {
   return [p.pareja1?.jugador1_id, p.pareja1?.jugador2_id, p.pareja2?.jugador1_id, p.pareja2?.jugador2_id]
@@ -14,7 +17,6 @@ function isMiPartido(p: PartidoFixture, uid: string): boolean {
 
 export function Dashboard() {
   const { data: user } = useUser()
-  const navigate = useNavigate()
 
   const { data: stats } = useQuery({
     queryKey: ['user-stats', user?.id],
@@ -41,84 +43,61 @@ export function Dashboard() {
 
   const { data: rankings } = usePlayerRankings(user?.id)
 
-  const firstName = user?.nombre_pila ?? user?.nombre?.split(' ')[0] ?? 'Jugador'
-
-  const jugados = stats?.jugados ?? 0
-  const victorias = stats?.victorias ?? 0
-  const winRate = jugados > 0 ? Math.round((victorias / jugados) * 100) : null
+  const { data: torneosJugados } = useQuery({
+    queryKey: ['torneos-jugados', user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const rows = await padelApi.get<{ torneo_id: string }[]>(
+        `inscripciones?or=(jugador1_id.eq.${user!.id},jugador2_id.eq.${user!.id})&estado=eq.confirmada&select=torneo_id`
+      )
+      return new Set(rows.map(r => r.torneo_id)).size
+    },
+  })
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-manrope text-2xl font-bold text-navy">
-          Hola, {firstName}
-        </h1>
-        <p className="font-inter text-sm text-slate">
-          Bienvenido a la Rama Pádel Saint George's
-        </p>
-      </div>
+    <div className="space-y-4">
+      <PerfilCard user={user} stats={stats} rankings={rankings} torneosJugados={torneosJugados} />
 
       <Novedades />
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Categoría" value={user?.categoria ?? '—'} />
-        <div className="rounded-xl bg-white p-4 shadow-card">
-          <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted">Ranking</p>
-          {rankings && rankings.length > 0 ? (
-            <div className="mt-1 space-y-1">
-              {rankings.map(r => (
-                <div key={`${r.categoria}_${r.sexo}`} className="flex items-baseline gap-1.5">
-                  <span className="font-manrope text-xl font-bold text-navy leading-tight">#{r.posicion}</span>
-                  <span className="font-inter text-xs text-muted">{r.categoria} · {r.puntos_total} pts</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-1 font-manrope text-2xl font-bold text-navy leading-tight">—</p>
-          )}
-        </div>
-        <StatCard label="Partidos" value={stats ? jugados : '—'} />
-        <StatCard
-          label="Ganados"
-          value={stats ? victorias : '—'}
-          sub={winRate !== null ? `${winRate}% victorias` : undefined}
-        />
+      {/* Mobile — single column */}
+      <div className="lg:hidden space-y-4">
+        {user?.id && <ProximosPartidos userId={user.id} />}
+        <TorneosDisponibles />
+        <AmistososAbiertos />
+        {user?.id && <PagosSummary userId={user.id} />}
+        <RaceWidget />
+        {user?.id && <RankingEvolucion userId={user.id} />}
       </div>
 
-      {user?.id && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-manrope text-sm font-bold uppercase tracking-widest text-slate">
-              Próximos partidos
-            </h2>
-          </div>
-          <ProximosPartidos userId={user.id} />
+      {/* Desktop — 3 columns */}
+      <div
+        className="hidden lg:grid gap-5 items-start"
+        style={{ gridTemplateColumns: '1fr 1fr 280px' }}
+      >
+        {/* Col 1: Próximos partidos + Amistosos */}
+        <div className="space-y-4">
+          {user?.id && <ProximosPartidos userId={user.id} />}
+          <AmistososAbiertos />
         </div>
-      )}
 
-      {user?.id && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <RankingEvolucion userId={user.id} />
-          <PagosSummary userId={user.id} />
+        {/* Col 2: Torneos disponibles */}
+        <TorneosDisponibles />
+
+        {/* Col 3: Pagos + Race + Ranking */}
+        <div className="space-y-4">
+          {user?.id && <PagosSummary userId={user.id} />}
+          <RaceWidget />
+          {user?.id && <RankingEvolucion userId={user.id} />}
         </div>
-      )}
-
-      <RaceWidget />
-    </div>
-  )
-}
-
-function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
-  return (
-    <div className="rounded-xl bg-white p-4 shadow-card">
-      <p className="font-inter text-xs font-semibold uppercase tracking-widest text-muted">{label}</p>
-      <p className="mt-1 font-manrope text-2xl font-bold text-navy leading-tight">{String(value)}</p>
-      {sub && <p className="font-inter text-xs text-muted mt-0.5">{sub}</p>}
+      </div>
     </div>
   )
 }
 
 function ProximosPartidos({ userId }: { userId: string }) {
+  const navigate = useNavigate()
+
   const { data: grupos = [], isLoading } = useQuery({
     queryKey: ['proximos-partidos', userId],
     queryFn: async () => {
@@ -157,17 +136,17 @@ function ProximosPartidos({ userId }: { userId: string }) {
     },
   })
 
-  const navigate = useNavigate()
-
   if (isLoading) return null
   if (grupos.length === 0) return (
     <div className="rounded-xl bg-white p-4 shadow-card text-center">
+      <p className="font-inter text-xs font-bold uppercase tracking-wider text-muted mb-1">Próximos partidos</p>
       <p className="font-inter text-sm text-muted">Sin partidos programados próximamente</p>
     </div>
   )
 
   return (
     <div className="space-y-3">
+      <p className="font-inter text-xs font-bold uppercase tracking-wider text-muted px-1">Próximos partidos</p>
       {grupos.map((g, i) => (
         <button
           key={i}
