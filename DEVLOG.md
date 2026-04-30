@@ -1,5 +1,27 @@
 # DEVLOG — padel-sg
 
+## [2026-04-30 10:00] — Fix color coding sembrado + SembradoPanel rediseñado
+
+**Resumen:** Se completó el rediseño del `SembradoPanel` con layout de fila matchup (seed | SG pair con avatars solapados | VS | Rival editable) y se corrigió el problema de colores monocromáticos: ahora se pasa `dotColor` derivado de `buildCatColorMap` desde `TorneoDetalle`. Los mockups de sembrado (3 variantes) quedaron en backbone-mockups. Se revisó el landing de torneos en el hub.
+
+**Archivos:** `src/features/torneos/TorneoDetalle.tsx`, `src/features/torneos/SembradoPanel.tsx`, `package.json`
+
+**Decisiones:**
+- `dotColor` prop en `SembradoPanel` — el componente es single-cat y no puede derivar el índice de paleta; el padre (`SembradoTabContent`) calcula `colorMap = buildCatColorMap(sembradoCats)` y pasa `colorMap.get(cat.nombre)?.dot`
+- `AvatarOverlap`: dos círculos solapados con iniciales, el segundo con alpha `bb` — coherente con tab Parejas
+- Layout grid `[36px_1fr_32px_1fr]`: seed navy strip | SG drag | VS label | Rival pencil edit
+- `buildCatColorMap` es la única fuente de verdad para colores de categoría (usa `color_texto` si existe, sino paleta por índice)
+
+**Pendientes:**
+- [ ] Iterar diseño landing torneos (hub backbone-mockups, 3 variantes actuales)
+- [ ] Ejecutar `reset-passwords.mjs` (DRY_RUN=false) + `gen-whatsapp.mjs` para lanzar enrollment
+- [ ] Sistema de puntos tipo ATP/WTA (defensa de puntos año a año)
+- [ ] Vista bracket visual interactiva en TorneoDetalle
+- [ ] Actualizar teléfonos faltantes (18 jugadores)
+- [ ] Probar wizard end-to-end: 1 torneo interno + 1 desafío
+
+---
+
 ## [2026-04-29 20:00] — Dashboard D·iii implementado — PerfilCard + 3 columnas desktop
 
 **Resumen:** Rediseño completo del dashboard siguiendo el mockup ganador D·iii. Se crearon 3 nuevos widgets reales (PerfilCard, TorneosDisponibles, AmistososAbiertos) y se reescribió Dashboard.tsx con layout de 3 columnas en desktop (`[1fr 1fr 280px]`). Las iteraciones del mockup (AltC, D1, D2, D3) quedaron en backbone-mockups.
